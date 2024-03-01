@@ -1,3 +1,4 @@
+
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
@@ -8,4 +9,107 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("PRISMA_DB_URL")
+}
+
+
+model User {
+  id          Int      @id    
+  user_name   String @unique
+  email       String @unique // should hold the email of the private account
+  client_cuid String @map("client_cuid")
+  role        String
+
+  @@map("user")
+}
+
+model ParentProfile {
+  id             Int @id
+  zipcode        Int 
+  yearly_income  Int? /// must be optional to give the parent income for sensitivity issues
+  birth_date     DateTime?
+  avg_num_book   Int /// average number of books read to child (before they registered with program/school and this will not be changed)
+  phone_number   String @unique /// parent should provide their mobile for easy contact their extension is not required (we are assuming they have a US extension)
+  gender         String 
+  marital_stat   String? /// martial status of the parent (will be optional choice)
+  first_name     String 
+  last_name      String
+  social_media   String? @unique /// could be other social media handle but should ask for twitter(X) handle (most likely social media handle they have)
+
+  ParentToChild  ParentToChild[] 
+  @@map("parent_profile")
+
+}
+
+
+model FacultyProfile{
+  id            Int    @id
+  district      String
+  dual_lang     Boolean /// True if they are spanish or other language teacher with non-english kids, otherwise false to indicate they are english speaking teachers      
+  faculty_email String @unique
+
+  TeacherToClass  TeacherToClass[]
+  @@map("faculty_profile")
+}
+
+// registered students profile 
+model StudentProfile{
+  id 	        Int @id
+  age    Int
+  grade  Int /// preschool should be given 0 to denote their grade level
+  reading_lvl Int /// should reference AR level to indicate reading level
+  birth_date  DateTime?
+  gender String /// not
+  school_name String
+  school_dist String
+  pref_lang   String?
+
+  Parent       ParentToChild[]
+  Student	     StudentToClass[]
+  @@map("student_profile")
+}
+
+// model to hold the administrators from Friends of MLK
+model AdminProfile{
+  admin_id    Int    @id
+  admin_email String @unique
+
+}
+
+// class model to create relation between teacher and student (should be one-to-many)
+model Class{
+id	Int	@id
+class_name	String
+class_year	Int
+Teacher 	TeacherToClass[] 
+Student	  StudentToClass[] 
+@@map("classes")
+}
+
+model TeacherToClass{
+  id         Int @id
+  class_id   Int
+  teacher_id Int
+  Class Class @relation(fields: [class_id], references: [id])
+  Teacher FacultyProfile @relation(fields: [teacher_id], references: [id])
+  @@map("teacher_to_classes")
+}
+
+
+model StudentToClass{
+  id         Int @id
+  class_id   Int 
+  student_id Int
+  Class    Class          @relation(fields: [class_id], references: [id])
+  Student  StudentProfile @relation(fields: [student_id], references: [id])  
+  @@map("student_to_classes")
+}
+
+// model to have relationship between parents and child (student) (should be one-to-many)
+model ParentToChild {
+  id          Int @id
+  parent_id   Int 
+  child_id    Int 
+  Parent      ParentProfile    @relation(fields:[parent_id], references:[id])
+  Child       StudentProfile   @relation(fields: [child_id], references: [id])
+  @@map("parent_to_kids")
 }
