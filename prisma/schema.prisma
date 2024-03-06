@@ -11,7 +11,7 @@ datasource db {
   url      = env("PRISMA_DB_URL")
 }
 
-
+// standard user profile 
 model User {
   id          Int      @id    
   user_name   String @unique
@@ -22,6 +22,7 @@ model User {
   @@map("user")
 }
 
+// parent profile
 model ParentProfile {
   id             Int @id
   zipcode        Int 
@@ -40,7 +41,7 @@ model ParentProfile {
 
 }
 
-
+// teacher profile (principle will also have a faculty profile)
 model FacultyProfile{
   id            Int    @id
   district      String
@@ -54,14 +55,14 @@ model FacultyProfile{
 // registered students profile 
 model StudentProfile{
   id 	        Int @id
-  age    Int
-  grade  Int /// preschool should be given 0 to denote their grade level
+  age         Int
+  grade       Int /// preschool should be given 0 to denote their grade level
   reading_lvl Int /// should reference AR level to indicate reading level
   birth_date  DateTime?
-  gender String /// not
-  school_name String
-  school_dist String
-  pref_lang   String?
+  gender      String /// note that the gender should be have drop down option for M = male, F = female, O = other (should probably talk with sponsor about making this voluntary or expanding options)
+  school_name String /// asssume that all the school names will be elementary schools so we should ask them to give the name of the school 
+  school_dist String /// example format should be GISD (garland independent school district)
+  pref_lang   String? /// drop down option for either english, spanish(espanol), or other (only temporary until we can get more info on what languages they speak)
 
   Parent       ParentToChild[]
   Student	     StudentToClass[]
@@ -70,21 +71,23 @@ model StudentProfile{
 
 // model to hold the administrators from Friends of MLK
 model AdminProfile{
-  admin_id    Int    @id
+  id    Int    @id
   admin_email String @unique
 
+ @@map("admin_profile")
 }
 
 // class model to create relation between teacher and student (should be one-to-many)
 model Class{
 id	Int	@id
-class_name	String
+class_name	String /// example: Bayard class
 class_year	Int
 Teacher 	TeacherToClass[] 
 Student	  StudentToClass[] 
 @@map("classes")
 }
 
+// join table for teacher to class relationship
 model TeacherToClass{
   id         Int @id
   class_id   Int
@@ -94,7 +97,7 @@ model TeacherToClass{
   @@map("teacher_to_classes")
 }
 
-
+// join table for student to class relationship
 model StudentToClass{
   id         Int @id
   class_id   Int 
@@ -104,10 +107,10 @@ model StudentToClass{
   @@map("student_to_classes")
 }
 
-// model to have relationship between parents and child (student) (should be one-to-many)
+// join table for relationship between parents and child (student) (should be one-to-many)
 model ParentToChild {
   id          Int @id
-  parent_id   Int 
+  parent_id   Int
   child_id    Int 
   Parent      ParentProfile    @relation(fields:[parent_id], references:[id])
   Child       StudentProfile   @relation(fields: [child_id], references: [id])
