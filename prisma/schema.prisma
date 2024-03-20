@@ -34,6 +34,7 @@ model ParentProfile {
   marital_stat   String? /// martial status of the parent (will be optional choice)
   first_name     String 
   last_name      String
+  email          String
   social_media   String? @unique /// could be other social media handle but should ask for twitter(X) handle (most likely social media handle they have)
 
   ParentToChild  ParentToChild[] 
