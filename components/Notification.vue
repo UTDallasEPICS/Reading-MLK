@@ -19,7 +19,6 @@
   });
   
   onMounted(() => {
-    // Hide the notification after 3000 milliseconds (adjust as needed)
     setTimeout(() => {
       isVisible.value = false;
     }, 3000);
@@ -27,7 +26,6 @@
   </script>
   
   <style scoped>
-  /* Add your notification styling here */
   .notification {
     position: fixed;
     top: 0;
