@@ -1,5 +1,6 @@
 <template>
-  <div>
-    <NuxtWelcome />
-  </div>
+    <NuxtPage >Reading Hurdles Application</NuxtPage>
+    <div>
+        <PageHeader />
+    </div>
 </template>

@@ -8,8 +8,13 @@ services:
    image: postgres
    restart: unless-stopped
    environment:
+<<<<<<< Updated upstream
      - POSTGRES_USER = postgres
      - POSTGRES_PASSWORD = postgres
+=======
+     POSTGRES_USER = postgres
+     POSTGRES_PASSWORD = postgres
+>>>>>>> Stashed changes
    ports:
      - $POSTGRES_PORT:5432
    volumes:

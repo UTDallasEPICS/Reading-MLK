@@ -10,12 +10,14 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "@prisma/client": "^5.10.2",
     "nuxt": "^3.10.3",
+    "papaparse": "^5.4.1",
+    "sass": "^1.71.1",
     "vue": "^3.4.19",
-    "vue-router": "^4.3.0"
+    "vue-router": "^4.3.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
-    "prisma": "^5.10.2"
+    "@types/node": "^20.11.25"
   }
 }
