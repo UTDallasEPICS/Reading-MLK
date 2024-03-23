@@ -8,9 +8,6 @@ import Button from './components/MLKButton.vue';
     <NuxtPage></NuxtPage>
     <header>
     <nav>
-      <ButtonComponent 
-        as="a"
-        href=" http://localhost:3000/facultyform"> Faculty </ButtonComponent>
       <ul>
       <NuxtLink to = "/facultyform">Register Faculty Account</NuxtLink>&nbsp;
       <NuxtLink to = "/parentform">Register Parent Account</NuxtLink>&nbsp;
