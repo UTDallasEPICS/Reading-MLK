@@ -48,6 +48,8 @@ model FacultyProfile{
   district      String
   dual_lang     Boolean /// True if they are spanish or other language teacher with non-english kids, otherwise false to indicate they are english speaking teachers      
   faculty_email String @unique
+  first_name    String
+  last_name     String
 
   TeacherToClass  TeacherToClass[]
   @@map("faculty_profile")
