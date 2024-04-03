@@ -1,3 +1,16 @@
+<script lang = "ts" setup>
+
+const data_FacultyProfile =ref( {
+
+});
+
+const submitFaculty = async () =>{
+    
+}
+
+</script>
+
+
 <template lang = "pug">
 MLKContainer 
     div 
