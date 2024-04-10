@@ -14,7 +14,6 @@ const data_child = ref<StudentProfile>({
     school_name: "",
     school_dist: "",
     pref_lang: "",
-    // Add more fields as per your schema
 })
 
 const errorInPage = ref(false);
@@ -57,8 +56,6 @@ const addChild = async () => {
   <CVContainer>
     <div class="well well-sm">
       <TitleComp>Add Child</TitleComp>
-      <!-- Form fields for child profile -->
-      <!-- Add more fields as per your schema -->
       <div class="py-4 grid sm:grid-cols-3">
         <CVLabel>Age</CVLabel>
         <div class="col-md-8 mx-9 sm:col-span-2 sm:mr-11">
@@ -107,14 +104,9 @@ const addChild = async () => {
           <CVSelect v-model="data_child.pref_lang" :options="prefLangOptions" placeholder="Select Preferred Language"></CVSelect>
         </div>
       </div>
-      <!-- More form fields for other child profile attributes -->
-      
-      <!-- Button to submit the form -->
       <div class="col-md-10 py-2">
         <ActionButton @click="addChild" class="transition duration-300 bg-orange-999 hover:bg-green-600">Add Child</ActionButton>
       </div>
-
-      <!-- Error message display -->
       <div class="py-4 grid sm:grid-cols-3" v-if="errorInPage" style="color: red">
         <CVLabel>Error adding child.</CVLabel>
       </div>
@@ -123,5 +115,4 @@ const addChild = async () => {
 </template>
 
 <style scoped>
-/* Add your custom styles here */
 </style>
