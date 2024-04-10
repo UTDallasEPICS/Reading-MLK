@@ -10,14 +10,16 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@vue-composable/cookie": "^1.0.0-beta.24",
+    "@vue/composition-api": "^1.7.2",
     "nuxt": "^3.10.3",
     "papaparse": "^5.4.1",
-    "sass": "^1.71.1",
     "vue": "^3.4.19",
     "vue-router": "^4.3.0",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
-    "@types/node": "^20.11.25"
+    "@types/node": "^20.11.25",
+    "sass": "^1.72.0"
   }
 }

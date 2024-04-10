@@ -6,7 +6,7 @@
             </nuxt-link>
         </div>
         <div class="right">
-            <nuxt-link to="/DatabaseAccess"> DatabaseAccess </nuxt-link> 
+            <nuxt-link to="/EditFamily"> EditFamily </nuxt-link> 
             <nuxt-link to="/EntryPageStudent"> EntryPageStudent </nuxt-link> 
         </div>
     </header>
