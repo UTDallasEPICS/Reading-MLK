@@ -5,7 +5,7 @@ import { loginRedirectUrl } from "../api/auth0";
 import { type JwtPayload } from "jsonwebtoken";
 
 const client = new PrismaClient();
-
+/** */
 interface MyTokenPayload extends JwtPayload {
   email?: string; // Assuming the email is an optional field in your JWT token.
 }
@@ -33,10 +33,10 @@ export default defineEventHandler(async (event) => {
         });
 
         if (!event.context.user) {
-          console.error(`${claims.email} not found`);
-          setCookie(event, 'cvtoken', ''); 
-          setCookie(event, 'cvuser', '');
-          return await sendRedirect(event, loginRedirectUrl());
+        console.error(`${claims.email} not found`);
+         setCookie(event, 'cvtoken', ''); 
+         setCookie(event, 'cvuser', '');
+         return await sendRedirect(event, loginRedirectUrl());
         }
         
         // Set the cookie with user information
