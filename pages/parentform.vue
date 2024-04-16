@@ -54,19 +54,24 @@ const toggleChildEntryForm = () => {
   AddChildForm.value = !AddChildForm.value;
 };
 
-const submitParent = async () => {
-const response = $fetch('/api/person', {
+const submittAccounts = async() =>{
+    // submitt for a parent account
+    const parentResponse = await $fetch('/api/person', {
     method: "POST",
     body: data_ParentProfile.value
-})
-}
+    });
+    // submitt for a student account array 
+    const studentResponses = await Promise.all(
+      data_StudentProfile.value.map(async (student) => {
+        return await $fetch('/api/person', {
+          method: 'POST',
+          body: student,
+        });
+      })
+    );
 
-const submitStudent = async() => {
-const  response = $fetch('/api/person',{
-    method: "POST",
-    body: data_StudentProfile.value
-})
-}
+
+};
 </script>
 
 
@@ -123,4 +128,9 @@ Container
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Button.mx-auto.text-md(name = "Add Child" @click="toggleChildEntryForm" class= "transition duration-500 bg-sky-600 hover: bg-green-400 ") Add a child
             ChildEntry(v-if="AddChildForm")
+        .py-4.grid(class="sm:grid-cols-3")
+            Button.mx-auto.text-md(name="Submitt all accounts" @click= "submittAccounts" class="transition duration-500 bg-sky-600 hover: bg-green-400") Submitt forms
+
+
+
 </template>
