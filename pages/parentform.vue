@@ -98,23 +98,23 @@ Container
         .py-4.grid(class="sm:grid-cols-3")
             Label Email:
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
-                Input(v-model='data_ParentProfile.Email' placeholder="(user defined)" required)
+                Input(v-model='data_ParentProfile.Email' placeholder="(Ex: example12345@gmail.com)" required)
         .py-4.grid(class="sm:grid-cols-3")
             Label Password:
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Input(v-model='data_ParentProfile.password' placeholder="Please have at least one lower and upper case letter, a number, and a special character" required )
         .py-4.grid(class="sm:grid-cols-3")
-            Label Social Media Handle: (***Not required***) (Please give either your Twitter(X) or Instagram social media handle)
+            Label Social Media Handle: (This is not required)
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
-                Input(v-model='data_ParentProfile.social_media' placeholder="(user defined)")
+                Input(v-model='data_ParentProfile.social_media' placeholder="(Please give either your Twitter(X) or Instagram social media handle)")
         .py-4.grid(class="sm:grid-cols-3")
             Label On average, how many books do you read per year to your child? (A guess is fine)
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
-                Input(v-model='data_ParentProfile.avg_num_book' placeholder="(user defined)" required)
+                Input(v-model='data_ParentProfile.avg_num_book' placeholder="If unsure, please give the lower boundary of how many books you read to your child" required)
         .py-4.grid(class="sm:grid-cols-3")
             Label What is your marital status? (If you do not wish to answer or can't find an answer which matches your situation select other)
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
-                Dropdown(v-model="data_StudentProfile.gender" :options="['Married', 'Divorced', 'Single', 'Other']") 
+                Dropdown(v-model="data_StudentProfile.gender" :options="['Married', 'Divorced', 'Single', 'Other', 'Wish not to Disclose']") 
     div
         TitleDisplay Child Registration Section
         br 

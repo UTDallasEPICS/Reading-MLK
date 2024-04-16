@@ -11,7 +11,6 @@ import Button from './components/MLKButton.vue';
       <ul>
       <NuxtLink to = "/facultyform">Register Faculty Account</NuxtLink>&nbsp;
       <NuxtLink to = "/parentform">Register Parent Account</NuxtLink>&nbsp;
-      <NuxtLink to = "/passwordrecover">Forgot Password</NuxtLink>&nbsp;
       </ul>
     </nav>
     </header>
