@@ -115,5 +115,8 @@ const addChild = async () => {
 </template>
 
 <style scoped>
+<<<<<<< HEAD:pages/ParentToStudent.vue
 
+=======
+>>>>>>> 7e362b8b756898a87575931993ddba65aaa5649d:pages/EntryPageStudent.vue
 </style>
