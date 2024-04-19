@@ -1,56 +1,71 @@
 <script setup lang="ts">
-import type { User, StudentProfile } from '@/types.d.ts'
-import { ref } from 'vue'
-import { useCookie } from "@vue-composable/cookie";
-const cvuser = useCookie('cvuser');
-const cvuser2 = useCookie('cvuser');
+  import type { User, StudentProfile } from '@/types.d.ts'
+  import { ref } from 'vue'
+  import { useCookie } from "@vue-composable/cookie";
+  
+  const cvuser = useCookie('cvuser');
+  const cvuser2 = useCookie('cvuser');
 
-const data_child = ref<StudentProfile>({
-    age: 0,
-    grade: 0,
-    reading_lvl: 0,
-    birth_date: new Date(),
-    gender: "",
-    school_name: "",
-    school_dist: "",
-    pref_lang: "",
-})
+  const data_child = ref<StudentProfile>({
+      age: 0,
+      grade: 0,
+      reading_lvl: 0,
+      birth_date: new Date(),
+      gender: "",
+      school_name: "",
+      school_dist: "",
+      pref_lang: ""
+  });
 
-const errorInPage = ref(false);
+  const errorInPage = ref(false);
 
-const addChild = async () => {
-  if(cvuser2.value?.user_role === "advocate" || cvuser2.value?.user_role === "admin") {
-    try {
-      const response = await fetch('/api/children', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${cvuser.value.token}`
-        },
-        body: JSON.stringify(data_child.value)
-      })
-      if (!response.ok) {
-        throw new Error('Failed to add child.')
+  const genderOptions = [
+    { value: 'M', label: 'Male' },
+    { value: 'F', label: 'Female' },
+    { value: 'O', label: 'Other' }
+  ];
+
+  const prefLangOptions = [
+    { value: 'english', label: 'English' },
+    { value: 'spanish', label: 'Spanish' },
+    { value: 'other', label: 'Other' }
+  ];
+
+  const addChild = async () => {
+    if(cvuser2.value?.user_role === "advocate" || cvuser2.value?.user_role === "admin") {
+      try {
+        const response = await fetch('/api/children', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${cvuser.value.token}`
+          },
+          body: JSON.stringify(data_child.value)
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to add child.')
+        }
+        // Reset form fields after successful addition
+        data_child.value = {
+          age: 0,
+          grade: 0,
+          reading_lvl: 0,
+          birth_date: new Date(),
+          gender: "",
+          school_name: "",
+          school_dist: "",
+          pref_lang: ""
+        };
+        errorInPage.value = false;
+      } catch (error) {
+        console.error('Error adding child:', error)
+        errorInPage.value = true;
       }
-      // Reset form fields after successful addition
-      data_child.value = {
-        age: 0,
-        grade: 0,
-        reading_lvl: 0,
-        birth_date: new Date(),
-        gender: "",
-        school_name: "",
-        school_dist: "",
-        pref_lang: ""
-      }
-      errorInPage.value = false;
-    } catch (error) {
-      console.error('Error adding child:', error)
-      errorInPage.value = true;
     }
-  }
-}
+  };
 </script>
+
 
 <template>
   <CVContainer>
@@ -115,8 +130,4 @@ const addChild = async () => {
 </template>
 
 <style scoped>
-<<<<<<< HEAD:pages/ParentToStudent.vue
-
-=======
->>>>>>> 7e362b8b756898a87575931993ddba65aaa5649d:pages/EntryPageStudent.vue
 </style>

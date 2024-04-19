@@ -1,27 +1,30 @@
-import { PrismaClient } from '@prisma/client'
-import { read } from 'fs'
+import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
-export default defineEventHandler(async(event) => {
-    
-    const body = await readBody(event)
-    let student = null
-    let error = null
+export default defineEventHandler(async (event) => {
+    const body = await readBody(event);
+    let student = null;
+    let error = null;
 
-    if(body.id)
-        await prisma.student.delete({
-            where: {
-              id: body.id,
-            },
-      }).then((response) => {
-        student = response
-      }).catch(async (e) =>{
-        error = e
-      })
+    if (body.id) {
+        try {
+            // Delete the student record
+            student = await prisma.studentProfile.delete({
+                where: {
+                    id: body.id,
+                },
+            });
+        } catch (e) {
+            console.error('Error deleting student:', e);
+            error = e;
+        }
+    }
 
-      if(error)
-        return createError({statusCode: 500, statusMessage: "Server Delete Error"})
+    // Check if an error occurred during the deletion
+    if (error) {
+        return createError({ statusCode: 500, statusMessage: "Server Delete Error" });
+    }
 
-    return student
-  })
+    return student;
+});

@@ -64,7 +64,7 @@
   import type { StudentProfile } from '@/types.d.ts';
   import { ref } from 'vue';
   import { useCookie } from "@vue-composable/cookie";
-  
+
   const cvuser = useCookie('cvuser');
   const student = ref<StudentProfile>({
       age: 0,
@@ -76,9 +76,21 @@
       school_dist: "",
       pref_lang: "",
   });
-  
+
   const errorInPage = ref(false);
-  
+
+  const genderOptions = [
+    { value: 'M', label: 'Male' },
+    { value: 'F', label: 'Female' },
+    { value: 'O', label: 'Other' }
+  ];
+
+  const prefLangOptions = [
+    { value: 'english', label: 'English' },
+    { value: 'spanish', label: 'Spanish' },
+    { value: 'other', label: 'Other' }
+  ];
+
   const updateStudent = async () => {
     if (cvuser.value?.user_role === "advocate" || cvuser.value?.user_role === "admin") {
       try {
@@ -94,7 +106,7 @@
         if (!response.ok) {
           throw new Error('Failed to update student.');
         }
-  
+
         errorInPage.value = false;
       } catch (error) {
         console.error('Error updating student:', error);
@@ -102,8 +114,8 @@
       }
     }
   };
-  </script>
-  
+</script>
+
   <style scoped>
   
   </style>

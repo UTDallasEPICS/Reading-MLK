@@ -34,16 +34,21 @@
   import type { FacultyProfile } from '@/types.d.ts';
   import { ref } from 'vue';
   import { useCookie } from "@vue-composable/cookie";
-  
+
   const cvuser = useCookie('cvuser');
   const teacher = ref<FacultyProfile>({
       district: "",
       dual_lang: false,
       faculty_email: ""
   });
-  
+
   const errorInPage = ref(false);
-  
+
+  const dualLangOptions = [
+    { value: false, label: 'English' },
+    { value: true, label: 'Spanish' },
+  ];
+
   const updateTeacher = async () => {
     if (cvuser.value?.user_role === "advocate" || cvuser.value?.user_role === "admin") {
       try {
@@ -55,11 +60,11 @@
           },
           body: JSON.stringify(teacher.value)
         });
-        
+
         if (!response.ok) {
           throw new Error('Failed to update teacher.');
         }
-  
+
         errorInPage.value = false;
       } catch (error) {
         console.error('Error updating teacher:', error);
@@ -67,7 +72,8 @@
       }
     }
   };
-  </script>
+</script>
+
   
   <style scoped>
   

@@ -3,15 +3,14 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 export default defineEventHandler(async () => {
-
   // get the cookie out of getCookie
   // user = JSON.parse() to turn cookie string into object
-  // role is then availalbe on user.role
+  // role is then available on user.role
   // if(user.role != 'admin') return
   try {
-    const students = await prisma.student.findMany({
+    const students = await prisma.studentProfile.findMany({
       include: {
-        author: true,
+        Parent: true, // Include parent information if needed
       },
     });
 
