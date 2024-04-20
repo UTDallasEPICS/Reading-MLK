@@ -1,7 +1,7 @@
 
 import ButtonCompoent from './components/buttonComponent.vue';
 <script setup>
-import Button from './components/MLKButton.vue';
+import Button from './components/Button.vue';
 </script>
 <template>
   <div>
