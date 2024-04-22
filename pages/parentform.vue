@@ -48,8 +48,8 @@ pref_lang: ""
 })
 }
 
-const removeStudent = (i: number) => {
-    data_StudentProfile.value.splice(i, 1);
+const removeStudent = (index: number) => {
+    data_StudentProfile.value.splice(index-1, 1);
 }
 
 const submittAccounts = async() =>{
@@ -119,7 +119,7 @@ Container
     .flex.flex-col.gap-5
         TitleDisplay Child Registration Section
     .flex.flex-col.gap-5
-        ChildEntry(v-for="(child, i), data_StudentProfile", v-model= "data_StudentProfile[i]" @remove="remove(i)")   
+        ChildEntry(v-for="(child, index) in data_StudentProfile" v-model= "data_StudentProfile[index]" @remove="removeStudent(index)")   
         Button.mx-auto.text-md(name = "Add Child" @click="addStudent" class="transition duration-500 bg-sky-600 hover: bg-green-400") Add Student
         
         
