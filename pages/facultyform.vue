@@ -2,7 +2,7 @@
 
 const data_FacultyProfile = ref({          
   district: "",     
-  dual_lang: "",      /// True if they are spanish or other language teacher with non-english kids, otherwise false to indicate they are english speaking teachers      
+  dual_lang: false,      /// True if they are spanish or other language teacher with non-english kids, otherwise false to indicate they are english speaking teachers      
   faculty_email: "",  
   first_name: "",   
   last_name: "",    
@@ -45,7 +45,7 @@ MLKContainer
         .py-4.grid(class="sm:grid-cols-3")
             Label Do you teach a dual language class?
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
-                Dropdown(v-model="data_StudentProfile.dual_lang" :options="['True', 'False']" required) 
+                Dropdown(v-model="data_StudentProfile.dual_lang" :options="[true, false]" required) 
         .py-4.grid(class="sm:grid-cols-3")
             Label School Name:
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
@@ -62,4 +62,9 @@ MLKContainer
             Label Grade you teach:
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Input(v-model='data_FacultyProfile.grade' placeholder="Ex: First, Second, or Pre-K" required)
+    flex.flex-col.gap-5 
+
+    Button.mx-auto.text-md(name="Submitt Faculty" @click= "submittFaculty" class="transition duration-500 bg-sky-600 hover: bg-green-400") Submitt
+
+
 </template>
