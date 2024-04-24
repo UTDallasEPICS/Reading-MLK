@@ -116,5 +116,5 @@ Container
             .py-4.grid(class="sm:grid-cols-3")
                 Label Click here to add child form 
                 .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
-                    Button.mx-auto.text-md(name = "Add Child" @click="addStudent" class = "transition duration-500 bg-sky-600 hover: bg-green-400 ") Add a child
+                nuxt-link(to="/createstudent" class="transition duration-500 bg-sky-600 hover:bg-green-400") Add a child
 </template>

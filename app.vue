@@ -11,6 +11,7 @@ import ButtonCompoent from './components/buttonComponent.vue';
       <NuxtLink to = "/facultyform">Register Faculty Account</NuxtLink>&nbsp;
       <NuxtLink to = "/parentform">Register Parent Account</NuxtLink>&nbsp;
       <NuxtLink to = "/editstudent">Edit Student Accounts</NuxtLink>&nbsp;
+      <NuxtLink to = "/edituser">Edit User Accounts</NuxtLink>&nbsp;
       </ul>
     </nav>
     </header>
