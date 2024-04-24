@@ -13,7 +13,7 @@ datasource db {
 
 // standard user profile 
 model User {
-  id          Int      @id   @default(autoincrement())
+  id          Int @id @default(autoincrement())
   user_name   String @unique // should have one upper case and lower case alongside a number
   email       String @unique // should hold the email of the private account
   client_cuid String @map("client_cuid")

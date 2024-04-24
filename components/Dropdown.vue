@@ -8,12 +8,12 @@ const props = defineProps<{
 const emit = defineEmits(['update:modelValue'])
 
 const value = computed({
-get() {
-  return props.modelValue
-},
-set(v: string) {
-  emit('update:modelValue', v)
-}
+  get() {
+    return props.modelValue
+  },
+  set(v: string) {
+    emit('update:modelValue', v)
+  }
 })
 
 const isOpen = ref(false)
