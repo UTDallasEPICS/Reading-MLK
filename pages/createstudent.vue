@@ -16,7 +16,7 @@ const studentProfile = ref({
 
 const createStudentProfile = async () => {
     try {
-        const response = await fetch('/api/student', {
+        const response = await fetch('/server/api/student', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

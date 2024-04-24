@@ -23,7 +23,7 @@ const user = ref<UserProfile>({
 
 const updateUser = async () => {
     try {
-        const response = await fetch(`/api/user/${user.value.id}`, {
+        const response = await fetch(`/server/api/user/${user.value.id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',

@@ -36,7 +36,7 @@ const student = ref<StudentProfile>({
 });
 const updateStudent = async () => {
     try {
-      const response = await fetch(`/api/student/${student.value.id}`, {
+      const response = await fetch(`/server/api/student/${student.value.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
