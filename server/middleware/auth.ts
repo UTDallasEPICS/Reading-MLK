@@ -29,7 +29,7 @@ export default defineEventHandler(async (event) => {
         event.context.claims = claims;
         // Using username field to find the user, assuming username stores the email
         event.context.user = await client.user.findFirst({
-          where: { user_name: claims.email } // Use the correct casing for username
+          where: { email: claims.email } // Use the correct casing for username
         });
 
         if (!event.context.user) {

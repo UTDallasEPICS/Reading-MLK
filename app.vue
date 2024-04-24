@@ -1,11 +1,10 @@
 
-import ButtonCompoent from './components/buttonComponent.vue';
 <script setup>
-import Button from './components/MLKButton.vue';
+//import ButtonCompoent from './components/buttonComponent.vue';
+
 </script>
 <template>
   <div>
-    <NuxtPage></NuxtPage>
     <header>
     <nav>
       <ul>
@@ -14,5 +13,6 @@ import Button from './components/MLKButton.vue';
       </ul>
     </nav>
     </header>
+    <NuxtPage></NuxtPage>
   </div>
 </template>

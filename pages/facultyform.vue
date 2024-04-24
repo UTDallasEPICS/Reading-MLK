@@ -23,7 +23,7 @@ const submitFaculty = async () =>{
 
 <template lang = "pug">
 MLKContainer 
-    .flex.flex-col.gap-5 
+    flex.flex-col.gap-5 
         TitleDisplay Faculty Registration Form
         br
         .py-4.grid(class="sm:grid-cols-3")
@@ -63,7 +63,7 @@ MLKContainer
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Input(v-model='data_FacultyProfile.grade' placeholder="Ex: First, Second, or Pre-K" required)
     flex.flex-col.gap-5 
-
+    
     Button.mx-auto.text-md(name="Submitt Faculty" @click= "submittFaculty" class="transition duration-500 bg-sky-600 hover: bg-green-400") Submitt
 
 

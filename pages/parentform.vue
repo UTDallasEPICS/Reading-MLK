@@ -53,19 +53,13 @@ const removeStudent = (index: number) => {
 }
 
 const submittAccounts = async() =>{
-    const parentResponse = await $fetch('/api/person', {
+    const parentResponse = await $fetch('/api/parent_submit', {
     method: "POST",
-    body: data_ParentProfile.value
+    body: {
+        parent: data_ParentProfile.value,
+        students: data_StudentProfile.value}
     });
-    const studentResponse = data_StudentProfile.value.map(async (student) => {$fetch('/api/person', {
-        method: 'POST',
-        body: student
-    });
-    })
-
-    const studentForms = await Promise.all(studentResponse);
-
-    const combinedForm = [parentResponse, ...studentForms];
+    
 };
 
 
@@ -73,9 +67,10 @@ const submittAccounts = async() =>{
 
 
 <template lang = "pug">
-Container 
-    .flex.flex-col.gap-5 
+Container( class=".bg-sky-400.p-8")
+    flex.flex-col.gap-5 
         TitleDisplay Parent Registration Form
+    flex.flex-col.gap-5
         .py-4.grid(class="sm:grid-cols-3")
             Label First Name:
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
@@ -95,30 +90,30 @@ Container
         .py-4.grid(class="sm:grid-cols-3") 
             Label Phone number:
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
-                Input(v-model='data_ParentProfile.phone_number' placeholder="(Ex: 1234567899)" required)
+                Input(v-model='data_ParentProfile.phone_number' placeholder="(Ex:1234567899)" required)
         .py-4.grid(class="sm:grid-cols-3")
             Label Email:
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
-                Input(v-model='data_ParentProfile.Email' placeholder="(Ex: example12345@gmail.com)" required)
+                Input(v-model='data_ParentProfile.Email' placeholder="(Ex:example12345@gmail.com)" required)
         .py-4.grid(class="sm:grid-cols-3")
             Label Password:
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
-                Input(v-model='data_ParentProfile.password' placeholder="(Please have at least one lower and upper case letter, a number, and a special character)" required )
+                Input(v-model='data_ParentProfile.password' placeholder="(user defined)" required )
         .py-4.grid(class="sm:grid-cols-3")
-            Label Social Media Handle: (This is not required)
+            Label Social Media Handle: (Not required)
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
-                Input(v-model='data_ParentProfile.social_media' placeholder="(Please give either your Twitter(X) or Instagram social media handle)")
+                Input(v-model='data_ParentProfile.social_media' placeholder="(user defined)")
         .py-4.grid(class="sm:grid-cols-3")
             Label On average, how many books do you read per year to your child? (A guess is fine)
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
-                Input(v-model='data_ParentProfile.avg_num_book' placeholder="(If unsure, please give the lower boundary of how many books you read to your child)" required)
+                Input(v-model='data_ParentProfile.avg_num_book' placeholder="(user defined)" required)
         .py-4.grid(class="sm:grid-cols-3")
             Label What is your marital status? (If you do not wish to answer or can't find an answer which matches your situation select Wish not to Disclose or Other respectively)
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
-                Dropdown(v-model="data_StudentProfile.martial_status" :options="['Married', 'Divorced', 'Single', 'Other', 'Wish not to Disclose']") 
+                Dropdown(v-model="data_StudentProfile.martial_status" :options="['Married', 'Divorced', 'Single', 'Other', 'Wish not to Disclose']" ) Select Marital Status
     .flex.flex-col.gap-5
         TitleDisplay Child Registration Section
-    .flex.flex-col.gap-5
+    flex.flex-col.gap-5
         ChildEntry(v-for="(child, index) in data_StudentProfile" v-model= "data_StudentProfile[index]" @remove="removeStudent(index)")   
         Button.mx-auto.text-md(name = "Add Child" @click="addStudent" class="transition duration-500 bg-sky-600 hover: bg-green-400") Add Student
         
