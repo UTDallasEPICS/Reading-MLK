@@ -1,0 +1,44 @@
+<script lang = "ts" setup>
+
+const props = defineProps<{
+  modelValue: string
+  options: string[]
+}>()
+
+const emit = defineEmits(['update: modelValue'])
+
+const value = computed([
+    get() {
+    return props.modelValue
+  },
+  set(v: string) {
+    emit('update:modelValue', v)
+  }
+])
+
+const isOpen = ref(false)
+
+const toggleDropdown = () => {
+    isOpen.value  = !isOpen.value
+}
+
+const selectOption = (option : string ) => {
+
+}
+</script>
+
+<template lang = "pug">
+.relative.inline-block
+      button.rounded-md.outline-0.border-box.w-full.p-3(
+        style="border: 2px solid #C0C0C0;"
+        @click="toggleDropdown"
+      )
+        | {{ value }}
+        i.fas.fa-chevron-down.ml-2
+      .absolute.z-10.w-full(v-if="isOpen")
+        ul.bg-white.shadow-md.rounded-md.overflow-hidden
+          li.p-3.cursor-pointer(
+            v-for="option in options"
+            @click="selectOption(option)"
+          ) {{ option }}
+</template>
