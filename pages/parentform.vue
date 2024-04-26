@@ -1,8 +1,14 @@
 
 <script lang="ts" setup>
 
+const props = defineProps({
+  modelValue: {
+    type: Object,
+    required: true
+  }
+})
 
-const data_ParentProfile = ref({
+const data_ParentProfile=ref({
 firstName: "",
 lastName: "",
 birth_date: "",
@@ -16,7 +22,7 @@ gender: "",
 martial_status: ""
 });
 
-const data_StudentProfile = ref([{
+const data_StudentProfile=ref([{
 first_name: "",
 last_name: "",
 pref_name: "",
@@ -34,18 +40,18 @@ pref_lang: ""
 
 const addStudent = () => {
     data_StudentProfile.value.push({
-first_name: "",
-last_name: "",
-pref_name: "",
-age: "",
-grade: "",
-reading_lvl: "",
-birth_date: "",
-gender: "",
-school_name: "",
-school_dist: "",
-pref_lang: ""
-})
+        first_name: "",
+        last_name: "",
+        pref_name: "",
+        age: "",
+        grade: "",
+        reading_lvl: "",
+        birth_date: "",
+        gender: "",
+        school_name: "",
+        school_dist: "",
+        pref_lang: ""
+    })
 }
 
 const removeStudent = (index: number) => {
@@ -67,10 +73,10 @@ const submittAccounts = async() =>{
 
 
 <template lang = "pug">
-Container( class=".bg-sky-400.p-8")
-    flex.flex-col.gap-5 
+Container
+    .flex.flex-col.gap-5 
         TitleDisplay Parent Registration Form
-    flex.flex-col.gap-5
+    .flex.flex-col.gap-5
         .py-4.grid(class="sm:grid-cols-3")
             Label First Name:
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
@@ -94,7 +100,7 @@ Container( class=".bg-sky-400.p-8")
         .py-4.grid(class="sm:grid-cols-3")
             Label Email:
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
-                Input(v-model='data_ParentProfile.Email' placeholder="(Ex:example12345@gmail.com)" required)
+                Input(v-model='data_ParentProfile.Email' placeholder="(Ex:shell12345@gmail.com)" required)
         .py-4.grid(class="sm:grid-cols-3")
             Label Password:
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
@@ -110,14 +116,11 @@ Container( class=".bg-sky-400.p-8")
         .py-4.grid(class="sm:grid-cols-3")
             Label What is your marital status? (If you do not wish to answer or can't find an answer which matches your situation select Wish not to Disclose or Other respectively)
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
-                Dropdown(v-model="data_StudentProfile.martial_status" :options="['Married', 'Divorced', 'Single', 'Other', 'Wish not to Disclose']" ) Select Marital Status
+                Dropdown(v-model="data_StudentProfile.martial_status" :options="['Married', 'Divorced', 'Single', 'Other', 'Wish not to Disclose']" placeholder = "Select your Marital Status") 
     .flex.flex-col.gap-5
-        TitleDisplay Child Registration Section
-    flex.flex-col.gap-5
-        ChildEntry(v-for="(child, index) in data_StudentProfile" v-model= "data_StudentProfile[index]" @remove="removeStudent(index)")   
-        Button.mx-auto.text-md(name = "Add Child" @click="addStudent" class="transition duration-500 bg-sky-600 hover: bg-green-400") Add Student
-        
-        
-.py-4.grid(class="sm:grid-cols-3")
-    Button.mx-auto.text-md(name="Submitt accounts" @click= "submittAccounts" class="transition duration-500 bg-sky-600 hover: bg-green-400") Submitt
+        TitleDisplay Register Child 
+        p Please input your child(s) information down below (you do not have to put anything for the optional parts)
+        Childentry(v-for="(child,index) in data_StudentProfile" v-model="data_StudentProfile[index]" @remove="removeStudent(index)")   
+        Button.mx-auto.text-md(name = "Add Child" @click="addStudent()" class='bg-sky-600 hover:bg-green-400 text-black') Add Student
+    Button.mx-auto.text-md(name="Submitt accounts" @click="submittAccounts()" class='bg-sky-600 hover:bg-green-400 text-black') Submit
 </template>

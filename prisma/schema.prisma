@@ -24,7 +24,7 @@ model User {
 
 // parent profile
 model ParentProfile {
-  id             Int @id
+  id             Int @id @default(autoincrement())
   zipcode        Int 
   yearly_income  Int? /// must be optional to give the parent income for sensitivity issues
   birth_date     DateTime?
@@ -45,7 +45,7 @@ model ParentProfile {
 
 // teacher profile (principle will also have a faculty profile)
 model FacultyProfile{
-  id            Int    @id
+  id            Int    @id @default(autoincrement())
   district      String
   dual_lang     Boolean /// True if they are spanish or other language teacher with non-english kids, otherwise false to indicate they are english speaking teachers      
   faculty_email String @unique
@@ -62,7 +62,7 @@ model FacultyProfile{
 
 // registered students profile 
 model StudentProfile{
-  id 	        Int @id
+  id 	        Int @id @default(autoincrement())
   age         Int
   grade       Int /// preschool should be given 0 to denote their grade level
   reading_lvl Int /// should reference AR level to indicate reading level
@@ -82,7 +82,7 @@ model StudentProfile{
 
 // model to hold the administrators from Friends of MLK
 model AdminProfile{
-  id    Int    @id
+  id    Int    @id @default(autoincrement())
   admin_email String @unique
 
  @@map("admin_profile")
