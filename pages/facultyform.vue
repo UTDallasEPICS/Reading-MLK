@@ -4,7 +4,7 @@ const props = defineProps<{modelValue:any}>()
 const emit = defineEmits(["update:modelValue"])
 
 const data_FacultyProfile = ref({          
-  district: "",     
+  school_dist: "",     
   dual_lang: false,      /// True if they are spanish or other language teacher with non-english kids, otherwise false to indicate they are english speaking teachers      
   faculty_email: "",  
   first_name: "",   
@@ -23,14 +23,6 @@ const submitFaculty = async () =>{
 }
 
 
-const dual_lang = computed({
-    get() {
-        return props.modelValue.dual_lang
-    },
-    set(v:Boolean){
-        emit("update:modelValue", {...props.modelValue, dual_lang: v})
-    }
-})
 </script>
 
 
@@ -58,7 +50,7 @@ Container
         .py-4.grid(class="sm:grid-cols-3")
             Label Do you teach a dual language class?
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
-                Dropdown(v-model="dual_lang" :options="[{label:'Yes', value:true}, {label:'No', value:false}]") 
+                Dropdown(v-model="data_FacultyProfile.dual_lang" :options="[{label:'Yes', value:true}, {label:'No', value:false}]") 
         .py-4.grid(class="sm:grid-cols-3")
             Label School Name:
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
@@ -75,6 +67,7 @@ Container
             Label Grade you teach:
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Input(v-model='data_FacultyProfile.grade' placeholder="Ex: First, Second, or Pre-K" required)
+
     .flex.flex-col.gap-5 
     Button.mx-auto.text-md(name="Submitt Faculty" @click= "submittFaculty()" class="transition duration-500 bg-sky-600 hover: bg-green-400") Submitt
 </template>
