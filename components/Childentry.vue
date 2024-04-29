@@ -145,6 +145,6 @@ Container
                 .cl-md-9.mx-10(class="sm: grid-cols-3")
                     Input(v-model='pref_lang' placeholder="(ex: userdefined)" required)
         .flex.flex-col.gap-5 
-            Button.mx-auto.text-md(name="Delete Student" @click= "handleDeletion(index)" class="bg-zinc-600 hover:bg-red-700") Remove Student
+            Button.mx-auto.text-md(name="Delete Student" @click= "handleDeletion(index)" class="bg-red-600 hover:bg-red-700") Remove Student
         .flex.flex-col.gap-5 
 </template>

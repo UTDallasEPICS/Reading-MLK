@@ -16,13 +16,11 @@ const data_FacultyProfile = ref({
 });
 
 const submitFaculty = async () =>{
-    const response = $fetch('/api/faculty_form',{
+    const faculty = $fetch('/api/faculty_submit',{
         method: "POST",
         body: data_FacultyProfile.value
     })
 }
-
-
 </script>
 
 
@@ -69,5 +67,5 @@ Container
                 Input(v-model='data_FacultyProfile.grade' placeholder="Ex: First, Second, or Pre-K" required)
 
     .flex.flex-col.gap-5 
-    Button.mx-auto.text-md(name="Submitt Faculty" @click= "submittFaculty()" class="transition duration-500 bg-sky-600 hover: bg-green-400") Submitt
+    Button.mx-auto.text-md(name="Submitt Faculty" @click= "submittFaculty()" class="rounded-md transition duration-500 bg-blue-500 hover: bg-green-400") Submitt
 </template>
