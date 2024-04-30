@@ -74,6 +74,7 @@ const submittAccounts = async() =>{
 Container
     .flex.flex-col.gap-5 
         TitleDisplay Parent Registration Form
+        div(style = "border: 2px solid")
         .flex.flex-col.gap-5
         .py-4.grid(class="sm:grid-cols-3")
             Label First Name:
@@ -116,11 +117,12 @@ Container
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Dropdown(v-model="data_StudentProfile.martial_status" :options="['Married', 'Divorced', 'Single', 'Other', 'Wish not to Disclose']" placeholder = "Select your Marital Status") 
     .flex.flex-col.gap-5
-        TitleDisplay Register Child 
+        TitleDisplay Register Child
+            div(style = "border:2px solid ")
             p Please input your child(s) information down below (you do not have to put anything for the optional parts)
         div(v-for="(child, index) in data_StudentProfile" :key="index" style = "border:2px solid ")
             Childentry(v-model="data_StudentProfile[index]" @remove="removeStudent(index)") 
         Button.mx-auto.text-md(name = "Add Child" @click="addStudent()" class='rounded-md bg-blue-500 hover:bg-green-400 text-black') Add Student
-        p Thank you for filling out this form and we wish you good luck for your child's academic future
+        p 
     Button.mx-auto.text-md(name="Submitt accounts" @click="submittAccounts()" class='rounded-md bg-blue-500 hover:bg-green-400 text-black') Submit
 </template>

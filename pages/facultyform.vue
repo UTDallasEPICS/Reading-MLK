@@ -28,7 +28,7 @@ const submitFaculty = async () =>{
 Container 
     .flex.flex-col.gap-5 
         TitleDisplay Faculty Registration Form
-        br
+        div(style = "border: 2px solid")
         .py-4.grid(class="sm:grid-cols-3")
             Label First Name:
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
@@ -65,6 +65,7 @@ Container
             Label Grade you teach:
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Input(v-model='data_FacultyProfile.grade' placeholder="Ex: First, Second, or Pre-K" required)
+    div(style = "border: 2px solid")
 
     .flex.flex-col.gap-5 
     Button.mx-auto.text-md(name="Submitt Faculty" @click= "submittFaculty()" class="rounded-md transition duration-500 bg-blue-500 hover: bg-green-400") Submitt
