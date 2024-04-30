@@ -6,7 +6,7 @@ export default defineEventHandler(async () => {
   try {
     const parents = await prisma.parentProfile.findMany({
       include: {
-        Student: true,
+        ParentToChild: true,
       },
     });
 
