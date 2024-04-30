@@ -67,8 +67,6 @@ const submittAccounts = async() =>{
     });
     
 };
-
-
 </script>
 
 

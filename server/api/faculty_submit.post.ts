@@ -2,11 +2,6 @@ export default defineEventHandler( async event => {
     const body = await readBody(event)
     const faculty = await event.context.client.FacultyProfile.create({
       data: {
-        author: {
-            connect: {
-                id: body.id
-            }
-        },
         firstName: body.firstName,
         lastName: body.lastName,
         school_dist: body.school_dist,
