@@ -1,3 +1,4 @@
+
 <template lang = pug>
     <div class="landing-page">
         <div class="background-image"></div>
@@ -11,3 +12,14 @@
 <style>
 @import "@/assets/styles/index.scss";
 </style>
+
+<template>
+    <div>
+    
+    </div>
+</template>
+
+<script setup>
+
+</script>
+

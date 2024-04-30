@@ -1,45 +1,18 @@
 <script lang="ts" setup>
 
-
-const data_StudentProfile = ref ([{
-    first_name: "",
-    last_name: "",
-    pref_name: "",
-    age: "",
-    grade: "",
-    reading_lvl: "",
-    birth_date: "",
-    gender: "",
-    school_name: "",
-    school_dist: "",
-    pref_lang: ""
-
-}]);
-
-
-const addStudent = () => {
-     data_StudentProfile.value.push({
-    first_name: "",
-    last_name: "",
-    pref_name: "",
-    age: "",
-    grade: "",
-    reading_lvl: "",
-    birth_date: "",
-    gender: "",
-    school_name: "",
-    school_dist: "",
-    pref_lang: ""
-    })
+const emit = defineEmits(["remove"])
+// button click = emit('remove')
+const handleDeletion = (index: number) => {
+    emit("remove", index)
 }
 </script>
 
 <template lang = "pug">
 Container
-        div 
+        .flex.flex-col.gap-5 
             TitleDisplay Register Child 
             p Please input your child(s) information down below (you do not have to put anything for the optional parts)
-            br
+            .flex.flex-col.gap-5
             .py-4.grid(class="sm: col-span")
                 Label First Name: 
                 .col-md-9.mx-10(class="sm:grid-cols-3")
@@ -80,4 +53,5 @@ Container
                 Label School District:
                 .cl-md-9.mx-10(class="sm: grid-cols-3")
                     Input(v-model='data_StudentProfile.school_dist' placeholder="(ex: SISD)" required)
+        Button.mx-auto.text-md(name="Delete Student" @click= "handleDeletion(index)" class="transition duration-500 bg-zinc-600 hover: bg-red-700") Remove Student
 </template>
