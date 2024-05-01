@@ -1,33 +1,36 @@
-<script lang = "ts" setup>
+<script lang="ts" setup>
+import { computed } from 'vue';
 
 const props = defineProps<{
-  modelValue: string
-  options: string[]
-}>()
+  modelValue: string;
+  options: string[];
+  placeholder?: string; 
+}>();
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue']);
 
 const value = computed({
   get() {
-    return props.modelValue
+    return props.modelValue;
   },
   set(v: string) {
-    emit('update:modelValue', v)
+    emit('update:modelValue', v);
   }
-})
+});
 
-const isOpen = ref(false)
+const isOpen = ref(false);
 
 const toggleDropdown = () => {
-    isOpen.value  = !isOpen.value
-}
+  isOpen.value = !isOpen.value;
+};
 
-const selectOption = (option : string ) => {
-
-}
+const selectOption = (option: string) => {
+  value.value = option;
+  isOpen.value = false;
+};
 </script>
 
-<template lang = "pug">
+<template lang="pug">
 .relative.inline-block
   button.rounded-md.outline-0.border-box.w-full.p-3(
     style="border: 2px solid #C0C0C0;"

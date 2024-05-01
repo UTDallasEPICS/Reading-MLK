@@ -48,7 +48,7 @@ Container
         .py-4.grid(class="sm:grid-cols-3")
             Label Do you teach a dual language class?
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
-                Dropdown(v-model="data_FacultyProfile.dual_lang" :options="[{label:'Yes', value:true}, {label:'No', value:false}]") 
+                Dropdown(v-model="data_FacultyProfile.dual_lang" :options="[, true, false]" placeholder = "Do you Teach a Bilingual Class") 
         .py-4.grid(class="sm:grid-cols-3")
             Label School Name:
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
@@ -66,7 +66,6 @@ Container
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Input(v-model='data_FacultyProfile.grade' placeholder="Ex: First, Second, or Pre-K" required)
     div(style = "border: 2px solid")
-
     .flex.flex-col.gap-5 
     Button.mx-auto.text-md(name="Submitt Faculty" @click= "submittFaculty()" class="rounded-md transition duration-500 bg-blue-500 hover: bg-green-400") Submitt
 </template>

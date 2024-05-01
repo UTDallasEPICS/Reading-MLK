@@ -131,7 +131,7 @@ Container
             .py-4.grid(class="sm: col-span")
                 label Gender:
                 .cl-md-9.mx-10(class="sm: grid-cols-3")
-                    Dropdown(v-model='gender' :options=['Male', 'Female', 'Wish not to Disclose'] @update:modelValue="emit('update:modelValue', { ...modelValue, gender: $event })" required)
+                    Dropdown(v-model='gender' :options=["", "Male", "Female", "Wish not to Disclose"] @update:modelValue="emit('update:modelValue', { ...modelValue, gender: $event })" placeholder = "Please Select your Gender" required)
             .py-4.grid(class="sm: col-span")
                 Label School Name:
                 .cl-md-9.mx-10(class="sm: grid-cols-3")

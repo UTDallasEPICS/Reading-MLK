@@ -109,7 +109,7 @@ Container
         .py-4.grid(class="sm:grid-cols-3")
             Label What is your marital status? (If you do not wish to answer or can't find an answer which matches your situation select Wish not to Disclose or Other respectively)
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
-                Dropdown(v-model="data_StudentProfile.martial_status" :options=['Married', 'Divorced', 'Single', 'Other', 'Wish not to Disclose'] placeholder = "Select your Marital Status") 
+                Dropdown(v-model="data_StudentProfile.martial_status" :options=["", "Married", "Divorced", "Single", "Other"] placeholder = "Select your Marital Status") 
     .flex.flex-col.gap-5
         TitleDisplay Register Child
             div(style = "border:2px solid ")
