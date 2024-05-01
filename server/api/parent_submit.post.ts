@@ -1,7 +1,7 @@
 export default defineEventHandler( async event => {
     const body = await readBody(event)
 
-    interface Student {
+        interface Student {
         first_name: string;
         last_name: string;
         pref_name: string;
@@ -16,25 +16,13 @@ export default defineEventHandler( async event => {
       }
 
     const parent = await event.context.client.ParentProfile.create({
-        data: {
-            firstName: body.parent.firstName,
-            lastName: body.parent.lastName,
-            birth_date: body.parent.birth_date,
-            zipcode: body.parent.zipcode,
-            phone_number: body.parent.phone_number,
-            email: body.parent.email,
-            social_media: body.parent.social_media,
-            avg_num_book: body.parent.avg_num_book,
-            yearly_income: body.parent.yearly_income,
-            gender: body.parent.gender,
-            martial_status: body.parent.martial_status,
-        },
+        data: body.parent,
       });
     
     const studentList = await Promise.all(
         body.students.map(async (students: Student) => {
-            const studentList = await event.context.client.StudentProfile.create({
-                data: {
+            const studentList = await event.context.client.StudentProfile.createMany({
+                data: [{
                     first_name: body.students.first_name,
                     last_name: body.students.last_name,
                     pref_name: body.students.pref_name,
@@ -45,8 +33,8 @@ export default defineEventHandler( async event => {
                     gender: body.students.gender,
                     school_name: body.students.school_name,
                     school_dist: body.students.school_dist,
-                    pref_lang: body.students.pref_lang,
-                },
+                    pref_lang: body.students.pref_lang, // pass many to- prisma call 
+                }],
             })
         })
     )
