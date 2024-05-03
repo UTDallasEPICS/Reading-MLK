@@ -1,6 +1,6 @@
 
 <script lang="ts" setup>
-const props = defineProps<{modelValue:any}>()
+const props = defineProps<{modelValue:Object}>()
 
 const data_ParentProfile=ref({
 firstName: "",
@@ -68,50 +68,49 @@ const submittAccounts = async() =>{
 Container
     .flex.flex-col.gap-5 
         TitleDisplay Parent Registration Form
-    div(class = "padding-bottom")
-        div(style = "border: 2px solid" )
+        div(style = "border: 2px solid")
         .flex.flex-col.gap-5
-        .py-4.grid(class="sm:grid-cols-3")
+        .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
             Label First Name:
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Input(v-model='data_ParentProfile.first_name' placeholder="(user defined)" required)
-        .py-4.grid(class="sm:grid-cols-3")
+        .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
             Label Last Name:
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Input(v-model='data_ParentProfile.last_name' placeholder="(user defined)" required)
-        .py-4.grid(class="sm:grid-cols-3")
+        .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
             Label Birth Date: (Please give the year you were born)
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Input(v-model='data_ParentProfile.birth_date' placeholder="(user defined)" required)
-        .py-4.grid(class="sm:grid-cols-3")
+        .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
             Label Zipcode: (Please give five digit number for the zipcode area you reside in)
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Inputnum(v-model='data_ParentProfile.zipcode' placeholder="(user defined)" required)
-        .py-4.grid(class="sm:grid-cols-3")
+        .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
             Label Yearly Income: (optional)
             .col-md-9.mx-10(class="sm:col-span-2 sm:m-11")
                 Dropdown(v-model="data_StudentProfile.yearly_income" :options=["", "10,000-20,000", "20,000-30,000", "30,000-40,000", "40,000-50,000", "50,000-60,000", "60,000+"] placeholder = "Select your income level") 
-        .py-4.grid(class="sm:grid-cols-3") 
+        .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px") 
             Label Phone number:
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Input(v-model='data_ParentProfile.phone_number' placeholder="(Ex:1234567899)" required)
-        .py-4.grid(class="sm:grid-cols-3")
+        .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
             Label Email:
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Input(v-model='data_ParentProfile.Email' placeholder="(Ex:shell12345@gmail.com)" required)
-        .py-4.grid(class="sm:grid-cols-3")
+        .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
             Label Password:
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Input(v-model='data_ParentProfile.password' placeholder="(user defined)" required )
-        .py-4.grid(class="sm:grid-cols-3")
+        .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
             Label Social Media Handle: (Not required)
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Input(v-model='data_ParentProfile.social_media' placeholder="(user defined)")
-        .py-4.grid(class="sm:grid-cols-3")
+        .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
             Label On average, how many books do you read per year to your child? (A guess is fine)
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Inputnum(v-model='data_ParentProfile.avg_num_book' placeholder="(user defined)" required)
-        .py-4.grid(class="sm:grid-cols-3")
+        .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
             Label What is your marital status? (If you do not wish to answer or can't find an answer which matches your situation select Wish not to Disclose or Other respectively)
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Dropdown(v-model="data_StudentProfile.martial_status" :options=["", "Married", "Divorced", "Single", "Other"] placeholder = "Select your Marital Status") 
@@ -119,7 +118,7 @@ Container
         TitleDisplay Register Child
             div(style = "border:2px solid ")
             p Please input your child(s) information down below (you do not have to put anything for the optional parts)
-        div(v-for="(child, index) in data_StudentProfile" :key="index" style = "border:2px solid ")
+        div(v-for="(child, index) in data_StudentProfile" :key="index" style = "border:2px solid blue")
             Childentry(v-model="data_StudentProfile[index]" @remove="removeStudent(index)") 
         Button.mx-auto.text-md(name = "Add Child" @click="addStudent()" class='rounded-md bg-blue-500 hover:bg-green-400 text-black') Add Student
         p

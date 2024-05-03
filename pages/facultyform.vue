@@ -31,39 +31,39 @@ Container
     .flex.flex-col.gap-5 
         TitleDisplay Faculty Registration Form
         div(style = "border: 2px solid")
-        .py-4.grid(class="sm:grid-cols-3")
+        .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
             Label First Name:
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Input(v-model='data_FacultyProfile.first_name' placeholder="(user defined)" required)
-        .py-4.grid(class="sm:grid-cols-3")
+        .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
             Label Last Name:
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Input(v-model='data_FacultyProfile.last_name' placeholder="(user defined)" required)
-        .py-4.grid(class="sm:grid-cols-3")
+        .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
             Label School District currently working in: 
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Input(v-model='data_FacultyProfile.school_dist' placeholder="(Ex: DISD)" required)
-        .py-4.grid(class="sm:grid-cols-3")
+        .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
             Label Faculty Email:
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Input(v-model='data_FacultyProfile.faculty_email' placeholder="(user defined)" required)
-        .py-4.grid(class="sm:grid-cols-3")
+        .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
             Label Do you teach a dual language class?
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Dropdown(v-model="data_FacultyProfile.dual_lang" :options="[, true, false]" placeholder = "Do you Teach a Bilingual Class") 
-        .py-4.grid(class="sm:grid-cols-3")
+        .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
             Label School Name:
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Input(v-model='data_FacultyProfile.school_name' placeholder="(user defined)" required)
-        .py-4.grid(class="sm:grid-cols-3")
+        .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
             Label Department:
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Input(v-model='data_FacultyProfile.department' placeholder="(Ex: English, Science, or Math)" required)
-        .py-4.grid(class="sm:grid-cols-3")
+        .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
             Label Phone number:
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Input(v-model='data_FacultyProfile.phone_number' placeholder="(Ex: 1234567891)" required)
-        .py-4.grid(class="sm:grid-cols-3")
+        .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
             Label Grade you teach:
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Input(v-model='data_FacultyProfile.grade' placeholder="Ex: First, Second, or Pre-K" required)
