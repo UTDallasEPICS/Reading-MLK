@@ -40,6 +40,7 @@ const selectOption = (option: string) => {
     i.fas.fa-chevron-down.ml-2
   .absolute.z-10.w-full(v-if="isOpen")
     ul.bg-white.shadow-md.rounded-md.overflow-hidden
+    div(style = "border:2px solid ")
       li.p-3.cursor-pointer(
         v-for="option in options"
         @click="selectOption(option)"

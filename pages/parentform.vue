@@ -6,23 +6,23 @@ const data_ParentProfile=ref({
 firstName: "",
 lastName: "",
 birth_date: "",
-zipcode: "",
-phone_number: "",
+zipcode: 0,
+phone_number: 0,
 email: "", 
 social_media: "",
 avg_num_book: "",
 yearly_income: "",
 gender: "",
-martial_status: ""
+martial_status: "",
 });
 
 const data_StudentProfile=ref([{
 first_name: "",
 last_name: "",
 pref_name: "",
-age: null,
-grade: null,
-reading_lvl: "",
+age: 0,
+grade: 0,
+reading_lvl: 0,
 birth_date: "",
 gender: "",
 school_name: "",
@@ -37,9 +37,9 @@ const addStudent = () => {
         first_name: "",
         last_name: "",
         pref_name: "",
-        age: null,
-        grade: null,
-        reading_lvl: "",
+        age: 0,
+        grade: 0,
+        reading_lvl: 0,
         birth_date: "",
         gender: "",
         school_name: "",
@@ -68,7 +68,8 @@ const submittAccounts = async() =>{
 Container
     .flex.flex-col.gap-5 
         TitleDisplay Parent Registration Form
-        div(style = "border: 2px solid")
+    div(class = "padding-bottom")
+        div(style = "border: 2px solid" )
         .flex.flex-col.gap-5
         .py-4.grid(class="sm:grid-cols-3")
             Label First Name:
@@ -85,7 +86,11 @@ Container
         .py-4.grid(class="sm:grid-cols-3")
             Label Zipcode: (Please give five digit number for the zipcode area you reside in)
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
-                Input(v-model='data_ParentProfile.zipcode' placeholder="(user defined)" required)
+                Inputnum(v-model='data_ParentProfile.zipcode' placeholder="(user defined)" required)
+        .py-4.grid(class="sm:grid-cols-3")
+            Label Yearly Income: (optional)
+            .col-md-9.mx-10(class="sm:col-span-2 sm:m-11")
+                Dropdown(v-model="data_StudentProfile.yearly_income" :options=["", "10,000-20,000", "20,000-30,000", "30,000-40,000", "40,000-50,000", "50,000-60,000", "60,000+"] placeholder = "Select your income level") 
         .py-4.grid(class="sm:grid-cols-3") 
             Label Phone number:
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
@@ -105,7 +110,7 @@ Container
         .py-4.grid(class="sm:grid-cols-3")
             Label On average, how many books do you read per year to your child? (A guess is fine)
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
-                Input(v-model='data_ParentProfile.avg_num_book' placeholder="(user defined)" required)
+                Inputnum(v-model='data_ParentProfile.avg_num_book' placeholder="(user defined)" required)
         .py-4.grid(class="sm:grid-cols-3")
             Label What is your marital status? (If you do not wish to answer or can't find an answer which matches your situation select Wish not to Disclose or Other respectively)
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")

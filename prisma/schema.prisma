@@ -26,7 +26,7 @@ model User {
 model ParentProfile {
   id             Int @id @default(autoincrement())
   zipcode        Int 
-  yearly_income  Int? /// must be optional to give the parent income for sensitivity issues
+  yearly_income  String? /// must be optional to give the parent income for sensitivity issues // changed to string to allow for more dynamic input
   birth_date     DateTime?
   avg_num_book   Int /// average number of books read to child (before they registered with program/school and this will not be changed)
   password       Int

@@ -18,7 +18,9 @@ const data_FacultyProfile = ref({
 const submitFaculty = async () =>{
     const faculty = $fetch('/api/faculty_submit',{
         method: "POST",
-        body: data_FacultyProfile.value
+        body: {
+            faculty: data_FacultyProfile.value
+        }
     })
 }
 </script>
