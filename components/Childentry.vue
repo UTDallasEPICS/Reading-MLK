@@ -144,7 +144,7 @@ Container
                 Label *Preferred language child speaks most in:
                 .cl-md-9.mx-10(class="sm: grid-cols-3")
                     Input(v-model='pref_lang' placeholder="(ex: userdefined)" required)
-        .flex.flex-col.gap-5
-            Button.mx-auto.text-md(name="Delete Student" @click= "handleDeletion(index)" class="bg-red-600 hover:bg-red-700" style="background-color: rgb(251 113 133);") Remove Student
+        .flex.flex-col.gap-5(class="sm: col-span" style = "padding: 5px")
+            Button.mx-auto.text-md(name="Delete Student" @click= "handleDeletion(index)" class="bg-red-600 hover:bg-red-700" style="background-color: rgb(251 113 133); border-color: rgb(251 113 133); padding: 5px") Remove Student
         .flex.flex-col.gap-5 
 </template>
