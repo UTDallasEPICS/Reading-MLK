@@ -27,7 +27,7 @@ const submitFaculty = async () =>{
 
 
 <template lang = "pug">
-Container 
+Container(style="background-color: rgb(240,240,240);")
     .flex.flex-col.gap-5 
         TitleDisplay Faculty Registration Form
         div(style = "border: 2px solid")

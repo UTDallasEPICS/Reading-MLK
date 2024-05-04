@@ -65,25 +65,25 @@ const submittAccounts = async() =>{
 
 
 <template lang = "pug">
-Container
+Container(style="background-color: rgb(240,240,240);")
     .flex.flex-col.gap-5 
         TitleDisplay Parent Registration Form
         div(style = "border: 2px solid")
         .flex.flex-col.gap-5
         .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
-            Label First Name:
+            Label *First Name:
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Input(v-model='data_ParentProfile.first_name' placeholder="(user defined)" required)
         .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
-            Label Last Name:
+            Label *Last Name:
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Input(v-model='data_ParentProfile.last_name' placeholder="(user defined)" required)
         .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
-            Label Birth Date: (Please give the year you were born)
+            Label *Birth Date: (Please give the year you were born)
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Input(v-model='data_ParentProfile.birth_date' placeholder="(user defined)" required)
         .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
-            Label Zipcode: (Please give five digit number for the zipcode area you reside in)
+            Label *Zipcode: (Please give five digit number for the zipcode area you reside in)
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Inputnum(v-model='data_ParentProfile.zipcode' placeholder="(user defined)" required)
         .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
@@ -91,23 +91,23 @@ Container
             .col-md-9.mx-10(class="sm:col-span-2 sm:m-11")
                 Dropdown(v-model="data_StudentProfile.yearly_income" :options=["", "10,000-20,000", "20,000-30,000", "30,000-40,000", "40,000-50,000", "50,000-60,000", "60,000+"] placeholder = "Select your income level") 
         .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px") 
-            Label Phone number:
+            Label *Phone number:
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Input(v-model='data_ParentProfile.phone_number' placeholder="(Ex:1234567899)" required)
         .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
-            Label Email:
+            Label *Email:
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Input(v-model='data_ParentProfile.Email' placeholder="(Ex:shell12345@gmail.com)" required)
         .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
-            Label Password:
+            Label *Password:
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Input(v-model='data_ParentProfile.password' placeholder="(user defined)" required )
         .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
-            Label Social Media Handle: (Not required)
+            Label Social Media Handle:
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Input(v-model='data_ParentProfile.social_media' placeholder="(user defined)")
         .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
-            Label On average, how many books do you read per year to your child? (A guess is fine)
+            Label *On average, how many books do you read per year to your child? (A guess is fine)
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Inputnum(v-model='data_ParentProfile.avg_num_book' placeholder="(user defined)" required)
         .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
@@ -118,9 +118,9 @@ Container
         TitleDisplay Register Child
             div(style = "border:2px solid ")
             p Please input your child(s) information down below (you do not have to put anything for the optional parts)
-        div(v-for="(child, index) in data_StudentProfile" :key="index" style = "border:2px solid blue")
+        div(v-for="(child, index) in data_StudentProfile" :key="index" style = "border:4px solid; border-radius: 5px;")
             Childentry(v-model="data_StudentProfile[index]" @remove="removeStudent(index)") 
-        Button.mx-auto.text-md(name = "Add Child" @click="addStudent()" class='rounded-md bg-blue-500 hover:bg-green-400 text-black') Add Student
+        Button.mx-auto.text-md(name = "Add Child" @click="addStudent()" class='hover:bg-green-400 text-black' style= "background-color: rgb(56 189 248);") Add Student
         p
-    Button.mx-auto.text-md(name="Submitt accounts" @click="submittAccounts()" class='rounded-md bg-blue-500 hover:bg-green-400 text-black') Submit
+    Button.mx-auto.text-md(name="Submitt accounts" @click="submittAccounts()" class='hover:bg-green-400 text-black') Submit
 </template>
