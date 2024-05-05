@@ -121,11 +121,11 @@ Container
                 .cl-md-9.mx-10(class="sm: grid-cols-3")
                     Inputnum(v-model='grade' placeholder="(give number)" required)
             .py-4.grid(class="sm: col-span" style = "padding: 5px")
-                label *What is the current readling level of the child? (give in a scale of 0 to 10)
+                Label *What is the current readling level of the child? (give in a scale of 0 to 10)
                 .cl-md-9.mx-10(class="sm: grid-cols-3")
                     Inputnum(v-model='reading_lvl' placeholder="(give number)" required)
             .py-4.grid(class="sm: col-span" style = "padding: 5px")
-                label *Birth date of child: 
+                Label *Birth date of child: 
                 .cl-md-9.mx-10(class="sm: grid-cols-3")
                     Input(v-model='birth_date' placeholder="(user defined)" required)
             .py-4.grid(class="sm: col-span" style = "padding: 5px")

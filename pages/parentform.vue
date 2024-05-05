@@ -87,7 +87,7 @@ Container(style="background-color: rgb(167 243 208);")
             .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                 Inputnum(v-model='data_ParentProfile.zipcode' placeholder="(user defined)" required)
         .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
-            Label Yearly Income: (optional)
+            Label Yearly Income:
             .col-md-9.mx-10(class="sm:col-span-2 sm:m-11")
                 Dropdown(v-model="data_StudentProfile.yearly_income" style = "padding: 5px" :options=["", "10,000-20,000", "20,000-30,000", "30,000-40,000", "40,000-50,000", "50,000-60,000", "60,000+"] placeholder = "Select your income level") 
         .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px") 
