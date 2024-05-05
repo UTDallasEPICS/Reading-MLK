@@ -1,4 +1,4 @@
-<template lang = pug>
+<template lang = "pug">
 div( class="landing-page")
     p Welcome to Reading Huddle
 </template>

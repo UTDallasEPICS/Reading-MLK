@@ -65,7 +65,7 @@ const submittAccounts = async() =>{
 
 
 <template lang = "pug">
-Container(style="background-color: rgb(167 243 208);")
+Container(style="background-color: rgb(254 240 138);")
     .flex.flex-col.gap-5 
         TitleDisplay Parent Registration Form
         div(style = "border: 2px solid")

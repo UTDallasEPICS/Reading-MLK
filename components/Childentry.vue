@@ -98,7 +98,7 @@ const pref_lang = computed({
 
 <template lang = "pug">
 .py-4.grid(class="sm:grid-cols-3")
-Container
+Container(style="background-color: rgb(167 243 208);")
         .flex.flex-col.gap-5 
             .py-4.grid(class="sm: col-span" style = "padding: 5px")
                 Label *First Name: 
