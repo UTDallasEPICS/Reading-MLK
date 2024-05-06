@@ -102,7 +102,7 @@ const pref_lang = computed({
 <template lang = "pug">
 .py-4.grid(class="sm:grid-cols-3")
 div
-        .flex.flex-col.gap-5.margin-auto(class="w-1/2")
+        .flex.flex-col.gap-5.margin-auto(class="text-center px-10")
             .py-4.grid(class="" style)
                 Label * First Name: 
                     Input(type="text" v-model='first_name' name="first_name" id="first_name" placeholder="(user defined)" required)
@@ -139,7 +139,7 @@ div
             .py-4.grid(class="" )
                 Label * Preferred language child speaks most in:
                     Input(type="text" v-model='pref_lang' name="pref_lang" id="pref_lang" placeholder="(ex: userdefined)" required)
-        .flex.flex-col.gap-5(class="" )
+        .flex.flex-col.gap-5(class="text-center" )
             Button.mx-auto.text-md(name="Delete Student" @click= "handleDeletion(index)" class='bg-rose-400 hover:bg-rose-400 border border-rose-400 rounded-lg') Remove Student
         .flex.flex-col.gap-5 
 </template>

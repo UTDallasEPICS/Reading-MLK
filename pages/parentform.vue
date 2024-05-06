@@ -67,7 +67,7 @@ const submittAccounts = async() =>{
 <template lang = "pug">
 div
     .flex.gap-5
-        .flex.flex-col.gap-5.margin-auto(class="w-1/2")
+        .flex.flex-col.gap-5.margin-auto(class="w-1/2 text-center")
             TitleDisplay Parent Registration Form
             div(class="border border-gray-700")
             div(class="border border-gray-700 rounded-lg px-10")
@@ -123,7 +123,8 @@ div
             div(v-for="(child, index) in data_StudentProfile" :key="index" class="border border-gray-700 rounded-lg")
                 Childentry(v-model="data_StudentProfile[index]" @remove="removeStudent(index)")
             .flex.flex-col.gap-5(class="") 
-            Button.mx-auto.text-md(name = "Add Child" @click="addStudent()" class='bg-sky-400 hover:bg-sky-400 text-black border border-sky-400 rounded-lg') Add Student
-            .flex.flex-col.gap-5(class="")
-    Button.mx-auto.text-md(name="Submitt accounts" @click="submittAccounts()" class='bg-green-400 hover:bg-green-400 text-black rounded-lg') Submit
+            Button.mx-auto.text-md(name = "Add Child" @click="addStudent()" class='bg-sky-400 hover:bg-sky-400 text-black border border-sky-400 rounded-lg ') Add Student
+    .flex.flex-col.gap-5(class="text-center border border-gray-700 text-center")
+    .flex.gap-5(class="object-center	")
+        Button.mx-auto.text-md(name="Submitt accounts" @click="submittAccounts()" class='bg-green-400 hover:bg-green-400 text-black rounded-lg ') Submit
 </template>
