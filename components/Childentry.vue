@@ -139,7 +139,7 @@ div
             .py-4.grid(class="" )
                 Label * Preferred language child speaks most in:
                     Input(type="text" v-model='pref_lang' name="pref_lang" id="pref_lang" placeholder="(ex: userdefined)" required)
-        .flex.flex-col.gap-5(class="text-center" )
-            Button.mx-auto.text-md(name="Delete Student" @click= "handleDeletion(index)" class='bg-rose-400 hover:bg-rose-400 border border-rose-400 rounded-lg') Remove Student
+        .flex.flex-col.gap-5(class="text-center py-2" )
+            Button.mx-auto.text-md(name="Delete Student" @click= "handleDeletion(index)" class='bg-rose-400 hover:bg-rose-400 border border-rose-400 rounded-lg py-2 px-2') Remove Student
         .flex.flex-col.gap-5 
 </template>

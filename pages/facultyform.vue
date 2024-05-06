@@ -46,7 +46,7 @@ div(class="text-center")
                     Input(v-model='data_FacultyProfile.faculty_email' name="faculty_email" id="faculty_email" placeholder="(user defined)" required)
             .py-4.grid(class="" )
                 Label * Do you teach a dual language class?
-                    select(v-model="data_FacultyProfile.dual_lang" name="dual_lang" id="dual_lang" class="block w-full rounded-md border border-gray-700 focus:ring-indigo-500"  placeholder = "Do you Teach a Bilingual Class")
+                    select(v-model="data_FacultyProfile.dual_lang" name="dual_lang" id="dual_lang" class="block w-full rounded-md border border-gray-700 focus:ring-indigo-500"  placeholder = "(Do you Teach a Bilingual Class)")
                         option(value='') Do you Teach a Bilingual Class
                         option(value=true) Yes
                         option(value=false) No
@@ -61,7 +61,8 @@ div(class="text-center")
                     Input(v-model='data_FacultyProfile.phone_number' name="phone_number" id="phone_number" placeholder="(Ex: 1234567891)" required)
             .py-4.grid(class="" )
                 Label * Grade you teach:
-                    Input(v-model='data_FacultyProfile.grade' name="grade" id="grade" placeholder="Ex: First, Second, or Pre-K" required)
-    .flex.flex-col.gap-5(class="text-center px-10 border-solid border border-gray-700 border-2" )
-    Button.mx-auto.text-md(name="Submitt Faculty" @click= "submittFaculty()" class="transition duration-500 bg-blue-500 hover: bg-green-400 rounded-lg") Submitt
+                    Input(v-model='data_FacultyProfile.grade' name="grade" id="grade" placeholder="(Ex: First, Second, or Pre-K)" required)
+    .flex.flex-col.gap-5(class="border-solid border border-gray-700 border-2")
+    .flex-col.gap-5(class="py-2")
+        Button.mx-auto.text-md(name="Submitt Faculty" @click= "submittFaculty()" class="transition duration-500 bg-blue-500 hover: bg-green-400 rounded-lg px-2 py-2") Submitt
 </template>

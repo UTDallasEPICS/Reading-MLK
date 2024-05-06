@@ -85,7 +85,7 @@ div
                         Inputnum(type="number" v-model='data_ParentProfile.zipcode' name="zipcode" id="zipcode" placeholder="(user defined)" required)
                 .py-4.grid(class="" )
                     Label Yearly Income:
-                        select(v-model="data_StudentProfile.yearly_income"  name="yearly_income" id="yearly_income" class="block w-full rounded-md border border-gray-700 focus:ring-indigo-500" placeholder = "Select your income level")
+                        select(v-model="data_StudentProfile.yearly_income"  name="yearly_income" id="yearly_income" class="block w-full rounded-md border border-gray-700 focus:ring-indigo-500" placeholder = "(Select your income level)")
                             option(value='') Select your income level
                             option(value='$10,000-$20,000') $10,000-$20,000
                             option(value='$20,000-$30,000') $20,000-$30,000
@@ -110,7 +110,7 @@ div
                         Inputnum(type="number" v-model='data_ParentProfile.avg_num_book' name="avg_num_books" id="avg_num_books" placeholder="(user defined)" required)
                 .py-4.grid(class="" )
                     Label What is your marital status?
-                        select(v-model="data_StudentProfile.martial_status" name='marital_stat' id="marital_stat" class="block w-full rounded-md border border-gray-700 focus:ring-indigo-500" placeholder = "Select your Marital Status")
+                        select(v-model="data_StudentProfile.martial_status" name='marital_stat' id="marital_stat" class="block w-full rounded-md border border-gray-700 focus:ring-indigo-500" placeholder = "(Select your Marital Status)")
                             option(value='') Select your Marital Status 
                             option(value='Married') Married
                             option(value='Single') Single
@@ -122,9 +122,9 @@ div
                 p Please input your child(s) information down below (you do not have to put anything for the optional parts)
             div(v-for="(child, index) in data_StudentProfile" :key="index" class="border border-gray-700 rounded-lg")
                 Childentry(v-model="data_StudentProfile[index]" @remove="removeStudent(index)")
-            .flex.flex-col.gap-5(class="") 
-            Button.mx-auto.text-md(name = "Add Child" @click="addStudent()" class='bg-sky-400 hover:bg-sky-400 text-black border border-sky-400 rounded-lg ') Add Student
+            .flex.flex-col.gap-5(class="py-2") 
+                Button.mx-auto.text-md(name = "Add Child" @click="addStudent()" class='bg-sky-400 hover:bg-sky-400 text-black border border-sky-400 rounded-lg px-2 py-2') Add Student
     .flex.flex-col.gap-5(class="text-center border border-gray-700 text-center")
-    .flex.gap-5(class="object-center	")
-        Button.mx-auto.text-md(name="Submitt accounts" @click="submittAccounts()" class='bg-green-400 hover:bg-green-400 text-black rounded-lg ') Submit
+    .flex.gap-5(class="object-center py-2")
+        Button.mx-auto.text-md(name="Submitt accounts" @click="submittAccounts()" class='bg-green-400 hover:bg-green-400 text-black rounded-lg px-2 py-2') Submit
 </template>
