@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import '@vuepic/vue-datepicker/dist/main.css';
+import "vue-select/dist/vue-select.css";
 const props = defineProps<{modelValue:any}>()
 const emit = defineEmits(["remove", "update:modelValue"])
 // button click = emit('remove')
@@ -55,12 +57,13 @@ const reading_lvl = computed({
     },
 });
 const birth_date = computed({
-    get() {
+    get(){
         return props.modelValue?.birth_date
     },
-    set(v:Date){
-        emit("update:modelValue", {...props.modelValue, birth_date: v})
+    set(v: Date){
+        emit("update:modelValue",{...props.modelValue, birth_date: v})
     },
+
 });
 const gender = computed({
     get() {
@@ -98,53 +101,45 @@ const pref_lang = computed({
 
 <template lang = "pug">
 .py-4.grid(class="sm:grid-cols-3")
-Container(style="background-color: rgb(167 243 208);")
-        .flex.flex-col.gap-5 
-            .py-4.grid(class="sm: col-span" style = "padding: 5px")
-                Label *First Name: 
-                .col-md-9.mx-10(class="sm:grid-cols-3")
-                    Input(v-model='first_name' placeholder="(user defined)" required)
-            .py-4.grid(class="sm: col-span" style = "padding: 5px")
-                Label *Last Name: 
-                .cl-md-9.mx-10(class="sm: grid-cols-3")
-                    Input(v-model='last_name' placeholder="(user defined)" required)
-            .py-4.grid(class="sm: col-span" style = "padding: 5px")
-                Label *What is your child's preferred name?
-                .cl-md-9.mx-10(class="sm: grid-cols-3")
-                    Input(v-model='pref_name' placeholder="(user defined)" required) 
-            .py-4.grid(class="sm: col-span" style = "padding: 5px")
-                Label *What is the age of the child?
-                .cl-md-9.mx-10(class="sm: grid-cols-3")
-                    Inputnum(v-model='age' placeholder="(giver number)" required)
-            .py-4.grid(class="sm: col-span" style = "padding: 5px")
-                Label *What is the current grade level of the child?
-                .cl-md-9.mx-10(class="sm: grid-cols-3")
-                    Inputnum(v-model='grade' placeholder="(give number)" required)
-            .py-4.grid(class="sm: col-span" style = "padding: 5px")
-                Label *What is the current readling level of the child? (give in a scale of 0 to 10)
-                .cl-md-9.mx-10(class="sm: grid-cols-3")
-                    Inputnum(v-model='reading_lvl' placeholder="(give number)" required)
-            .py-4.grid(class="sm: col-span" style = "padding: 5px")
-                Label *Birth date of child: 
-                .cl-md-9.mx-10(class="sm: grid-cols-3")
-                    Input(v-model='birth_date' placeholder="(user defined)" required)
-            .py-4.grid(class="sm: col-span" style = "padding: 5px")
-                label *Gender:
-                .cl-md-9.mx-10(class="sm: grid-cols-3")
-                    Dropdown(v-model='gender' :options=["", "Male", "Female", "Wish not to Disclose"] placeholder = "Please Select your Gender" required)
-            .py-4.grid(class="sm: col-span" style = "padding: 5px")
-                Label *School Name:
-                .cl-md-9.mx-10(class="sm: grid-cols-3")
-                    Input(v-model='school_name' placeholder="(ex: SunnyVale Elementary)"  required)
-            .py-4.grid(class="sm: col-span" style = "padding: 5px")
-                Label *School District:
-                .cl-md-9.mx-10(class="sm: grid-cols-3")
-                    Input(v-model='school_dist' placeholder="(ex: DISD)" required)
-            .py-4.grid(class="sm: col-span" style = "padding: 5px")
-                Label *Preferred language child speaks most in:
-                .cl-md-9.mx-10(class="sm: grid-cols-3")
-                    Input(v-model='pref_lang' placeholder="(ex: userdefined)" required)
-        .flex.flex-col.gap-5(class="sm: col-span" style = "padding: 5px")
-            Button.mx-auto.text-md(name="Delete Student" @click= "handleDeletion(index)" class="bg-red-600 hover:bg-red-700" style="background-color: rgb(251 113 133); border-color: rgb(251 113 133); padding: 5px") Remove Student
+div
+        .flex.flex-col.gap-5.margin-auto(class="w-1/2")
+            .py-4.grid(class="" style)
+                Label * First Name: 
+                    Input(type="text" v-model='first_name' name="first_name" id="first_name" placeholder="(user defined)" required)
+            .py-4.grid(class="" )
+                Label * Last Name: 
+                    Input(type="text" v-model='last_name' name="last_name" id="last_name" placeholder="(user defined)" required)
+            .py-4.grid(class="" )
+                Label * What is your child's preferred name?
+                    Input(type="text" v-model='pref_name' name="pref_name" id="pref_name" placeholder="(user defined)" required) 
+            .py-4.grid(class="" )
+                Label * What is the age of the child?
+                    Inputnum(type="number" v-model='age' name="age" id="age" placeholder="(giver number)" required)
+            .py-4.grid(class="" )
+                Label * What is the current grade level of the child?
+                    Inputnum(type="number" v-model='grade' name="grade" id="grade" placeholder="(give number)" required)
+            .py-4.grid(class="" )
+                Label * What is the current readling level of the child? (give in a scale of 0 to 10)
+                    Inputnum(type="number" v-model='reading_lvl' name="reading_lvl" id="reading_lvl" placeholder="(give number)" required)
+            .py-4.grid(class="" )
+                Label * Birth date of child: 
+                    Input(type="date" v-model="birth_date"  @update:modelValue="handleBirthDateChange" name="date" id="date" placeholder="(user defined)" required)
+            .py-4.grid(class="" )
+                label * Gender:
+                    select(v-model='gender' name="gender" id="gender" placeholder = "Please Select your Gender" class="block w-full rounded-md border border-gray-700 focus:ring-indigo-500"  required)
+                        option(value='Male') Male
+                        option(value='Female') Female
+                        option(value='Other') Other
+            .py-4.grid(class="" )
+                Label * School Name:
+                    Input(type="text" v-model='school_name' name="school_name" id="school_name" placeholder="(ex: SunnyVale Elementary)"  required)
+            .py-4.grid(class="" )
+                Label * School District:
+                    Input(type="text" v-model='school_dist' name="school_dist" id="school_dist" placeholder="(ex: DISD)" required)
+            .py-4.grid(class="" )
+                Label * Preferred language child speaks most in:
+                    Input(type="text" v-model='pref_lang' name="pref_lang" id="pref_lang" placeholder="(ex: userdefined)" required)
+        .flex.flex-col.gap-5(class="" )
+            Button.mx-auto.text-md(name="Delete Student" @click= "handleDeletion(index)" class='bg-rose-400 hover:bg-rose-400 border border-rose-400 rounded-lg') Remove Student
         .flex.flex-col.gap-5 
 </template>

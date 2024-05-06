@@ -1,44 +1,43 @@
 <script lang="ts" setup>
-export default {
-  name: 'FormDate',
-  props: {
-    value: {
-      type: [Number, String],
-      required: true,
-    },
-    // ...
+const emit = defineEmits(['update:modelValue']);
+const props = defineProps({
+  modelValue: {
+    type: [Number, String],
+    required: true,
   },
-  data() {
-    return {
-      day: `${this.value ? new Date(this.value).getDate() : ''}`,
-      month: `${this.value ? new Date(this.value).getMonth() + 1 : ''}`,
-      year: `${this.value ? new Date(this.value).getFullYear(): ''}`,
-    };
+  showDay: {
+    type: Boolean,
+    default: true,
   },
-  methods: {
-    updateValue() {
-      const timestamp = Date.parse(`${this.year.padStart(4, 0)}-${this.month}-${this.day}`);
+  showMonth: {
+    type: Boolean,
+    default: true,
+  },
+  showYear: {
+    type: Boolean,
+    default: true,
+  },
+});
 
-      if (Number.isNaN(timestamp)) return;
+const valueDate = props.modelValue ? new Date(props.modelValue) : null;
+const day = ref(valueDate ? valueDate.getDate().toString() : '');
+const month = ref(valueDate ? (valueDate.getMonth() + 1).toString() : '');
+const year = ref(valueDate ? valueDate.getFullYear().toString() : '');
 
-      this.$emit('input', timestamp);
-    },
-  },
+const updateValue = () => {
+  const timestamp = Date.parse(
+    `${year.value.padStart(4, '0')}-${month.value.padStart(2, '0')}-${day.value.padStart(2, '0')}`
+  );
+  if (Number.isNaN(timestamp)) return;
+  emit('update:modelValue', timestamp);
 };
 </script>
 
 <template lang="pug">
-    div(class ="form_date"; @keyup.capture="updateValue")
-        input(v-if="showDay" v-model="day" class="form_date__input form_date--day" type="number" placeholder="dd")
-        span(v-if="showDay && showMonth" class="form_date")
-        input(v-if="showMonth" v-model="month" class="form_date__input form_date--month" type="number" placeholder="mm")
-        span(v-if="showYear && (showDay || showMonth)" class="form_date__divider")
-        input(v-if="showYear" v-model="year" class="form_date__input form_date--year" type="number" placeholder="yyyy")
-
+div(class ="form_date" @keyup.capture="updateValue")
+    input(v-if="showDay" v-model="day" class="form_date__input form_date--day" type="number" style="border-color:black;" placeholder="dd")
+    span(v-if="showDay && showMonth" class="form_date")
+    input(v-if="showMonth" v-model="month" class="form_date__input form_date--month" type="number" style="border-color:black;" placeholder="mm")
+    span(v-if="showYear && (showDay || showMonth)" class="form_date__divider")
+    input(v-if="showYear" v-model="year" class="form_date__input form_date--year" type="number" style="border-color:black;" placeholder="yyyy")
 </template>
-
-<style>
-
-
-
-</style>

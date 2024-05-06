@@ -33,17 +33,18 @@ const selectOption = (option: string) => {
 <template lang="pug">
 .relative.inline-block
   button.rounded-md.outline-0.border-box.w-full.p-3(
-    style="border: 2px solid; border-color: black; border-radius: 9px; font-family: monospace;"
+    style="border: 2px solid;"
+    class='bg-white rounded-md border border-gray-700 border-solid'
     @click="toggleDropdown"
   )
     | {{ value || props.placeholder || 'Select an option' }}
     i.fas.fa-chevron-down.ml-2
   .absolute.z-10.w-full(v-if="isOpen")
     ul.bg-white.shadow-md.rounded-md.overflow-hidden
-    div(style = "border:2px solid; list-style-type: none;")
+    div(class="border border-black border-solid p-4 list-none")
       li.p-3.cursor-pointer(
         v-for="option in options"
         @click="selectOption(option)"
-        style="border-bottom: 1px solid black; border: 1px solid;"
-      ) {{ option }}
+        class="border-b border-black border-solid pb-1 border"
+        ) {{ option }}
 </template>

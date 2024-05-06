@@ -4,12 +4,12 @@
 
 </script>
 <template lang="pug">
-  div
-    header
-      nav
-            NuxtLink(to="/facultyform") Register Faculty Account
-            | &nbsp;
-            NuxtLink(to="/parentform") Register Parent Account
-            | &nbsp;
-    NuxtPage
+div
+  header
+    nav
+          Navigationbutton(to="/facultyform") Register Faculty Account
+          | &nbsp;
+          Navigationbutton(to="/parentform") Register Parent Account
+          | &nbsp;
+  NuxtPage
 </template>

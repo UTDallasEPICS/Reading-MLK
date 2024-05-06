@@ -65,63 +65,65 @@ const submittAccounts = async() =>{
 
 
 <template lang = "pug">
-Container(style="background-color: rgb(254 240 138);")
-    .flex.flex-col.gap-5 
-        TitleDisplay Parent Registration Form
-        div(style = "border: 2px solid")
+div
+    .flex.gap-5
+        .flex.flex-col.gap-5.margin-auto(class="w-1/2")
+            TitleDisplay Parent Registration Form
+            div(class="border border-gray-700")
+            div(class="border border-gray-700 rounded-lg px-10")
+                .py-4.grid(class="" )
+                    Label * First Name:
+                        Input(type="text" v-model='data_ParentProfile.first_name' name="first_name" id="first_name" placeholder="(user defined)" required)
+                .py-4.grid(class="" )
+                    Label * Last Name:
+                        Input(type="text" v-model='data_ParentProfile.last_name' name="last_name" id="last_name" placeholder="(user defined)" required)
+                .py-4.grid(class="" )
+                    Label * Birth Date:
+                        Input(type="date" v-model='data_ParentProfile.birth_date' name="birth_date" id="birth_date" placeholder="(user defined)" required)
+                .py-4.grid(class="" )
+                    Label * Zipcode: 
+                        Inputnum(type="number" v-model='data_ParentProfile.zipcode' name="zipcode" id="zipcode" placeholder="(user defined)" required)
+                .py-4.grid(class="" )
+                    Label Yearly Income:
+                        select(v-model="data_StudentProfile.yearly_income"  name="yearly_income" id="yearly_income" class="block w-full rounded-md border border-gray-700 focus:ring-indigo-500" placeholder = "Select your income level")
+                            option(value='') Select your income level
+                            option(value='$10,000-$20,000') $10,000-$20,000
+                            option(value='$20,000-$30,000') $20,000-$30,000
+                            option(value='$30,000-$40,000') $30,000-$40,000
+                            option(value='$40,000-$50,000') $40,000-$50,000
+                            option(vlaue='$50,000-$60,000') $50,000-$60,000
+                            option(value='$60,000+') $60,000+
+                .py-4.grid(class="" ) 
+                    Label * Phone number:
+                        Input(type="text" v-model='data_ParentProfile.phone_number' name="phone_number" id="phone_number" placeholder="(Ex:1234567899)" required)
+                .py-4.grid(class="" )
+                    Label * Email:
+                        Input(type="text" v-model='data_ParentProfile.Email' name="email" id="email" placeholder="(Ex:shell12345@gmail.com)" required)
+                .py-4.grid(class="" )
+                    Label * Password:
+                        Input(type="text" v-model='data_ParentProfile.password' name="password" id="password" placeholder="(user defined)" required )
+                .py-4.grid(class="" )
+                    Label Social Media Handle:
+                        Input(type="text" v-model='data_ParentProfile.social_media' name="social_media_handle" id="social_media_handle" placeholder="(user defined)")
+                .py-4.grid(class="" )
+                    Label * On average, how many books do you read per year to your child? (A guess is fine)
+                        Inputnum(type="number" v-model='data_ParentProfile.avg_num_book' name="avg_num_books" id="avg_num_books" placeholder="(user defined)" required)
+                .py-4.grid(class="" )
+                    Label What is your marital status?
+                        select(v-model="data_StudentProfile.martial_status" name='marital_stat' id="marital_stat" class="block w-full rounded-md border border-gray-700 focus:ring-indigo-500" placeholder = "Select your Marital Status")
+                            option(value='') Select your Marital Status 
+                            option(value='Married') Married
+                            option(value='Single') Single
+                            option(value='Divorced') Divorced
+                            option(value='Other') Other
         .flex.flex-col.gap-5
-        .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
-            Label *First Name:
-            .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
-                Input(v-model='data_ParentProfile.first_name' placeholder="(user defined)" required)
-        .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
-            Label *Last Name:
-            .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
-                Input(v-model='data_ParentProfile.last_name' placeholder="(user defined)" required)
-        .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
-            Label *Birth Date: (Please give the year you were born)
-            .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
-                Input(v-model='data_ParentProfile.birth_date' placeholder="(user defined)" required)
-        .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
-            Label *Zipcode: (Please give five digit number for the zipcode area you reside in)
-            .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
-                Inputnum(v-model='data_ParentProfile.zipcode' placeholder="(user defined)" required)
-        .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
-            Label Yearly Income:
-            .col-md-9.mx-10(class="sm:col-span-2 sm:m-11")
-                Dropdown(v-model="data_StudentProfile.yearly_income" style = "padding: 5px" :options=["", "10,000-20,000", "20,000-30,000", "30,000-40,000", "40,000-50,000", "50,000-60,000", "60,000+"] placeholder = "Select your income level") 
-        .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px") 
-            Label *Phone number:
-            .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
-                Input(v-model='data_ParentProfile.phone_number' placeholder="(Ex:1234567899)" required)
-        .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
-            Label *Email:
-            .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
-                Input(v-model='data_ParentProfile.Email' placeholder="(Ex:shell12345@gmail.com)" required)
-        .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
-            Label *Password:
-            .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
-                Input(v-model='data_ParentProfile.password' placeholder="(user defined)" required )
-        .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
-            Label Social Media Handle:
-            .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
-                Input(v-model='data_ParentProfile.social_media' placeholder="(user defined)")
-        .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
-            Label *On average, how many books do you read per year to your child? (A guess is fine)
-            .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
-                Inputnum(v-model='data_ParentProfile.avg_num_book' placeholder="(user defined)" required)
-        .py-4.grid(class="sm:grid-cols-3" style = "padding: 5px")
-            Label What is your marital status? (If you do not wish to answer or can't find an answer which matches your situation select Wish not to Disclose or Other respectively)
-            .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
-                Dropdown(v-model="data_StudentProfile.martial_status" style = "padding: 5px" :options=["", "Married", "Divorced", "Single", "Other"] placeholder = "Select your Marital Status") 
-    .flex.flex-col.gap-5
-        TitleDisplay Register Child
-            div(style = "border:2px solid ")
-            p Please input your child(s) information down below (you do not have to put anything for the optional parts)
-        div(v-for="(child, index) in data_StudentProfile" :key="index" style = "border:4px solid; border-radius: 5px;")
-            Childentry(v-model="data_StudentProfile[index]" @remove="removeStudent(index)")
-        .flex.flex-col.gap-5(class="sm: col-span" style = "padding: 5px") 
-        Button.mx-auto.text-md(name = "Add Child" @click="addStudent()" class='hover:bg-green-400 text-black' style= "background-color: rgb(56 189 248); border-color: rgb(56 189 248); padding: 5px; ") Add Student
-        .flex.flex-col.gap-5(class="sm: col-span" style = "padding: 5px")
-    Button.mx-auto.text-md(name="Submitt accounts" @click="submittAccounts()" class='hover:bg-green-400 text-black') Submit
+            TitleDisplay Register Child
+                div(class="border border-gray-700")
+                p Please input your child(s) information down below (you do not have to put anything for the optional parts)
+            div(v-for="(child, index) in data_StudentProfile" :key="index" class="border border-gray-700 rounded-lg")
+                Childentry(v-model="data_StudentProfile[index]" @remove="removeStudent(index)")
+            .flex.flex-col.gap-5(class="") 
+            Button.mx-auto.text-md(name = "Add Child" @click="addStudent()" class='bg-sky-400 hover:bg-sky-400 text-black border border-sky-400 rounded-lg') Add Student
+            .flex.flex-col.gap-5(class="")
+    Button.mx-auto.text-md(name="Submitt accounts" @click="submittAccounts()" class='bg-green-400 hover:bg-green-400 text-black rounded-lg') Submit
 </template>
