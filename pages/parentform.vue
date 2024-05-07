@@ -116,7 +116,7 @@ div
                             option(value='Single') Single
                             option(value='Divorced') Divorced
                             option(value='Other') Other
-        .flex.flex-col.gap-5
+        .flex.flex-col.gap-5(class="text-center")
             TitleDisplay Register Child
                 div(class="border border-gray-700")
                 p Please input your child(s) information down below (you do not have to put anything for the optional parts)
