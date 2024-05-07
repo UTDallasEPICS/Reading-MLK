@@ -123,7 +123,7 @@ div
             div(v-for="(child, index) in data_StudentProfile" :key="index" class="border border-gray-700 rounded-lg")
                 Childentry(v-model="data_StudentProfile[index]" @remove="removeStudent(index)")
             .flex.flex-col.gap-5(class="py-2") 
-                Button.mx-auto.text-md(name = "Add Child" @click="addStudent()" class='bg-sky-400 hover:bg-sky-400 text-black border border-sky-400 rounded-lg px-2 py-2') Add Student
+                Button.mx-auto.text-md(name = "Add Child" @click="addStudent()" class='bg-sky-400 hover:bg-sky-500 text-black border border-sky-400 rounded-lg px-2 py-2') Add Student
     .flex.flex-col.gap-5(class="text-center border border-gray-700 text-center")
     .flex.gap-5(class="object-center py-2")
         Button.mx-auto.text-md(name="Submitt accounts" @click="submittAccounts()" class='bg-green-400 hover:bg-green-400 text-black rounded-lg px-2 py-2') Submit
