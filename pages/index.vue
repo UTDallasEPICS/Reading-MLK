@@ -1,9 +1,7 @@
-<template>
-    <div>
-    
-    </div>
+<template lang = "pug">
+div( class="landing-page")
+    p Welcome to Reading Huddle
 </template>
 
-<script setup>
-
-</script>
+<style lang="ts" setup>
+</style>

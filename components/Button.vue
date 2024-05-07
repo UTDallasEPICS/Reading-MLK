@@ -1,8 +1,7 @@
 <template lang="pug">
-NuxtLink.items-center.px-4.py-4.text-base.font-medium.rounded-md.cursor-pointer(style="text-align:center;" class='text-gray-999 hover:text-black border border-gray-999 hover:border-green-999 transition duration-300' :to="to")
+button.p-4.px-6.pt-2.rounded-full(class="rounded-extralight font-medium")
       slot
 </template>
 
 <script setup lang="ts">
-const props = defineProps<{ to: string}>()
 </script>
