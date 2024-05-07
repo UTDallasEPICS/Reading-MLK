@@ -1,20 +1,15 @@
 
-import ButtonCompoent from './components/Button.vue';
 <script setup>
-import Button from './components/Button.vue';
+//import ButtonCompoent from './components/buttonComponent.vue';
+
 </script>
-<template>
-  <div>
-    <NuxtPage></NuxtPage>
-    <header>
-    <nav>
-      <ul>
-      <NuxtLink to = "/facultyform">Register Faculty Account</NuxtLink>&nbsp;
-      <NuxtLink to = "/parentform">Register Parent Account</NuxtLink>&nbsp;
-      <NuxtLink to = "/editstudent">Edit Student Accounts</NuxtLink>&nbsp;
-      <NuxtLink to = "/edituser">Edit User Accounts</NuxtLink>&nbsp;
-      </ul>
-    </nav>
-    </header>
-  </div>
+<template lang="pug">
+div
+  header
+    nav
+          Navigationbutton(to="/facultyform") Register Faculty Account
+          | &nbsp;
+          Navigationbutton(to="/parentform") Register Parent Account
+          | &nbsp;
+  NuxtPage
 </template>

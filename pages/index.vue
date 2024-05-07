@@ -1,25 +1,7 @@
-
-<template lang = pug>
-    <div class="landing-page">
-        <div class="background-image"></div>
-
-        <div class="content">
-            <p>Welcome to Reading Huddle</p>
-        </div>
-    </div>
+<template lang = "pug">
+div( class="landing-page")
+    p Welcome to Reading Huddle
 </template>
 
-<style>
-@import "@/assets/styles/index.scss";
+<style lang="ts" setup>
 </style>
-
-<template>
-    <div>
-    
-    </div>
-</template>
-
-<script setup>
-
-</script>
-

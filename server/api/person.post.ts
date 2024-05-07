@@ -6,4 +6,4 @@ export default defineEventHandler(async event => {
     const result = await event.context.client.user.create({
         ...body
     })
-})
+}) 

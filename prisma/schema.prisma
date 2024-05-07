@@ -14,10 +14,7 @@ datasource db {
 
 // standard user profile 
 model User {
-  id          Int      @id @default(autoincrement())
-
-  id          Int      @id  @default(autoincrement())
-
+  id          Int @id @default(autoincrement())
   user_name   String @unique // should have one upper case and lower case alongside a number
   email       String @unique // should hold the email of the private account
   client_cuid String @map("client_cuid")
@@ -28,9 +25,9 @@ model User {
 
 // parent profile
 model ParentProfile {
-  id             Int @id
+  id             Int @id @default(autoincrement())
   zipcode        Int 
-  yearly_income  Int? /// must be optional to give the parent income for sensitivity issues
+  yearly_income  String? /// must be optional to give the parent income for sensitivity issues // changed to string to allow for more dynamic input
   birth_date     DateTime?
   avg_num_book   Int /// average number of books read to child (before they registered with program/school and this will not be changed)
   password       String
@@ -49,7 +46,7 @@ model ParentProfile {
 
 // teacher profile (principle will also have a faculty profile)
 model FacultyProfile{
-  id            Int    @id
+  id            Int    @id @default(autoincrement())
   district      String
   dual_lang     Boolean /// True if they are spanish or other language teacher with non-english kids, otherwise false to indicate they are english speaking teachers      
   faculty_email String @unique
@@ -66,7 +63,7 @@ model FacultyProfile{
 
 // registered students profile 
 model StudentProfile{
-  id 	        Int @id
+  id 	        Int @id @default(autoincrement())
   age         Int
   grade       Int /// preschool should be given 0 to denote their grade level
   reading_lvl Int /// should reference AR level to indicate reading level
@@ -86,7 +83,7 @@ model StudentProfile{
 
 // model to hold the administrators from Friends of MLK
 model AdminProfile{
-  id    Int    @id
+  id    Int    @id @default(autoincrement())
   admin_email String @unique
 
  @@map("admin_profile")
