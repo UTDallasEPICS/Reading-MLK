@@ -18,6 +18,7 @@
     "@vuepic/vue-datepicker": "^8.5.1",
     "jsonwebtoken": "^9.0.2",
     "nuxt": "^3.10.3",
+    "pg": "^8.11.5",
     "pug": "^3.0.2",
     "vue": "^3.4.19",
     "vue-router": "^4.3.0",

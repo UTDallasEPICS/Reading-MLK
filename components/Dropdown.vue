@@ -1,6 +1,5 @@
-<script lang="ts" setup>
-import { computed } from 'vue';
 
+<script lang = "ts" setup>
 const props = defineProps<{
   modelValue: string;
   options: string[];
