@@ -123,10 +123,10 @@ div
                     Inputnum(type="number" v-model='reading_lvl' name="reading_lvl" id="reading_lvl" placeholder="(give number)" required)
             .py-4.grid(class="" )
                 Label * Birth date of child: 
-                    Input(type="date" v-model="birth_date"  @update:modelValue="handleBirthDateChange" name="date" id="date" placeholder="(user defined)" required)
+                    Input(type="date" v-model="birth_date" name="date" id="date" placeholder="(user defined)" required)
             .py-4.grid(class="" )
                 label * Gender:
-                    select(v-model='gender' name="gender" id="gender" placeholder = "Please Select your Gender" class="block w-full rounded-md border border-gray-700 focus:ring-indigo-500"  required)
+                    select(v-model='gender' name="gender" id="gender" placeholder = "Please Select your Gender" class="block w-full rounded-md border border-gray-400 focus:border-gray-700"  required)
                         option(value='Male') Male
                         option(value='Female') Female
                         option(value='Other') Other
@@ -138,8 +138,8 @@ div
                     Input(type="text" v-model='school_dist' name="school_dist" id="school_dist" placeholder="(ex: DISD)" required)
             .py-4.grid(class="" )
                 Label * Preferred language child speaks most in:
-                    Input(type="text" v-model='pref_lang' name="pref_lang" id="pref_lang" placeholder="(ex: userdefined)" required)
+                    Input(type="text" v-model='pref_lang' name="pref_lang" id="pref_lang" placeholder="(user defined)" required)
         .flex.flex-col.gap-5(class="text-center py-2" )
-            Button.mx-auto.text-md(name="Delete Student" @click= "handleDeletion(index)" class='bg-rose-400 hover:bg-rose-400 border border-rose-400 rounded-lg py-2 px-2') Remove Student
+            Button.mx-auto.text-md(name="Delete Student" @click= "handleDeletion(index)" class='bg-rose-400 hover:bg-rose-500 border border-rose-400 rounded-lg py-2 px-2') Remove Student
         .flex.flex-col.gap-5 
 </template>

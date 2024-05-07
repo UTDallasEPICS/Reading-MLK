@@ -4,7 +4,6 @@ export default defineEventHandler( async event => {
       data: body.faculty
 });
     return {
-      faculty: faculty
+      faculty: faculty,
     }
-
 })
