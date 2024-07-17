@@ -14,18 +14,39 @@ export default defineEventHandler( async event => {
         school_dist: string;
         pref_lang: string;
       }
-
-    const parent = await event.context.client.parentProfile.create({
+      
+    /*const parent = await event.context.client.parentProfile.create({
         data: body.parent,
       });
 
     const studentList = event.context.client.studentProfile.createMany({
         data: body.students
-    })
+    })*/
     
+    const {user_id, ...d} = body.parent
+      event.context.client.parentProfile.create({
+        ...d,
+        User: {
+          connect: { id: user_id },
+        },
+        ParentToChild: {
+          createMany: {
+            data: [
+              ...body.students.map((s:any) => ({
+                ...s,
+                User: {
+                  data: {
+                    email: s.email,
+                  },
+                },
+              })),
+            ],
+          },
+        },
+      })
 
-    return {
+    /*return {
         parent: parent,
         studentsList: studentList,
-    }
+    }*/
 })
