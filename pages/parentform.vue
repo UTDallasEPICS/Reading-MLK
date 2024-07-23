@@ -17,7 +17,7 @@ avg_num_book: "",
 yearly_income: "",
 gender: "",
 marital_stat: "",
-user_id: cvuser.value?.id,
+user_id: cvuser.value.id,
 });
 
 const data_StudentProfile=ref([{
@@ -31,7 +31,8 @@ birth_date: "",
 gender: "",
 school_name: "",
 school_dist: "",
-pref_lang: ""
+pref_lang: "",
+user_id: cvuser.value.id,
 
 }]);
 
@@ -48,7 +49,8 @@ const addStudent = () => {
         gender: "",
         school_name: "",
         school_dist: "",
-        pref_lang: ""
+        pref_lang: "",
+        user_id: cvuser.value.id,
     })
 }
 
@@ -57,6 +59,7 @@ const removeStudent = (index: number) => {
 }
 
 const submittAccounts = async() =>{
+    console.log("Testinggg")
     const parentResponse = await $fetch('/api/parent_submit', {
     method: "POST",
     body: {

@@ -95,6 +95,8 @@ for (let i = 0; i < data_FacultyProfiles.value.length; i++) {
       phone_number: data_FacultyProfiles.value[i].phone_number,
       department: data_FacultyProfiles.value[i].department,
       grade: data_FacultyProfiles.value[i].grade,
+      user_id: data_FacultyProfiles.value[i].user_id,
+
       //...data_facultyProfile.values[i]
       }
     }
@@ -118,6 +120,7 @@ async function editFaculty(editedFaculty) {
         phone_number: editedFaculty.phone_number,
         department: editedFaculty.department,
         grade: editedFaculty.grade,
+        user_id: editedFaculty.user_id,
       }
     })
   navigateTo('/viewfaculty')

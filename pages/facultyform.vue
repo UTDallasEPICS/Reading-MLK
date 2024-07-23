@@ -3,7 +3,7 @@
 const props = defineProps<{modelValue:any}>()
 const emit = defineEmits(["update:modelValue"])
 const cvuser = useCookie<any>('cvuser')
-const data_FacultyProfile = ref({          
+const data_FacultyProfile = ref({     
   district: "",     
   dual_lang: false,      /// True if they are spanish or other language teacher with non-english kids, otherwise false to indicate they are english speaking teachers      
   faculty_email: "",  
@@ -13,13 +13,13 @@ const data_FacultyProfile = ref({
   phone_number: "",  
   department: "",    
   grade: "", 
-  user_id: cvuser.value?.id,
+  user_id: cvuser.value.id,
 });
 const dual_lang = computed({
   get() {
-    return data_FacultyProfile.value.dual_lang ? "true" : ''
+    return data_FacultyProfile.value.dual_lang ? true : false
   },
-  set(s: string) {
+  set(s) {
     data_FacultyProfile.value.dual_lang =Boolean(s)
     console.log(s)
   }

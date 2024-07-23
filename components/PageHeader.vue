@@ -16,6 +16,7 @@
               <li><nuxt-link to="/facultyform" class="navPage">Register Faculty Account</nuxt-link></li>
               <li><nuxt-link to="/parentform" class="navPage">Register Parent Account</nuxt-link></li>
               <li><nuxt-link to="/viewfaculty" class="navPage">View Faculty Accounts</nuxt-link></li>
+              <li><nuxt-link to="/viewparents" class="navPage">View Parent Accounts</nuxt-link></li>
               <li><a class="right navPage" href="/api/logout">Logout</a></li>
             </ul>
       </div>

@@ -87,7 +87,7 @@ model StudentProfile{
   user_id  Int @unique
   Student     User @relation(fields: [user_id], references: [id])
 
-  Parents      ParentToChild[]
+  ParentToChild      ParentToChild[]
   Classes	     StudentToClass[]
   @@map("student_profile")
 }

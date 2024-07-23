@@ -5,18 +5,20 @@ const prisma = new PrismaClient();
 export default defineEventHandler(async (event) => {
     const body = await readBody(event);
 
-    const district = body.district;
-    const dual_lang = body.dual_lang;
-    const faculty_email = body.faculty_email;
-    const first_name = body.first_name;
-    const last_name = body.last_name;
-    const school_name = body.school_name;
-    const phone_number = body.phone_number;
-    const department = body.department;
-    const grade = body.grade;
+    const district = body.faculty.district;
+    const dual_lang = body.faculty.dual_lang;
+    const faculty_email = body.faculty.faculty_email;
+    const first_name = body.faculty.first_name;
+    const last_name = body.faculty.last_name;
+    const school_name = body.faculty.school_name;
+    const phone_number = body.faculty.phone_number;
+    const department = body.faculty.department;
+    const grade = body.faculty.grade;
+    const user_id = body.faculty.user_id
+
 
     // Check for missing data
-    if (!(district && faculty_email && first_name && last_name && school_name && phone_number && department && grade)) {
+    if (!(district && faculty_email && first_name && last_name && school_name && phone_number && department && grade && user_id)) {
         return createError({ statusCode: 400, statusMessage: "Missing Data" });
     }
 
@@ -26,6 +28,11 @@ export default defineEventHandler(async (event) => {
         // Create a new faculty record
         newFaculty = await prisma.facultyProfile.create({
             data: {
+                Faculty: {
+                    connect: {
+                        id: user_id
+                    }
+                },
                 district: district,
                 dual_lang: dual_lang,
                 faculty_email: faculty_email,
@@ -34,7 +41,7 @@ export default defineEventHandler(async (event) => {
                 school_name: school_name,
                 phone_number: phone_number,
                 department: department,
-                grade: grade
+                grade: grade,
             },
         });
     } catch (error) {

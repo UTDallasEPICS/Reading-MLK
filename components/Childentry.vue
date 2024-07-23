@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import '@vuepic/vue-datepicker/dist/main.css';
 import "vue-select/dist/vue-select.css";
+import VueDatePicker from '@vuepic/vue-datepicker';
+import '@vuepic/vue-datepicker/dist/main.css';
 const props = defineProps<{modelValue:any}>()
 const emit = defineEmits(["remove", "update:modelValue"])
 // button click = emit('remove')
@@ -123,7 +125,7 @@ div
                     Inputnum(type="number" v-model='reading_lvl' name="reading_lvl" id="reading_lvl" placeholder="(give number)" required)
             .py-4.grid(class="" )
                 Label * Birth date of child: 
-                    Input(type="date" v-model="birth_date"  @update:modelValue="handleBirthDateChange" name="date" id="date" placeholder="(user defined)" required)
+                    VueDatePicker(v-model='birth_date' name='birth_date' id='birth_date' required)
             .py-4.grid(class="" )
                 label * Gender:
                     select(v-model='gender' name="gender" id="gender" placeholder = "Please Select your Gender" class="block w-full rounded-md border border-gray-700 focus:ring-indigo-500"  required)
