@@ -15,15 +15,14 @@ export default defineEventHandler( async event => {
         pref_lang: string;
       }
     
-    await event.context.client.$transaction(async (tx:any) => {
-    const parent = await tx.parentProfile.create({
+    const parent = await event.context.client.parentProfile.create({
         data: {
           User: {
             connect: {
               id: body.parent.user_id
             }
           },
-          zipcode: parseInt(body.parent.zipcode),
+          zipcode: body.parent.zipcode,
           yearly_income: body.parent.yearly_income,
           birth_date: body.parent.birth_date,
           avg_num_book: parseInt(body.parent.avg_num_book),
@@ -36,8 +35,36 @@ export default defineEventHandler( async event => {
           email: body.parent.email,
           social_media: body.parent.social_media,
       }
-      })
+      });
 
+      const studentList = await Promise.all(body.students.map((student:any) =>
+            event.context.client.studentProfile.create({
+              data: {
+                ParentToChild: {
+                  create: {
+                    Parent: {
+                      connect: {
+                        id: parent.id
+                      }
+                    }
+                  }
+                },
+                age: parseInt(student.age),
+                grade: parseInt(student.grade),
+                reading_lvl: parseInt(student.reading_lvl),
+                birth_date: student.birth_date,
+                gender: student.gender,
+                school_name: student.school_name,
+                school_dist: student.school_dist,
+                pref_lang: student.pref_lang,
+                first_name: student.first_name,
+                last_name: student.last_name,
+                pref_name: student.pref_name,
+                user_id: student.user_id,
+              }
+            })
+          ));
+        /*
     const studentList = await tx.studentProfile.createMany({
         data: {
           ParentToChild: {
@@ -58,7 +85,7 @@ export default defineEventHandler( async event => {
           pref_name: body.students[0].pref_name,
           user_id: body.students[0].user_id,
         }        
-    })})
+    })})*/
     /*
     try {
       // Create a new faculty record

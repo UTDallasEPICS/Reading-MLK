@@ -31,7 +31,7 @@ model User {
 // parent profile
 model ParentProfile {
   id             Int @id @default(autoincrement())
-  zipcode        Int 
+  zipcode        String
   yearly_income  String? /// must be optional to give the parent income for sensitivity issues // changed to string to allow for more dynamic input
   birth_date     DateTime? @default(now())
   avg_num_book   Int /// average number of books read to child (before they registered with program/school and this will not be changed)
@@ -105,7 +105,7 @@ model AdminProfile{
 
 // class model to create relation between teacher and student (should be one-to-many)
 model Class{
-id	Int	@id
+id	Int	@id @default(autoincrement())
 class_name	String /// example: Bayard class
 class_year	Int
 Teacher 	TeacherToClass[] 
@@ -115,7 +115,7 @@ Student	  StudentToClass[]
 
 // join table for teacher to class relationship
 model TeacherToClass{
-  id         Int @id
+  id         Int @id @default(autoincrement())
   class_id   Int
   teacher_id Int
   Class Class @relation(fields: [class_id], references: [id])
@@ -125,7 +125,7 @@ model TeacherToClass{
 
 // join table for student to class relationship
 model StudentToClass{
-  id         Int @id
+  id         Int @id @default(autoincrement())
   class_id   Int 
   student_id Int
   Class    Class          @relation(fields: [class_id], references: [id])
@@ -135,7 +135,7 @@ model StudentToClass{
 
 // join table for relationship between parents and child (student) (should be one-to-many)
 model ParentToChild {
-  id          Int @id
+  id          Int @id @default(autoincrement())
   parent_id   Int
   child_id    Int 
   Parent      ParentProfile    @relation(fields:[parent_id], references:[id])
