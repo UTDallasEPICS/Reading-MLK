@@ -20,15 +20,20 @@ model User {
   client_cuid String @map("client_cuid")
   role        String
 
+  Parents     ParentProfile?
+  Children    StudentProfile?
+  Faculty     FacultyProfile?
+  Admin       AdminProfile?
+
   @@map("users")
 }
 
 // parent profile
 model ParentProfile {
   id             Int @id @default(autoincrement())
-  zipcode        Int 
+  zipcode        String
   yearly_income  String? /// must be optional to give the parent income for sensitivity issues // changed to string to allow for more dynamic input
-  birth_date     DateTime?
+  birth_date     DateTime? @default(now())
   avg_num_book   Int /// average number of books read to child (before they registered with program/school and this will not be changed)
   password       String
   phone_number   String @unique /// parent should provide their mobile for easy contact their extension is not required (we are assuming they have a US extension)
@@ -38,7 +43,8 @@ model ParentProfile {
   last_name      String
   email          String
   social_media   String? @unique /// could be other social media handle but should ask for twitter(X) handle (most likely social media handle they have)
-
+  user_id        Int @unique
+  User           User @relation(fields: [user_id], references: [id])
   ParentToChild  ParentToChild[] 
   @@map("parent_profile")
 
@@ -57,6 +63,8 @@ model FacultyProfile{
   department    String
   grade         String // multi to indicate that they teach multiple 
 
+  user_id    Int @unique
+  Faculty       User @relation(fields: [user_id], references: [id])
   TeacherToClass  TeacherToClass[]
   @@map("faculty_profile")
 }
@@ -67,7 +75,7 @@ model StudentProfile{
   age         Int
   grade       Int /// preschool should be given 0 to denote their grade level
   reading_lvl Int /// should reference AR level to indicate reading level
-  birth_date  DateTime?
+  birth_date  DateTime? @default(now())
   gender      String /// note that the gender should be have drop down option for M = male, F = female, O = other (should probably talk with sponsor about making this voluntary or expanding options)
   school_name String /// asssume that all the school names will be elementary schools so we should ask them to give the name of the school 
   school_dist String /// example format should be GISD (garland independent school district)
@@ -76,8 +84,11 @@ model StudentProfile{
   last_name   String
   pref_name   String
 
-  Parent       ParentToChild[]
-  Student	     StudentToClass[]
+  user_id  Int @unique
+  Student     User @relation(fields: [user_id], references: [id])
+
+  ParentToChild      ParentToChild[]
+  Classes	     StudentToClass[]
   @@map("student_profile")
 }
 
@@ -86,12 +97,15 @@ model AdminProfile{
   id    Int    @id @default(autoincrement())
   admin_email String @unique
 
+  admin_id  Int @unique
+  Admin     User @relation(fields: [admin_id], references: [id])
+
  @@map("admin_profile")
 }
 
 // class model to create relation between teacher and student (should be one-to-many)
 model Class{
-id	Int	@id
+id	Int	@id @default(autoincrement())
 class_name	String /// example: Bayard class
 class_year	Int
 Teacher 	TeacherToClass[] 
@@ -101,7 +115,7 @@ Student	  StudentToClass[]
 
 // join table for teacher to class relationship
 model TeacherToClass{
-  id         Int @id
+  id         Int @id @default(autoincrement())
   class_id   Int
   teacher_id Int
   Class Class @relation(fields: [class_id], references: [id])
@@ -111,7 +125,7 @@ model TeacherToClass{
 
 // join table for student to class relationship
 model StudentToClass{
-  id         Int @id
+  id         Int @id @default(autoincrement())
   class_id   Int 
   student_id Int
   Class    Class          @relation(fields: [class_id], references: [id])
@@ -121,7 +135,7 @@ model StudentToClass{
 
 // join table for relationship between parents and child (student) (should be one-to-many)
 model ParentToChild {
-  id          Int @id
+  id          Int @id @default(autoincrement())
   parent_id   Int
   child_id    Int 
   Parent      ParentProfile    @relation(fields:[parent_id], references:[id])

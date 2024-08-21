@@ -1,149 +1,134 @@
-<template>
-    <div class="content-center">
-      <!-- Submission form for editing faculty profiles -->
-      <div class="container content-center" id="form" style="margin: 0 auto">
-        <h2 class="text-center text-3xl font-bold mt-6">Edit Faculty Profile</h2>
-        <hr class="rounded center-text" style="border-top: 7px solid #122C4F; width: 65%; margin: 0 auto; margin-top: 7px">
-        
-        <!-- Form fields -->
-        <div class="mt-10 grid grid-cols-1 gap-x-24 gap-y-8 sm:grid-cols-6 mx-40">
-          <!-- First Name -->
-          <div class="sm:col-span-3 ml-28">
-            <label for="first-name" class="block text-lg font-medium leading-6 text-gray-900">First Name</label>
-            <div class="mt-2">
-              <input v-model="facultyProfile.firstName" type="text" name="first-name" id="first-name" class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-lg sm:leading-6">
-            </div>
-          </div>
-          <!-- Last Name -->
-          <div class="sm:col-span-3 mr-28">
-            <label for="last-name" class="block text-lg font-medium leading-6 text-gray-900">Last Name</label>
-            <div class="mt-2">
-              <input v-model="facultyProfile.lastName" type="text" name="last-name" id="last-name" class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-lg sm:leading-6">
-            </div>
-          </div>
-          <!-- District -->
-          <div class="sm:col-span-3 ml-28">
-            <label for="district" class="block text-lg font-medium leading-6 text-gray-900">District</label>
-            <div class="mt-2">
-              <input v-model="facultyProfile.district" type="text" name="district" id="district" class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-lg sm:leading-6">
-            </div>
-          </div>
-          <!-- Faculty Email -->
-          <div class="sm:col-span-3 mr-28">
-            <label for="faculty-email" class="block text-lg font-medium leading-6 text-gray-900">Faculty Email</label>
-            <div class="mt-2">
-              <input v-model="facultyProfile.facultyEmail" type="email" name="faculty-email" id="faculty-email" class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-lg sm:leading-6">
-            </div>
-          </div>
-          <!-- Phone Number -->
-          <div class="sm:col-span-3 ml-28">
-            <label for="phone-number" class="block text-lg font-medium leading-6 text-gray-900">Phone Number</label>
-            <div class="mt-2">
-              <input v-model="facultyProfile.phoneNumber" type="text" name="phone-number" id="phone-number" class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-lg sm:leading-6">
-            </div>
-          </div>
-          <!-- Department -->
-          <div class="sm:col-span-3 mr-28">
-            <label for="department" class="block text-lg font-medium leading-6 text-gray-900">Department</label>
-            <div class="mt-2">
-              <input v-model="facultyProfile.department" type="text" name="department" id="department" class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-lg sm:leading-6">
-            </div>
-          </div>
-          <!-- School Name -->
-          <div class="sm:col-span-3 ml-28">
-            <label for="school-name" class="block text-lg font-medium leading-6 text-gray-900">School Name</label>
-            <div class="mt-2">
-              <input v-model="facultyProfile.schoolName" type="text" name="school-name" id="school-name" class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-lg sm:leading-6">
-            </div>
-          </div>
-          <!-- Dual Language -->
-          <div class="sm:col-span-3 mr-28">
-            <label for="dual-language" class="block text-lg font-medium leading-6 text-gray-900">Dual Language</label>
-            <div class="mt-2">
-              <input v-model="facultyProfile.dualLang" type="checkbox" name="dual-language" id="dual-language" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-            </div>
-          </div>
-          <!-- Grade -->
-          <div class="sm:col-span-3 ml-28">
-            <label for="grade" class="block text-lg font-medium leading-6 text-gray-900">Grade</label>
-            <div class="mt-2">
-              <input v-model="facultyProfile.grade" type="text" name="grade" id="grade" class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-lg sm:leading-6">
-            </div>
-          </div>
-          <!-- Submit Button -->
-          <button type="button" class="rounded-md bg-indigo-600 px-3 py-2 text-lg font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 w-60 mx-72" @click.prevent="editFacultyProfile(facultyProfile)">Apply Edits</button>
-        </div>
-      </div>
-    </div>
-  </template>
-  
-  <script setup lang="ts">
-  import { ref } from 'vue';
-  
-  interface FacultyProfile {
-    id: number | null;
-    firstName: string | null;
-    lastName: string | null;
-    district: string | null;
-    dualLang: boolean | null;
-    facultyEmail: string | null;
-    phoneNumber: string | null;
-    department: string | null;
-    schoolName: string | null;
-    grade: string | null;
-  }
-  
-  const facultyProfile = ref<FacultyProfile>({
-    id: null,
-    firstName: null,
-    lastName: null,
-    district: null,
-    dualLang: null,
-    facultyEmail: null,
-    phoneNumber: null,
-    department: null,
-    schoolName: null,
-    grade: null
-  });
-  
-  const url = new URL(window.location.href);
-  const queryParams = new URLSearchParams(url.search);
-  const profileId = queryParams.get('id');
-  
-  const getFacultyProfile = async () => {
-    const response = await fetch(`/api/faculty-profile/${profileId}`);
-    const data = await response.json();
-    return data;
-  };
-  
-  facultyProfile.value = await getFacultyProfile();
-  
-  /**
-  *   @desc Edit faculty profile information
-  *   @param editedProfile Object containing edited faculty profile information
-  */
-  const editFacultyProfile = async (editedProfile: FacultyProfile) => {
-    console.log('Edited Faculty Profile:', editedProfile);
-    let response = null;
-    try {
-      response = await fetch('/api/faculty-profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(editedProfile)
-      });
-  
-      if (!response.ok) {
-        throw new Error('Failed to edit faculty profile.');
+<template lang = "pug">
+  div(class="text-center")
+      .flex.flex-col.gap-5(class="text-center px-10")
+          TitleDisplay Faculty Registration Form
+          div(class = "text-center px-10 border-solid border border-gray-700 border-2")
+          div(class="")
+              .py-4.grid(class="" )
+                  Label * First Name:
+                      Input(v-model='data_FacultyProfile.first_name' name="first_name" id="first_name" placeholder="(user defined)" required)
+              .py-4.grid(class="" )
+                  Label * Last Name:
+                      Input(v-model='data_FacultyProfile.last_name' name="last_name" id="last_name" placeholder="(user defined)" required)
+              .py-4.grid(class="" )
+                  Label * School District currently working in: 
+                      Input(v-model='data_FacultyProfile.district' name="district_teach" id="district_teach" placeholder="(Ex: DISD)" required)
+              .py-4.grid(class="" )
+                  Label * Faculty Email:
+                      Input(v-model='data_FacultyProfile.faculty_email' name="faculty_email" id="faculty_email" placeholder="(user defined)" required)
+              .py-4.grid(class="" )
+                  Label * Do you teach a dual language class?
+                      select(v-model="data_FacultyProfile.dual_lang" name="dual_lang" id="dual_lang" class="block w-full rounded-md border border-gray-700 focus:ring-indigo-500"  placeholder = "(Do you Teach a Bilingual Class)")
+                          option(:value="false") Do you Teach a Bilingual Class
+                          option(:value="true") Yes
+                          option(:value="false") No
+              .py-4.grid(class="" )
+                  Label * School Name:
+                      Input(v-model='data_FacultyProfile.school_name' name="school_name" id="school_name" placeholder="(user defined)" required)
+              .py-4.grid(class="" )
+                  Label * Department:
+                      Input(v-model='data_FacultyProfile.department' name="department" id="department" placeholder="(Ex: English, Science, or Math)" required)
+              .py-4.grid(class="" )
+                  Label * Phone number:
+                      Input(v-model='data_FacultyProfile.phone_number' name="phone_number" id="phone_number" placeholder="(Ex: 1234567891)" required)
+              .py-4.grid(class="" )
+                  Label * Grade you teach:
+                      Input(v-model='data_FacultyProfile.grade' name="grade" id="grade" placeholder="(Ex: First, Second, or Pre-K)" required)
+      .flex.flex-col.gap-5(class="border-solid border border-gray-700 border-2")
+      .flex-col.gap-5(class="py-2")
+          Button.mx-auto.text-md(name="Submitt Faculty" @click= "editFaculty(data_FacultyProfile)" class="transition duration-500 bg-blue-500 hover: bg-green-400 rounded-lg px-2 py-2") Apply Edits
+</template>
+<style scoped>
+
+/*.jost-font {
+  font-family: "Jost", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-style: normal;
+}*/
+.input {
+  @apply w-full px-4 py-2 border rounded-md;
+}
+
+.select {
+  @apply w-full px-4 py-2 border rounded-md;
+}
+
+.btn {
+  @apply w-full py-2 text-white font-semibold bg-blue-500 hover:bg-blue-700 rounded-md;
+}
+</style>
+
+<script setup>
+const cvuser = useCookie('cvuser')
+const userRole = cvuser.value.role
+const data_FacultyProfiles = ref(null)
+var data_FacultyProfile = ref({
+  id: null,
+  district: "",     
+  dual_lang: false, 
+  faculty_email: "",  
+  first_name: "",   
+  last_name: "",    
+  school_name: "",   
+  phone_number: "",  
+  department: "",    
+  grade: "",
+});
+
+data_FacultyProfiles.value = await getFaculty()
+
+
+let url = new URL(window.location.href)
+let queryParams = new URLSearchParams(url.search)
+let data_FacultyProfileId = Object.fromEntries(queryParams).id
+for (let i = 0; i < data_FacultyProfiles.value.length; i++) {
+    if (data_FacultyProfiles.value[i].id == data_FacultyProfileId) {
+      data_FacultyProfile = {
+      id: data_FacultyProfiles.value[i].id,
+      district: data_FacultyProfiles.value[i].district,
+      dual_lang: data_FacultyProfiles.value[i].dual_lang,
+      faculty_email: data_FacultyProfiles.value[i].faculty_email,
+      first_name: data_FacultyProfiles.value[i].first_name,
+      last_name: data_FacultyProfiles.value[i].last_name,
+      school_name: data_FacultyProfiles.value[i].school_name,
+      phone_number: data_FacultyProfiles.value[i].phone_number,
+      department: data_FacultyProfiles.value[i].department,
+      grade: data_FacultyProfiles.value[i].grade,
+      user_id: data_FacultyProfiles.value[i].user_id,
+
+      //...data_facultyProfile.values[i]
       }
-  
-      console.log('Faculty profile edited successfully');
-      // Optionally, you can redirect the user to a success page or display a success message.
-    } catch (error) {
-      console.error('Error editing faculty profile:', error);
-      // Optionally, you can display an error message to the user.
     }
-  };
-  </script>
-  
+}
+
+async function editFaculty(editedFaculty) {
+  console.log("test")
+  let data_FacultyProfile = null
+  console.log(editedFaculty)
+  if(editedFaculty)
+    data_FacultyProfile = await $fetch('/api/faculty/faculty', {
+      method: 'PUT',
+      body: {
+        id: parseInt(editedFaculty.id),
+        district: editedFaculty.district,
+        dual_lang: editedFaculty.dual_lang,
+        faculty_email: editedFaculty.faculty_email,
+        first_name: editedFaculty.first_name,
+        last_name: editedFaculty.last_name,
+        school_name: editedFaculty.school_name,
+        phone_number: editedFaculty.phone_number,
+        department: editedFaculty.department,
+        grade: editedFaculty.grade,
+        user_id: editedFaculty.user_id,
+      }
+    })
+  navigateTo('/viewfaculty')
+  if(data_FacultyProfile)   data_FacultyProfiles.value = await getFaculty()
+}
+
+async function getFaculty() {
+  return await $fetch('/api/faculty/faculty')
+}
+
+</script>

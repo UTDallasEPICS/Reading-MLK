@@ -2,8 +2,8 @@
 import { ref } from 'vue';
 
 const studentProfile = ref({
-    firstName: '',
-    lastName: '',
+    first_name: '',
+    last_name: '',
     age: 0,
     grade: 0,
     readingLvl: 0,
