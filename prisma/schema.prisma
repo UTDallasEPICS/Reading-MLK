@@ -4,11 +4,12 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("PRISMA_DB_URL")
+  url      = env("DATABASE_URL")
 }
 
 // standard user profile 
@@ -29,9 +30,9 @@ model ParentProfile {
   yearly_income  String? /// must be optional to give the parent income for sensitivity issues // changed to string to allow for more dynamic input
   birth_date     DateTime?
   avg_num_book   Int /// average number of books read to child (before they registered with program/school and this will not be changed)
-  password       Int
+  password       String
   phone_number   String @unique /// parent should provide their mobile for easy contact their extension is not required (we are assuming they have a US extension)
-  gender         String 
+  gender         String
   marital_stat   String? /// martial status of the parent (will be optional choice)
   first_name     String 
   last_name      String
