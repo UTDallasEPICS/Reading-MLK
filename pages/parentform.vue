@@ -1,10 +1,13 @@
 
 <script lang="ts" setup>
+import { ref } from 'vue';
+import VueDatePicker from '@vuepic/vue-datepicker';
+import '@vuepic/vue-datepicker/dist/main.css';
 const props = defineProps<{modelValue:Object}>()
-
+const cvuser = useCookie<any>('cvuser')
 const data_ParentProfile=ref({
-firstName: "",
-lastName: "",
+first_name: "",
+last_name: "",
 birth_date: "",
 zipcode: 0,
 phone_number: 0,
@@ -13,7 +16,8 @@ social_media: "",
 avg_num_book: "",
 yearly_income: "",
 gender: "",
-martial_status: "",
+marital_stat: "",
+user_id: cvuser.value.id,
 });
 
 const data_StudentProfile=ref([{
@@ -27,7 +31,8 @@ birth_date: "",
 gender: "",
 school_name: "",
 school_dist: "",
-pref_lang: ""
+pref_lang: "",
+user_id: cvuser.value.id,
 
 }]);
 
@@ -44,7 +49,8 @@ const addStudent = () => {
         gender: "",
         school_name: "",
         school_dist: "",
-        pref_lang: ""
+        pref_lang: "",
+        user_id: cvuser.value.id,
     })
 }
 
@@ -53,6 +59,7 @@ const removeStudent = (index: number) => {
 }
 
 const submittAccounts = async() =>{
+    console.log("Testinggg")
     const parentResponse = await $fetch('/api/parent_submit', {
     method: "POST",
     body: {
@@ -77,10 +84,10 @@ const submittAccounts = async() =>{
                     .lg(class="col-span-2")
                         .grid.gap-4.gap-y-2.text-sm.grid-cols-1(class="md.grid-cols-5")
                             div(class="col-span-5")
-                                label(for="full_name") Parent First Name
+                                label(for="full_name") First Name
                                 Input(v-model="data_ParentProfile.first_name" name="first_name" id="first_name" class="h-10 border mt-1 rounded px-4 w-full bg-gray-50" placeholder="(user defined)" required)
                             div(class="col-span-5")
-                                label(for="email") Parent Last Name
+                                label(for="email") Last Name
                                 Input(v-model="data_ParentProfile.last_name" name="last_name" id="last_name" class="h-10 border mt-1 rounded px-4 w-full bg-gray-50" placeholder="(user defined)" required)
                             div(class="col-span-5")
                                 label(for="email") Birth Date

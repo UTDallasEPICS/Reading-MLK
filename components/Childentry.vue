@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import '@vuepic/vue-datepicker/dist/main.css';
 import "vue-select/dist/vue-select.css";
+import VueDatePicker from '@vuepic/vue-datepicker';
+import '@vuepic/vue-datepicker/dist/main.css';
 const props = defineProps<{modelValue:any}>()
 const emit = defineEmits(["remove", "update:modelValue"])
 // button click = emit('remove')
@@ -100,46 +102,51 @@ const pref_lang = computed({
 </script>
 
 <template lang = "pug">
-.py-4.grid(class="sm:grid-cols-3")
-div
-        .flex.flex-col.gap-5.margin-auto(class="text-center px-10")
-            .py-4.grid(class="" style)
-                Label * First Name: 
-                    Input(type="text" v-model='first_name' name="first_name" id="first_name" placeholder="(user defined)" required)
-            .py-4.grid(class="" )
-                Label * Last Name: 
-                    Input(type="text" v-model='last_name' name="last_name" id="last_name" placeholder="(user defined)" required)
-            .py-4.grid(class="" )
-                Label * What is your child's preferred name?
-                    Input(type="text" v-model='pref_name' name="pref_name" id="pref_name" placeholder="(user defined)" required) 
-            .py-4.grid(class="" )
-                Label * What is the age of the child?
-                    Inputnum(type="number" v-model='age' name="age" id="age" placeholder="(giver number)" required)
-            .py-4.grid(class="" )
-                Label * What is the current grade level of the child?
-                    Inputnum(type="number" v-model='grade' name="grade" id="grade" placeholder="(give number)" required)
-            .py-4.grid(class="" )
-                Label * What is the current readling level of the child? (give in a scale of 0 to 10)
-                    Inputnum(type="number" v-model='reading_lvl' name="reading_lvl" id="reading_lvl" placeholder="(give number)" required)
-            .py-4.grid(class="" )
-                Label * Birth date of child: 
-                    Input(type="date" v-model="birth_date" name="date" id="date" placeholder="(user defined)" required)
-            .py-4.grid(class="" )
-                label * Gender:
-                    select(v-model='gender' name="gender" id="gender" placeholder = "Please Select your Gender" class="block w-full rounded-md border border-gray-400 focus:border-gray-700"  required)
-                        option(value='Male') Male
-                        option(value='Female') Female
-                        option(value='Other') Other
-            .py-4.grid(class="" )
-                Label * School Name:
-                    Input(type="text" v-model='school_name' name="school_name" id="school_name" placeholder="(ex: SunnyVale Elementary)"  required)
-            .py-4.grid(class="" )
-                Label * School District:
-                    Input(type="text" v-model='school_dist' name="school_dist" id="school_dist" placeholder="(ex: DISD)" required)
-            .py-4.grid(class="" )
-                Label * Preferred language child speaks most in:
-                    Input(type="text" v-model='pref_lang' name="pref_lang" id="pref_lang" placeholder="(user defined)" required)
-        .flex.flex-col.gap-5(class="text-center py-2" )
-            Button.mx-auto.text-md(name="Delete Student" @click= "handleDeletion(index)" class='bg-rose-400 hover:bg-rose-500 border border-rose-400 rounded-lg py-2 px-2') Remove Student
-        .flex.flex-col.gap-5 
+.min-h-screen.p-6.bg-gray-100.flex.items-center.justify-center
+    .container.max-w-screen-lg.mx-auto
+        div
+            .bg-white.rounded.shadow-lg.p-4.px-4.p-8(class="md:mb-6")
+                .grid.gap-4.gap-y-2.text-sm.grid-cols-1(class="lg:grid-cols-3")
+                    .text-gray-600
+                        p.font-medium.text-lg Child Registration Form
+                        p Please Enter Child Information
+                    .lg.col-span-2
+                        .grid.gap-4.gap-y-2.text-sm.grid-cols-1(class="md:grid-cols-5")
+                            div(class="col-span-5")
+                                label(for="full_name") First Name
+                                Input(v-model="first_name" name="first_name" id="first_name" class="h-10 border mt-1 rounded px-4 w-full bg-gray-50" placeholder="(user defined)" required)
+                            div(class="col-span-5")
+                                label(for="email") Last Name
+                                Input(v-model="last_name" name="last_name" id="last_name" class="h-10 border mt-1 rounded px-4 w-full bg-gray-50" placeholder="(user defined)" required)
+                            div(class="col-span-5")
+                                label(for="email") Preferred Name
+                                Input(v-model="pref_name" name="pref_name" id="pref_name" class="h-10 border mt-1 rounded px-4 w-full bg-gray-50" placeholder="(user defined)" required)
+                            div(class="col-span-5")
+                                label(for="email") Age
+                                Inputnum(type="number" v-model="age" name="age" id="age" class="h-10 border mt-1 rounded px-4 w-full bg-gray-50" placeholder="(giver number)" required)
+                            div(class="col-span-5")
+                                label(for="email") What is the current grade level of the child?
+                                Inputnum(type="number" v-model="grade" name="grade" id="grade" class="h-10 border mt-1 rounded px-4 w-full bg-gray-50" placeholder="(give number)" required)
+                            div(class="col-span-5")
+                                label(for="email") What is the current reading level of the child? (Given on a scale from 0-10)
+                                Inputnum(type="number" v-model="reading_lvl" name="reading_lvl" id="reading_lvl" class="h-10 border mt-1 rounded px-4 w-full bg-gray-50" placeholder="(give number)" required)
+                            div(class="col-span-5")
+                                label(for="email") Birth Date of Child
+                                VueDatePicker(v-model="birth_date" name="birth_date" id="birth_date" required)
+                            div(class="col-span-5")
+                                label(for="email") Gender
+                                select(v-model="gender" name="gender" id="gender" placeholder = "Please Select your Gender" class="h-10 border mt-1 rounded px-4 w-full bg-gray-50" required) option(value="Male") Male option(value="Female") Female option(value="Other") Other
+                            div(class="col-span-5")
+                                label(for="address") School District
+                                Input(v-model="school_dist" name="school_dist_teach" id="school_dist_teach" class="h-10 border mt-1 rounded px-4 w-full bg-gray-50" placeholder="(Ex: DISD)" required)
+                            div(class="col-span-5")
+                                label(for="city") School Name
+                                Input(v-model="school_name" name="school_name" id="school_name" class="h-10 border mt-1 rounded px-4 w-full bg-gray-50" placeholder="(user defined)" required)
+                            div(class="col-span-5")
+                                label(for="city") Preferred language child speaks most in:
+                                Input(type="text" v-model="pref_lang" name="pref_lang" id="pref_lang" class="h-10 border mt-1 rounded px-4 w-full bg-gray-50" placeholder="(ex: userdefined)" required)
+                            div(class="col-span-5 text-right")
+                                .inline-flex.items-end 
+                                    Button.mx-auto.text-md(name="Delete Student" @click= "handleDeletion(index)" class="bg-rose-400 hover:bg-rose-400 border border-rose-400 rounded-lg py-2 px-2") Remove Student
+
 </template>
