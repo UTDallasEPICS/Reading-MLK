@@ -18,6 +18,7 @@
               <li><nuxt-link to="/viewfaculty" class="navPage">View Faculty Accounts</nuxt-link></li>
               <li><nuxt-link to="/viewparents" class="navPage">View Parent Accounts</nuxt-link></li>
               <li><a class="right navPage" href="/api/logout">Logout</a></li>
+              <li><a class="right navPage" href="/api/login">Login</a></li>
             </ul>
       </div>
       <nav>
