@@ -10,10 +10,10 @@ const genState = (): string => {
 
 const runtime = useRuntimeConfig();
 export const loginRedirectUrl = (): string => 
-  `${runtime.ISSUER}/authorize?response_type=id_token&response_mode=form_post&client_id=${runtime.AUTH0_CLIENTID}&scope=openid%20email&redirect_uri=${encodeURIComponent(runtime.BASEURL + "api/callback")}&nonce=${genState()}`;
+  `${runtime.ISSUER}/authorize?response_type=id_token&response_mode=form_post&client_id=${runtime.AUTH0_CLIENTID}&scope=openid%20email&redirect_uri=${encodeURIComponent(runtime.BASEURL! + "api/callback")}&nonce=${genState()}`;
 
 export const logoutRedirectUrl = (id_token: string): string => 
-  `${runtime.ISSUER}/oidc/logout?id_token_hint=${id_token}&post_logout_redirect_uri=${encodeURIComponent(runtime.BASEURL + "api/logout_complete")}&nonce=${genState()}`;
+  `${runtime.ISSUER}/oidc/logout?id_token_hint=${id_token}&post_logout_redirect_uri=${encodeURIComponent(runtime.BASEURL! + "api/logout-complete")}&nonce=${genState()}`;
 
 export const verifyNonce = (nonce: string): boolean => {
   if (state[nonce]) {
