@@ -64,8 +64,7 @@ const submittAccounts = async() =>{
     method: "POST",
     body: {
         parent: data_ParentProfile.value,
-        students: data_StudentProfile.value
-    }
+        students: data_StudentProfile.value}
     });
     
 };

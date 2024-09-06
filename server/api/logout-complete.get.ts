@@ -1,5 +1,5 @@
 export default defineEventHandler(async event => {
-  setCookie(event, "rhtoken", "")
-  setCookie(event, "rhuser", "")
+  setCookie(event, "cvtoken", "")
+  setCookie(event, "cvuser", "")
   await sendRedirect(event, "/Search/?search=")
 })
