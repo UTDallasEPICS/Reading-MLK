@@ -48,7 +48,9 @@ div
         //- Dual Language
         div
             label.block.text-lg.font-medium.leading-6.text-gray-900(for="dual-lang") Dual Language
-            input(type="checkbox" v-model="facultyProfile.dualLang" name="dual-lang" id="dual-lang" class="w-6 h-6 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500")
+            select(v-model="facultyProfile.dual-lang" name="dual-lang" id="dual-lang" class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-lg")
+                option(value="Yes") Yes
+                option(value="No") No     
         //- Faculty Email
         div
             label.block.text-lg.font-medium.leading-6.text-gray-900(for="faculty-email") Faculty Email
