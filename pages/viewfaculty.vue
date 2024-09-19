@@ -148,9 +148,9 @@ const removeStudent = async (id) => {
 
 
   
-  const cvuser = useCookie('cvuser')
-  const userRole = (cvuser.value.role)
-  console.log(cvuser.role)
-  const currid = parseInt(cvuser.value.id)
+  const rhuser = useCookie('rhuser')
+  const userRole = (rhuser.value.role)
+  console.log(rhuser.role)
+  const currid = parseInt(rhuser.value.id)
 
   </script>

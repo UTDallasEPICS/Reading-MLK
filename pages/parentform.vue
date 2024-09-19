@@ -4,7 +4,7 @@ import { ref } from 'vue';
 import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css';
 const props = defineProps<{modelValue:Object}>()
-const cvuser = useCookie<any>('cvuser')
+const rhuser = useCookie<any>('rhuser')
 const data_ParentProfile=ref({
 first_name: "",
 last_name: "",
@@ -17,7 +17,7 @@ avg_num_book: "",
 yearly_income: "",
 gender: "",
 marital_stat: "",
-user_id: cvuser.value.id,
+user_id: rhuser.value.id,
 });
 
 const data_StudentProfile=ref([{
@@ -32,7 +32,7 @@ gender: "",
 school_name: "",
 school_dist: "",
 pref_lang: "",
-user_id: cvuser.value.id,
+user_id: rhuser.value.id,
 
 }]);
 
@@ -50,7 +50,7 @@ const addStudent = () => {
         school_name: "",
         school_dist: "",
         pref_lang: "",
-        user_id: cvuser.value.id,
+        user_id: rhuser.value.id,
     })
 }
 
