@@ -15,7 +15,7 @@ CREATE TABLE "parent_profile" (
     "zipcode" INTEGER NOT NULL,
     "yearly_income" INTEGER,
     "birth_date" TIMESTAMP(3),
-    "avg_num_book" INTEGER NOT NULL,
+    "average_number_books" INTEGER NOT NULL,
     "password" INTEGER NOT NULL,
     "phone_number" TEXT NOT NULL,
     "gender" TEXT NOT NULL,

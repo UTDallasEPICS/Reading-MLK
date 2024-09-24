@@ -39,7 +39,7 @@
               <div>{{ u.birth_date }}</div>
             </td>
             <td>
-              <div>{{ u.avg_num_book }}</div>
+              <div>{{ u.average_number_books }}</div>
             </td>
             <td>
               <div>{{ u.password }}</div>

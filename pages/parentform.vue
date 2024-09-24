@@ -13,7 +13,7 @@ zipcode: 0,
 phone_number: 0,
 email: "", 
 social_media: "",
-avg_num_book: "",
+average_number_books: "",
 yearly_income: "",
 gender: "",
 marital_stat: "",
@@ -112,7 +112,7 @@ const submittAccounts = async() =>{
                                 Input(type="text" v-model="data_ParentProfile.social_media" name="social_media_handle" id="social_media_handle" class="h-10 border mt-1 rounded px-4 w-full bg-gray-50" placeholder="(user defined)")
                             div(class="col-span-5")
                                 label(for="city") On average how many books a year do you read to your child (a guess is fine)
-                                Inputnum(type="number" v-model="data_ParentProfile.avg_num_book" name="avg_num_books" id="avg_num_books" class="h-10 border mt-1 rounded px-4 w-full bg-gray-50" placeholder="(user defined)" required)
+                                Inputnum(type="number" v-model="data_ParentProfile.average_number_books" name="average_number_books" id="average_number_books" class="h-10 border mt-1 rounded px-4 w-full bg-gray-50" placeholder="(user defined)" required)
                             div(class="col-span-5")
                                 label(for="city") What is your marital status
                                 select(v-model="data_StudentProfile.marital_stat" name="marital_stat" id="marital_stat" class="block w-full rounded-md border border-gray-700 focus:ring-indigo-500" class="h-10 border mt-1 rounded px-4 w-full bg-gray-50" placeholder = "(Select your Marital Status)") option(value=") Select your Marital Status option(value="Married") Married option(value="Single") Single option(value="Divorced") Divorced option(value="Other") Other .flex.flex-col.gap-5(class="text-center")

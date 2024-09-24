@@ -16,6 +16,8 @@ datasource db {
 model User {
   id          Int @id @default(autoincrement())
   user_name   String @unique // should have one upper case and lower case alongside a number
+  first_name    String
+  last_name     String
   email       String @unique // should hold the email of the private account
   client_cuid String @map("client_cuid")
   role        String
@@ -34,13 +36,10 @@ model ParentProfile {
   zipcode        String
   yearly_income  String? /// must be optional to give the parent income for sensitivity issues // changed to string to allow for more dynamic input
   birth_date     DateTime? @default(now())
-  avg_num_book   Int /// average number of books read to child (before they registered with program/school and this will not be changed)
-  password       String
+  average_number_books   Int /// average number of books read to child (before they registered with program/school and this will not be changed)
   phone_number   String @unique /// parent should provide their mobile for easy contact their extension is not required (we are assuming they have a US extension)
   gender         String
   marital_stat   String? /// martial status of the parent (will be optional choice)
-  first_name     String 
-  last_name      String
   email          String
   social_media   String? @unique /// could be other social media handle but should ask for twitter(X) handle (most likely social media handle they have)
   user_id        Int @unique
@@ -56,8 +55,6 @@ model FacultyProfile{
   district      String
   dual_lang     Boolean /// True if they are spanish or other language teacher with non-english kids, otherwise false to indicate they are english speaking teachers      
   faculty_email String @unique
-  first_name    String
-  last_name     String
   school_name   String
   phone_number  String
   department    String
@@ -115,30 +112,34 @@ Student	  StudentToClass[]
 
 // join table for teacher to class relationship
 model TeacherToClass{
-  id         Int @id @default(autoincrement())
+  // id         Int @id @default(autoincrement())
   class_id   Int
   teacher_id Int
   Class Class @relation(fields: [class_id], references: [id])
   Teacher FacultyProfile @relation(fields: [teacher_id], references: [id])
+  @@id([class_id,teacher_id])  
   @@map("teacher_to_classes")
 }
 
 // join table for student to class relationship
 model StudentToClass{
-  id         Int @id @default(autoincrement())
+  // id         Int @id @default(autoincrement())
   class_id   Int 
   student_id Int
   Class    Class          @relation(fields: [class_id], references: [id])
-  Student  StudentProfile @relation(fields: [student_id], references: [id])  
+  Student  StudentProfile @relation(fields: [student_id], references: [id])
+  @@id([class_id,student_id])  
   @@map("student_to_classes")
 }
 
 // join table for relationship between parents and child (student) (should be one-to-many)
 model ParentToChild {
-  id          Int @id @default(autoincrement())
+  // id          Int @id @default(autoincrement())
   parent_id   Int
   child_id    Int 
   Parent      ParentProfile    @relation(fields:[parent_id], references:[id])
   Child       StudentProfile   @relation(fields: [child_id], references: [id])
+
+  @@id([parent_id,child_id])
   @@map("parent_to_kids")
 }

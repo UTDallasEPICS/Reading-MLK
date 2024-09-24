@@ -9,7 +9,7 @@ interface parentInfoInterface {
     zipcode: number, 
     yearly_income: number, 
     birth_date: Date, 
-    avg_num_book: number, 
+    average_number_books: number, 
     password: number, 
     phone_number: string, 
     gender: string, 
@@ -26,7 +26,7 @@ const parentInfo = reactive({
     zipcode: '', 
     yearly_income: '', 
     birth_date: '', 
-    avg_num_book: '', 
+    average_number_books: '', 
     password: '', 
     phone_number: '', 
     gender: '', 
@@ -42,7 +42,7 @@ const handleQuery = async (event: { preventDefault: () => void; }) => {
 
 
 
-  //const { id, zipcode, yearly_income, birth_date, avg_num_book, password, phone_number, gender, marital_stat, first_name, last_name, email, social_media }= parentInfo
+  //const { id, zipcode, yearly_income, birth_date, average_number_books, password, phone_number, gender, marital_stat, first_name, last_name, email, social_media }= parentInfo
   parentInfo.first_name = parentfirstname.value
   parentInfo.last_name = parentlastname.value
   //console.log(parentInfo)
@@ -66,7 +66,7 @@ const handleQuery = async (event: { preventDefault: () => void; }) => {
         zipcode: parentInfo.value.zipcode,
         yearly_income: parentInfo.value.yearly_income,
         birth_date: parentInfo.value.birth_date,
-        avg_num_book: parentInfo.value.avg_num_book,
+        average_number_books: parentInfo.value.average_number_books,
         password: parentInfo.value.password,
         phone_number: parentInfo.value.phone_number,
         gender: parentInfo.value.gender,
@@ -108,14 +108,14 @@ const handleQuery = async () => {
         const data = await response.json();
 
         // Destructure the data object
-        const { id, zipcode, yearly_income, birth_date, avg_num_book, password, phone_number, gender, marital_stat, first_name, last_name, email, social_media } = data;
+        const { id, zipcode, yearly_income, birth_date, average_number_books, password, phone_number, gender, marital_stat, first_name, last_name, email, social_media } = data;
 
         // Log the destructured variables
         console.log('ID:', id);
         console.log('Zipcode:', zipcode);
         console.log('Yearly Income:', yearly_income);
         console.log('Birth Date:', birth_date);
-        console.log('Average Number of Books:', avg_num_book);
+        console.log('Average Number of Books:', average_number_books);
         console.log('Password:', password);
         console.log('Phone Number:', phone_number);
         console.log('Gender:', gender);

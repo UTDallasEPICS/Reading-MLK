@@ -30,9 +30,9 @@
       </div>
       <!-- Average Number of Books Read to Child -->
       <div class="sm:col-span-3 mr-28">
-        <label for="avg-num-book" class="block text-lg font-medium leading-6 text-gray-900">Avg. Number of Books Read to Child</label>
+        <label for="average_number_books" class="block text-lg font-medium leading-6 text-gray-900">Avg. Number of Books Read to Child</label>
         <div class="mt-2">
-          <input v-model="parent.avgNumBook" type="number" name="avg-num-book" id="avg-num-book" class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-lg sm:leading-6">
+          <input v-model="parent.avgNumBook" type="number" name="average_number_books" id="average_number_books" class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-lg sm:leading-6">
         </div>
       </div>
       <!-- Password -->
