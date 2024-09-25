@@ -9,7 +9,7 @@ zipcode: 0,
 phone_number: 0,
 email: "", 
 social_media: "",
-avg_num_book: "",
+average_number_books: "",
 yearly_income: "",
 gender: "",
 martial_status: "",
@@ -56,8 +56,8 @@ div
             input(type="date" v-model="parentProfile.birthDate" name="birth-date" id="birth-date" class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-lg")
         //- Average Number of Books
         div
-            label.block.text-lg.font-medium.leading-6.text-gray-900(for="avg-num-books") Average Number of Books
-            input(type="number" v-model="parentProfile.avgNumBooks" name="avg-num-books" id="avg-num-books" class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-lg")
+            label.block.text-lg.font-medium.leading-6.text-gray-900(for="average_number_books") Average Number of Books
+            input(type="number" v-model="parentProfile.avgNumBooks" name="average_number_books" id="average_number_books" class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-lg")
         //- Password
         div
             label.block.text-lg.font-medium.leading-6.text-gray-900(for="password") Password

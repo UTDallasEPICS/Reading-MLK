@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
         //zipcode: string;
         //yearly_income: number;
         //birth_date: string;
-        //avg_num_book: number;
+        //average_number_books: number;
         //password: string;
         //phone_number: string;
         //gender: string;
