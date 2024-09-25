@@ -16,7 +16,7 @@ const userSeed = [
     { user_name: 'Dtn210005', first_name: "Duc Trung", last_name: "Nguyen", private_email: 'ductrungnguyen20034@gmail.com', client_cuid: 'cuid9', role: 'Admin' },
     { user_name: 'Tlb210005', first_name: "Taylor Liling", last_name: "Beers", private_email: 'tlb210005@utdallas.edu', client_cuid: 'cuid10', role: 'Admin' },
     { user_name: 'Bnt220000', first_name: "Bilal Nail", last_name: "Tulek", private_email: 'bilaltulek0@gmail.com', client_cuid: 'cuid11', role: 'Admin' },
-    { user_name: 'Txm210043', first_name: "Thanmai", last_name: "Mandala", private_email: 'txm210043@utdallas.edu', client_cuid: 'cuid12', role: 'Admin' },
+    { user_name: 'Txm210043', first_name: "Thanmai", last_name: "Mandala", private_email: 'mandalathanmai@gmail.com', client_cuid: 'cuid12', role: 'Admin' },
     { user_name: 'Rxu210009', first_name: "Rishil", last_name: "Uppalaru", private_email: 'rishil.u@gmail.com', client_cuid: 'cuid13', role: 'Admin' },
     { user_name: 'Mxs210181', first_name: "Mira", last_name: "Shan", private_email: 'mxs210181@utdallas.edu', client_cuid: 'cuid14', role: 'Admin' },
     { user_name: 'Oxs200002', first_name: "Ofek", last_name: "Shaltiel", private_email: 'ofekjshaltiel@gmail.com', client_cuid: 'cuid15', role: 'Admin' },
