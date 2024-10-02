@@ -4,13 +4,12 @@ services:
     build: .
     restart: unless-stopped
     ports:
-      - "3000:3000"  # Corrected port binding
+      -"3000:3000"
     volumes:
-      - .:/app
+      -.:/app
     environment:
       - NODE_ENV=development
     command: npm run dev
-
   db:
     image: postgres
     restart: unless-stopped
