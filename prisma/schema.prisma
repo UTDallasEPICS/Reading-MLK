@@ -21,7 +21,7 @@ model User {
   first_name     String
   last_name      String
   preferred_name String?
-  private_email  String  @unique // should hold the email of the private account @map("email")
+  email  String  @unique // should hold the email of the private account @map("email")
   client_cuid    String  @map("client_cuid")
   role           String
 

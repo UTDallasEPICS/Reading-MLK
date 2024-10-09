@@ -123,13 +123,13 @@ const pref_lang = computed({
                                 Input(v-model="pref_name" name="pref_name" id="pref_name" class="h-10 border mt-1 rounded px-4 w-full bg-gray-50" placeholder="(user defined)" required)
                             div(class="col-span-5")
                                 label(for="email") Age
-                                Inputnum(type="number" v-model="age" name="age" id="age" class="h-10 border mt-1 rounded px-4 w-full bg-gray-50" placeholder="(giver number)" required)
+                                InputNum(type="number" v-model="age" name="age" id="age" class="h-10 border mt-1 rounded px-4 w-full bg-gray-50" placeholder="(giver number)" required)
                             div(class="col-span-5")
                                 label(for="email") What is the current grade level of the child?
-                                Inputnum(type="number" v-model="grade" name="grade" id="grade" class="h-10 border mt-1 rounded px-4 w-full bg-gray-50" placeholder="(give number)" required)
+                                InputNum(type="number" v-model="grade" name="grade" id="grade" class="h-10 border mt-1 rounded px-4 w-full bg-gray-50" placeholder="(give number)" required)
                             div(class="col-span-5")
                                 label(for="email") What is the current reading level of the child? (Given on a scale from 0-10)
-                                Inputnum(type="number" v-model="reading_lvl" name="reading_lvl" id="reading_lvl" class="h-10 border mt-1 rounded px-4 w-full bg-gray-50" placeholder="(give number)" required)
+                                InputNum(type="number" v-model="reading_lvl" name="reading_lvl" id="reading_lvl" class="h-10 border mt-1 rounded px-4 w-full bg-gray-50" placeholder="(give number)" required)
                             div(class="col-span-5")
                                 label(for="email") Birth Date of Child
                                 VueDatePicker(v-model="birth_date" name="birth_date" id="birth_date" required)
@@ -147,6 +147,6 @@ const pref_lang = computed({
                                 Input(type="text" v-model="pref_lang" name="pref_lang" id="pref_lang" class="h-10 border mt-1 rounded px-4 w-full bg-gray-50" placeholder="(ex: userdefined)" required)
                             div(class="col-span-5 text-right")
                                 .inline-flex.items-end 
-                                    Button.mx-auto.text-md(name="Delete Student" @click= "handleDeletion(index)" class="bg-rose-400 hover:bg-rose-400 border border-rose-400 rounded-lg py-2 px-2") Remove Student
+                                    button.mx-auto.text-md(name="Delete Student" @click= "handleDeletion(index)" class="bg-rose-400 hover:bg-rose-400 border border-rose-400 rounded-lg py-2 px-2") Remove Student
 
 </template>

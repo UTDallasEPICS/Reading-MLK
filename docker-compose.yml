@@ -1,15 +1,5 @@
 version: '3.1'
 services:
-  reading-mlk:
-    build: .
-    restart: unless-stopped
-    ports:
-      -"3000:3000"
-    volumes:
-      -.:/app
-    environment:
-      - NODE_ENV=development
-    command: npm run dev
   db:
     image: postgres
     restart: unless-stopped
@@ -17,10 +7,9 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
     ports:
-      - "11111:5432"  # @Ofek: Keep this for now; will change to xxxxx:5432 in the future 
+      - $POSTGRES_PORT:5432
     volumes:
       - postgres-data:/var/lib/postgresql/data
-
 volumes:
   postgres-data:
     driver: local

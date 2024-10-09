@@ -94,7 +94,7 @@ const submittAccounts = async() =>{
                                 VueDatePicker(v-model="data_ParentProfile.birth_date" name="birth_date" id="birth_date" required)
                             div(class="col-span-5")
                                 label(for="email") Zipcode
-                                Inputnum(type="text" v-model="data_ParentProfile.zipcode" name="zipcode" id="zipcode" placeholder="(user defined)" class="h-10 border mt-1 rounded px-4 w-full bg-gray-50" required)
+                                InputNum(type="text" v-model="data_ParentProfile.zipcode" name="zipcode" id="zipcode" placeholder="(user defined)" class="h-10 border mt-1 rounded px-4 w-full bg-gray-50" required)
                             div(class="col-span-5")
                                 label(for="email") Yearly Income
                                 select(v-model="data_StudentProfile.yearly_income" name="yearly_income" id="yearly_income" class="block w-full rounded-md border border-gray-700 focus:ring-indigo-500" class="h-10 border mt-1 rounded px-4 w-full bg-gray-50" placeholder = "(Select your income level)") option(value=") Select your income level option(value="$10,000-$20,000") $10,000-$20,000 option(value="$20,000-$30,000") $20,000-$30,000 option(value="$30,000-$40,000") $30,000-$40,000 option(value="$40,000-$50,000") $40,000-$50,000 option(value="$50,000-$60,000") $50,000-$60,000 option(value="$60,000+") $60,000+
@@ -112,17 +112,17 @@ const submittAccounts = async() =>{
                                 Input(type="text" v-model="data_ParentProfile.social_media" name="social_media_handle" id="social_media_handle" class="h-10 border mt-1 rounded px-4 w-full bg-gray-50" placeholder="(user defined)")
                             div(class="col-span-5")
                                 label(for="city") On average how many books a year do you read to your child (a guess is fine)
-                                Inputnum(type="number" v-model="data_ParentProfile.average_number_books" name="average_number_books" id="average_number_books" class="h-10 border mt-1 rounded px-4 w-full bg-gray-50" placeholder="(user defined)" required)
+                                InputNum(type="number" v-model="data_ParentProfile.average_number_books" name="average_number_books" id="average_number_books" class="h-10 border mt-1 rounded px-4 w-full bg-gray-50" placeholder="(user defined)" required)
                             div(class="col-span-5")
                                 label(for="city") What is your marital status
                                 select(v-model="data_StudentProfile.marital_stat" name="marital_stat" id="marital_stat" class="block w-full rounded-md border border-gray-700 focus:ring-indigo-500" class="h-10 border mt-1 rounded px-4 w-full bg-gray-50" placeholder = "(Select your Marital Status)") option(value=") Select your Marital Status option(value="Married") Married option(value="Single") Single option(value="Divorced") Divorced option(value="Other") Other .flex.flex-col.gap-5(class="text-center")
 
 Childentry(v-for="(child, index) in data_StudentProfile" :key="index" v-model="data_StudentProfile[index]" @remove="removeStudent(index)")
-Button.mx-auto.text-md(name = "Add Child" @click="addStudent()" class='bg-sky-400 hover:bg-sky-400 text-black border border-sky-400 rounded-lg px-2 py-2') Add Student
+button.mx-auto.text-md(name = "Add Child" @click="addStudent()" class='bg-sky-400 hover:bg-sky-400 text-black border border-sky-400 rounded-lg px-2 py-2') Add Student
 .flex.flex-col.gap-5(class="text-center border border-gray-700 text-center")
 
 
 
 .flex.gap-5(class="object-center py-2")
-    Button.mx-auto.text-md(name="Submitt accounts" @click="submittAccounts()" class='bg-green-400 hover:bg-green-400 text-black rounded-lg px-2 py-2') Submit
+    button.mx-auto.text-md(name="Submitt accounts" @click="submittAccounts()" class='bg-green-400 hover:bg-green-400 text-black rounded-lg px-2 py-2') Submit
 </template>
