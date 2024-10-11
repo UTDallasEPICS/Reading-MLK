@@ -118,11 +118,11 @@ const submittAccounts = async() =>{
                                 select(v-model="data_StudentProfile.marital_stat" name="marital_stat" id="marital_stat" class="block w-full rounded-md border border-gray-700 focus:ring-indigo-500" class="h-10 border mt-1 rounded px-4 w-full bg-gray-50" placeholder = "(Select your Marital Status)") option(value=") Select your Marital Status option(value="Married") Married option(value="Single") Single option(value="Divorced") Divorced option(value="Other") Other .flex.flex-col.gap-5(class="text-center")
 
 Childentry(v-for="(child, index) in data_StudentProfile" :key="index" v-model="data_StudentProfile[index]" @remove="removeStudent(index)")
-button.mx-auto.text-md(name = "Add Child" @click="addStudent()" class='bg-sky-400 hover:bg-sky-400 text-black border border-sky-400 rounded-lg px-2 py-2') Add Student
+Button.mx-auto.text-md(name = "Add Child" @click="addStudent()" class='bg-sky-400 hover:bg-sky-400 text-black border border-sky-400 rounded-lg px-2 py-2') Add Student
 .flex.flex-col.gap-5(class="text-center border border-gray-700 text-center")
 
 
 
 .flex.gap-5(class="object-center py-2")
-    button.mx-auto.text-md(name="Submitt accounts" @click="submittAccounts()" class='bg-green-400 hover:bg-green-400 text-black rounded-lg px-2 py-2') Submit
+    Button.mx-auto.text-md(name="Submitt accounts" @click="submittAccounts()" class='bg-green-400 hover:bg-green-400 text-black rounded-lg px-2 py-2') Submit
 </template>

@@ -147,6 +147,6 @@ const pref_lang = computed({
                                 Input(type="text" v-model="pref_lang" name="pref_lang" id="pref_lang" class="h-10 border mt-1 rounded px-4 w-full bg-gray-50" placeholder="(ex: userdefined)" required)
                             div(class="col-span-5 text-right")
                                 .inline-flex.items-end 
-                                    button.mx-auto.text-md(name="Delete Student" @click= "handleDeletion(index)" class="bg-rose-400 hover:bg-rose-400 border border-rose-400 rounded-lg py-2 px-2") Remove Student
+                                    Button.mx-auto.text-md(name="Delete Student" @click= "handleDeletion(index)" class="bg-rose-400 hover:bg-rose-400 border border-rose-400 rounded-lg py-2 px-2") Remove Student
 
 </template>

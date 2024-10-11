@@ -33,7 +33,7 @@ const selectOption = (option: string) => {
 
 <template lang="pug">
 .relative.inline-block
-  button.rounded-md.outline-0.border-box.w-full.p-3(
+  Button.rounded-md.outline-0.border-box.w-full.p-3(
     style="border: 2px solid;"
     class='bg-white rounded-md border border-gray-700 border-solid'
     @click="toggleDropdown"
