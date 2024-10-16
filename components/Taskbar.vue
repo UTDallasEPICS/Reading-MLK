@@ -1,45 +1,31 @@
 <template>
-  <header class="taskbar-container">
-    <!-- <div class="taskbar"> -->
-    <!-- <div class="navPage"> -->
+  <header class="taskbar">
+    <div class="taskbar-container">
+      <div class="log">
+        <a id="homebtn" href="">Home</a>
+      </div>
+      <div class="main">
+        <div class="dropdown">
+          <button class="dropbtn">Register</button>
+          <div class="dropdown-content">
+            <nuxt-link to="/facultyform" class="taskbar-item">Faculty</nuxt-link>
+            <nuxt-link to="/parentform" class="taskbar-item">Parent</nuxt-link>
+          </div>
+        </div>
 
-    <div class="dropdown">
-      <button class="dropbtn">Register</button>
-      <div class="dropdown-content">
-        <nuxt-link to="/facultyform" class="taskbar-item">Faculty</nuxt-link>
-        <nuxt-link to="/parentform" class="taskbar-item">Parent</nuxt-link>
+        <div class="dropdown">
+          <button class="dropbtn">View</button>
+          <div class="dropdown-content">
+            <nuxt-link to="/viewfaculty" class="taskbar-item">Faculty</nuxt-link>
+            <nuxt-link to="/viewparents" class="taskbar-item">Parent</nuxt-link>
+          </div>
+        </div>
+      </div>
+      <div class="log">
+        <a id="logoutbtn" href="/api/logout" @click="logout">Logout</a>
       </div>
     </div>
 
-    <div class="dropdown">
-      <button class="dropbtn">View</button>
-      <div class="dropdown-content">
-        <nuxt-link to="/viewfaculty" class="taskbar-item">Faculty</nuxt-link>
-        <nuxt-link to="/viewparents" class="taskbar-item">Parent</nuxt-link>
-      </div>
-    </div>
-
-    <!-- <nuxt-link to="/facultyform" class="taskbar-item">Faculty</nuxt-link>
-    <nuxt-link to="/parentform" class="taskbar-item">Parent</nuxt-link> -->
-    <!-- <nuxt-link to="/viewfaculty" class="taskbar-item">View Faculty Accounts</nuxt-link>
-    <nuxt-link to="/viewparents" class="taskbar-item">View Parent Accounts</nuxt-link> -->
-    <!-- </div> -->
-    <!-- </div> -->
-    <div class="off-screen-menu">
-      <!-- <nuxt-link to="/facultyform" class="navPage">Register Faculty Account</nuxt-link>
-      <nuxt-link to="/parentform" class="navPage">Register Parent Account</nuxt-link>
-      <nuxt-link to="/viewfaculty" class="navPage">View Faculty Accounts</nuxt-link>
-      <nuxt-link to="/viewparents" class="navPage">View Parent Accounts</nuxt-link>
-      <a class="right navPage" href="/api/logout">Logout</a>
-      <a class="right navPage" href="/api/login">Login</a> -->
-    </div>
-    <nav>
-      <div class="ham-menu">
-        <span></span>
-        <span></span>
-        <span></span>
-      </div>
-    </nav>
   </header>
 </template>
 
@@ -60,6 +46,7 @@ const props = defineProps(['userRole']);
 .dropdown {
   position: relative;
   display: inline-block;
+  gap: 15px;
 }
 
 .dropbtn {
@@ -93,6 +80,21 @@ const props = defineProps(['userRole']);
 
 .dropdown-content .taskbar-item:hover {
   background-color: #ddd;
+}
+
+.log-container {
+  display: flex;
+  flex-direction: row;
+  gap: 15px;
+}
+
+#logoutbtn,
+#loginbtn,
+#homebtn {
+  color: white;
+  text-decoration: none;
+  font-family: Arial;
+  font-size: 16px;
 }
 </style>
 
