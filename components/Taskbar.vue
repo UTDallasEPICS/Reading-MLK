@@ -1,23 +1,37 @@
 <template>
-  <header class="page-header">
-    <div class="left">
+  <header class="taskbar-container">
+    <!-- <div class="taskbar"> -->
+    <!-- <div class="navPage"> -->
+
+    <div class="dropdown">
+      <button class="dropbtn">Register</button>
+      <div class="dropdown-content">
+        <nuxt-link to="/facultyform" class="taskbar-item">Faculty</nuxt-link>
+        <nuxt-link to="/parentform" class="taskbar-item">Parent</nuxt-link>
+      </div>
     </div>
-    <!-- <div class="right flex">
-        <div class="right">
-          <nuxt-link v-if="userRole === 'staff' || userRole === 'admin'" to="/entry" class="navPage">Student Entry</nuxt-link>
-          <nuxt-link to="/database" v-if="userRole === 'staff' || userRole === 'admin'" class="navPage">View Students</nuxt-link>
-          <nuxt-link to="/admin" v-if="userRole === 'admin'" class="navPage">Admin</nuxt-link>
-        </div>
-        <a class="right navPage" href="/api/logout">Logout</a>
-      </div> -->
-    <!-- hamburger menu code below  -->
+
+    <div class="dropdown">
+      <button class="dropbtn">View</button>
+      <div class="dropdown-content">
+        <nuxt-link to="/viewfaculty" class="taskbar-item">Faculty</nuxt-link>
+        <nuxt-link to="/viewparents" class="taskbar-item">Parent</nuxt-link>
+      </div>
+    </div>
+
+    <!-- <nuxt-link to="/facultyform" class="taskbar-item">Faculty</nuxt-link>
+    <nuxt-link to="/parentform" class="taskbar-item">Parent</nuxt-link> -->
+    <!-- <nuxt-link to="/viewfaculty" class="taskbar-item">View Faculty Accounts</nuxt-link>
+    <nuxt-link to="/viewparents" class="taskbar-item">View Parent Accounts</nuxt-link> -->
+    <!-- </div> -->
+    <!-- </div> -->
     <div class="off-screen-menu">
-      <nuxt-link to="/facultyform" class="navPage">Register Faculty Account</nuxt-link>
+      <!-- <nuxt-link to="/facultyform" class="navPage">Register Faculty Account</nuxt-link>
       <nuxt-link to="/parentform" class="navPage">Register Parent Account</nuxt-link>
       <nuxt-link to="/viewfaculty" class="navPage">View Faculty Accounts</nuxt-link>
       <nuxt-link to="/viewparents" class="navPage">View Parent Accounts</nuxt-link>
       <a class="right navPage" href="/api/logout">Logout</a>
-      <a class="right navPage" href="/api/login">Login</a>
+      <a class="right navPage" href="/api/login">Login</a> -->
     </div>
     <nav>
       <div class="ham-menu">
@@ -33,14 +47,60 @@
 const props = defineProps(['userRole']);
 </script>
 
-
 <style scoped>
-.page-header {
+.taskbar-container {
+  background-color: #122C4F;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  height: 60px;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropbtn {
+  background-color: #122C4F;
+  color: white;
+  padding: 10px;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+
+.dropdown-content .taskbar-item {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+.dropdown-content .taskbar-item:hover {
+  background-color: #ddd;
+}
+</style>
+
+<!-- <style scoped>
+.taskbar {
   display: flex;
   background-color: #122C4F;
-  /* Set the background to blue */
   color: #ffffff;
-  /* Set the text color to white */
   padding: 10px 20px;
   position: relative;
   justify-content: space-between;
@@ -138,9 +198,9 @@ const props = defineProps(['userRole']);
   top: 50%;
   transform: translate(-50%, -50%) rotate(-45deg);
 }
-</style>
+</style> -->
 
-<script>
+<!-- <script>
 export default {
   mounted() {
     const hamMenu = document.querySelector(".ham-menu");
@@ -149,11 +209,6 @@ export default {
       hamMenu.classList.toggle('active');
       offScreenMenu.classList.toggle('active');
     });
-    //added below code for it to disappear once clicked, still in progress
-    // hamMenu.addEventListener('click', () => {
-    //   hamMenu.classList.toggle('active');
-    //   offScreenMenu.classList.toggle('active');
-    // });
   }
 };
-</script>
+</script> -->
