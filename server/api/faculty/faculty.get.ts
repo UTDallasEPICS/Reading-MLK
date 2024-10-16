@@ -8,7 +8,11 @@ export default defineEventHandler(async () => {
 
     try {
         // Retrieve all faculty profiles
-        faculties = await prisma.facultyProfile.findMany();
+        faculties = await prisma.facultyProfile.findMany({ 
+            include: {
+                TeacherToClass: true,
+            }
+        });
     } catch (error) {
         if (error instanceof PrismaClientKnownRequestError){
             console.log('You exeperienced this error code: ' + error.code, error.meta, error.message, ' If you would like to find what this error message means please refer to this link: https://www.prisma.io/docs/orm/reference/error-reference  ')
@@ -17,7 +21,7 @@ export default defineEventHandler(async () => {
             console.log('Unknown request error: ' , error.message)
         }
         throw createError({ statusCode: 500, statusMessage: "Error fetching faculties" });
-    }
+    } 
 
     return faculties;
 });
