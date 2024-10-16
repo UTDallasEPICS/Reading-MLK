@@ -25,7 +25,7 @@ export default defineEventHandler( async event => {
           zipcode: body.parent.zipcode,
           yearly_income: body.parent.yearly_income,
           birth_date: body.parent.birth_date,
-          avg_num_book: parseInt(body.parent.avg_num_book),
+          average_number_books: parseInt(body.parent.average_number_books),
           password: body.parent.password,
           phone_number: body.parent.phone_number,
           gender: body.parent.gender,
