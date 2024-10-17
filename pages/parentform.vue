@@ -1,137 +1,126 @@
 <template lang="pug">
-    .centered-container
-      .form-container
-        .form-header
+  .centered-container(style="display: flex; justify-content: center; align-items: center; margin: 40px;")
+    .form-container(style="padding: 20px; background-color: white; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4); max-width: 500px; width: 100%;")
+      .form-header(style="text-align: center;")
+        h2 Parent Registration Form
+      .form-input(style="display: grid; gap: 10px;")
+        
+        //- Each form element
+        .form-element(style="display: flex; flex-direction: column;")
+          label(for="first_name" style="font-size: 16px; font-weight: 500; color: #333;") Enter Parent First Name
+            span(style="color: red;") *
+          input(type="text" id="first_name" v-model="data_ParentProfile.first_name" placeholder="Parent First Name" required style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;")
+
+        .form-element(style="display: flex; flex-direction: column;")
+          label(for="last_name" style="font-size: 16px; font-weight: 500; color: #333;") Enter Parent Last Name
+            span(style="color: red;") *
+          input(type="text" id="last_name" v-model="data_ParentProfile.last_name" placeholder="Parent Last Name" required style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;")
+
+        .form-element(style="display: flex; flex-direction: column;")
+          label(for="birth_date" style="font-size: 16px; font-weight: 500; color: #333;") Enter Parent Birth Date
+            span(style="color: red;") *
+          VueDatePicker(v-model="data_ParentProfile.birth_date" name="birth_date" id="birth_date" required :enable-time-picker="false")
+
+        .form-element(style="display: flex; flex-direction: column;")
+          label(for="zipcode" style="font-size: 16px; font-weight: 500; color: #333;") Enter Parent Zipcode
+            span(style="color: red;") *
+          input(type="text" id="zipcode" v-model="data_ParentProfile.zipcode" placeholder="Parent Zipcode" required style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;")
+
+        .form-element(style="display: flex; flex-direction: column;")
+          label(for="yearly_income" style="font-size: 16px; font-weight: 500; color: #333;") Enter Parent Yearly Income
+            span(style="color: red;") *
+          input(type="text" id="yearly_income" v-model="data_ParentProfile.yearly_income" placeholder="Parent Yearly Income" required style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;")
+
+        .form-element(style="display: flex; flex-direction: column;")
+          label(for="phone_number" style="font-size: 16px; font-weight: 500; color: #333;") Enter Parent Phone Number
+            span(style="color: red;") *
+          input(type="text" id="phone_number" v-model="data_ParentProfile.phone_number" placeholder="Parent Phone Number" required style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;")
+
+        .form-element(style="display: flex; flex-direction: column;")
+          label(for="email" style="font-size: 16px; font-weight: 500; color: #333;") Enter Parent Private Email
+            span(style="color: red;") *
+          input(type="text" id="email" v-model="data_ParentProfile.email" placeholder="Parent Private Email" required style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;")
+
+        .form-element(style="display: flex; flex-direction: column;")
+          label(for="social_media" style="font-size: 16px; font-weight: 500; color: #333;") Enter Parent Twitter Handle
+            span(style="color: red;") *
+          input(type="text" id="social_media" v-model="data_ParentProfile.social_media" placeholder="Parent Twitter Handle" required style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;")
+
+        .form-element(style="display: flex; flex-direction: column;")
+          label(for="average_number_books" style="font-size: 16px; font-weight: 500; color: #333;") On average, how many books a year does your child read (a guess is fine)?
+            span(style="color: red;") *
+          input(type="text" id="average_number_books" v-model="data_ParentProfile.average_number_books" placeholder="Enter # of books" required style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;")
+
+        .form-element(style="display: flex; flex-direction: column;")
+          label(for="marital_stat" style="font-size: 16px; font-weight: 500; color: #333;") Enter Parent Marital Status
+            span(style="color: red;") *
+          input(type="text" id="marital_stat" v-model="data_ParentProfile.marital_stat" placeholder="Parent Marital Status" required style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;")
+
+      studentform()
+
+      .button-container(style="display: flex; justify-content: center; margin-top: 20px;")
+        button(type="button" class="submit-button" 
+          style="padding: 10px 20px; background-color: #122c4f; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;"
+          @mouseover="this.style.backgroundColor='#0056b3'" 
+          @mouseleave="this.style.backgroundColor='#122c4f'"
+          @click="submitAccounts") Submit
+</template>
+
+<!-- <template lang="pug">
+    .centered-container(style="display: flex; justify-content: center; align-items: center; margin: 40px;")
+      .form-container(style="padding: 20px; background-color: white; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4); max-width: 500px; width: 100%;")
+        .form-header(style="text-align: center;")
           h2 Parent Registration Form
-        .form-input
-          .form-element
-            label(for="textbox").required Enter Parent First Name
-            input(type="text" id="textbox" placeholder="Parent First Name" required)
-          .form-element
-            label(for="textbox").required Enter Parent Last Name
-            input(type="text" id="textbox" placeholder="Parent Last Name" required)
-          .form-element
-            label(for="textbox").required Enter Parent Birth Date
-            VueDatePicker(v-model="data_ParentProfile.birth_date" name="birth_date" id="birth_date" required)
-          .form-element
-            label(for="textbox").required Enter Parent Zipcode
-            input(type="text" id="textbox" placeholder="Parent Zipcode" required)
-          .form-element
-            label(for="textbox").required Enter Parent Yearly Income
-            input(type="text" id="textbox" placeholder="Parent Yearly Income" required)
-          .form-element
-            label(for="textbox").required Enter Parent Phone Number
-            input(type="text" id="textbox" placeholder="Parent Phone Number" required)
-          .form-element
-            label(for="textbox").required Enter Parent Private Email
-            input(type="text" id="textbox" placeholder="Parent Private Email" required)
-          .form-element
-            label(for="textbox").required Enter Parent Twitter Handle
-            input(type="text" id="textbox" placeholder="Parent Twitter Handle" required)
-          .form-element
-            label(for="textbox").required On average, how many books a year do you read to your child (a guess is fine)
-            input(type="text" id="textbox" placeholder="Enter # of books" required)
-          .form-element
-            label(for="textbox").required Enter Parent Marital Status
-            input(type="text" id="textbox" placeholder="Parent Marital Status" required)
+        .form-input(style="display: grid; gap: 10px;")
+          .form-element(style="display: flex; flex-direction: column;")
+            label(for="textbox(style="font-size: 16px; font-weight: 500; color: #333;").required Enter Parent First Name
+              span(style="color: red;")  *
+            input(type="text" id="textbox" placeholder="Parent First Name" required style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;")
+          .form-element(style="display: flex; flex-direction: column;")
+            label(for="textbox(style="font-size: 16px; font-weight: 500; color: #333;").required Enter Parent Last Name
+              span(style="color: red;")  *
+            input(type="text" id="textbox" placeholder="Parent Last Name" required style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;")
+          .form-element(style="display: flex; flex-direction: column;")
+            label(for="textbox(style="font-size: 16px; font-weight: 500; color: #333;").required Enter Parent Birth Date
+              span(style="color: red;")  *
+            VueDatePicker(v-model="data_ParentProfile.birth_date" name="birth_date" id="birth_date" required :enable-time-picker="false")
+          .form-element(style="display: flex; flex-direction: column;")
+            label(for="textbox(style="font-size: 16px; font-weight: 500; color: #333;").required Enter Parent Zipcode
+              span(style="color: red;")  *
+            input(type="text" id="textbox" placeholder="Parent Zipcode" required style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;")
+          .form-element(style="display: flex; flex-direction: column;")
+            label(for="textbox(style="font-size: 16px; font-weight: 500; color: #333;").required Enter Parent Yearly Income
+              span(style="color: red;")  *
+            input(type="text" id="textbox" placeholder="Parent Yearly Income" required style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;")
+          .form-element(style="display: flex; flex-direction: column;")
+            label(for="textbox(style="font-size: 16px; font-weight: 500; color: #333;").required Enter Parent Phone Number
+              span(style="color: red;")  *
+            input(type="text" id="textbox" placeholder="Parent Phone Number" required style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;")
+          .form-element(style="display: flex; flex-direction: column;")
+            label(for="textbox(style="font-size: 16px; font-weight: 500; color: #333;").required Enter Parent Private Email
+              span(style="color: red;")  *
+            input(type="text" id="textbox" placeholder="Parent Private Email" required style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;")
+          .form-element(style="display: flex; flex-direction: column;")
+            label(for="textbox(style="font-size: 16px; font-weight: 500; color: #333;").required Enter Parent Twitter Handle
+              span(style="color: red;")  *
+            input(type="text" id="textbox" placeholder="Parent Twitter Handle" required style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;")
+          .form-element(style="display: flex; flex-direction: column;")
+            label(for="textbox(style="font-size: 16px; font-weight: 500; color: #333;").required On average, how many books a year does your child read (a guess is fine)?
+              span(style="color: red;")  *
+            input(type="text" id="textbox" placeholder="Enter # of books" required style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;")
+          .form-element(style="display: flex; flex-direction: column;")
+            label(for="textbox(style="font-size: 16px; font-weight: 500; color: #333;").required Enter Parent Marital Status
+              span(style="color: red;")  *
+            input(type="text" id="textbox" placeholder="Parent Marital Status" required style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;")
         studentform()
 
-        .button-container
-            button(type="button" class="submit-button") Submit
+        .button-container(style="display: flex; justify-content: center; margin-top: 20px;")
+            button(type="button" class="submit-button(style="padding: 10px 20px; background-color: #122c4f; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;"
+            @mouseover="this.style.backgroundColor='#0056b3'" 
+            @mouseleave="this.style.backgroundColor='#122c4f'") Submit
             
-  </template>
+  </template> -->
 
-
-<style scoped>
-.centered-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 40px;
-}
-
-.form-container {
-    padding: 20px;
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-    max-width: 500px;
-    width: 100%;
-}
-
-.form-header {
-    text-align: center;
-}
-
-.form-input {
-    display: grid;
-    gap: 10px;
-}
-
-.form-element {
-    display: flex;
-    flex-direction: column;
-}
-
-input {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-.checkbox {
-    display: flex;
-    align-items: center;
-}
-
-input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    margin-right: 10px;
-    cursor: pointer;
-}
-
-label {
-    font-size: 16px;
-    font-weight: 500;
-    color: #333;
-}
-
-input[type="checkbox"]:hover {
-    border-color: #007BFF;
-}
-
-input[type="checkbox"]:focus {
-    outline: none;
-    box-shadow: 0 0 5px 2px rgba(0, 123, 255, 0.5);
-}
-
-.required::after {
-    content: " *";
-    color: red;
-    font-weight: bold;
-}
-
-.button-container {
-    display: flex;
-    justify-content: center;
-    margin-top: 20px;
-}
-
-.submit-button {
-    padding: 10px 20px;
-    background-color: #122c4f;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-.submit-button:hover {
-    background-color: #0056b3;
-}
-</style>
 
 <script lang="ts" setup>
 import { ref } from 'vue';

@@ -33,6 +33,7 @@
     "@types/vue-select": "^3.16.8",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.47",
+    "postcss-loader": "^8.1.1",
     "prisma": "^5.20.0",
     "prisma-erd-generator": "^1.11.2",
     "sass": "^1.76.0",
