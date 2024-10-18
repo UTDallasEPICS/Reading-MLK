@@ -1,22 +1,17 @@
 import { PrismaClient } from '@prisma/client';
 import { PrismaClientKnownRequestError, PrismaClientUnknownRequestError } from '@prisma/client/runtime/library';
 import { read } from 'fs';
+const prisma = new PrismaClient();
 
-export default defineEventHandler(async event => {
+export default defineEventHandler(async () => {
     let faculties = null;
-    const {id} = getQuery(event)
-    const prisma = event.context.client;
 
     try {
         // Retrieve all faculty profiles
-        faculties = await prisma.facultyProfile.findFirst({ 
-            where: {
-                id: parseInt(id as string)
-            },
+        faculties = await prisma.facultyProfile.findMany({ 
             include: {
                 TeacherToClass: true,
-                Faculty: true,
-            },
+            }
         });
     } catch (error) {
         if (error instanceof PrismaClientKnownRequestError){

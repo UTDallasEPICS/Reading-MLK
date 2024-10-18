@@ -1,18 +1,13 @@
 import { PrismaClient } from '@prisma/client';
 import { PrismaClientKnownRequestError, PrismaClientUnknownRequestError } from '@prisma/client/runtime/library';
 
-export default defineEventHandler(async event => {
-  let students = null;
-  const {id} = getQuery(event)
-  const prisma = event.context.client;
+const prisma = new PrismaClient();
+
+export default defineEventHandler(async () => {
   try {
-      students = await prisma.studentProfile.findFirst({
-      where: {
-        id: parseInt(id as string)
-      },
+    const students = await prisma.studentProfile.findMany({
       include: {
         ParentToChild: true,
-        Student: true,
       },
     });
 

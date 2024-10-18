@@ -1,22 +1,15 @@
-import { User } from '@auth0/auth0-spa-js';
 import { PrismaClient } from '@prisma/client';
 import { PrismaClientKnownRequestError, PrismaClientUnknownRequestError } from '@prisma/client/runtime/library';
 
-export default defineEventHandler(async event => {
-  let parents = null;
-  const {id} = getQuery(event)
-  const prisma = event.context.client;
+const prisma = new PrismaClient();
+
+export default defineEventHandler(async () => {
   try {
-    parents = await prisma.parentProfile.findFirst({
-      where: {
-        id: parseInt(id as string)
-      },
+    const parents = await prisma.parentProfile.findMany({
       include: {
         ParentToChild: true,
-        User: true,
       },
     });
-
     return parents;
   } catch (error) {
   if (error instanceof PrismaClientKnownRequestError){
