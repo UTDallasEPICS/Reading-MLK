@@ -25,7 +25,7 @@
           </tr>
           </thead>
           <tbody>
-          <tr class="h-9" v-for="(u) in students">            
+          <tr class="h-9" v-for="(u) in Faculties">            
             <td>
               <div>{{ u.district }}</div>
             </td>
@@ -74,19 +74,20 @@
     </div>
   </template>
   
-  <script setup>
+  <script setup lang="ts">
+  import type { User } from "@prisma/client";
   import { ref } from "vue";
 
   const editButtonPressed = ref(false)
 
   /**
-   * @desc adding data from an imported file to the student table
+   * @desc adding data from an imported file to the Faculty table
    * @param jsonData the data from a parsed file
    */
-  const addDataToDatabase = async (jsonData) => {
+  const addDataToDatabase = async (jsonData: any) => {
   // Iterate through jsonData and add each record to the Prisma database
   for (const record of jsonData) {
-    const newStudent = {
+    const newFaculty = {
         district: record['district'],     
         dual_lang: record['dual_lang'],
         faculty_email: record['faculty_email'],  
@@ -98,19 +99,30 @@
         grade: record['grade'], 
     };
 
-    // Use Prisma to add the new student to the database
+    // Use Prisma to add the new Faculty to the database
     await $fetch('/api/faculty/faculty', {
       method: 'POST',
-      body: newStudent,
+      body: newFaculty,
     });
   }
 
-  // Refresh the list of students after importing data
-  students.value = await getStudents();
+  // Refresh the list of Faculties after importing data
+  // Faculties.value = await getFaculties();
 };
-  
-  const students = ref(null)
-  const student = ref({
+  type Faculty = {
+    id: number,
+    district: string,     
+    dual_lang: boolean, 
+    faculty_email: string,  
+    first_name: string,   
+    last_name: string,    
+    school_name: string,   
+    phone_number: string,  
+    department: string,    
+    grade: string,
+  }
+  const Faculties = ref<Faculty[]>([])
+  const FacultyObject = ref({
     district: "",     
     dual_lang: false, 
     faculty_email: "",  
@@ -122,35 +134,36 @@
     grade: "",
   })
   
-  students.value = await getStudents()
+  await getFaculties()
 
-async function getStudents() {
-    const studentList = await $fetch('/api/faculty/faculty', {
-        method: 'GET',
-    })
-    students.value = studentList;
-    return studentList;
-}
+  async function getFaculties() {
+    const { data: FacultyList } = await useFetch('/api/faculty', {
+          method: 'GET',
+      })
+      Faculties.value = FacultyList.value as unknown as Faculty[];
+      console.log(FacultyList.value)
+      return FacultyList;
+  }
 
-async function goToEdit(studentId) {
-  const editUrl = '/editfaculty?' + 'id=' + studentId
-  navigateTo(editUrl)
-}
+  async function goToEdit(FacultyId: number) {
+    const editUrl = '/editfaculty?' + 'id=' + FacultyId
+    await navigateTo(editUrl)
+  }
 
-const removeStudent = async (id) => {
-    await $fetch('/api/faculty/faculty', {
-        method: 'DELETE',
-        body: { id },
-    });
-    students.value = await getStudents();
-}
+  const removeStudent = async (id: number) => {
+      await $fetch('/api/faculty/faculty', {
+          method: 'DELETE',
+          body: { id },
+      });
+    //  Faculties.value = await getFaculties();
+  }
 
 
 
   
-  const rhuser = useCookie('rhuser')
-  const userRole = (rhuser.value.role)
-  console.log(rhuser.role)
-  const currid = parseInt(rhuser.value.id)
+  const rhuser = useCookie<User>('rhuser')
+  const userRole = (rhuser.value?.role)
+  console.log(rhuser.value.role)
+  const currid = (rhuser.value?.id)
 
   </script>

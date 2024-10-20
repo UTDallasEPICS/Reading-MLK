@@ -1,5 +1,5 @@
 <script lang = "ts" setup>
-
+const id = ref(0);
 const props = defineProps<{modelValue:any}>()
 const emit = defineEmits(["update:modelValue"])
 const rhuser = useCookie<any>('rhuser')
@@ -26,7 +26,7 @@ const dual_lang = computed({
 })
 const submitFaculty = async () =>{
     const faculty = $fetch('/api/faculty/faculty',{
-        method: "POST",
+        method: (id.value as number) !== 0 ? 'PUT' : 'POST',
         body: {
             faculty: data_FacultyProfile.value
         }

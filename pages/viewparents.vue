@@ -15,7 +15,6 @@
             <th scope="col" class="px-6 py-3">Yearly Income</th>
             <th scope="col" class="px-6 py-3">Birth Date</th>
             <th scope="col" class="px-6 py-3">Average Number of Books</th>
-            <th scope="col" class="px-6 py-3">Password</th>
             <th scope="col" class="px-6 py-3">Phone Number</th>
             <th scope="col" class="px-6 py-3">Gender</th>
             <th scope="col" class="px-6 py-3">Marital Status</th>
@@ -28,7 +27,7 @@
           </tr>
           </thead>
           <tbody>
-          <tr class="h-9" v-for="(u) in parents">            
+          <tr class="h-9" v-for="(u) in Parents">            
             <td>
               <div>{{ u.zipcode }}</div>
             </td>
@@ -40,9 +39,6 @@
             </td>
             <td>
               <div>{{ u.average_number_books }}</div>
-            </td>
-            <td>
-              <div>{{ u.password }}</div>
             </td>
             <td>
               <div>{{ u.phone_number }}</div>
@@ -86,42 +82,96 @@
     </div>
   </template>
   
-  <script setup>
+  <script setup lang="ts">
+  import type { User } from "@prisma/client";
   import { ref } from "vue";
 
   const editButtonPressed = ref(false)
   
-  const parents = ref(null)
-  
-  parents.value = await getParents()
+  const addDataToDatabase = async (jsonData: any) => {
 
-async function getParents() {
-    const parentList = await $fetch('/api/parent/parent', {
-        method: 'GET',
-    })
-    parents.value = parentList;
-    return parentList;
-}
+  for (const record of jsonData) {
+    const newParent = {
+        zipcode: record['zipcode'],     
+        yearly_income: record['yearly_income'],
+        birth_date: record['birth_date'],
+        average_number_books: record['average_number_books'],     
+        first_name: record['first_name'],   
+        last_name: record['last_name'],
+        email: record['email'],    
+        phone_number: record['phone_number'],  
+        gender: record['gender'],    
+        marital_stat: record['marital_stat'],
+        social_media: record['social_media'], 
+    };
 
-async function goToEdit(parentId) {
-  const editUrl = '/editparent?' + 'id=' + parentId
-  navigateTo(editUrl)
-}
-
-const removeParent = async (id) => {
+    // Use Prisma to add the new Faculty to the database
     await $fetch('/api/parent/parent', {
-        method: 'DELETE',
-        body: { id },
+      method: 'POST',
+      body: newParent,
     });
-    parents.value = await getParents();
-}
+  }
+  };
+
+  type Parent = {
+    id: number,
+    zipcode: string,     
+    yearly_income: string, 
+    birth_date: Date,
+    average_number_books: number,     
+    first_name: string,   
+    last_name: string,
+    email: string,    
+    phone_number: string,  
+    gender: string,    
+    marital_stat: string,
+    social_media: string,
+  }
+    
+  const Parents = ref<Parent[]>([])
+  const FacultyObject = ref({
+    zipcode: "",     
+    yearly_income: "", 
+    birth_date: new Date(),  
+    average_number_books: 0,   
+    first_name: "",   
+    last_name: "",
+    email: "",    
+    phone_number: "",  
+    gender: "",    
+    marital_stat: "",
+    social_media: "",
+  })
+
+  await getParents()
+    
+  async function getParents() {
+    const { data: parentList } = await useFetch('/api/parent', {
+          method: 'GET',
+      })
+      Parents.value = parentList.value as unknown as Parent[];
+      return parentList;
+  }
+
+  async function goToEdit(parentId: number) {
+    const editUrl = '/editparent?' + 'id=' + parentId
+    navigateTo(editUrl)
+  }
+
+  const removeParent = async (id: number) => {
+      await $fetch('/api/parent/parent', {
+          method: 'DELETE',
+          body: { id },
+      });
+    //  Parents.value = await getParents();
+  }
 
 
 
   
-  const rhuser = useCookie('rhuser')
-  const userRole = (rhuser.value.role)
-  console.log(rhuser.role)
-  const currid = parseInt(rhuser.value.id)
+  const rhuser = useCookie<User>('rhuser')
+  const userRole = (rhuser.value?.role)
+  console.log(rhuser.value.role)
+  const currid = (rhuser.value?.id)
 
   </script>

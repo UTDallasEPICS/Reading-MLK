@@ -1,5 +1,6 @@
-import { User } from '@auth0/auth0-spa-js';
+//import {  } from '@auth0/auth0-spa-js';
 import { PrismaClient } from '@prisma/client';
+import type { User } from '@prisma/client';
 import { PrismaClientKnownRequestError, PrismaClientUnknownRequestError } from '@prisma/client/runtime/library';
 
 export default defineEventHandler(async event => {
