@@ -1,7 +1,7 @@
 <template lang="pug">
   div(v-for="(form, index) in studentForms" :key="index" 
       class="student-registration-form" 
-      style="background-color: #f9f9f9; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); padding: 10px 0px; margin: 30px;")
+      style="background-color: #f9f9f9; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); padding: 1px; padding-bottom: 15px; margin: 30px;")
     h2(class="student-registration-header" 
        style="text-align: center; color: #333;") Student \#{{index+1}} Registration
     div(class="form-container" 

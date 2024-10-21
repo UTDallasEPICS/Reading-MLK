@@ -1,6 +1,6 @@
 <template lang="pug">
   .centered-container(style="display: flex; justify-content: center; align-items: center; margin: 40px;")
-    .form-container(style="padding: 20px; background-color: white; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4); max-width: 500px; width: 100%;")
+    .form-container(style="padding: 20px; padding-top: 0px;background-color: white; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4); max-width: 500px; width: 100%;")
       .form-header(style="text-align: center;")
         h2 Parent Registration Form
       .form-input(style="display: grid; gap: 10px;")
