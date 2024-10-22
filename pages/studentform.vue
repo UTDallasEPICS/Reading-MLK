@@ -17,7 +17,7 @@
                required 
                class="input"
                id="student_first_name" 
-               style="width: 100%; padding:10px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; transition: border-color 0.3s ease; box-sizing: border-box; height: 40px;"
+               style="width: 100%; padding:10px; border: 1px solid #ccc; border-radius: 5px; transition: border-color 0.3s ease; box-sizing: border-box; height: 40px;"
                @focus="this.style.borderColor='#007BFF'" 
                @blur="this.style.borderColor='#ccc'") 
       
@@ -32,7 +32,7 @@
                required 
                class="input"
                id="student_last_name" 
-               style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; transition: border-color 0.3s ease; box-sizing: border-box; height: 40px;"
+               style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; transition: border-color 0.3s ease; box-sizing: border-box; height: 40px;"
                @focus="this.style.borderColor='#007BFF'" 
                @blur="this.style.borderColor='#ccc'")
       
@@ -47,8 +47,9 @@
                required 
                class="input" 
                id="student_gender"
-               style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px;")
-          option(value="" disabled selected) Select Gender
+               style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; font-size: inherit")
+               
+          option(value="" selected disabled default ) Select Gender
           option(value="M") Male
           option(value="F") Female
       
@@ -63,6 +64,7 @@
                       required 
                       class="input"
                       id="student_birth_date"
+                      placeholder="Birth Date"
                       style="width: 100%; border: none; font-size: 16px; transition: border-color 0.3s ease;"
                       @focus="this.style.borderColor='#007BFF'" 
                       @blur="this.style.borderColor='#ccc'"
@@ -79,7 +81,7 @@
                required 
                class="input" 
                id="student_grade"
-               style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px;")
+               style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; style=font-size: inherit")
           option(value="" disabled selected) Select Grade
           option(v-for="grade in 10" :key="grade" :value="grade") {{ grade }}
       
@@ -94,7 +96,7 @@
                required 
                class="input" 
                id="student_reading_level"
-               style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px;")
+               style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; ")
           option(value="" disabled selected) Select Reading Level
           option(v-for="rLevel in 10" :key="rLevel" :value="rLevel") {{ rLevel }}
       
@@ -108,7 +110,7 @@
         input(type="number" v-model="form.zipcode" placeholder="Student Zipcode" 
                required 
                class="input" 
-               style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; transition: border-color 0.3s ease; box-sizing: border-box;"
+               style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; transition: border-color 0.3s ease; box-sizing: border-box;"
                @focus="this.style.borderColor='#007BFF'" 
                @blur="this.style.borderColor='#ccc'")
       

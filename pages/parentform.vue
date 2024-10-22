@@ -94,26 +94,18 @@ const rhuser = useCookie<any>('rhuser')
 
 const showStudentForm = ref(false);
 
-const toggleStudentForm = () => {
-    showStudentForm.value = !showStudentForm.value;
-    // if (showStudentForm.value) {
-        addStudent;
-        console.log('adding stu')
-    // }
-};
-
 const data_ParentProfile = ref({
-    first_name: "",
-    last_name: "",
-    birth_date: "",
-    zipcode: 0,
-    phone_number: 0,
-    email: "",
-    social_media: "",
-    average_number_books: "",
-    yearly_income: "",
-    gender: "",
-    marital_stat: "",
+    first_name: null,
+    last_name: null,
+    birth_date: null,
+    zipcode: null,
+    phone_number: null,
+    email: null,
+    social_media: null,
+    average_number_books: null,
+    yearly_income: null,
+    gender: null,
+    marital_stat: null,
     user_id: rhuser.value.id,
 });
 
@@ -133,6 +125,14 @@ const data_StudentProfile = ref([{
 
 }]);
 
+const toggleStudentForm = () => {
+    showStudentForm.value = !showStudentForm.value;
+    // if (showStudentForm.value) {
+        addStudent;
+        console.log('adding stu')
+        console.log(data_StudentProfile)
+    // }
+};
 
 const addStudent = () => {
     data_StudentProfile.value.push({
@@ -155,9 +155,8 @@ const removeStudent = (index: number) => {
     data_StudentProfile.value.splice(index - 1, 1);
 }
 
-const submittAccounts = async () => {
-    console.log("Testinggg")
-    const parentResponse = await $fetch('/api/parent_submit', {
+const submitAccounts = async () => {
+    const parentResponse = await $fetch('/parent_submit', {
         method: "POST",
         body: {
             parent: data_ParentProfile.value,

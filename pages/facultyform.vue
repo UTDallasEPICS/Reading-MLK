@@ -1,6 +1,6 @@
 <template lang="pug">
   .centered-container(style="display: flex; justify-content: center; align-items: center; margin: 40px")
-    .form-container(style="padding: 20px; background-color: white; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4); max-width: 500px; width: 100%;")
+    .form-container(style="padding: 20px; padding-top:0px; background-color: white; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4); max-width: 500px; width: 100%;")
       .form-header(style="text-align: center;")
         h2 Faculty Registration Form
       .form-input(style="display: grid; gap: 10px;")
@@ -57,7 +57,7 @@
             input(type="checkbox" id="dual_lang" name="dual_lang" value="true" style="width: 20px; height: 20px; margin-right: 10px; cursor: pointer;" @hover="this.style.borderColor='#007BFF'" @focus="this.style.outline=none; this.style.boxShadow='0 0 5px 2px rgba(0, 123, 255, 0.5);'")
             label(for="dual_lang" style="font-size: 16px; font-weight: 500; color: #333;") Dual Language Teacher?
         .button-container(style="display: flex; justify-content: center; margin-top: 20px;")
-          button(type="button" class="submit-button" style="padding: 10px 20px; background-color: #122c4f; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;"
+          button(type="submit" class="submit-button" style="padding: 10px 20px; background-color: #122c4f; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;"
             @mouseover="this.style.backgroundColor='#0056b3'" 
             @mouseleave="this.style.backgroundColor='#122c4f'") Submit
 </template>
