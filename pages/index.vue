@@ -1,6 +1,6 @@
 <template lang="pug">
-  .header-container
-    p.header-text Welcome to Reading Huddle
+  .header-container(style="display: flex; flex-direction: row; background-color: grey; justify-content: center;")
+    p.header-text(style="font-size: 50px;") Welcome to Reading Huddle
 </template>
 
 <script setup>
@@ -19,16 +19,3 @@ function closeAccountSelectionWindow() {
   showAccountSelectionWindow.value = false;
 }
 </script>
-
-<style scoped>
-.header-container {
-  display: flex;
-  flex-direction: row;
-  background-color: grey;
-  justify-content: center;
-}
-
-.header-text {
-  font-size: 50px;
-}
-</style>
