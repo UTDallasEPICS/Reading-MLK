@@ -1,8 +1,6 @@
 <template lang="pug">
-  div(class="text-center p-5")
-    p.text-lg.font-semibold Welcome to Reading Huddle
-    button(@click="openAccountSelectionWindow" class="px-5 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition duration-300") Register Now
-    AccountSelectionWindow(v-if="showAccountSelectionWindow" @close="closeAccountSelectionWindow")
+  .header-container(style="display: flex; flex-direction: row; background-color: grey; justify-content: center;")
+    p.header-text(style="font-size: 50px;") Welcome to Reading Huddle
 </template>
 
 <script setup>
