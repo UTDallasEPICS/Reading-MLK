@@ -1,23 +1,19 @@
-<script lang="ts" setup>
-// Defining props and emits (unchanged)
-const props = defineProps<{ modelValue: any }>();
-const emit = defineEmits(["update:modelValue"]);
+<script lang = "ts" setup>
 
-// Cookie for user (unchanged)
-const cvuser = useCookie<any>("cvuser");
-
-// Faculty profile object (unchanged)
-const data_FacultyProfile = ref({
-  district: "",
-  dual_lang: false, // True if they are a Spanish or other language teacher with non-English students, otherwise false for English-speaking teachers
-  faculty_email: "",
-  first_name: "",
-  last_name: "",
-  school_name: "",
-  phone_number: "",
-  department: "",
-  grade: "",
-  user_id: cvuser.value.id,
+const props = defineProps<{modelValue:any}>()
+const emit = defineEmits(["update:modelValue"])
+const rhuser = useCookie<any>('rhuser')
+const data_FacultyProfile = ref({     
+  district: "",     
+  dual_lang: false,      /// True if they are spanish or other language teacher with non-english kids, otherwise false to indicate they are english speaking teachers      
+  faculty_email: "",  
+  first_name: "",   
+  last_name: "",    
+  school_name: "",   
+  phone_number: "",  
+  department: "",    
+  grade: "", 
+  user_id: rhuser.value.id,
 });
 
 // Computed property for dual language (unchanged)

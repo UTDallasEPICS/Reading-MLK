@@ -117,10 +117,10 @@
     students.value = await getStudents();
   };
   
-  // Manage user cookies
-  const cvuser = useCookie('cvuser');
-  const userRole = cvuser.value.role;
-  console.log(userRole);
-  const currid = parseInt(cvuser.value.id);
+  const rhuser = useCookie('rhuser')
+  const userRole = (rhuser.value.role)
+  console.log(rhuser.role)
+  const currid = parseInt(rhuser.value.id)
+
   </script>
   
