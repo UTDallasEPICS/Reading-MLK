@@ -4,6 +4,6 @@
 
 </script>
 <template lang="pug">
-Taskbar
+Navbar
 NuxtPage
 </template>
