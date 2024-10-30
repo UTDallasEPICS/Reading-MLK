@@ -3,8 +3,12 @@ import { PrismaClientKnownRequestError, PrismaClientUnknownRequestError } from '
 
 export default defineEventHandler(async event => {
   let students = null;
-  const {id} = getQuery(event)
+  // const {id} = getQuery(event)
   const prisma = event.context.client;
+  const id = getRouterParam(event, 'id');
+
+  console.log(id as string)
+  
   try {
       students = await prisma.studentProfile.findFirst({
       where: {

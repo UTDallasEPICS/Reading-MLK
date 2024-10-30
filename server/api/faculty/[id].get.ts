@@ -4,8 +4,12 @@ import { read } from 'fs';
 
 export default defineEventHandler(async event => {
     let faculties = null;
-    const {id} = getQuery(event);
+    // const {id} = getQuery(event);
     const prisma = event.context.client;
+    
+    const id = getRouterParam(event, 'id');
+
+    console.log(id as string)
 
     try {
         // Retrieve all faculty profiles
