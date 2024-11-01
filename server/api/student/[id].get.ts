@@ -1,13 +1,22 @@
 import { PrismaClient } from '@prisma/client';
 import { PrismaClientKnownRequestError, PrismaClientUnknownRequestError } from '@prisma/client/runtime/library';
 
-const prisma = new PrismaClient();
+export default defineEventHandler(async event => {
+  let students = null;
+  // const {id} = getQuery(event)
+  const prisma = event.context.client;
+  const id = getRouterParam(event, 'id');
 
-export default defineEventHandler(async () => {
+  console.log(id as string)
+  
   try {
-    const students = await prisma.studentProfile.findMany({
+      students = await prisma.studentProfile.findFirst({
+      where: {
+        id: parseInt(id as string)
+      },
       include: {
-        Parent: true, 
+        ParentToChild: true,
+        Student: true,
       },
     });
 
@@ -20,7 +29,5 @@ export default defineEventHandler(async () => {
     console.log('Unknown request error: ' , error.message)
   }
     throw error; // Rethrow the error so it can be handled elsewhere
-  } finally {
-    await prisma.$disconnect(); // Disconnect Prisma client when done
   }
 });

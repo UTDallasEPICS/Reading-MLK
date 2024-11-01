@@ -10,7 +10,6 @@ export default defineEventHandler(async () => {
         ParentToChild: true,
       },
     });
-
     return parents;
   } catch (error) {
   if (error instanceof PrismaClientKnownRequestError){
@@ -20,7 +19,5 @@ export default defineEventHandler(async () => {
     console.log('Unknown request error: ' , error.message)
   }
     throw error; // Rethrow the error so it can be handled elsewhere
-  } finally {
-    await prisma.$disconnect(); // Disconnect Prisma client when done
   }
 });
