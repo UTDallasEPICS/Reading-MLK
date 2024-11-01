@@ -7,21 +7,15 @@
       button(@click="closeAccountSelectionWindow" class="block bg-red-500 text-white py-3 px-6 m-auto mt-4 rounded-lg hover:bg-red-700 transition duration-300") Close
 </template>
 
-<script>
-export default {
-  props: {
-    showAccountSelectionWindow: {
-      type: Boolean,
-      required: true,
-    },
-  },
-  created() {
-    console.log('Account Selection Window component rendered!');
-  },
-  methods: {
-    closeAccountSelectionWindow() {
-      this.$emit('close');
-    },
-  },
+<script setup lang="ts">
+//const props = defineProps<{ showAccountSelectionWindow: boolean}>();
+const emit = defineEmits(['close']);
+
+const closeAccountSelectionWindow = () => {
+  emit('close');
 };
+//console.log('Account Selection Window component rendered!'); //testing line
 </script>
+
+
+
