@@ -1,5 +1,10 @@
 <template lang="pug">
-    <!--table for the database display-->
+    <div>
+    <div>
+      <h2 class="text-center text-3xl font-bold mt-4"  style="margin-top: 35px">View Database</h2>
+      <br>
+    </div>
+    //table for the database display
     <div class="mt-4 mx-10">
       <div class="relative overflow-x-auto rounded-lg">
         <table class="w-full text-sm text-center text-gray-500 dark:text-gray-400">
@@ -47,8 +52,19 @@
             <td>
               <div>{{ u.grade }}</div>
             </td>
-
-
+            <td>
+              <button id="editUserButton" v-if="!editButtonPressed" @click='goToEdit(u.id)' class="rounded-md bg-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Edit</button>
+            </td>
+            //Remove function
+            <td>
+              <button id="applyRemoveButton" @click="removeStudent(u.id)" class="rounded-md bg-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Remove</button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    </div>
 </template>
   
   <script setup lang="ts">
@@ -123,7 +139,7 @@
   }
 
   async function goToEdit(FacultyId: number) {
-    const editUrl = '/editfaculty?' + 'id=' + FacultyId
+    const editUrl = '/archives/editfaculty?' + 'id=' + FacultyId
     await navigateTo(editUrl)
   }
 

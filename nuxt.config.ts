@@ -13,5 +13,5 @@ export default defineNuxtConfig({
       autoprefixer: {},
     },
   },
-  
+  compatibilityDate: "2024-04-03"
 })

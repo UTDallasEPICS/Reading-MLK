@@ -76,31 +76,22 @@ var data_FacultyProfile = ref({
   grade: "",
 });
 
-data_FacultyProfiles.value = await getFaculty()
 
 
-let url = new URL(window.location.href)
-let queryParams = new URLSearchParams(url.search)
-let data_FacultyProfileId = Object.fromEntries(queryParams).id
-for (let i = 0; i < data_FacultyProfiles.value.length; i++) {
-    if (data_FacultyProfiles.value[i].id == data_FacultyProfileId) {
-      data_FacultyProfile = {
-      id: data_FacultyProfiles.value[i].id,
-      district: data_FacultyProfiles.value[i].district,
-      dual_lang: data_FacultyProfiles.value[i].dual_lang,
-      faculty_email: data_FacultyProfiles.value[i].faculty_email,
-      first_name: data_FacultyProfiles.value[i].first_name,
-      last_name: data_FacultyProfiles.value[i].last_name,
-      school_name: data_FacultyProfiles.value[i].school_name,
-      phone_number: data_FacultyProfiles.value[i].phone_number,
-      department: data_FacultyProfiles.value[i].department,
-      grade: data_FacultyProfiles.value[i].grade,
-      user_id: data_FacultyProfiles.value[i].user_id,
+const url = new URL(window.location.href);
+const queryParams = new URLSearchParams(url.search);
+const FacultyProfileId = queryParams.get('id');
 
-      //...data_facultyProfile.values[i]
-      }
-    }
+async function getFaculty() {
+   // Fixed for baseline functionality, horrible example though
+   // useFetch, not fetch
+   const response = await fetch(`/api/faculty/${FacultyProfileId}`)
+   const data = await response.json();
+   return data;
 }
+
+data_FacultyProfile.value = await getFaculty();
+
 
 async function editFaculty(editedFaculty) {
   console.log("test")
@@ -127,8 +118,6 @@ async function editFaculty(editedFaculty) {
   if(data_FacultyProfile)   data_FacultyProfiles.value = await getFaculty()
 }
 
-async function getFaculty() {
-  return await $fetch('/api/faculty/faculty')
-}
+
 
 </script>
