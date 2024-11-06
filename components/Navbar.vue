@@ -8,6 +8,13 @@
           @mouseover="homeFontSize = '20px'"
           @mouseleave="homeFontSize = '16px'"
         ) Home
+      .log
+        nuxt-link#aboutbtn(
+          to="/"
+          :style="{ color: 'white', textDecoration: 'none', fontFamily: 'Arial', fontSize: aboutFontSize }"
+          @mouseover="aboutFontSize = '20px'"
+          @mouseleave="aboutFontSize = '16px'"
+        ) About Us
 
       .main
         .dropdown(style="position: relative; display: inline-block; gap: 15px;")
@@ -59,6 +66,7 @@ const props = defineProps(['userRole']);
 const viewFontSize = ref('16px');
 const registerFontSize = ref('16px');
 const homeFontSize = ref('16px');
+const aboutFontSize = ref('16px');
 const logoutFontSize = ref('16px');
 
 const showViewDropdown = ref(false);
