@@ -8,9 +8,10 @@
           @mouseover="homeFontSize = '20px'"
           @mouseleave="homeFontSize = '16px'"
         ) Home
+
       .log
         nuxt-link#aboutbtn(
-          to="/"
+          to="/about"
           :style="{ color: 'white', textDecoration: 'none', fontFamily: 'Arial', fontSize: aboutFontSize, transition: 'font-size 0.3s ease' }"
           @mouseover="aboutFontSize = '20px'"
           @mouseleave="aboutFontSize = '16px'"
