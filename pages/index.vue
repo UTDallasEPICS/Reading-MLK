@@ -25,7 +25,7 @@
         @mouseover="applyHoverStyles(2)"
         @mouseleave="removeHoverStyles(2)"
       )
-        img(src="/public/bookmark.png" alt="Reading Huddle Logo" style="width: 50px; height: 50px; margin-right: 10px; border-radius: 5px; object-fit: contain;")
+        img(src="/bookmark.png" alt="Reading Huddle Logo" style="width: 50px; height: 50px; margin-right: 10px; border-radius: 5px; object-fit: contain;")
         h2(font-size: clamp(2vw + 1rem, 2.5rem);) container 3
 </template>
 
