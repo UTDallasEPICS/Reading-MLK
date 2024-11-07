@@ -1,21 +1,68 @@
 <template lang="pug">
-  .main-container
-    .centered-container
+  .main-container(style="display: flex; flex-direction: column; align-items: center; justify-content: center;")
+    .centered-container(style="display: flex; align-items: center; justify-content: center; text-align: center;")
       h1 Welcome to Reading Huddle
-    .module-container
-      .module
-        img(src="/public/bookmark.png" alt="Reading Huddle Logo")
-        h2 About Us
-      .module
-        img(src="/public/bookmark.png" alt="Reading Huddle Logo")
-        h2 Course Homepage
-      .module
-        img(src="/public/bookmark.png" alt="Reading Huddle Logo")
-        h2 container3
+    .module-container(style="display: flex; justify-content: center; align-items: center; padding: 20px; border-radius: 20px; background-color: #FFCD98; width: 90vw; gap: 30px;")
+      .module(
+        :key="index"
+        :style="moduleStyles[0]"
+        @mouseover="applyHoverStyles(0)"
+        @mouseleave="removeHoverStyles(0)"
+      )
+        img(src="/bookmark.png" alt="Reading Huddle Logo" style="width: 50px; height: 50px; margin-right: 10px; border-radius: 5px; object-fit: contain;")
+        h2(style="font-size: clamp(2vw + 1rem, 2.5rem);") About Us
+      .module(
+        :key="index"
+        :style="moduleStyles[1]"
+        @mouseover="applyHoverStyles(1)"
+        @mouseleave="removeHoverStyles(1)"
+      )
+        img(src="/bookmark.png" alt="Reading Huddle Logo" style="width: 50px; height: 50px; margin-right: 10px; border-radius: 5px; object-fit: contain;")
+        h2(style="font-size: clamp(2vw + 1rem, 2.5rem);") Course Homepage
+      .module(
+        :key="index"
+        :style="moduleStyles[2]"
+        @mouseover="applyHoverStyles(2)"
+        @mouseleave="removeHoverStyles(2)"
+      )
+        img(src="/public/bookmark.png" alt="Reading Huddle Logo" style="width: 50px; height: 50px; margin-right: 10px; border-radius: 5px; object-fit: contain;")
+        h2(font-size: clamp(2vw + 1rem, 2.5rem);) container 3
 </template>
 
 <script setup>
+import { ref, reactive } from 'vue';
+
 const showAccountSelectionWindow = ref(false);
+const modules = [
+  { title: 'About Us' },
+  { title: 'Course Homepage' },
+  { title: 'Container 3' },
+];
+
+const moduleStyles = reactive(modules.map(() => ({
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  alignItems: 'center',
+  height: '80px',
+  backgroundColor: '#FFE382',
+  padding: '60px 60px',
+  borderRadius: '10px',
+  width: '1000px',
+  transition: 'transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease'
+})));
+
+function applyHoverStyles(index) {
+  moduleStyles[index].backgroundColor = '#FFBB33'; // Change background color on hover
+  moduleStyles[index].transform = 'scale(1.05)'; // Slightly scale the element on hover
+  moduleStyles[index].boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)'; // Add box shadow on hover
+}
+
+function removeHoverStyles(index) {
+  moduleStyles[index].backgroundColor = '#FFE382'; // Revert to original background color
+  moduleStyles[index].transform = 'scale(1)'; // Revert scaling
+  moduleStyles[index].boxShadow = 'none'; // Remove box shadow
+}
 
 function openAccountSelectionWindow() {
   console.log('Opening account selection window...');
@@ -27,65 +74,3 @@ function closeAccountSelectionWindow() {
   showAccountSelectionWindow.value = false;
 }
 </script>
-
-<style>
-.main-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.centered-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-
-.module-container {
-  display: flex;
-  /* flex-direction: ;  */
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
-  border-radius: 20px;
-  background-color: #FFCD98;
-  width: 90vw;
-  gap: 30px;
-}
-
-.module {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 80px;
-  background-color: #FFE382;
-  padding: 60px 60px;
-  border-radius: 10px;
-  width: 1000px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
-}
-
-.module:hover {
-  cursor: pointer;
-  background-color: #FFD25A; /* Slightly darker shade for hover */
-  transform: scale(1.05); /* Slightly enlarges the module */
-  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2); /* Adds a shadow effect */
-}
-
-.module h2 {
-  font-size: clamp(2vw + 1rem, 2.5rem);
-}
-
-.module img {
-  width: 50px; /* Adjust size as needed */
-  height: 50px;
-  margin-right: 10px; /* Add space between image and text */
-  border-radius: 5px; /* Slight rounding for a softer look */
-  object-fit: contain; /* Ensures image scaling is contained within dimensions */
-}
-
-
-</style>

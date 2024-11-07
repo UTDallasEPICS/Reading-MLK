@@ -4,14 +4,14 @@
       .log
         nuxt-link#homebtn(
           to="/"
-          :style="{ color: 'white', textDecoration: 'none', fontFamily: 'Arial', fontSize: homeFontSize }"
+          :style="{ color: 'white', textDecoration: 'none', fontFamily: 'Arial', fontSize: homeFontSize, transition: 'font-size 0.3s ease' }"
           @mouseover="homeFontSize = '20px'"
           @mouseleave="homeFontSize = '16px'"
         ) Home
       .log
         nuxt-link#aboutbtn(
           to="/"
-          :style="{ color: 'white', textDecoration: 'none', fontFamily: 'Arial', fontSize: aboutFontSize }"
+          :style="{ color: 'white', textDecoration: 'none', fontFamily: 'Arial', fontSize: aboutFontSize, transition: 'font-size 0.3s ease' }"
           @mouseover="aboutFontSize = '20px'"
           @mouseleave="aboutFontSize = '16px'"
         ) About Us
@@ -19,7 +19,7 @@
       .main
         .dropdown(style="position: relative; display: inline-block; gap: 15px;")
           button.dropbtn(
-            :style="{ backgroundColor: '#122C4F', color: 'white', padding: '10px', fontSize: registerFontSize, border: 'none', cursor: 'pointer' }"
+            :style="{ backgroundColor: '#122C4F', color: 'white', padding: '10px', fontSize: registerFontSize, border: 'none', cursor: 'pointer', transition: 'font-size 0.3s ease' }"
             @mouseover="registerFontSize = '20px'"
             @mouseleave="registerFontSize = '16px'"
             @click="showRegisterDropdown = !showRegisterDropdown"
@@ -27,16 +27,16 @@
 
           .dropdown-content(:style="{ display: showRegisterDropdown ? 'block' : 'none', position: 'absolute', backgroundColor: '#f9f9f9', minWidth: '160px', boxShadow: '0px 8px 16px rgba(0, 0, 0, 0.2)', zIndex: '1' }"
             @mouseleave="showRegisterDropdown=!showRegisterDropdown")
-            nuxt-link.navbar-item(to="/facultyform" :style="{ color: 'black', padding: '12px 16px', textDecoration: 'none', display: 'block', backgroundColor: registerFacultyBackground}"
+            nuxt-link.navbar-item(to="/facultyform" :style="{ color: 'black', padding: '12px 16px', textDecoration: 'none', display: 'block', backgroundColor: registerFacultyBackground, transition: 'background-color 0.3s ease'}"
             @mouseover="registerFacultyBackground = '#ddd'"
             @mouseleave="registerFacultyBackground = none") Faculty
-            nuxt-link.navbar-item(to="/parentform" :style="{ color: 'black', padding: '12px 16px', textDecoration: 'none', display: 'block', backgroundColor: registerParentBackground}"
+            nuxt-link.navbar-item(to="/parentform" :style="{ color: 'black', padding: '12px 16px', textDecoration: 'none', display: 'block', backgroundColor: registerParentBackground, transition: 'background-color 0.3s ease'}"
             @mouseover="registerParentBackground = '#ddd'"
             @mouseleave="registerParentBackground = none") Parent
 
         .dropdown(style="position: relative; display: inline-block; gap: 15px;")
           button.dropbtn(
-            :style="{ backgroundColor: '#122C4F', color: 'white', padding: '10px', fontSize: viewFontSize, border: 'none', cursor: 'pointer' }"
+            :style="{ backgroundColor: '#122C4F', color: 'white', padding: '10px', fontSize: viewFontSize, border: 'none', cursor: 'pointer', transition: 'font-size 0.3s ease' }"
             @mouseover="viewFontSize = '20px'"
             @mouseleave="viewFontSize = '16px'"
             @click="showViewDropdown = !showViewDropdown"
@@ -44,10 +44,10 @@
 
           .dropdown-content(:style="{ display: showViewDropdown ? 'block' : 'none', position: 'absolute', backgroundColor: '#f9f9f9', minWidth: '160px', boxShadow: '0px 8px 16px rgba(0, 0, 0, 0.2)', zIndex: '1' }"
             @mouseleave="showViewDropdown=!showViewDropdown")
-            nuxt-link.navbar-item( to="/viewfaculty" :style="{ color: 'black', padding: '12px 16px', textDecoration: 'none', display: 'block', backgroundColor: viewFacultyBackground}"
+            nuxt-link.navbar-item( to="/viewfaculty" :style="{ color: 'black', padding: '12px 16px', textDecoration: 'none', display: 'block', backgroundColor: viewFacultyBackground, transition: 'background-color 0.3s ease'}"
             @mouseover="viewFacultyBackground = '#ddd'"
             @mouseleave="viewFacultyBackground = none") Faculty
-            nuxt-link.navbar-item(to="/viewparents" :style="{ color: 'black', padding: '12px 16px', textDecoration: 'none', display: 'block', backgroundColor: viewParentBackground}"
+            nuxt-link.navbar-item(to="/viewparents" :style="{ color: 'black', padding: '12px 16px', textDecoration: 'none', display: 'block', backgroundColor: viewParentBackground, transition: 'background-color 0.3s ease'}"
             @mouseover="viewParentBackground = '#ddd'"
             @mouseleave="viewParentBackground = none") Parent
             
@@ -55,7 +55,7 @@
         a#logoutbtn(
           href="/api/logout"
           @click="logout"
-          :style="{ color: 'white', textDecoration: 'none', fontFamily: 'Arial', fontSize: logoutFontSize }"
+          :style="{ color: 'white', textDecoration: 'none', fontFamily: 'Arial', fontSize: logoutFontSize, transition: 'font-size 0.3s ease' }"
           @mouseover="logoutFontSize = '20px'"
           @mouseleave="logoutFontSize = '16px'"
         ) Logout
