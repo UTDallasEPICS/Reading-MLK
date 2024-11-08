@@ -1,47 +1,48 @@
 <template lang="pug">
   div(v-for="(form, index) in studentForms" :key="index" 
       class="student-registration-form" 
-      style="background-color: #f9f9f9; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); padding: 1px; padding-bottom: 15px; margin: 30px;")
+      style="background-color: #f9f9f9; border-radius: 15px; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); padding: 30px 0px; margin: 30px auto; max-width: 600px; width: 100%;")
     h2(class="student-registration-header" 
-       style="text-align: center; color: #333;") Student \#{{index+1}} Registration
+      style="text-align: center; font-size: 24px; color: #122c4f; font-weight: 600; margin-bottom: 20px;") 
+      | Student \#{{index+1}} Registration
     div(class="form-container" 
-       style="display: flex; flex-direction: column; gap: 15px; /*padding: 0px 10%; padding-bottom: 20px;*/")
+       style="display: flex; flex-direction: column; gap: 15px; padding: 0 20px;")
       //- First Name
-      div(class="form-element" style="padding:0px 20px;")
+      div(class="form-element" style="display: flex; flex-direction: column; margin-bottom: 20px;")
         label(for="student_first_name" class="label" 
-               style="font-size: 16px; font-weight: 500; color: #333;") 
+               style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 5px;") 
                .required 
-               Enter Student First Name
+               | Student First Name
                span(style="color: red;")  *
         input(type="text" v-model="form.firstName" placeholder="Student First Name" 
                required 
                class="input"
                id="student_first_name" 
-               style="width: 100%; padding:10px; border: 1px solid #ccc; border-radius: 5px; transition: border-color 0.3s ease; box-sizing: border-box; height: 40px;"
+               style="padding: 12px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; outline: none; transition: border-color 0.3s ease;" 
                @focus="this.style.borderColor='#007BFF'" 
                @blur="this.style.borderColor='#ccc'") 
       
       //- Last Name
-      div(class="form-element" style="padding:0px 20px;")
+      div(class="form-element" style="display: flex; flex-direction: column; margin-bottom: 20px;")
         label(for="student_last_name" class="label" 
-               style="font-size: 16px; font-weight: 500; color: #333;")
+               style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 5px;")
                .required 
-               Enter Student Last Name
+               | Student Last Name
                span(style="color: red;")  *
         input(type="text" v-model="form.lastName" placeholder="Student Last Name" 
                required 
                class="input"
                id="student_last_name" 
-               style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; transition: border-color 0.3s ease; box-sizing: border-box; height: 40px;"
+               style="padding: 12px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; outline: none; transition: border-color 0.3s ease;" 
                @focus="this.style.borderColor='#007BFF'" 
                @blur="this.style.borderColor='#ccc'")
       
       //- Gender (dropdown selection)
-      div(class="form-element" style="padding:0px 20px;")
+      div(class="form-element" style="display: flex; flex-direction: column; margin-bottom: 20px;")
         label(for="student_gender" class="label" 
-               style="font-size: 16px; font-weight: 500; color: #333;") 
+               style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 5px;") 
                .required
-               Enter Student Gender 
+               | Student Gender 
                span(style="color: red;")  *
         select(v-model="form.gender" placeholder="Select Gender"
                required 
@@ -54,11 +55,11 @@
           option(value="F") Female
       
       //- Birth Date (calendar)
-      div(class="form-element" style="padding:0px 20px;")
+      div(class="form-element" style="display: flex; flex-direction: column; margin-bottom: 20px;")
         label(for="student_birth_date" class="label" 
-               style="font-size: 16px; font-weight: 500; color: #333;") 
+               style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 5px;") 
                .required 
-               Enter Student Birth Date
+               | Student Birth Date
                span(style="color: red;")  *
         VueDatePicker(v-model="form.birthDate" name="student_birth_date" 
                       required 
@@ -71,11 +72,11 @@
                       :enable-time-picker="false")
       
       //- Grade (dropdown selection)
-      div(class="form-element" style="padding:0px 20px;")
+      div(class="form-element" style="display: flex; flex-direction: column; margin-bottom: 20px;")
         label(for="student_grade" class="label" 
-               style="font-size: 16px; font-weight: 500; color: #333;") 
+               style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 5px;") 
                .required
-               Enter Student Grade
+               | Student Grade
                span(style="color: red;")  *
         select(type="number" v-model="form.grade"
                required 
@@ -86,11 +87,11 @@
           option(v-for="grade in 10" :key="grade" :value="grade") {{ grade }}
       
       //- Reading Level (dropdown selection)
-      div(class="form-element" style="padding:0px 20px;")
+      div(class="form-element" style="display: flex; flex-direction: column; margin-bottom: 20px;")
         label(for="student_reading_level" class="label" 
-               style="font-size: 16px; font-weight: 500; color: #333;") 
+               style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 5px;") 
                .required
-               Enter Student Reading Level
+               | Student Reading Level
                span(style="color: red;")  *
         select(type="number" v-model="form.readingLevel"
                required 
@@ -101,11 +102,11 @@
           option(v-for="rLevel in 10" :key="rLevel" :value="rLevel") {{ rLevel }}
       
       //- Zipcode (allow only numbers)
-      div(class="form-element" style="padding:0px 20px;")
+      div(class="form-element" style="display: flex; flex-direction: column; margin-bottom: 20px;")
         label(for="student_zipcode" class="label" 
-               style="font-size: 16px; font-weight: 500; color: #333;") 
+               style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 5px;") 
                .required 
-               Enter Student Zipcode
+               | Student Zipcode
                span(style="color: red;")  *
         input(type="number" v-model="form.zipcode" placeholder="Student Zipcode" 
                required 
@@ -120,6 +121,8 @@
         button(v-if="studentForms.length > 1" @click="removeStudent(index)" class="button" style="padding: 10px 20px; background-color: #122c4f; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin-top: 10px; transition: background-color 0.3s ease;") - Student
 
 </template>
+
+
 
 <script lang="ts" setup>
 import { ref } from 'vue';
