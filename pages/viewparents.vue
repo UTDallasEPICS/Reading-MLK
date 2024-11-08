@@ -1,4 +1,4 @@
-<template lang="pug">
+<!-- <template lang="pug">
   .database-view(style="font-family: Arial, sans-serif; background-color: #f0f4f8; padding: 20px;")
     .header(style="display: flex; flex-direction: column; justify-content: center; align-items: center; background-color: #2d3748; padding: 1.5rem; border-radius: 0.5rem; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); margin-bottom: 2rem;") 
       h2(style="font-size: 2.5rem; font-weight: 700; color: #f7fafc; text-transform: uppercase; letter-spacing: 0.1rem; margin: 0; position: relative;"
@@ -50,7 +50,50 @@
                   ) Remove
       
     
+</template> -->
+
+<template lang="pug"> 
+  .database-view(class="font-sans bg-gray-50 p-5")
+    .header(class="flex flex-col justify-center items-center bg-gray-800 p-6 rounded-lg shadow-lg mb-8") 
+      h2(class="text-4xl font-bold text-gray-50 uppercase tracking-wide mb-2 relative") Parent
+      .heading-line(class="block w-16 h-1 bg-green-400 my-2 mx-auto rounded relative")
+    .search-container(class="mb-6 p-6 bg-white rounded-lg shadow-md justify-center items-center")
+      h3.text-2xl.font-semibold.mb-6.text-center Search Parent Database 
+      .search-form(class="grid grid-cols-6 gap-8 mb-6")
+        .field(v-for="(header, index) in tableHeaders" :key="index" class="flex flex-col w-full max-w-xs mb-6")
+          label(class="text-lg font-semibold text-gray-800 mb-2 transition-all duration-300 ease-in-out transform hover:text-teal-600") {{header.label}}
+          input(v-if="header.type !== 'checkbox'" :id="header.id" :placeholder="header.placeholder" class="p-3 text-base border border-gray-300 rounded-md w-full transition-all duration-300 ease-in-out focus:ring-2 focus:ring-teal-500")
+          input(v-if="header.type === 'checkbox'" type="checkbox" :id="header.id" class="p-3 text-base border border-gray-300 rounded-md w-1/10 transition-all duration-300 ease-in-out focus:ring-2 focus:ring-teal-500")
+      .button-group.flex.justify-center.gap-4.mt-6
+        button(@click="performSearch" class="clear-button p-3 px-5 text-base font-semibold text-white bg-teal-500 rounded-lg transition-colors duration-300 hover:bg-teal-600 focus:outline-none") Search
+        button(@click="clearSearch" class="clear-button p-3 px-5 text-base font-semibold text-white bg-red-500 rounded-lg transition-colors duration-300 hover:bg-red-600 focus:outline-none") Clear
+
+    .table-container(class="mt-8 p-5")
+      .table-wrapper(class="overflow-x-auto rounded-lg shadow-lg")
+        table.table.w-full.border-collapse.text-sm.text-gray-800.bg-gray-50
+          thead.table-head.text-xs.text-white.bg-gray-700.uppercase
+            tr
+              th(v-for="header in h" :key="header" class="table-cell p-3 border-b border-gray-200 text-center") {{ header }}
+          
+          tbody
+            tr(v-for="(u, index) in Parents" :key="u.id" :class="['table-row', index % 2 === 0 ? 'bg-gray-100' : 'bg-white']")
+              td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.zipcode }}
+              td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.yearly_income }}
+              td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.birth_date }}
+              td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.average_number_books }}
+              td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.phone_number }}
+              td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.gender }}
+              td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.marital_stat }}
+              td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.first_name }}
+              td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.last_name }}
+              td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.email }}
+              td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.social_media }}
+              td(class="table-cell p-3 border-b border-gray-200 text-center") 
+                button(v-if="!editButtonPressed" @click="goToEdit(u.id)" class="action-button p-2 px-4 text-xs font-semibold text-white bg-teal-500 rounded-lg focus:outline-none") Edit
+              td(class="table-cell p-3 border-b border-gray-200 text-center")
+                button(@click="removeFaculty(u.id)" class="action-button p-2 px-4 text-xs font-semibold text-white bg-red-500 rounded-lg focus:outline-none") Remove
 </template>
+
 
 <script setup lang="ts">
   import type { User } from "@prisma/client";

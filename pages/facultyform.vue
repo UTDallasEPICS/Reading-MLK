@@ -271,8 +271,6 @@
           button(type="submit" class="submit-button" style="padding: 10px 20px; background-color: #122c4f; color: white; border: none; border-radius: 0.5rem; cursor: pointer; font-size: 1rem; transition: all 0.3s ease;" @hover="this.style.backgroundColor='#1a1a2e'") Submit
 </template>
 
-
-
 <script lang="ts" setup>
 
 const props = defineProps<{ modelValue: any }>()
