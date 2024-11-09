@@ -29,6 +29,37 @@
         h2(style="font-size: clamp(2vw + 1rem, 2.5rem);") container 3
 </template> -->
 
+<template lang="pug">
+  .main-container(style="display: flex; flex-direction: column; align-items: center; justify-content: center;")
+    .centered-container(style="display: flex; align-items: center; justify-content: center; text-align: center;")
+      h1 Welcome to Reading Huddle
+    .module-container(style="display: flex; justify-content: center; align-items: center; padding: 20px; border-radius: 20px; background-color: #FFCD98; width: 90vw; gap: 30px;")
+      .module(
+        :key="index"
+        :style="moduleStyles[0]"
+        @mouseover="applyHoverStyles(0)"
+        @mouseleave="removeHoverStyles(0)"
+      )
+        img(src="/bookmark.png" alt="Reading Huddle Logo" style="width: 50px; height: 50px; margin-right: 10px; border-radius: 5px; object-fit: contain;")
+        h2(style="font-size: clamp(2vw + 1rem, 2.5rem);") About Us
+      .module(
+        :key="index"
+        :style="moduleStyles[1]"
+        @mouseover="applyHoverStyles(1)"
+        @mouseleave="removeHoverStyles(1)"
+      )
+        img(src="/bookmark.png" alt="Reading Huddle Logo" style="width: 50px; height: 50px; margin-right: 10px; border-radius: 5px; object-fit: contain;")
+        h2(style="font-size: clamp(2vw + 1rem, 2.5rem);") Course Homepage
+      .module(
+        :key="index"
+        :style="moduleStyles[2]"
+        @mouseover="applyHoverStyles(2)"
+        @mouseleave="removeHoverStyles(2)"
+      )
+        img(src="/bookmark.png" alt="Reading Huddle Logo" style="width: 50px; height: 50px; margin-right: 10px; border-radius: 5px; object-fit: contain;")
+        h2(style="font-size: clamp(2vw + 1rem, 2.5rem);") container 3
+</template>
+
 <!-- <template lang="pug">
   .main-container(class="flex flex-col items-center justify-center min-h-screen py-10 bg-gray-50")
     .centered-container(class="flex flex-col items-center justify-center text-center space-y-8 md:space-y-10")
