@@ -10,7 +10,7 @@ module.exports = {
     theme: {
       extend: {
         colors: {
-          customBlue: '#122C4F',
+          customBlue: '#2d3748',
         }
       },
     },
