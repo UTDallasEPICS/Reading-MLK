@@ -1,12 +1,11 @@
 <template lang="pug">
-  .centered-container(class="flex justify-center items-center m-10")
+  .centered-container(class="flex justify-center items-center my-10")
     .form
-      .form-container(class="p-8 bg-white rounded-lg shadow-lg max-w-4xl w-full")
+      .form-container(class="p-8 bg-white rounded-lg shadow-lg max-w-4xl w-full min-w-[900px]")
         .form-header(class="text-center bg-customBlue p-6 rounded-t-lg text-gray-100")
           h2(class="text-4xl font-medium uppercase tracking-wider") Faculty Registration Form
           .heading-line(class="w-32 h-1 bg-green-400 my-2 mx-auto rounded-sm")
         .form-input(class="grid gap-6 p-8 bg-white rounded-b-lg")
-
           // Form fields
           .form-element(class="flex flex-col")
             label(for="first-name" class="text-lg font-semibold text-gray-800 mb-2") First Name
@@ -47,13 +46,11 @@
           .checkbox(class="flex items-center mt-4")
             input(type="checkbox" id="dual_lang" name="dual_lang" value="true" class="w-5 h-5 mr-2 cursor-pointer")
             label(for="dual_lang" class="text-lg font-semibold text-gray-800") Dual Language Teacher?
-
         .button-container(class="flex justify-center mt-5")
           button(type="submit" class="submit-button px-5 py-2.5 bg-[#122c4f] text-white border-0 rounded-lg cursor-pointer text-base transition-all duration-300 ease-in-out hover:bg-[#1a1a2e]") Submit
 </template>
 
 <script lang="ts" setup>
-
 const props = defineProps<{ modelValue: any }>()
 const emit = defineEmits(["update:modelValue"])
 const rhuser = useCookie<any>('rhuser')
