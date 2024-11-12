@@ -1,70 +1,56 @@
 <template lang="pug">
-  .centered-container(style="display: flex; justify-content: center; align-items: center; margin: 40px")
+  .centered-container(class="flex justify-center items-center my-10")
     .form
-      .form-container(style="padding: 20px; padding-top: 10px; background-color: white; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4); max-width: 500px; width: 100%;")
-        .form-header(style="text-align: center;")
-          h2 Faculty Registration Form
-        .form-input(style="display: grid; gap: 10px;")
-          .form-element(style="display: flex; flex-direction: column;")
-            label(for="textbox" style="font-size: 16px; font-weight: 500; color: #333;").required Enter Faculty First Name 
-              span(style="color: red;")  *
-            input(type="text" id="textbox" placeholder="Faculty First Name" required style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;")
-          .form-element(style="display: flex; flex-direction: column;")
-            label(for="textbox" style="font-size: 16px; font-weight: 500; color: #333;").required Enter the Faculty's Last Name
-              span(style="color: red;")  *          
-            input(type="text" id="textbox" placeholder="Faculty Last Name" required style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;")
-          .form-element(style="display: flex; flex-direction: column;")
-            label(for="textbox" style="font-size: 16px; font-weight: 500; color: #333;").required Enter the Faculty's User Name
-              span(style="color: red;")  *          
-            input(type="text" id="textbox" placeholder="Faculty User Name" required style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;")
-          .form-element(style="display: flex; flex-direction: column;")
-            label(for="textbox" style="font-size: 16px; font-weight: 500; color: #333;").required Enter the Faculty's Preferred Name
-              span(style="color: red;")  *
-            input(type="text" id="textbox" placeholder="Faculty Preferred Name" required style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;")
-          .form-element(style="display: flex; flex-direction: column;")
-            label(for="textbox" style="font-size: 16px; font-weight: 500; color: #333;").required Enter the Faculty's Email
-              span(style="color: red;")  *
-            input(type="text" id="textbox" placeholder="Faculty Email" required style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;")
-          .form-element(style="display: flex; flex-direction: column;")
-            label(for="textbox" style="font-size: 16px; font-weight: 500; color: #333;").required Enter the Faculty's Private Email
-              span(style="color: red;")  *          
-            input(type="text" id="textbox" placeholder="Faculty Private Email" required style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;")
-          .form-element(style="display: flex; flex-direction: column;")
-            label(for="textbox" style="font-size: 16px; font-weight: 500; color: #333;").required Enter the Faculty's School Name
-              span(style="color: red;")  *          
-            input(type="text" id="textbox" placeholder="Faculty School Name" required style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;")
-          .form-element(style="display: flex; flex-direction: column;")
-            label(for="textbox" style="font-size: 16px; font-weight: 500; color: #333;").required Enter the Faculty's School District
-              span(style="color: red;")  *
-            input(type="text" id="textbox" placeholder="Faculty School District" required style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;")
-          .form-element(style="display: flex; flex-direction: column;")
-            label(for="textbox" style="font-size: 16px; font-weight: 500; color: #333;").required Enter the Faculty's Department Name
-              span(style="color: red;")  *
-            input(type="text" id="textbox" placeholder="Faculty Department Name" required style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;")
-          .form-element(style="display: flex; flex-direction: column;")
-            label(for="textbox" style="font-size: 16px; font-weight: 500; color: #333;").required Enter the Faculty's Phone Number
-              span(style="color: red;")  *
-            input(type="text" id="textbox" placeholder="Faculty Phone Number" required style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;")
-          .form-element(style="display: flex; flex-direction: column;")
-            label(for="textbox" style="font-size: 16px; font-weight: 500; color: #333;").required Enter the Faculty's Phone Number
-              span(style="color: red;")  *
-            input(type="text" id="textbox" placeholder="Faculty Phone Number" required style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;")
-          .form-element(style="display: flex; flex-direction: column;")
-            label(for="textbox" style="font-size: 16px; font-weight: 500; color: #333;").required Enter Grade (use comma to separate multiple grades)
-              span(style="color: red;")  *
-            input(type="text" id="textbox" placeholder="Faculty Phone Number" required style="padding: 10px; border: 1px solid #ccc; border-radius: 5px;")
-          .form-element(style="display: flex; flex-direction: column;")
-            .checkbox(style="display: flex; align-items: center;")
-              input(type="checkbox" id="dual_lang" name="dual_lang" value="true" style="width: 20px; height: 20px; margin-right: 10px; cursor: pointer;" @hover="this.style.borderColor='#007BFF'" @focus="this.style.outline=none; this.style.boxShadow='0 0 5px 2px rgba(0, 123, 255, 0.5);'")
-              label(for="dual_lang" style="font-size: 16px; font-weight: 500; color: #333;") Dual Language Teacher?
-          .button-container(style="display: flex; justify-content: center; margin-top: 20px;")
-            button(type="submit" class="submit-button" style="padding: 10px 20px; background-color: #122c4f; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px;"
-              @mouseover="this.style.backgroundColor='#0056b3'" 
-              @mouseleave="this.style.backgroundColor='#122c4f'") Submit
+      .form-container(class="p-8 bg-white rounded-lg shadow-lg max-w-4xl w-full min-w-[900px]")
+        .form-header(class="text-center bg-customBlue p-6 rounded-t-lg text-gray-100")
+          h2(class="text-4xl font-medium uppercase tracking-wider") Faculty Registration Form
+          .heading-line(class="w-32 h-1 bg-green-400 my-2 mx-auto rounded-sm")
+        .form-input(class="grid gap-6 p-8 bg-white rounded-b-lg")
+          // Form fields
+          .form-element(class="flex flex-col")
+            label(for="first-name" class="text-lg font-semibold text-gray-800 mb-2") First Name
+            input#first-name(type="text" placeholder="first name" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500")
+          
+          .form-element(class="flex flex-col")
+            label(for="last-name" class="text-lg font-semibold text-gray-800 mb-2") Last Name
+            input#last-name(type="text" placeholder="last name" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500")
+          
+          .form-element(class="flex flex-col")
+            label(for="user-name" class="text-lg font-semibold text-gray-800 mb-2") User Name
+            input#user-name(type="text" placeholder="user name" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500")
+
+          .form-element(class="flex flex-col")
+            label(for="preferred-name" class="text-lg font-semibold text-gray-800 mb-2") Preferred Name
+            input#preferred-name(type="text" placeholder="Preferred name" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500")
+
+          .form-element(class="flex flex-col")
+            label(for="email" class="text-lg font-semibold text-gray-800 mb-2") Email
+            input#email(type="email" placeholder="Email Address" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500")
+          
+          .form-element(class="flex flex-col")
+            label(for="phone-number" class="text-lg font-semibold text-gray-800 mb-2") Phone Number
+            input#phone-number(type="tel" placeholder="Phone Number" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500")
+
+          .form-element(class="flex flex-col")
+            label(for="school-name" class="text-lg font-semibold text-gray-800 mb-2") School Name
+            input#school-name(type="text" placeholder="School name" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500")
+
+          .form-element(class="flex flex-col")
+            label(for="school-district" class="text-lg font-semibold text-gray-800 mb-2") School District
+            input#school-district(type="text" placeholder="School District" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500")
+          
+          .form-element(class="flex flex-col")
+            label(for="department-name" class="text-lg font-semibold text-gray-800 mb-2") Department Name
+            input#department-name(type="text" placeholder="Department Name" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500")
+
+          .checkbox(class="flex items-center mt-4")
+            input(type="checkbox" id="dual_lang" name="dual_lang" value="true" class="w-5 h-5 mr-2 cursor-pointer")
+            label(for="dual_lang" class="text-lg font-semibold text-gray-800") Dual Language Teacher?
+        .button-container(class="flex justify-center mt-5")
+          button(type="submit" class="submit-button px-5 py-2.5 bg-[#122c4f] text-white border-0 rounded-lg cursor-pointer text-base transition-all duration-300 ease-in-out hover:bg-[#1a1a2e]") Submit
 </template>
 
 <script lang="ts" setup>
-
 const props = defineProps<{ modelValue: any }>()
 const emit = defineEmits(["update:modelValue"])
 const rhuser = useCookie<any>('rhuser')

@@ -1,92 +1,69 @@
-<template>
-    <div>
-    <div>
-      <h2 class="text-center text-3xl font-bold mt-4"  style="margin-top: 35px">View Database</h2>
-      <br>
-    </div>
+<template lang="pug"> 
+  .database-view(class="bg-gray-100 p-5 font-sans")
+    .header(class="flex flex-col justify-center items-center bg-gray-700 p-6 rounded-lg shadow-lg mb-8") 
+      h2(class="text-4xl font-bold text-gray-100 uppercase tracking-wide mb-2 relative") Parent
+      .heading-line(class="block w-16 h-1 bg-teal-400 my-2 mx-auto rounded relative")
+    .search-container(class="mb-6 p-6 bg-white rounded-lg shadow-md flex flex-col items-center justify-center")
+      h3.text-2xl.font-semibold.mb-6.text-center Search Parent Database 
+      .search-form.flex.flex-wrap.gap-8.mb-6.justify-center
+        .field(v-for="(header, index) in tableHeaders" :key="index" class="flex flex-col w-full max-w-xs mb-6")
+          label(class="text-lg font-semibold text-gray-700 mb-2 transition-all duration-300 ease-in-out transform hover:text-teal-600") {{ header.label }}
+          input(v-if="header.type !== 'checkbox'" :id="header.id" :placeholder="header.placeholder" class="p-3 text-base border border-gray-300 rounded-md w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-500")
+          input(v-if="header.type === 'checkbox'" type="checkbox" :id="header.id" class="p-3 text-base border rounded-md w-10 h-full focus:border-blue-500 bg-transparent")
+      .button-group.flex.justify-center.gap-4.mt-6
+        button(@click="performSearch" class="clear-button p-3 px-5 text-base font-semibold text-white bg-teal-500 rounded-lg transition-colors duration-300 hover:bg-teal-600 focus:outline-none") Search
+        button(@click="clearSearch" class="clear-button p-3 px-5 text-base font-semibold text-white bg-red-500 rounded-lg transition-colors duration-300 hover:bg-red-600 focus:outline-none") Clear
+    .table-wrapper.overflow-x-auto.rounded-lg.shadow-lg
+      table.table.w-full.border-collapse.text-sm.text-gray-800.bg-gray-50
+        thead.table-head.text-xs.text-white.bg-gray-700.uppercase
+          tr
+            th(v-for="header in h" :key="header" class="table-cell p-3 border-b border-gray-200 text-center") {{ header }}
+        tbody
+          tr(v-for="(u, index) in Parents" :key="u.id" :class="['table-row', index % 2 === 0 ? 'bg-gray-100' : 'bg-white', 'hover:shadow-lg', 'hover:scale-[1.02]', 'transition-transform', 'duration-200']") 
+            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.zipcode }}
+            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.yearly_income }}
+            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.birth_date }}
+            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.average_number_books }}
+            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.phone_number }}
+            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.gender }}
+            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.marital_stat }}
+            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.first_name }}
+            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.last_name }}
+            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.email }}
+            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.social_media }}
+            td(class="table-cell p-3 border-b border-gray-200 text-center")
+              button(v-if="!editButtonPressed" @click="goToEdit(u.id)" class="action-button edit-button rounded-md py-2 px-4 text-xs font-semibold text-white cursor-pointer bg-teal-500 hover:bg-teal-600 focus:outline-none transition-all") Edit
+            td(class="table-cell p-3 border-b border-gray-200 text-center")
+              button(@click="removeParent(u.id)" class="action-button remove-button rounded-md py-2 px-4 text-xs font-semibold text-white cursor-pointer bg-red-500 hover:bg-red-600 focus:outline-none transition-all" ) Remove
+</template>
 
-    <!--table for the database display-->
-    <div class="mt-4 mx-10">
-      <div class="relative overflow-x-auto rounded-lg">
-        <table class="w-full text-sm text-center text-gray-500 dark:text-gray-400">
-          <thead class="text-sm text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-          <tr class="h-9">
-            <th scope="col" class="px-6 py-3">Zip Code</th>
-            <th scope="col" class="px-6 py-3">Yearly Income</th>
-            <th scope="col" class="px-6 py-3">Birth Date</th>
-            <th scope="col" class="px-6 py-3">Average Number of Books</th>
-            <th scope="col" class="px-6 py-3">Phone Number</th>
-            <th scope="col" class="px-6 py-3">Gender</th>
-            <th scope="col" class="px-6 py-3">Marital Status</th>
-            <th scope="col" class="px-6 py-3">First Name</th>
-            <th scope="col" class="px-6 py-3">Last Name</th>
-            <th scope="col" class="px-6 py-3">Email</th>
-            <th scope="col" class="px-6 py-3">Social Media</th>
-            <th scope="col" class="px-6 py-3">Edit</th>
-            <th scope="col" class="px-6 py-3">Remove</th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr class="h-9" v-for="(u) in Parents">            
-            <td>
-              <div>{{ u.zipcode }}</div>
-            </td>
-            <td>
-              <div>{{ u.yearly_income }}</div>
-            </td>
-            <td>
-              <div>{{ u.birth_date }}</div>
-            </td>
-            <td>
-              <div>{{ u.average_number_books }}</div>
-            </td>
-            <td>
-              <div>{{ u.phone_number }}</div>
-            </td>
-            <td>
-              <div>{{ u.gender }}</div>
-            </td>
-            <td>
-              <div>{{ u.marital_stat }}</div>
-            </td>
-            <td>
-              <div>{{ u.first_name }}</div>
-            </td>
-            <td>
-              <div>{{ u.last_name }}</div>
-            </td>
-            <td>
-              <div>{{ u.email }}</div>
-            </td>
-            <td>
-              <div>{{ u.social_media }}</div>
-            </td>
 
-            <td>
-              <button id="editUserButton" class="rounded-md bg-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow-sm
-            hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2
-            focus-visible:outline-indigo-600" v-if="!editButtonPressed" @click='goToEdit(u.id)'>Edit</button>
-            </td>
 
-            <!--Remove function-->
-            <td>
-              <button id="applyRemoveButton" class="rounded-md bg-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow-sm
-            hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2
-            focus-visible:outline-indigo-600" @click="removeParent(u.id)">Remove</button>
-            </td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-    </div>
-  </template>
-  
-  <script setup lang="ts">
+<script setup lang="ts">
   import type { User } from "@prisma/client";
   import { ref } from "vue";
 
-  const editButtonPressed = ref(false)
+  const editButtonPressed = ref(false)  
+  const searchButtonHover = ref("#48bb78")
+  const clearButtonHover = ref("#e53e3e")
+
+  const tableHeaders = [
+        { id: 'zipcode', label: 'Zip Code', placeholder: 'Zip Code', type: 'text' },
+        { id: 'yearlyIncome', label: 'Yearly Income', placeholder: 'Yearly Income', type: 'text' },
+        { id: 'birthDate', label: 'Birth Date', placeholder: 'Birth Date', type: 'text' },
+        { id: 'avgBookNum', label: 'Avg. # of Books', placeholder: 'Avg. # of Books', type: 'text' },
+        { id: 'phone', label: 'Phone Number', placeholder: 'Phone Number', type: 'text' },
+        { id: 'gender', label: 'Gender', placeholder: 'Gender', type: 'text' },
+        { id: 'maritalStat', label: 'Marital Status', placeholder: 'Marital Status', type: 'text' },
+        { id: 'firstname', label: 'First Name', placeholder: 'First Name', type: 'text' },
+        { id: 'lastname', label: 'Last Name', placeholder: 'Last Name', type: 'text' },
+        { id: 'email', label: 'Email', placeholder: 'Email', type: 'text' },
+        { id: 'socialmedia', label: 'Social Media', placeholder: 'Social Media', type: 'text' },
+      ];
+
+  const h = [
+    "Zip Code", "Yearly Income", "Birth Date", "Avg. # of Books", "Phone Number", "Gender", "Marital Status", "First Name", "Last Name", "Email", "Social Media", "Edit", "Remove"
+  ]
   
   const addDataToDatabase = async (jsonData: any) => {
 
@@ -105,7 +82,7 @@
         social_media: record['social_media'], 
     };
 
-    // Use Prisma to add the new Faculty to the database
+    // Use Prisma to add the new parent to the database
     await $fetch('/api/parent/parent', {
       method: 'POST',
       body: newParent,
@@ -129,7 +106,7 @@
   }
     
   const Parents = ref<Parent[]>([])
-  const FacultyObject = ref({
+  const ParentObject = ref({
     zipcode: "",     
     yearly_income: "", 
     birth_date: new Date(),  
@@ -164,14 +141,27 @@
           body: { id },
       });
     //  Parents.value = await getParents();
-  }
+  } 
 
-
-
-  
+  const performSearch = () => {}
+  const clearSearch = () => {
+    ParentObject.value = {
+      zipcode: "",
+      yearly_income: "",
+      birth_date: new Date(),
+      average_number_books: 0,
+      first_name: "",
+      last_name: "",
+      email: "",
+      phone_number: "",
+      gender: "",
+      marital_stat: "",
+      social_media: "",
+    };
+  };
   const rhuser = useCookie<User>('rhuser')
   const userRole = (rhuser.value?.role)
   console.log(rhuser.value.role)
   const currid = (rhuser.value?.id)
 
-  </script>
+</script>

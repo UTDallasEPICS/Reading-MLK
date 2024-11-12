@@ -1,65 +1,66 @@
 <template lang="pug">
   header.navbar
-    .navbar-container(style="background-color: #122C4F; display: flex; justify-content: center; align-items: center; gap: 15px; height: 60px;")
+    .navbar-container(class="bg-customBlue flex justify-center items-center gap-6 md:gap-10 py-4")
       .log
-        nuxt-link#homebtn(
-          to="/"
-          :style="{ color: 'white', textDecoration: 'none', fontFamily: 'Arial', fontSize: homeFontSize }"
-          @mouseover="homeFontSize = '20px'"
-          @mouseleave="homeFontSize = '16px'"
-        ) Home
+      nuxt-link#homebtn(
+        to="/"
+        class="text-white font-bold no-underline font-sans text-base lg:text-lg px-2 lg:px-4 hover:scale-110 transform transition-all duration-700 inline-flex items-center justify-center"
+      ) Home
+
+
       .log
         nuxt-link#aboutbtn(
-          to="/"
-          :style="{ color: 'white', textDecoration: 'none', fontFamily: 'Arial', fontSize: aboutFontSize }"
-          @mouseover="aboutFontSize = '20px'"
-          @mouseleave="aboutFontSize = '16px'"
+          to="/about"
+          class="text-white font-bold no-underline font-sans text-base lg:text-lg px-2 lg:px-4 hover:scale-110 transform transition-all duration-700 inline-flex items-center justify-center"
         ) About Us
 
-      .main
-        .dropdown(style="position: relative; display: inline-block; gap: 15px;")
-          button.dropbtn(
-            :style="{ backgroundColor: '#122C4F', color: 'white', padding: '10px', fontSize: registerFontSize, border: 'none', cursor: 'pointer' }"
-            @mouseover="registerFontSize = '20px'"
-            @mouseleave="registerFontSize = '16px'"
-            @click="showRegisterDropdown = !showRegisterDropdown"
-          ) Register
+      // Register dropdown
+      .dropdown.relative.inline-block.gap-4(
+        onmouseenter="this.querySelector('.dropdown-content').style.display = 'block'"
+        onmouseleave="this.querySelector('.dropdown-content').style.display = 'none'"
+      )
+        button.dropbtn(
+          class="text-white font-bold py-2 px-4 lg:px-6 text-base lg:text-lg border-none cursor-pointer"
+        ) Register
 
-          .dropdown-content(:style="{ display: showRegisterDropdown ? 'block' : 'none', position: 'absolute', backgroundColor: '#f9f9f9', minWidth: '160px', boxShadow: '0px 8px 16px rgba(0, 0, 0, 0.2)', zIndex: '1' }"
-            @mouseleave="showRegisterDropdown=!showRegisterDropdown")
-            nuxt-link.navbar-item(to="/facultyform" :style="{ color: 'black', padding: '12px 16px', textDecoration: 'none', display: 'block', backgroundColor: registerFacultyBackground}"
-            @mouseover="registerFacultyBackground = '#ddd'"
-            @mouseleave="registerFacultyBackground = none") Faculty
-            nuxt-link.navbar-item(to="/parentform" :style="{ color: 'black', padding: '12px 16px', textDecoration: 'none', display: 'block', backgroundColor: registerParentBackground}"
-            @mouseover="registerParentBackground = '#ddd'"
-            @mouseleave="registerParentBackground = none") Parent
+        .dropdown-content.hidden.absolute.bg-white.min-w-40.shadow-lg.z-10.rounded-md
+          nuxt-link.navbar-item(
+            to="/facultyform"
+            class="text-black py-3 px-4 no-underline block hover:bg-gray-200 rounded-md"
+          ) Faculty
+          nuxt-link.navbar-item(
+            to="/parentform"
+            class="text-black py-3 px-4 no-underline block hover:bg-gray-200 rounded-md"
+          ) Parent
 
-        .dropdown(style="position: relative; display: inline-block; gap: 15px;")
-          button.dropbtn(
-            :style="{ backgroundColor: '#122C4F', color: 'white', padding: '10px', fontSize: viewFontSize, border: 'none', cursor: 'pointer' }"
-            @mouseover="viewFontSize = '20px'"
-            @mouseleave="viewFontSize = '16px'"
-            @click="showViewDropdown = !showViewDropdown"
-          ) View
+      // View dropdown
+      .dropdown.relative.inline-block.gap-4(
+        onmouseenter="this.querySelector('.dropdown-content').style.display = 'block'"
+        onmouseleave="this.querySelector('.dropdown-content').style.display = 'none'"
+      )
+        button.dropbtn(
+          class="text-white font-bold py-2 px-4 lg:px-6 text-base lg:text-lg border-none cursor-pointer"
+        ) View
 
-          .dropdown-content(:style="{ display: showViewDropdown ? 'block' : 'none', position: 'absolute', backgroundColor: '#f9f9f9', minWidth: '160px', boxShadow: '0px 8px 16px rgba(0, 0, 0, 0.2)', zIndex: '1' }"
-            @mouseleave="showViewDropdown=!showViewDropdown")
-            nuxt-link.navbar-item( to="/viewfaculty" :style="{ color: 'black', padding: '12px 16px', textDecoration: 'none', display: 'block', backgroundColor: viewFacultyBackground}"
-            @mouseover="viewFacultyBackground = '#ddd'"
-            @mouseleave="viewFacultyBackground = none") Faculty
-            nuxt-link.navbar-item(to="/viewparents" :style="{ color: 'black', padding: '12px 16px', textDecoration: 'none', display: 'block', backgroundColor: viewParentBackground}"
-            @mouseover="viewParentBackground = '#ddd'"
-            @mouseleave="viewParentBackground = none") Parent
-            
+        .dropdown-content.hidden.absolute.bg-white.min-w-40.shadow-lg.z-10.rounded-md
+          nuxt-link.navbar-item(
+            to="/viewfaculty"
+            class="text-black py-3 px-4 no-underline block hover:bg-gray-200 rounded-md"
+          ) Faculty
+          nuxt-link.navbar-item(
+            to="/viewparents"
+            class="text-black py-3 px-4 no-underline block hover:bg-gray-200 rounded-md"
+          ) Parent
+
       .log
         a#logoutbtn(
           href="/api/logout"
           @click="logout"
-          :style="{ color: 'white', textDecoration: 'none', fontFamily: 'Arial', fontSize: logoutFontSize }"
-          @mouseover="logoutFontSize = '20px'"
-          @mouseleave="logoutFontSize = '16px'"
+          class="text-white font-bold no-underline font-sans text-base lg:text-lg px-2 lg:px-4 hover:scale-110 transform transition-all duration-700 inline-flex items-center justify-center"
         ) Logout
 </template>
+
+
 
 <script setup>
 const props = defineProps(['userRole']);
