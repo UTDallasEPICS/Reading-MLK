@@ -14,8 +14,8 @@
             div(v-if="header.type === 'checkbox'" class="flex flex-col gap-5 justify-center align-items-center")
               div(v-if="header.type === 'checkbox'" class="flex flex-row gap-5 my-2")
                 div(v-if="header.type === 'checkbox'" class="flex flex-row gap-5 justify-center align-items-center")
-                  input(v-if="header.type === 'checkbox'" type="checkbox" :id="header.id + '-toggle'" :name="header.id" v-model="selectedOption" :value="selectedOption === 'yes' ? 'no' : 'yes'" @click="selectedOption = (selectedOption === 'yes' ? 'no' : 'yes'); console.log('selectedOption changed to:', selectedOption)" class="appearance-none border border-gray-300 rounded-lg w-8 h-7 bg-transparent cursor-pointer checked:bg-customBlue checked:border-transparent focus:outline-none focus:ring-2 focus:ring-customBlue focus:ring-offset-2 transition duration-300 ease-in-out transform hover:scale-105 shadow-sm hover:shadow-md")
-                  label(v-if="header.type === 'checkbox'" for="header.id + '-toggle'" :class="{'text-teal-600': selectedOption === 'yes', 'text-gray-700': selectedOption === 'no'}" class="text-lg font-semibold text-gray-700 mb-2 transition-all duration-300 ease-in-out transform hover:text-teal-600") {{selectedOption === 'yes' ? "Yes" : "No"}}
+                input(v-if="header.type === 'checkbox'" type="checkbox" :id="header.id + '-toggle'" :name="header.id" v-model="selectedOption" class="appearance-none border border-gray-300 rounded-lg w-8 h-7 bg-transparent cursor-pointer checked:bg-customBlue checked:border-transparent focus:outline-none focus:ring-2 focus:ring-customBlue focus:ring-offset-2 transition duration-300 ease-in-out transform hover:scale-105 shadow-sm hover:shadow-md")
+                label(for="header.id + '-toggle'" :class="{'text-teal-600': selectedOption, 'text-gray-700': !selectedOption}" class="text-lg font-semibold text-gray-700 mb-2 transition-all duration-300 ease-in-out transform hover:text-teal-600") {{ selectedOption ? "Yes" : "No" }}
       .button-group.flex.justify-center.gap-4.mt-6
         button(@click="performSearch" class="clear-button px-5 py-3 text-base font-semibold text-white rounded-lg bg-teal-500 hover:bg-teal-600 focus:outline-none transition-all") Search
         button(@click="clearSearch" class="clear-button px-5 py-3 text-base font-semibold text-white rounded-lg bg-red-500 hover:bg-red-600 focus:outline-none transition-all") Clear
@@ -51,7 +51,10 @@
 <script setup lang="ts">
   import type { User } from "@prisma/client";
   import { ref } from "vue";
-  
+
+  const editButtonPressed = ref(false);
+  const selectedOption = ref(false); // Initialize with a default value, e.g., 'no'
+
   const tableHeaders = [
         { id: 'district', label: 'District', placeholder: 'District', type: 'text' },
         { id: 'email', label: 'Email', placeholder: 'Email', type: 'text' },
