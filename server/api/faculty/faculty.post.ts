@@ -1,9 +1,12 @@
 import { PrismaClient } from '@prisma/client';
+import { PrismaClientKnownRequestError, PrismaClientUnknownRequestError } from '@prisma/client/runtime/library';
 import { read } from 'fs';
 const prisma = new PrismaClient();
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event);
+
+    console.log("me event",event);
 
     const district = body.faculty.district;
     const dual_lang = body.faculty.dual_lang;
@@ -36,8 +39,8 @@ export default defineEventHandler(async (event) => {
                 district: district,
                 dual_lang: dual_lang,
                 faculty_email: faculty_email,
-                first_name: first_name,
-                last_name: last_name,
+                // first_name: first_name,
+                // last_name: last_name,
                 school_name: school_name,
                 phone_number: phone_number,
                 department: department,
@@ -45,8 +48,13 @@ export default defineEventHandler(async (event) => {
             },
         });
     } catch (error) {
-        console.error('Error creating faculty:', error);
-        throw createError({ statusCode: 500, statusMessage: "Error creating faculty" });
+        if (error instanceof PrismaClientKnownRequestError){
+            console.log('You exeperienced this error code: ' + error.code, error.meta, error.message, ' If you would like to find what this error message means please refer to this link: https://www.prisma.io/docs/orm/reference/error-reference  ')
+        }
+        else if (error instanceof PrismaClientUnknownRequestError){
+            console.log('Unknown error: ' , error.message)
+        }
+        throw createError({ statusCode: 500, statusMessage: "Error creating faculty", });
     }
 
     return newFaculty;

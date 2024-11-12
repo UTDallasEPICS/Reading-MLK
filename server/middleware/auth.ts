@@ -13,14 +13,14 @@ const runtime  = useRuntimeConfig()
 
 export default defineEventHandler(async (event) => {
   event.context.client = client;
-  const cvtoken = getCookie(event, 'cvtoken') || '';
+  const rhtoken = getCookie(event, 'rhtoken') || '';
 
-  if (!cvtoken && !(event.node.req.url?.includes('/api/callback'))) {
+  if (!rhtoken && !(event.node.req.url?.includes('/api/callback'))) {
     await sendRedirect(event, loginRedirectUrl());
-  } else if (cvtoken) {
+  } else if (rhtoken) {
     try {
       const decoded = jwt.verify(
-        cvtoken, 
+        rhtoken, 
         fs.readFileSync(process.cwd() + '/cert-dev.pem')
       );
       const claims = decoded as MyTokenPayload; // Type assertion
@@ -34,21 +34,21 @@ export default defineEventHandler(async (event) => {
 
         if (!event.context.user) {
         console.error(`${claims.email} not found`);
-         setCookie(event, 'cvtoken', ''); 
-         setCookie(event, 'cvuser', '');
+         setCookie(event, 'rhtoken', ''); 
+         setCookie(event, 'rhuser', '');
          return await sendRedirect(event, loginRedirectUrl());
         }
         
         // Set the cookie with user information
-        setCookie(event, 'cvuser', JSON.stringify(event.context.user));
+        setCookie(event, 'rhuser', JSON.stringify(event.context.user));
       } else {
         // Handle the case where the email is not defined in the token payload
         throw new Error('Email not provided in token.');
       }
     } catch (e) {
       console.error(e);
-      setCookie(event, 'cvtoken', '');
-      setCookie(event, 'cvuser', '');
+      setCookie(event, 'rhtoken', '');
+      setCookie(event, 'rhuser', '');
       return await sendRedirect(event, loginRedirectUrl());
     }
   }

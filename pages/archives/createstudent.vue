@@ -43,11 +43,11 @@ div
     form.mt-10(@submit.prevent="createStudentProfile")
         //- First Name
         div
-            label.block.text-lg.font-medium.leading-6.text-gray-900(for="first-name") First Name
+            label.block.text-lg.font-medium.leading-6.text-gray-900(for="first-name") Child First Name
             input(type="text" v-model="studentProfile.firstName" name="first-name" id="first-name" class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-lg")
         //- Last Name
         div
-            label.block.text-lg.font-medium.leading-6.text-gray-900(for="last-name") Last Name
+            label.block.text-lg.font-medium.leading-6.text-gray-900(for="last-name") Child Last Name
             input(type="text" v-model="studentProfile.lastName" name="last-name" id="last-name" class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-lg")
         //- Age
         div
