@@ -9,14 +9,14 @@
           // First Name
           .form-element(class="flex flex-col")
             label(for="first_name" class="text-lg font-semibold text-gray-800 mb-2")
-              Enter Parent First Name
+              Enter First Name
               span(class="text-red-500") 
             input(type="text" id="first_name" v-model="data_ParentProfile.first_name" placeholder="Parent First Name" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" @focus="this.style.borderColor='#007BFF'" @blur="this.style.borderColor='#ccc'")
 
           // Last Name
           .form-element(class="flex flex-col")
             label(for="last_name" class="text-lg font-semibold text-gray-800 mb-2")
-              Enter Parent Last Name
+              Enter Last Name
               span(class="text-red-500") 
             input(type="text" id="last_name" v-model="data_ParentProfile.last_name" placeholder="Parent Last Name" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" @focus="this.style.borderColor='#007BFF'" @blur="this.style.borderColor='#ccc'")
 
@@ -24,42 +24,42 @@
           // Birth Date
           .form-element(class="flex flex-col")
             label(for="birth_date" class="text-lg font-semibold text-gray-800 mb-2")
-              Enter Parent Birth Date
+              Enter Birth Date
               span(class="text-red-500") 
             VueDatePicker(v-model="data_ParentProfile.birth_date" name="birth_date" id="birth_date" required :enable-time-picker="false")
             
           // Zipcode
           .form-element(class="flex flex-col")
             label(for="zipcode" class="text-lg font-semibold text-gray-800 mb-2")
-              Enter Parent Zipcode
+              Enter Zipcode
               span(class="text-red-500") 
             input(type="text" id="zipcode" v-model="data_ParentProfile.zipcode" placeholder="Parent Zipcode" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" @focus="this.style.borderColor='#007BFF'" @blur="this.style.borderColor='#ccc'")
 
           // Yearly Income
           .form-element(class="flex flex-col")
             label(for="yearly_income" class="text-lg font-semibold text-gray-800 mb-2")
-              Enter Parent Yearly Income
+              Enter Yearly Income
               span(class="text-red-500") 
             input(type="text" id="yearly_income" v-model="data_ParentProfile.yearly_income" placeholder="Parent Yearly Income" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" @focus="this.style.borderColor='#007BFF'" @blur="this.style.borderColor='#ccc'")
 
           // Phone Number
           .form-element(class="flex flex-col")
             label(for="phone_number" class="text-lg font-semibold text-gray-800 mb-2")
-              Enter Parent Phone Number
+              Enter Phone Number
               span(class="text-red-500") 
             input(type="text" id="phone_number" v-model="data_ParentProfile.phone_number" placeholder="Parent Phone Number" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" @focus="this.style.borderColor='#007BFF'" @blur="this.style.borderColor='#ccc'")
 
           // Private Email
           .form-element(class="flex flex-col")
             label(for="email" class="text-lg font-semibold text-gray-800 mb-2")
-              Enter Parent Email
+              Enter Email
               span(class="text-red-500") 
             input(type="email" id="email" v-model="data_ParentProfile.email" placeholder="Parent Email" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" @focus="this.style.borderColor='#007BFF'" @blur="this.style.borderColor='#ccc'")
 
           // Social Media
           .form-element(class="flex flex-col")
             label(for="social_media" class="text-lg font-semibold text-gray-800 mb-2")
-              Enter Parent Twitter Handle
+              Enter Twitter Handle
               span(class="text-red-500") 
             input(type="text" id="social_media" v-model="data_ParentProfile.social_media" placeholder="Parent Twitter Handle" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" @focus="this.style.borderColor='#007BFF'" @blur="this.style.borderColor='#ccc'")
 
@@ -73,7 +73,7 @@
           // Marital Status
           .form-element(class="flex flex-col")
             label(for="marital_stat" class="text-lg font-semibold text-gray-800 mb-2")
-              Enter Parent Marital Status
+              Enter Marital Status
               span(class="text-red-500") 
             input(type="text" id="marital_stat" v-model="data_ParentProfile.marital_stat" placeholder="Parent Marital Status" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" @focus="this.style.borderColor='#007BFF'" @blur="this.style.borderColor='#ccc'")
 

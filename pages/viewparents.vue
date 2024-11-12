@@ -5,11 +5,11 @@
       .heading-line(class="block w-16 h-1 bg-teal-400 my-2 mx-auto rounded relative")
     .search-container(class="mb-6 p-6 bg-white rounded-lg shadow-md flex flex-col items-center justify-center")
       h3.text-2xl.font-semibold.mb-6.text-center Search Parent Database 
-      .search-form.grid.grid-cols-6.gap-8.mb-6
+      .search-form.flex.flex-wrap.gap-8.mb-6.justify-center
         .field(v-for="(header, index) in tableHeaders" :key="index" class="flex flex-col w-full max-w-xs mb-6")
-          label(class="text-lg font-semibold text-gray-700 mb-2 transition-all duration-300 ease-in-out transform hover:text-teal-600") {{header.label}}
-          input(v-if="header.type !== 'checkbox'" :id="header.id" :placeholder="header.placeholder" class="p-3 text-base border border-gray-300 rounded-md w-full transition-all duration-300 ease-in-out focus:ring-2 focus:ring-teal-500")
-          input(v-if="header.type === 'checkbox'" type="checkbox" :id="header.id" class="p-3 text-base border border-gray-300 rounded-md w-1/10 transition-all duration-300 ease-in-out focus:ring-2 focus:ring-teal-500")
+          label(class="text-lg font-semibold text-gray-700 mb-2 transition-all duration-300 ease-in-out transform hover:text-teal-600") {{ header.label }}
+          input(v-if="header.type !== 'checkbox'" :id="header.id" :placeholder="header.placeholder" class="p-3 text-base border border-gray-300 rounded-md w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-500")
+          input(v-if="header.type === 'checkbox'" type="checkbox" :id="header.id" class="p-3 text-base border rounded-md w-10 h-full focus:border-blue-500 bg-transparent")
       .button-group.flex.justify-center.gap-4.mt-6
         button(@click="performSearch" class="clear-button p-3 px-5 text-base font-semibold text-white bg-teal-500 rounded-lg transition-colors duration-300 hover:bg-teal-600 focus:outline-none") Search
         button(@click="clearSearch" class="clear-button p-3 px-5 text-base font-semibold text-white bg-red-500 rounded-lg transition-colors duration-300 hover:bg-red-600 focus:outline-none") Clear
