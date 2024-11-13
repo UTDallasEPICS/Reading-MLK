@@ -6,21 +6,7 @@
           h2(class="text-4xl font-medium uppercase tracking-wider") Parent Registration Form
           .heading-line(class="w-32 h-1 bg-green-400 my-2 mx-auto rounded-sm")
         .form-input(class="grid gap-6 p-8 bg-white rounded-b-lg")
-          // First Name
-          .form-element(class="flex flex-col")
-            label(for="first_name" class="text-lg font-semibold text-gray-800 mb-2")
-              Enter First Name
-              span(class="text-red-500") 
-            input(type="text" id="first_name" v-model="data_ParentProfile.first_name" placeholder="Parent First Name" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" @focus="this.style.borderColor='#007BFF'" @blur="this.style.borderColor='#ccc'")
-
-          // Last Name
-          .form-element(class="flex flex-col")
-            label(for="last_name" class="text-lg font-semibold text-gray-800 mb-2")
-              Enter Last Name
-              span(class="text-red-500") 
-            input(type="text" id="last_name" v-model="data_ParentProfile.last_name" placeholder="Parent Last Name" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" @focus="this.style.borderColor='#007BFF'" @blur="this.style.borderColor='#ccc'")
-
-
+          
           // Birth Date
           .form-element(class="flex flex-col")
             label(for="birth_date" class="text-lg font-semibold text-gray-800 mb-2")
@@ -95,8 +81,6 @@ const rhuser = useCookie<any>('rhuser')
 const showStudentForm = ref(false);
 
 const data_ParentProfile = ref({
-    first_name: null,
-    last_name: null,
     birth_date: null,
     zipcode: null,
     phone_number: null,
@@ -156,7 +140,7 @@ const removeStudent = (index: number) => {
 }
 
 const submitAccounts = async () => {
-    const parentResponse = await $fetch('/parent_submit', {
+    const parentResponse = await $fetch('/api/parent_submit', {
         method: "POST",
         body: {
             parent: data_ParentProfile.value,

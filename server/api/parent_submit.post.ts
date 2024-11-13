@@ -1,3 +1,4 @@
+import type {ParentProfile} from '@prisma/client'
 export default defineEventHandler( async event => {
     const body = await readBody(event)
 
@@ -14,8 +15,27 @@ export default defineEventHandler( async event => {
         school_dist: string;
         pref_lang: string;
       }
+
+      let parent : ParentProfile= {
+        id: 0,
+        zipcode: '',
+        yearly_income: null,
+        birth_date: null,
+        avg_num_book: 0,
+        password: '',
+        phone_number: '',
+        gender: '',
+        marital_stat: null,
+        first_name: '',
+        last_name: '',
+        email: '',
+        social_media: null,
+        user_id: 0
+      };
+      let studentlist = null;
     
-    const parent = await event.context.client.parentProfile.create({
+      try {
+       parent = await event.context.client.parentProfile.create({
         data: {
           User: {
             connect: {
@@ -37,7 +57,7 @@ export default defineEventHandler( async event => {
       }
       });
 
-      const studentList = await Promise.all(body.students.map((student:any) =>
+      studentlist = await Promise.all(body.students.map((student:any) =>
             event.context.client.studentProfile.create({
               data: {
                 ParentToChild: {
@@ -135,8 +155,12 @@ export default defineEventHandler( async event => {
         },
       })
     */
+      } catch(e)
+        {console.error(e);
+          return e;
+        }   
     return {
         parent: parent,
-        studentList: studentList,
+        studentList: studentlist,
     }
 })
