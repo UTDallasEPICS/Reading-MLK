@@ -11,8 +11,11 @@ export default defineEventHandler(async () => {
         faculties = await prisma.facultyProfile.findMany({ 
             include: {
                 TeacherToClass: true,
+                Faculty: true
             }
         });
+
+        // console.log("LET'S WORK THIS: ", faculties[0]);
     } catch (error) {
         if (error instanceof PrismaClientKnownRequestError){
             console.log('You exeperienced this error code: ' + error.code, error.meta, error.message, ' If you would like to find what this error message means please refer to this link: https://www.prisma.io/docs/orm/reference/error-reference  ')
