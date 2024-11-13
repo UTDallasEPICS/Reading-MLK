@@ -8,7 +8,7 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "seed": "prisma db seed"
+    "seed": "node ./prisma/generateSeed.js && npx prisma db seed"
   },
   "dependencies": {
     "@coreui/coreui": "^5.0.2",
