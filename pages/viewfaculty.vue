@@ -35,8 +35,8 @@
                 path(d="M15 9l-6 6M9 9l6 6")
             td.table-cell.py-3.text-center {{ u.district }} 
             td.table-cell.py-3.text-center {{ u.faculty_email }}
-            td.table-cell.py-3.text-center {{ u.Faculty["first_name"] }}
-            td.table-cell.py-3.text-center {{ u.Faculty["last_name"] }}
+            td.table-cell.py-3.text-center {{ u.Faculty.first_name }}
+            td.table-cell.py-3.text-center {{ u.Faculty.last_name }}
             td.table-cell.py-3.text-center {{ u.school_name }}
             td.table-cell.py-3.text-center {{ u.phone_number }}
             td.table-cell.py-3.text-center {{ u.department }}
