@@ -72,16 +72,6 @@ const adminProfile = (user_id, new_user) => {
     }
 }
 
-function generateClasses() {
-    const classes = [];
-    for (let class_id = 1; class_id <= TOTAL_USERS/profileTypes.length; class_id++){
-        const classYear = faker.date.past().getFullYear();
-        const className = `${faker.word.adjective()} ${faker.word.noun()} Class`;
-        classes.push({class_name: className, class_year: classYear});
-    }
-    return {Classes: classes};
-}
-
 function generateUsers() {
     const users = [...defaultUsers], students = [], parents = [], faculties = [], admins = [...defaultAdmins];
 
@@ -122,56 +112,137 @@ function generateUsers() {
     return { Users: users, Students: students, Parents: parents, Faculties: faculties, Admins: admins };
 }
 
+function generateClasses() {
+    const classes = [];
+    for (let class_id = 1; class_id <= TOTAL_USERS/profileTypes.length; class_id++){
+        const classYear = faker.date.past().getFullYear();
+        const className = `${faker.word.adjective()} ${faker.word.noun()} Class`;
+        classes.push({class_name: className, class_year: classYear});
+    }
+    return {Classes: classes};
+}
+
+function relateTeacherToClass(teachers, classes) {
+    const teacherToClass = [];
+    console.log("teach:", teachers.length)
+    for (let i = 1; i <= classes.length; i++) {
+        teacherToClass.push({
+            class_id: i,
+            teacher_id: Math.floor(Math.random() * teachers.length)+1,
+        });
+    }
+    return teacherToClass;
+}
+
+function relateStudentToClass(students, classes) {
+    const studentToClass = [];
+    for (var i = 1; i <= classes.length; i++) {
+        studentToClass.push({
+            class_id: i,
+            student_id: Math.floor(Math.random() * students.length)+1,
+        });
+    }
+    return studentToClass;
+}
+
+function relateParentToChild(parents, children) {
+    const parentToChild = [];
+    for (var i = 1; i <= parents.length; i++) {
+        parentToChild.push({
+            child_id: i,
+            parent_id: Math.floor(Math.random() * children.length)+1,
+        });
+    }
+    return parentToChild;
+}
+
 function generateMain() {
     return {...generateUsers(), ...generateClasses()}
 }
 
-const completeGeneratedList = generateMain();
+function relateMain() {
+    const generated = generateMain();
+    return {
+        TeacherToClass: relateTeacherToClass(generated.Faculties, generated.Classes),
+        StudentToClass: relateStudentToClass(generated.Students, generated.Classes),
+        ParentToChild: relateParentToChild(generated.Parents, generated.Students),
+    }
+}
 
-fs.writeFile('./prisma/testedUsers.json', JSON.stringify(completeGeneratedList.Users, null, 2), (err) => {
+function masterMain() {
+    return {...generateMain(), ...relateMain()}
+}
+
+const completeGeneratedList = masterMain();
+
+fs.writeFile('./prisma/userData.json', JSON.stringify(completeGeneratedList.Users, null, 2), (err) => {
     if (err) {
         console.error('Error writing file:', err);
     } else {
-        console.log('Users saved to testedUsers.json');
+        console.log('Users saved to userData.json');
     }
 })
 
-fs.writeFile('./prisma/testedStudents.json', JSON.stringify(completeGeneratedList.Students, null, 2), (err) => {
+fs.writeFile('./prisma/studentData.json', JSON.stringify(completeGeneratedList.Students, null, 2), (err) => {
     if (err) {
         console.error('Error writing file:', err);
     } else {
-        console.log('Users saved to testedStudents.json');
+        console.log('Users saved to studentData.json');
     }
 })
 
-fs.writeFile('./prisma/testedParents.json', JSON.stringify(completeGeneratedList.Parents, null, 2), (err) => {
+fs.writeFile('./prisma/parentData.json', JSON.stringify(completeGeneratedList.Parents, null, 2), (err) => {
     if (err) {
         console.error('Error writing file:', err);
     } else {
-        console.log('Users saved to testedParents.json');
+        console.log('Users saved to parentData.json');
     }
 })
 
-fs.writeFile('./prisma/testedFaculties.json', JSON.stringify(completeGeneratedList.Faculties, null, 2), (err) => {
+fs.writeFile('./prisma/facultyData.json', JSON.stringify(completeGeneratedList.Faculties, null, 2), (err) => {
     if (err) {
         console.error('Error writing file:', err);
     } else {
-        console.log('Users saved to testedFaculties.json');
+        console.log('Users saved to facultyData.json');
     }
 })
 
-fs.writeFile('./prisma/testedAdmins.json', JSON.stringify(completeGeneratedList.Admins, null, 2), (err) => {
+fs.writeFile('./prisma/adminData.json', JSON.stringify(completeGeneratedList.Admins, null, 2), (err) => {
     if (err) {
         console.error('Error writing file:', err);
     } else {
-        console.log('Users saved to testedAdmins.json');
+        console.log('Users saved to adminData.json');
     }
 })
 
-fs.writeFile('./prisma/testedClasses.json', JSON.stringify(completeGeneratedList.Classes, null, 2), (err) => {
+fs.writeFile('./prisma/classData.json', JSON.stringify(completeGeneratedList.Classes, null, 2), (err) => {
     if (err) {
         console.error('Error writing file:', err);
     } else {
-        console.log('Users saved to testedClasses.json');
+        console.log('Users saved to classData.json');
+    }
+})
+
+fs.writeFile('./prisma/teacherToClassData.json', JSON.stringify(completeGeneratedList.TeacherToClass, null, 2), (err) => {
+    if (err) {
+        console.error('Error writing file:', err);
+    } else {
+        console.log('Users saved to teacherToClassData.json');
+    }
+})
+
+fs.writeFile('./prisma/studentToClassData.json', JSON.stringify(completeGeneratedList.StudentToClass, null, 2), (err) => {
+    if (err) {
+        console.error('Error writing file:', err);
+    } else {
+        console.log('Users saved to studentToClassData.json');
+    }
+})
+
+fs.writeFile('./prisma/parentToChildData.json', JSON.stringify(completeGeneratedList.ParentToChild, null, 2), (err) => {
+    if (err) {
+        console.error('Error writing file:', err);
+    } else {
+        console.log('Users saved to parentToChildData.json');
     }
 })
