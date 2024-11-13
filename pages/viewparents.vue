@@ -22,14 +22,14 @@
           tr(v-for="(u, index) in Parents" :key="u.id" :class="['table-row', index % 2 === 0 ? 'bg-gray-100' : 'bg-white', 'hover:shadow-lg', 'hover:scale-[1.02]', 'transition-transform', 'duration-200']") 
             td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.zipcode }}
             td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.yearly_income }}
-            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.birth_date }}
+            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ new Date(u.birth_date).toLocaleString("en-US", {year: "numeric", month: "long", day: "numeric",}) }}
             td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.average_number_books }}
             td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.phone_number }}
             td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.gender }}
             td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.marital_stat }}
-            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.first_name }}
-            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.last_name }}
-            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.email }}
+            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.User["first_name"] }}
+            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.User["last_name"] }}
+            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.User["email"] }}
             td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.social_media }}
             td(class="table-cell p-3 border-b border-gray-200 text-center")
               button(v-if="!editButtonPressed" @click="goToEdit(u.id)" class="action-button edit-button rounded-md py-2 px-4 text-xs font-semibold text-white cursor-pointer bg-teal-500 hover:bg-teal-600 focus:outline-none transition-all") Edit

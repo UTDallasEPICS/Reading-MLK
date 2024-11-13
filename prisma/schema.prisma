@@ -43,7 +43,6 @@ model ParentProfile {
   phone_number         String          @unique /// parent should provide their mobile for easy contact their extension is not required (we are assuming they have a US extension)
   gender               String
   marital_stat         String? /// martial status of the parent (will be optional choice)
-  // email                String
   social_media         String?         @unique /// could be other social media handle but should ask for twitter(X) handle (most likely social media handle they have)
   user_id              Int             @unique
   User                 User            @relation(fields: [user_id], references: [id])
