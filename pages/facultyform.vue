@@ -9,19 +9,19 @@
           // Form fields
           .form-element(class="flex flex-col")
             label(for="first-name" class="text-lg font-semibold text-gray-800 mb-2") First Name
-            input#first-name(type="text" placeholder="first name" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500")
+            input#first-name(type="text" placeholder="First Name" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500")
           
           .form-element(class="flex flex-col")
             label(for="last-name" class="text-lg font-semibold text-gray-800 mb-2") Last Name
-            input#last-name(type="text" placeholder="last name" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500")
+            input#last-name(type="text" placeholder="Last Name" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500")
           
           .form-element(class="flex flex-col")
             label(for="user-name" class="text-lg font-semibold text-gray-800 mb-2") User Name
-            input#user-name(type="text" placeholder="user name" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500")
+            input#user-name(type="text" placeholder="User Name" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500")
 
           .form-element(class="flex flex-col")
             label(for="preferred-name" class="text-lg font-semibold text-gray-800 mb-2") Preferred Name
-            input#preferred-name(type="text" placeholder="Preferred name" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500")
+            input#preferred-name(type="text" placeholder="Preferred Name" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500")
 
           .form-element(class="flex flex-col")
             label(for="email" class="text-lg font-semibold text-gray-800 mb-2") Email
@@ -33,7 +33,7 @@
 
           .form-element(class="flex flex-col")
             label(for="school-name" class="text-lg font-semibold text-gray-800 mb-2") School Name
-            input#school-name(type="text" placeholder="School name" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500")
+            input#school-name(type="text" placeholder="School Name" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500")
 
           .form-element(class="flex flex-col")
             label(for="school-district" class="text-lg font-semibold text-gray-800 mb-2") School District
