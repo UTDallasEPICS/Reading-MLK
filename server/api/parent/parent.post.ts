@@ -18,7 +18,8 @@ export default defineEventHandler(async (event) => {
         body.pref_lang &&
         body.first_name &&
         body.last_name &&
-        body.pref_name
+        body.pref_name && 
+        body.email
     ) {
         // Create a new student record
         try {

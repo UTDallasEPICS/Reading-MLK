@@ -92,6 +92,7 @@ import '@vuepic/vue-datepicker/dist/main.css';
 import studentform from "./studentform.vue"
 const props = defineProps<{ modelValue: Object }>()
 const rhuser = useCookie<any>('rhuser')
+const client_cuid = rhuser.value?.client_cuid || "0";
 
 const showStudentForm = ref(false);
 
@@ -166,4 +167,18 @@ const submitAccounts = async () => {
     });
 
 };
+
+const save = async () => {
+  const data = await $fetch('/api/parent', {
+    method: (client_cuid.value as string) !== "0" ? 'PUT' : 'POST',
+    body: ({...data_ParentProfile.value, client_cuid: client_cuid.value as string})
+  }).catch((error)=>{
+    console.log("Error: ",error.data.message);
+
+  });
+  console.log(data)
+  if(data && (data as any).success){
+    await navigateTo('/parent')
+  }
+}
 </script>

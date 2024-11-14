@@ -35,6 +35,13 @@ export default defineEventHandler(async (event) => {
                     id: id
                 },
                 data: {
+                    Student: {
+                        update: {
+                            first_name: first_name,
+                            last_name: last_name,
+                            preferred_name: pref_name
+                        }
+                    },
                     age: age,
                     grade: grade,
                     reading_lvl: reading_lvl,
@@ -43,9 +50,6 @@ export default defineEventHandler(async (event) => {
                     school_name: school_name,
                     school_dist: school_dist,
                     pref_lang: pref_lang,
-                    first_name: first_name,
-                    last_name: last_name,
-                    pref_name: pref_name
                 },
             });
         } catch (error) {
