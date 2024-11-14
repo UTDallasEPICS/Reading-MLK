@@ -1,10 +1,4 @@
-<template>
-    <div>
-    <div>
-      <h2 class="text-center text-3xl font-bold mt-4"  style="margin-top: 35px">View Database</h2>
-      <br>
-    </div>
-
+<template lang="pug">
     <!--table for the database display-->
     <div class="mt-4 mx-10">
       <div class="relative overflow-x-auto rounded-lg">
@@ -54,25 +48,8 @@
               <div>{{ u.grade }}</div>
             </td>
 
-            <td>
-              <button id="editUserButton" class="rounded-md bg-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow-sm
-            hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2
-            focus-visible:outline-indigo-600" v-if="!editButtonPressed" @click='goToEdit(u.id)'>Edit</button>
-            </td>
 
-            <!--Remove function-->
-            <td>
-              <button id="applyRemoveButton" class="rounded-md bg-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow-sm
-            hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2
-            focus-visible:outline-indigo-600" @click="removeStudent(u.id)">Remove</button>
-            </td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-    </div>
-  </template>
+</template>
   
   <script setup lang="ts">
   import type { User } from "@prisma/client";
@@ -167,3 +144,5 @@
   const currid = (rhuser.value?.id)
 
   </script>
+
+

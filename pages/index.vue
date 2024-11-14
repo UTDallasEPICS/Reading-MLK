@@ -6,9 +6,6 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import AccountSelectionWindow from '@/pages/accountSelectionWindow.vue';
-
 const showAccountSelectionWindow = ref(false);
 
 function openAccountSelectionWindow() {
