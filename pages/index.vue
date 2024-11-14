@@ -21,6 +21,8 @@
       )
         img(src="/bookmark.png" alt="Reading Huddle Logo" class="w-16 h-16 mr-4 rounded-full object-contain cursor-pointer")
         h2(class="text-4xl sm:text-2xl lg:text-4xl font-semibold text-gray-800 hover:text-yellow-500 transition-all duration-300 cursor-pointer") container 3
+
+    Footer
 </template>
 
 <script setup>
