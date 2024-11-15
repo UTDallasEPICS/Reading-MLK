@@ -7,19 +7,19 @@
         :key="index"
         class="flex items-center p-4 sm:p-5 bg-white rounded-xl shadow-xl transition-transform transform hover:scale-105 duration-300"
       )
-        img(src="/bookmark.png" alt="Reading Huddle Logo" class="w-16 h-16 mr-4 rounded-full object-contain cursor-pointer")
+        img(src="/home.svg" alt="Reading Huddle Logo" class="w-16 h-16 mr-4 rounded-full object-contain cursor-pointer")
         h2(class="text-4xl sm:text-2xl lg:text-4xl font-semibold text-gray-800 hover:text-yellow-500 transition-all duration-300 cursor-pointer") About Us
       .module(
         :key="index"
         class="flex items-center p-4 sm:p-5 bg-white rounded-xl shadow-xl transition-transform transform hover:scale-105 duration-300"
       )
-        img(src="/bookmark.png" alt="Reading Huddle Logo" class="w-16 h-16 mr-4 rounded-full object-contain")
+        img(src="/bookstack.svg" alt="Reading Huddle Logo" class="w-16 h-16 mr-4 rounded-full object-contain")
         h2(class="text-4xl sm:text-2xl lg:text-4xl font-semibold text-gray-800 hover:text-yellow-500 transition-all duration-300 cursor-pointer") Course Homepage
       .module(
         :key="index"
         class="flex items-center p-4 sm:p-5 bg-white rounded-xl shadow-xl transition-transform transform hover:scale-105 duration-300"
       )
-        img(src="/bookmark.png" alt="Reading Huddle Logo" class="w-16 h-16 mr-4 rounded-full object-contain cursor-pointer")
+        img(src="/bookstack.svg" alt="Reading Huddle Logo" class="w-16 h-16 mr-4 rounded-full object-contain cursor-pointer")
         h2(class="text-4xl sm:text-2xl lg:text-4xl font-semibold text-gray-800 hover:text-yellow-500 transition-all duration-300 cursor-pointer") container 3
 
     Footer
