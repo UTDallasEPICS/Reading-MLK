@@ -12,23 +12,21 @@
   },
   "dependencies": {
     "@headlessui/vue": "^1.7.19",
-    "@nuxtjs/auth-next": "^5.0.0-1667386184.dfbbb54",
     "@prisma/client": "^5.20.0",
     "@vuepic/vue-datepicker": "^8.8.1",
     "jsonwebtoken": "^9.0.2",
     "nuxt": "^3.14.159",
-    "pg": "^8.11.5",
-    "pug": "^3.0.2",
-    "puppeteer": "^23.7.1"
+    "pug": "^3.0.2"
   },
   "devDependencies": {
-    "@mermaid-js/mermaid-cli": "^11.4.0",
+    "@mermaid-js/mermaid-cli": "^11.3.0",
     "@types/jsonwebtoken": "^9.0.6",
-    "@types/vue-select": "^3.16.8",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.47",
     "postcss-loader": "^8.1.1",
     "prisma": "^5.20.0",
+    "prisma-erd-generator": "^1.11.2",
+    "sass": "^1.76.0",
     "tailwindcss": "^3.4.14"
   },
   "prisma": {

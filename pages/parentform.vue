@@ -14,6 +14,14 @@
               span(class="text-red-500") 
             VueDatePicker(v-model="data_ParentProfile.birth_date" name="birth_date" id="birth_date" required :enable-time-picker="false")
             
+          
+          div(class="flex flex-col mb-5")
+            label(for="student_gender" class="text-lg font-semibold text-gray-800 mb-2") Gender
+            select(v-model="data_ParentProfile.gender" required class="w-full px-4 py-3 border border-gray-300 rounded-lg text-lg" id="student_gender")
+              option(value="" selected disabled) Select Gender
+              option(value="M") Male
+              option(value="F") Female
+
           // Zipcode
           .form-element(class="flex flex-col")
             label(for="zipcode" class="text-lg font-semibold text-gray-800 mb-2")
