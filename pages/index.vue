@@ -3,6 +3,7 @@
     p.text-lg.font-semibold Welcome to Reading Huddle
     button(@click="openAccountSelectionWindow" class="px-5 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition duration-300") Register Now
     AccountSelectionWindow(v-if="showAccountSelectionWindow" @close="closeAccountSelectionWindow")
+    AboutUs
 </template>
 
 <script setup>

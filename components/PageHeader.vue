@@ -18,6 +18,7 @@
       <nuxt-link to="/viewparents" class="navPage">View Parent Accounts</nuxt-link>
       <a class="right navPage" href="/api/logout">Logout</a>
       <a class="right navPage" href="/api/login">Login</a>
+      <nuxt-link to="/AboutUs" class="navPage">AboutUs</nuxt-link>
     </div>
     <nav>
       <div class="ham-menu">
