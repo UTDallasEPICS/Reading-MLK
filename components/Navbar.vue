@@ -6,8 +6,6 @@
         to="/"
         class="text-white font-bold no-underline font-sans text-base lg:text-lg px-2 lg:px-4 hover:scale-110 transform transition-all duration-700 inline-flex items-center justify-center"
       ) Home
-
-
       .log
         nuxt-link#aboutbtn(
           to="/about"
@@ -24,6 +22,10 @@
         ) Register
 
         .dropdown-content.hidden.absolute.bg-white.min-w-40.shadow-lg.z-10.rounded-md
+          nuxt-link.navbar-item(
+            to="/newuser"
+            class="text-black py-3 px-4 no-underline block hover:bg-gray-200 rounded-md"
+          ) Invite User
           nuxt-link.navbar-item(
             to="/facultyform"
             class="text-black py-3 px-4 no-underline block hover:bg-gray-200 rounded-md"
