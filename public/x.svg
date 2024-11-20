@@ -1,27 +1,8 @@
-<!-- <svg role="img" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-  <title>X</title>
-  <circle cx="12" cy="12" r="12" fill="black" />
-  <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/>
-</svg> -->
-
-<!-- <svg role="img" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-  <title>X</title>
-  <circle cx="12" cy="12" r="12" fill="black" />
-  <path transform="scale(0.9, 0.9)" d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/>
-</svg> -->
-
-
-<!-- <svg role="img" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-  <title>X</title>
-  <rect x="0" y="0" width="40" height="30" rx="0" ry="0" fill="black" />
-  <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/>
-</svg> -->
-
-
 <svg role="img" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
   <title>X</title>
-  <rect x="0" y="0" width="24" height="24" rx="5" ry="5" fill="black" />
-  <g transform="translate(2.5, 2.5) scale(0.8)">
+  <circle cx="12" cy="12" r="12" fill="black" />
+  <!-- <rect x="0" y="0" width="24" height="24" rx="5" ry="5" fill="black" /> -->
+  <g transform="translate(3.7, 3.5) scale(0.7)">
     <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/>
   </g>
 </svg>
