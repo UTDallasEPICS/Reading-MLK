@@ -34,7 +34,7 @@ export default defineEventHandler(async (event) => {
                 Faculty: {
                     connect: {
                         id: user_id
-                    }
+                    },
                 },
                 district: district,
                 dual_lang: dual_lang,

@@ -38,97 +38,81 @@ div(class="text-center")
     .flex-col.gap-5(class="py-2")
         Button.mx-auto.text-md(name="Submitt Faculty" @click= "editFaculty(data_FacultyProfile)" class="transition duration-500 bg-blue-500 hover: bg-green-400 rounded-lg px-2 py-2") Apply Edits
 </template>
-<style scoped>
 
-/*.jost-font {
-  font-family: "Jost", sans-serif;
-  font-optical-sizing: auto;
-  font-weight: 600;
-  font-style: normal;
-}*/
-.input {
-  @apply w-full px-4 py-2 border rounded-md;
-}
-
-.select {
-  @apply w-full px-4 py-2 border rounded-md;
-}
-
-.btn {
-  @apply w-full py-2 text-white font-semibold bg-blue-500 hover:bg-blue-700 rounded-md;
-}
-</style>
-
-<script setup>
-const rhuser = useCookie('rhuser')
+<script setup lang='ts'>
+import { ref } from 'vue';
+const rhuser = useCookie<any>('rhuser')
 const userRole = rhuser.value.role
-const data_FacultyProfiles = ref(null)
-var data_FacultyProfile = ref({
+const data_FacultyProfile = ref(null)
+const client_cuid = rhuser.value?.client_cuid || "0";
+
+interface FacultyProfile {
+  id: number | null;
+  district: number | null;
+  dual_lang: boolean | null;
+  faculty_email: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  school_name: string | null;
+  phone_number: number | null;
+  department: string | null;
+  grade: string | null;
+}
+
+const faculty = ref<FacultyProfile>({
   id: null,
-  district: "",     
+  district: null,     
   dual_lang: false, 
-  faculty_email: "",  
-  first_name: "",   
-  last_name: "",    
-  school_name: "",   
-  phone_number: "",  
-  department: "",    
-  grade: "",
+  faculty_email: null,  
+  first_name: null,   
+  last_name: null,    
+  school_name: null,   
+  phone_number: null,  
+  department: null,    
+  grade: null,
 });
 
-data_FacultyProfiles.value = await getFaculty()
-
-
-let url = new URL(window.location.href)
-let queryParams = new URLSearchParams(url.search)
+const url = new URL(window.location.href)
+const queryParams = new URLSearchParams(url.search)
+const facultyId = queryParams.get('id');
 let data_FacultyProfileId = Object.fromEntries(queryParams).id
-for (let i = 0; i < data_FacultyProfiles.value.length; i++) {
-    if (data_FacultyProfiles.value[i].id == data_FacultyProfileId) {
-      data_FacultyProfile = {
-      id: data_FacultyProfiles.value[i].id,
-      district: data_FacultyProfiles.value[i].district,
-      dual_lang: data_FacultyProfiles.value[i].dual_lang,
-      faculty_email: data_FacultyProfiles.value[i].faculty_email,
-      first_name: data_FacultyProfiles.value[i].first_name,
-      last_name: data_FacultyProfiles.value[i].last_name,
-      school_name: data_FacultyProfiles.value[i].school_name,
-      phone_number: data_FacultyProfiles.value[i].phone_number,
-      department: data_FacultyProfiles.value[i].department,
-      grade: data_FacultyProfiles.value[i].grade,
-      user_id: data_FacultyProfiles.value[i].user_id,
-
-      //...data_facultyProfile.values[i]
-      }
-    }
-}
-
-async function editFaculty(editedFaculty) {
-  console.log("test")
-  let data_FacultyProfile = null
-  console.log(editedFaculty)
-  if(editedFaculty)
-    data_FacultyProfile = await $fetch('/api/faculty/faculty', {
-      method: 'PUT',
-      body: {
-        id: parseInt(editedFaculty.id),
-        district: editedFaculty.district,
-        dual_lang: editedFaculty.dual_lang,
-        faculty_email: editedFaculty.faculty_email,
-        first_name: editedFaculty.first_name,
-        last_name: editedFaculty.last_name,
-        school_name: editedFaculty.school_name,
-        phone_number: editedFaculty.phone_number,
-        department: editedFaculty.department,
-        grade: editedFaculty.grade,
-        user_id: editedFaculty.user_id,
-      }
-    })
-  navigateTo('/viewfaculty')
-  if(data_FacultyProfile)   data_FacultyProfiles.value = await getFaculty()
-}
 
 async function getFaculty() {
-  return await $fetch('/api/faculty/faculty')
+  const response = await $fetch(`/api/faculty/${facultyId}`);
+  const data = await response.json();
+  return data;
+}
+
+faculty.value = await getFaculty()
+
+const editFaculty = async (editedFaculty: FacultyProfile) => {
+  console.log("Edited Faculty Profile", editFaculty);
+  let response = null
+  console.log(editedFaculty)
+  try{
+    response = await fetch('/api/faculty', {
+      method: 'PUT',
+      headers: {
+        'Content Type:' : 'application/json'
+      },
+      body: JSON.stringify(editedFaculty)
+    });
+
+    if (!response.ok){
+      throw new Error('Failed to edit the faculty profile');
+    }
+    console.log("Faculty profile edited successfully");
+  }catch(error){
+    console.log('Error editing Faculty profile');
+  }
+  navigateTo('/viewfaculty')
+  if(data_FacultyProfile)   data_FacultyProfile.value = await getFaculty()
+}
+
+const save = async() =>{
+const data = await $fetch('/api/faculty/', {
+  method: (client_cuid.value as string) !== "0" ? 'PUT' : 'POST',
+})
 }
 
 </script>

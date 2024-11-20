@@ -111,7 +111,9 @@
   
   <script setup lang="ts">
   import { ref } from 'vue';
-  
+  const rhuser = useCookie<any>('rhuser')
+  const client_cuid = rhuser.value?.client_cuid || "0";
+
   interface ParentProfile {
     id: number | null;
     zipcode: number | null;
@@ -150,7 +152,7 @@
   const parentId = queryParams.get('id');
   
   const getParent = async () => {
-    const response = await fetch(`/api/parent/${parentId}`);
+    const response = await $fetch(`/api/parent/${parentId}`);
     const data = await response.json();
     return data;
   };
@@ -184,5 +186,18 @@
       // Optionally, you can display an error message to the user.
     }
   };
+
+  const save = async () => {
+  const data = await $fetch('/api/parent', {
+    method: (client_cuid.value as string) !== "0" ? 'PUT' : 'POST',
+    body: ({...parent.value, client_cuid: client_cuid.value as string})
+  }).catch((error)=>{
+    console.log("Error: ",error.data.message);
+  });
+  console.log(data)
+  if(data && (data as any).success){
+    await navigateTo('/parent')
+  }
+}
   </script>
   

@@ -96,6 +96,8 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+const rhuser = useCookie<any>('rhuser')
+const client_cuid = rhuser.value?.client_cuid || "0";
 
 const student = ref({
   id: null,
@@ -150,4 +152,17 @@ const editStudent = async (editedStudent: any) => {
     // Optionally, you can display an error message to the user.
   }
 };
+
+const save = async() =>{
+  const data = await $fetch('/api/student',{
+    method: (client_cuid.value as string) !== '0' ? 'PUT' : 'POST',
+    body: ({...student.value, client_cuid: client_cuid.value as string})
+  }).catch((error)=>{
+    console.log("Error: ", error.message)
+  });
+  console.log(data)
+  if(data && (data as any).success){
+    await navigateTo('/student')
+  }
+}
 </script>
