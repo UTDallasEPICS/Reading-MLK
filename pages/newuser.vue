@@ -1,5 +1,5 @@
 <template lang="pug">
-  .centered-container.flex.justify-center.items-center.my-10
+  .centered-container.flex.justify-center.items-center.my-28
     .form
       .form-container(class="p-8 bg-white rounded-lg shadow-lg max-w-4xl w-full min-w-[900px]")
         

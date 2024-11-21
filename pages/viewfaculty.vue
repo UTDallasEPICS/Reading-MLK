@@ -1,5 +1,5 @@
 <template lang="pug">
-  .database-view(class="bg-gray-100 p-5 font-sans")
+  .database-view(class="bg-gray-100 p-5 font-sans mt-[7vh]")
     .header(class="flex flex-col justify-center items-center bg-gray-700 p-6 rounded-lg shadow-lg mb-8")
       h2(class="text-4xl font-bold text-gray-100 uppercase tracking-wide mb-2 relative") Faculty
       .heading-line(class="block w-16 h-1 bg-teal-400 my-2 mx-auto rounded relative")

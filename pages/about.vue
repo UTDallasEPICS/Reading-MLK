@@ -370,7 +370,7 @@ export default {
  -->
 
  <template lang="pug">
-    div.about-container
+    div.about-container(style="margin-top: 11vh")
         h2.text-center.text-4xl.font-extrabold.mt-8 About Us
         hr.center-text(style="border-top: 3px solid #122C4F; width: 80%; margin: 20px auto;")
 
