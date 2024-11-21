@@ -1,5 +1,18 @@
 <script setup>
 import { ref, reactive } from 'vue';
+
+
+const showAccountSelectionWindow = ref(false);
+
+function openAccountSelectionWindow() {
+  console.log('Opening account selection window...');
+  showAccountSelectionWindow.value = true;
+}
+
+function closeAccountSelectionWindow() {
+  console.log('Closing account selection window...');
+  showAccountSelectionWindow.value = false;
+}
 </script>
 
 <!-- <template lang="pug">
