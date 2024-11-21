@@ -1,5 +1,5 @@
 <template lang="pug">
-.footer(class="flex p-6 bg-customBlue w-full sm:gap-36 shadow-lg mt-14")
+.footer(class="flex p-6 bg-customBlue w-full sm:gap-36 shadow-lg")
     //- .footer(class="bg-[#FFCD98] text-gray-900 py-8 mt-10 w-full")
     .container(class="container mx-auto")
       .footer-container(class="flex flex-col md:flex-row md:justify-between items-center space-y-6 md:space-y-0")

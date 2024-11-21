@@ -9,6 +9,8 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fill: ['hover', 'focus'], // Enables `hover` and `focus` variants for `fill`
+      stroke: ['hover', 'focus'],
       colors: {
         customBlue: '#2d3748',
       },

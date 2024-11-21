@@ -15,7 +15,7 @@ function closeAccountSelectionWindow() {
 
 
 <template lang="pug">
-  .main-container(class="flex flex-col items-center min-h-screen bg-white")
+  .main-container(class="flex flex-col items-center min-h-screen bg-white overflow-y-hidden")
     // Centered Section
     // Centered Section
     .centered-container(class="relative flex items-center justify-center text-center w-full overflow-hidden h-[93vh] transition-all duration-500")
@@ -49,26 +49,30 @@ function closeAccountSelectionWindow() {
         button(@click="openAccountSelectionWindow" class="text-2xl font-bold text-white") Register Here!
         AccountSelectionWindow(v-if="showAccountSelectionWindow" @close="closeAccountSelectionWindow")
 
-
+    // Modules Section
+    div(class="flex flex-row items-baseline w-full h-auto p-9")
+      //- .module-header(class="flex justify-center align-center w-full h-auto py-3")
+      //-   h3(class="text-3xl lg:text-4xl font-bold text-customBlue uppercase tracking-wide") Start your reading huddle
+      .module-container(class="flex flex-wrap justify-center items-baseline gap-6 w-full py-10 px-4")
+        .module(class="flex flex-col justify-center items-center w-[20vw] h-[20vh] p-4 bg-[#FFCD98] rounded-lg shadow-lg hover:shadow-xl transition-transform hover:scale-105")
+          img(src="/bookstack.svg" alt="Bookstack icon" class="w-12 h-12 mr-4 rounded-full object-contain")
+          h2(class="text-xl font-semibold text-gray-800 hover:text-yellow-500 transition") Read any book
+        .module(class="flex flex-col justify-center items-center w-[20vw] h-[20vh] p-4 bg-[#FFCD98] rounded-lg shadow-lg hover:shadow-xl transition-transform hover:scale-105")
+          img(src="/home.svg" alt="Home icon" class="w-12 h-12 mr-4 rounded-full object-contain")
+          h2(class="text-xl font-semibold text-gray-800 hover:text-yellow-500 transition") Course Homepage
+      .mission-header-container(class="flex flex-col flex-wrap items-center justify-center pl-20 py-4 bg-customBlue w-[60vw] h-[20vw] max-w-4xl rounded-lg shadow-md animate-slideDown" style="clip-path: polygon(100% 0, 0 0, calc(0% + 30px) 50%, 0 100%, 100% 100%);")
+        h3(class="text-3xl lg:text-4xl font-bold text-white uppercase tracking-wide") Start your reading Huddle
     // Huddle Section
-    .huddle-container(class="flex flex-col items-center bg-[#FFCD98] w-full py-12 px-6")
+    .huddle-container(class="flex flex-col items-center bg-[#FFCD98] w-full py-12")
       div(class="flex")
-        .huddle-header-container(class="flex items-center justify-center bg-[#E0B07C] px-8 py-4 w-full max-w-4xl rounded-lg shadow-md")
+        .huddle-header-container(class="flex items-center justify-center bg-[#E0B07C] w-full max-w-4xl rounded-lg shadow-md")
           h3(class="text-3xl lg:text-4xl font-bold text-white uppercase tracking-wide") Inside The Huddle
-        .huddle-content-container(class="text-center mt-6 space-y-6")
+        .huddle-content-container(class="text-center mt-6 space-y-6 ml-16")
           p(class="text-lg sm:text-xl px-4 font-medium text-gray-800 leading-relaxed") 
             | Inside the huddle, we bring together families and sports icons to create meaningful story time experiences for children.
-          .huddle-img-container(class="flex flex-wrap justify-center gap-8")
-            img(src="/children_playing.jpg" alt="Huddle image 1" class="w-64 h-48 rounded-lg shadow-lg object-cover hover:scale-105 transition-transform")
-            img(src="/children_playing.jpg" alt="Huddle image 2" class="w-64 h-48 rounded-lg shadow-lg object-cover hover:scale-105 transition-transform")
-            img(src="/children_playing.jpg" alt="Huddle image 3" class="w-64 h-48 rounded-lg shadow-lg object-cover hover:scale-105 transition-transform")
+          .huddle-img-container(class="flex flex-col px-7")
+            img(src="/children_playing.jpg" alt="Huddle image 1" class="self-start w-64 h-48 rounded-lg shadow-lg object-cover hover:scale-105 transition-transform")
+            img(src="/children_playing.jpg" alt="Huddle image 2" class="self-end w-64 h-48 rounded-lg shadow-lg object-cover hover:scale-105 transition-transform")
 
-    // Modules Section
-    .module-container(class="flex flex-wrap justify-center gap-6 bg-[#FFCD98] w-full py-10 px-4")
-      .module(class="flex items-center p-4 bg-white rounded-lg shadow-lg hover:shadow-xl transition-transform hover:scale-105")
-        img(src="/bookstack.svg" alt="Bookstack icon" class="w-12 h-12 mr-4 rounded-full object-contain")
-        h2(class="text-xl font-semibold text-gray-800 hover:text-yellow-500 transition") Read any book
-      .module(class="flex items-center p-4 bg-white rounded-lg shadow-lg hover:shadow-xl transition-transform hover:scale-105")
-        img(src="/home.svg" alt="Home icon" class="w-12 h-12 mr-4 rounded-full object-contain")
-        h2(class="text-xl font-semibold text-gray-800 hover:text-yellow-500 transition") Course Homepage
+    
 </template>
