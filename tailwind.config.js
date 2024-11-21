@@ -30,7 +30,7 @@ module.exports = {
       animation: {
         slideFadeIn: 'slideFadeIn 0.8s ease-out forwards',
         zoomIn: 'zoomIn 8s ease-in-out infinite',
-        typing: 'typing 3.5s steps(30) 1s forwards',
+        typing: 'typing 4s steps(1000) 1s',
       },
     },
   },
