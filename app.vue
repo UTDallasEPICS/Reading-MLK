@@ -6,4 +6,5 @@
 <template lang="pug">
 Navbar
 NuxtPage
+Footer
 </template>
