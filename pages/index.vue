@@ -156,6 +156,10 @@ import { ref, reactive } from 'vue';
       .module(class="flex items-center p-4 sm:p-5 bg-white rounded-xl shadow-xl transition-transform transform hover:scale-105 duration-300 m-4")
         img(src="/home.svg" alt="Reading Huddle Logo" class="w-16 h-16 mr-4 rounded-full object-contain cursor-pointer transition-all duration-300")
         h2(class="text-2xl sm:text-4xl font-semibold text-gray-800 hover:text-yellow-500 transition-all duration-300 cursor-pointer") Course Homepage
+  div(class="text-center p-5")
+    p.text-lg.font-semibold Welcome to Reading Huddle
+    button(@click="openAccountSelectionWindow" class="px-5 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition duration-300") Register Now
+    AccountSelectionWindow(v-if="showAccountSelectionWindow" @close="closeAccountSelectionWindow")
 </template>
 
 <!-- <template lang="pug">
