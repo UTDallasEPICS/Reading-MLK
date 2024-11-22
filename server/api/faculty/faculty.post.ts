@@ -11,14 +11,28 @@ export default defineEventHandler(async (event) => {
     const district = body.faculty.district;
     const dual_lang = body.faculty.dual_lang;
     const faculty_email = body.faculty.faculty_email;
-    const first_name = body.faculty.first_name;
-    const last_name = body.faculty.last_name;
+    const first_name = body.faculty.Faculty.first_name;
+    const last_name = body.faculty.Faculty.last_name;
     const school_name = body.faculty.school_name;
     const phone_number = body.faculty.phone_number;
     const department = body.faculty.department;
     const grade = body.faculty.grade;
-    const user_id = body.faculty.user_id
+    const user_id = body.faculty.user_id;
 
+
+    console.log("YO VAL:", [
+        district, 
+        dual_lang, 
+        faculty_email, 
+        first_name, 
+        last_name, 
+        school_name, 
+        phone_number, 
+        department, 
+        grade, 
+        user_id
+    ].join('|'));
+    
 
     // Check for missing data
     if (!(district && faculty_email && first_name && last_name && school_name && phone_number && department && grade && user_id)) {

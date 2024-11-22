@@ -8,6 +8,7 @@ export default defineEventHandler(async () => {
     const parents = await prisma.parentProfile.findMany({
       include: {
         ParentToChild: true,
+        User: true
       },
     });
     return parents;

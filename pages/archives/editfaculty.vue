@@ -72,6 +72,7 @@ const faculty = ref<FacultyProfile>({
   grade: "",
 });
 
+<<<<<<< HEAD
 const url = new URL(window.location.href)
 const queryParams = new URLSearchParams(url.search)
 const facultyId = queryParams.get('id');
@@ -121,5 +122,50 @@ if (data && (data as any).success){
   await navigateTo('/parent');
 }
 }
+=======
+
+
+const url = new URL(window.location.href);
+const queryParams = new URLSearchParams(url.search);
+const FacultyProfileId = queryParams.get('id');
+
+async function getFaculty() {
+   // Fixed for baseline functionality, horrible example though
+   // useFetch, not fetch
+   const response = await fetch(`/api/faculty/${FacultyProfileId}`)
+   const data = await response.json();
+   return data;
+}
+
+data_FacultyProfile.value = await getFaculty();
+
+
+async function editFaculty(editedFaculty) {
+  console.log("test")
+  let data_FacultyProfile = null
+  console.log(editedFaculty)
+  if(editedFaculty)
+    data_FacultyProfile = await $fetch('/api/faculty/faculty', {
+      method: 'PUT',
+      body: {
+        id: parseInt(editedFaculty.id),
+        district: editedFaculty.district,
+        dual_lang: editedFaculty.dual_lang,
+        faculty_email: editedFaculty.faculty_email,
+        first_name: editedFaculty.first_name,
+        last_name: editedFaculty.last_name,
+        school_name: editedFaculty.school_name,
+        phone_number: editedFaculty.phone_number,
+        department: editedFaculty.department,
+        grade: editedFaculty.grade,
+        user_id: editedFaculty.user_id,
+      }
+    })
+  navigateTo('/viewfaculty')
+  if(data_FacultyProfile)   data_FacultyProfiles.value = await getFaculty()
+}
+
+
+>>>>>>> bab796426aa8abab34c4a35311a5856d4884b7e7
 
 </script>
