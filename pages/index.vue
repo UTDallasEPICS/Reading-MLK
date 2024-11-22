@@ -7,22 +7,40 @@
         :key="index"
         class="flex items-center p-4 sm:p-5 bg-white rounded-xl shadow-xl transition-transform transform hover:scale-105 duration-300"
       )
-        img(src="/bookmark.png" alt="Reading Huddle Logo" class="w-16 h-16 mr-4 rounded-full object-contain cursor-pointer")
+        img(src="/home.svg" alt="Reading Huddle Logo" class="w-16 h-16 mr-4 rounded-full object-contain cursor-pointer")
         h2(class="text-4xl sm:text-2xl lg:text-4xl font-semibold text-gray-800 hover:text-yellow-500 transition-all duration-300 cursor-pointer") About Us
       .module(
         :key="index"
         class="flex items-center p-4 sm:p-5 bg-white rounded-xl shadow-xl transition-transform transform hover:scale-105 duration-300"
       )
-        img(src="/bookmark.png" alt="Reading Huddle Logo" class="w-16 h-16 mr-4 rounded-full object-contain")
+        img(src="/bookstack.svg" alt="Reading Huddle Logo" class="w-16 h-16 mr-4 rounded-full object-contain")
         h2(class="text-4xl sm:text-2xl lg:text-4xl font-semibold text-gray-800 hover:text-yellow-500 transition-all duration-300 cursor-pointer") Course Homepage
       .module(
         :key="index"
         class="flex items-center p-4 sm:p-5 bg-white rounded-xl shadow-xl transition-transform transform hover:scale-105 duration-300"
       )
-        img(src="/bookmark.png" alt="Reading Huddle Logo" class="w-16 h-16 mr-4 rounded-full object-contain cursor-pointer")
+        img(src="/bookstack.svg" alt="Reading Huddle Logo" class="w-16 h-16 mr-4 rounded-full object-contain cursor-pointer")
         h2(class="text-4xl sm:text-2xl lg:text-4xl font-semibold text-gray-800 hover:text-yellow-500 transition-all duration-300 cursor-pointer") container 3
+
+    Footer
+  div(class="text-center p-5")
+    p.text-lg.font-semibold Welcome to Reading Huddle
+    button(@click="openAccountSelectionWindow" class="px-5 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition duration-300") Register Now
+    AccountSelectionWindow(v-if="showAccountSelectionWindow" @close="closeAccountSelectionWindow")
 </template>
 
 <script setup>
 import { ref, reactive } from 'vue';
+
+const showAccountSelectionWindow = ref(false);
+
+function openAccountSelectionWindow() {
+  console.log('Opening account selection window...');
+  showAccountSelectionWindow.value = true;
+}
+
+function closeAccountSelectionWindow() {
+  console.log('Closing account selection window...');
+  showAccountSelectionWindow.value = false;
+}
 </script>
