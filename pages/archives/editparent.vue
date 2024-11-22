@@ -35,13 +35,6 @@
           <input v-model="parent.avgNumBook" type="number" name="average_number_books" id="average_number_books" class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-lg sm:leading-6">
         </div>
       </div>
-      <!-- Password -->
-      <div class="sm:col-span-3 ml-28">
-        <label for="password" class="block text-lg font-medium leading-6 text-gray-900">Password</label>
-        <div class="mt-2">
-          <input v-model="parent.password" type="password" name="password" id="password" class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-lg sm:leading-6">
-        </div>
-      </div>
       <!-- Phone Number -->
       <div class="sm:col-span-3 mr-28">
         <label for="phone-number" class="block text-lg font-medium leading-6 text-gray-900">Phone Number</label>
@@ -120,7 +113,6 @@
     yearlyIncome: string | null;
     birthDate: string | null;
     avgNumBook: number | null;
-    password: string | null;
     phoneNumber: string | null;
     gender: string | null;
     maritalStatus: string | null;
@@ -131,19 +123,18 @@
   }
   
   const parent = ref<ParentProfile>({
-    id: null,
-    zipcode: null,
-    yearlyIncome: null,
-    birthDate: null,
-    avgNumBook: null,
-    password: null,
-    phoneNumber: null,
-    gender: null,
-    maritalStatus: null,
-    firstName: null,
-    lastName: null,
-    email: null,
-    socialMedia: null
+    id: 0,
+    zipcode: 0,
+    yearlyIncome: "",
+    birthDate: "",
+    avgNumBook: 0,
+    phoneNumber: "",
+    gender: "",
+    maritalStatus: "",
+    firstName: "",
+    lastName: "",
+    email: "",
+    socialMedia: ""
   });
   
   // Fetch parent profile based on URL parameter
@@ -178,13 +169,12 @@
       if (!response.ok) {
         throw new Error('Failed to edit parent profile.');
       }
-  
       console.log('Parent profile edited successfully');
-      // Optionally, you can redirect the user to a success page or display a success message.
     } catch (error) {
       console.error('Error editing parent profile:', error);
-      // Optionally, you can display an error message to the user.
     }
+    if(parent) parent.value = await getParent()
+    navigateTo('/viewparent')
   };
 
   const save = async () => {

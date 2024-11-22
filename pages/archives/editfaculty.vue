@@ -48,28 +48,28 @@ const client_cuid = rhuser.value?.client_cuid || "0";
 
 interface FacultyProfile {
   id: number | null;
-  district: number | null;
+  district: string | null;
   dual_lang: boolean | null;
   faculty_email: string | null;
   first_name: string | null;
   last_name: string | null;
   school_name: string | null;
-  phone_number: number | null;
+  phone_number: string | null;
   department: string | null;
   grade: string | null;
 }
 
 const faculty = ref<FacultyProfile>({
-  id: null,
-  district: null,     
+  id: 0,
+  district: "",     
   dual_lang: false, 
-  faculty_email: null,  
-  first_name: null,   
-  last_name: null,    
-  school_name: null,   
-  phone_number: null,  
-  department: null,    
-  grade: null,
+  faculty_email: "",  
+  first_name: "",   
+  last_name: "",    
+  school_name: "",   
+  phone_number: "",  
+  department: "",    
+  grade: "",
 });
 
 const url = new URL(window.location.href)
@@ -93,7 +93,7 @@ const editFaculty = async (editedFaculty: FacultyProfile) => {
     response = await fetch('/api/faculty', {
       method: 'PUT',
       headers: {
-        'Content Type:' : 'application/json'
+        'Content-Type:' : 'application/json'
       },
       body: JSON.stringify(editedFaculty)
     });
@@ -105,14 +105,21 @@ const editFaculty = async (editedFaculty: FacultyProfile) => {
   }catch(error){
     console.log('Error editing Faculty profile');
   }
-  navigateTo('/viewfaculty')
   if(data_FacultyProfile)   data_FacultyProfile.value = await getFaculty()
+  navigateTo('/viewfaculty')
 }
 
 const save = async() =>{
 const data = await $fetch('/api/faculty/', {
   method: (client_cuid.value as string) !== "0" ? 'PUT' : 'POST',
-})
+  body: ({...faculty.value, client_cuid: client_cuid.value as string})
+}).catch((error)=>{
+  console.log("Error: ",error.data.message);
+});
+console.log(data);
+if (data && (data as any).success){
+  await navigateTo('/parent');
+}
 }
 
 </script>

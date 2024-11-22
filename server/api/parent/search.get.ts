@@ -5,14 +5,14 @@ const prisma = new PrismaClient();
 export default defineEventHandler(async (event) => {
     const runtime = useRuntimeConfig()
     if(event.context.user?.cuid != undefined) {
-        const {searchTerm} = getQuery(event);
+        const { searchTerm} = getQuery(event);
         const searchSpacesRemoved = (searchTerm as string).replaceAll(" ", "")
         let searchResult = null;
         if ((searchTerm as string) != "" && searchSpacesRemoved.length !=0){
             try{
-               const pageResult =  await prisma.user.findMany({
+            const pageResult = await prisma.user.findMany({
                     where: {
-                        role: 'faculty',
+                        role: 'parent',
                         OR: [
                             {first_name: {
                                 contains: searchTerm as string,
@@ -25,11 +25,10 @@ export default defineEventHandler(async (event) => {
                         ]
                     },
                     });
-                    return {
-                        data: pageResult,
-                    }
-        }
-        catch(error){
+            return {
+                data: pageResult,
+            };
+        } catch(error){
             if (error instanceof PrismaClientKnownRequestError){
                 console.log('You exeperienced this error code: ' + error.code, error.meta, error.message, ' If you would like to find what this error message means please refer to this link: https://www.prisma.io/docs/orm/reference/error-reference  ')
             }

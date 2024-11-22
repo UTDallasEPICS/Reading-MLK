@@ -92,7 +92,6 @@ import '@vuepic/vue-datepicker/dist/main.css';
 import studentform from "./studentform.vue"
 const props = defineProps<{ modelValue: Object }>()
 const rhuser = useCookie<any>('rhuser')
-const client_cuid = rhuser.value?.client_cuid || "0";
 
 const showStudentForm = ref(false);
 

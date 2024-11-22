@@ -151,6 +151,7 @@ const editStudent = async (editedStudent: any) => {
     console.error('Error editing student:', error);
     // Optionally, you can display an error message to the user.
   }
+  if(student)   student.value = await getStudent()
 };
 
 const save = async() =>{
