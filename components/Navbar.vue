@@ -198,7 +198,7 @@
 <template lang="pug">
   header.navbar
     .navbar-container(
-      class="bg-customBlue flex justify-center items-center gap-6 md:gap-10 py-4 shadow-lg mx-auto max-w-full fixed top-0 left-0 right-0 z-50"
+      class="bg-customBlue flex justify-center items-center gap-6 md:gap-10 py-4 shadow-lg mx-auto max-w-full"
     )
       .log
       nuxt-link#homebtn(

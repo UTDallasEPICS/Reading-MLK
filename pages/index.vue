@@ -15,7 +15,7 @@ function closeAccountSelectionWindow() {
 
 
 <template lang="pug">
-  .main-container(class="flex flex-col items-center min-h-screen bg-white overflow-y-hidden mt-[7vh]")
+  .main-container(class="flex flex-col items-center min-h-screen bg-white overflow-y-hidden")
     // Centered Section
     // Centered Section
     .centered-container(class="relative flex items-center justify-center text-center w-full overflow-hidden h-[93vh] transition-all duration-500")
