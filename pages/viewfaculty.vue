@@ -133,7 +133,7 @@
   }
 
   async function goToEdit(FacultyId: number) {
-    const editUrl = '/archives/editfaculty?' + 'id=' + FacultyId
+    const editUrl = '/edit/editfaculty?' + 'id=' + FacultyId
     await navigateTo(editUrl)
   }
 

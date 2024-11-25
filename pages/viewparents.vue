@@ -131,7 +131,8 @@
   }
 
   async function goToEdit(parentId: number) {
-    const editUrl = '/archives/editparent?' + 'id=' + parentId
+    console.log(parentId)
+    const editUrl = '/edit/editparent?' + 'id=' + parentId
     navigateTo(editUrl)
   }
 

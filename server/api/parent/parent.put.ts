@@ -24,13 +24,13 @@ export default defineEventHandler(async (event) => {
         return createError({ statusCode: 400, statusMessage: "Missing Data" });
     }
 
-    let parent = null;
+    let updatedParent = null;
 
     // Check if ID is provided
     if (id) {
         try {
             // Update existing parent record
-            parent = await prisma.parentProfile.update({
+            updatedParent = await prisma.parentProfile.update({
                 where: {
                     id: id
                 },
@@ -63,5 +63,5 @@ export default defineEventHandler(async (event) => {
         }
     }
 
-    return parent;
+    return updatedParent;
 });
