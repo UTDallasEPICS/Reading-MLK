@@ -7,12 +7,9 @@ const prisma = new PrismaClient();
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event);
-
+    console.log(body);
     const {
-        first_name,
-        last_name,
-        user_name,
-        preferred_name,
+        
         faculty_email,
         phone_number,
         school_name,
@@ -23,19 +20,21 @@ export default defineEventHandler(async (event) => {
     
     } = body;
 
+    //console.log("test");
     // Check for missing data
-    if (!first_name || !last_name || !preferred_name || 
-        !district || !faculty_email || !school_name || 
-        !phone_number || !department || !grade || !user_name || !dual_lang) {
+    /*
+    if (!district || !faculty_email || !school_name || 
+        !phone_number || !department || !grade || !dual_lang) {
         return {
             statusCode: 400,
             statusMessage: "Missing required fields",
         };
     }
+    */
 
     let newFaculty = null;
-    let newUser = null;
-
+    ///let newUser = null;
+    /*
     try {
         // First create the user record
         newUser = await prisma.user.create({
@@ -48,6 +47,7 @@ export default defineEventHandler(async (event) => {
                 role: "faculty"  // default role to faculty if not provided
             },
         });
+    */
 
     try {
         // Create a new faculty record
@@ -57,18 +57,21 @@ export default defineEventHandler(async (event) => {
                 //last_name,
                 //user_name,
                 //preferred_name,
-                faculty_email,
-                phone_number,
-                school_name,
-                district,
-                department,
-                grade,
-                //dual_lang,
+                id: undefined,
+                faculty_email: body.faculty.faculty_email,
+                phone_number: body.faculty.phone_number,
+                school_name: body.faculty.school_name,
+                district: body.faculty.district,
+                department: body.faculty.department,
+                grade: body.faculty.grade,
+                dual_lang: body.faculty.dual_lang,
+                user_id: event.context.user.id
                 //role: "faculty"
             },
         });
         console.log('New faculty created successfully:', newFaculty);
     } catch (error) {
+        console.error(error);
         console.error('Error creating faculty:', error);
         if (error instanceof PrismaClientKnownRequestError) {
             console.log('You experienced this error code: ' + error.code, error.meta, error.message, ' If you would like to find what this error message means please refer to this link: https://www.prisma.io/docs/orm/reference/error-reference');
