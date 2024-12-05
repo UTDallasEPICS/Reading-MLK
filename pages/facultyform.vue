@@ -1,5 +1,5 @@
 <template lang="pug">
-  .centered-container(class="flex justify-center items-center my-10")
+  .centered-container(class="flex justify-center items-center my-[5vh]")
     .form
       .form-container(class="p-8 bg-white rounded-lg shadow-lg max-w-4xl w-full min-w-[900px]")
         .form-header(class="text-center bg-customBlue p-6 rounded-t-lg text-gray-100")
@@ -43,9 +43,14 @@
             label(for="department-name" class="text-lg font-semibold text-gray-800 mb-2") Department Name
             input#department-name(type="text" placeholder="Department Name" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500")
 
-          .checkbox(class="flex items-center mt-4")
-            input(type="checkbox" id="dual_lang" name="dual_lang" value="true" class="w-5 h-5 mr-2 cursor-pointer")
-            label(for="dual_lang" class="text-lg font-semibold text-gray-800") Dual Language Teacher?
+          .form-element(class="flex justify-left items-center")
+            label(class="text-lg font-semibold text-gray-700 mb-2 transition-all duration-300 ease-in-out transform hover:text-teal-600") Dual Language?
+            div(class="flex flex-col gap-5 justify-center align-items-center")
+              div(class="flex flex-row gap-5 my-2")
+                div(class="flex flex-row gap-5 justify-center align-items-center")
+                input(type="checkbox" :id="dual_lang + '-toggle'" :name="dual_lang" v-model="selectedOption" class="appearance-none border border-gray-300 rounded-lg w-8 h-7 bg-transparent cursor-pointer checked:bg-customBlue checked:border-transparent focus:outline-none focus:ring-2 focus:ring-customBlue focus:ring-offset-2 transition duration-300 ease-in-out transform hover:scale-105 shadow-sm hover:shadow-md")
+                label(for="dual_lang + '-toggle'" :class="{'text-teal-600': selectedOption, 'text-gray-700': !selectedOption}" class="text-lg font-semibold text-gray-700 mb-2 transition-all duration-300 ease-in-out transform hover:text-teal-600") {{ selectedOption ? "Yes" : "No" }}
+
         .button-container(class="flex justify-center mt-5")
           button(type="submit" class="submit-button px-5 py-2.5 bg-[#122c4f] text-white border-0 rounded-lg cursor-pointer text-base transition-all duration-300 ease-in-out hover:bg-[#1a1a2e]") Submit
 </template>
@@ -53,6 +58,7 @@
 <script lang="ts" setup>
 const props = defineProps<{ modelValue: any }>()
 const emit = defineEmits(["update:modelValue"])
+const selectedOption = ref(false);
 const rhuser = useCookie<any>('rhuser')
 const data_FacultyProfile = ref({
   district: "",

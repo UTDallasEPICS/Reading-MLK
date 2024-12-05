@@ -1,37 +1,5 @@
-<template lang="pug">
-  .main-container(class="flex flex-col items-center justify-center bg-gray-100 py-10")
-    .centered-container(class="flex items-center justify-center text-center my-10 sm:mx-10 lg:mx-20 cursor-default")
-      h1(class="text-4xl sm:text-4xl lg:text-7xl font-extrabold text-gray-800") Welcome to Reading Huddle
-    .module-container(class="flex justify-center items-center p-6 sm:p-8 rounded-2xl bg-[#FFCD98] w-[90vw] sm:gap-36 shadow-lg")
-      .module(
-        :key="index"
-        class="flex items-center p-4 sm:p-5 bg-white rounded-xl shadow-xl transition-transform transform hover:scale-105 duration-300"
-      )
-        img(src="/home.svg" alt="Reading Huddle Logo" class="w-16 h-16 mr-4 rounded-full object-contain cursor-pointer")
-        h2(class="text-4xl sm:text-2xl lg:text-4xl font-semibold text-gray-800 hover:text-yellow-500 transition-all duration-300 cursor-pointer") About Us
-      .module(
-        :key="index"
-        class="flex items-center p-4 sm:p-5 bg-white rounded-xl shadow-xl transition-transform transform hover:scale-105 duration-300"
-      )
-        img(src="/bookstack.svg" alt="Reading Huddle Logo" class="w-16 h-16 mr-4 rounded-full object-contain")
-        h2(class="text-4xl sm:text-2xl lg:text-4xl font-semibold text-gray-800 hover:text-yellow-500 transition-all duration-300 cursor-pointer") Course Homepage
-      .module(
-        :key="index"
-        class="flex items-center p-4 sm:p-5 bg-white rounded-xl shadow-xl transition-transform transform hover:scale-105 duration-300"
-      )
-        img(src="/bookstack.svg" alt="Reading Huddle Logo" class="w-16 h-16 mr-4 rounded-full object-contain cursor-pointer")
-        h2(class="text-4xl sm:text-2xl lg:text-4xl font-semibold text-gray-800 hover:text-yellow-500 transition-all duration-300 cursor-pointer") container 3
-
-    Footer
-  div(class="text-center p-5")
-    p.text-lg.font-semibold Welcome to Reading Huddle
-    button(@click="openAccountSelectionWindow" class="px-5 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition duration-300") Register Now
-    AccountSelectionWindow(v-if="showAccountSelectionWindow" @close="closeAccountSelectionWindow")
-</template>
-
 <script setup>
 import { ref, reactive } from 'vue';
-
 const showAccountSelectionWindow = ref(false);
 
 function openAccountSelectionWindow() {
@@ -44,3 +12,67 @@ function closeAccountSelectionWindow() {
   showAccountSelectionWindow.value = false;
 }
 </script>
+
+
+<template lang="pug">
+  .main-container(class="flex flex-col items-center min-h-screen bg-white overflow-y-hidden")
+    // Centered Section
+    // Centered Section
+    .centered-container(class="relative flex items-center justify-center text-center w-full overflow-hidden h-[93vh] transition-all duration-500")
+      img(src="/children_playing.jpg" alt="Welcome to Reading Huddle" class="absolute inset-0 w-full h-full object-cover opacity-100 transition-transform transform group-hover:scale-110 group-hover:opacity-80 motion-safe:animate-zoomIn")
+      .text-container(class="flex flex-col items-center z-10 w-full bg-black/30 p-6 sm:p-8 animate-slideFadeIn shadow-xl")
+        h1(class="text-4xl sm:text-5xl lg:text-7xl font-extrabold text-white drop-shadow-xl overflow-hidden whitespace-nowrap p-4 animate-typing") Welcome to Reading Huddle
+        h3(class="text-2xl sm:text-3xl lg:text-5xl font-medium text-yellow-300 drop-shadow-lg italic tracking-wider") Creating story time wins
+
+      // Scroll Down Pointer
+      .scroll-down-pointer(href="#mission" class="absolute bottom-10 animate-bounce w-8 h-8 bg-white rounded-full flex items-center justify-center text-black mx-auto cursor-pointer")
+        i(class="fa fa-chevron-down")
+
+    // Mission Section
+    .mission-container(id="mission" class="relative flex flex-row justify-center items-center w-full py-12 px-6 animate-fadeIn")
+      .mission-header-container(class="flex flex-col items-center justify-center px-8 py-4 bg-customBlue w-full h-[20vw] max-w-4xl rounded-lg shadow-md animate-slideDown" style="clip-path: polygon(0 0, 100% 0, calc(100% - 30px) 50%, 100% 100%, 0 100%);")
+        h3(class="text-3xl lg:text-4xl font-bold text-white uppercase tracking-wide") Our Mission
+      .mission-content-container(class="text-center space-y-6 ")
+        p(class="text-lg sm:text-xl px-4 sm:px-6 font-medium text-gray-800 leading-relaxed") 
+          | At Reading Huddle, our mission is to empower caregivers and preschoolers to build a foundation of literacy through the joy of storytelling. By connecting families with inspiring  "reading coaches," including sports figures and community leaders, we foster meaningful daily story time experiences that ignite a love for reading, strengthen bonds, and nurture the skills essential for lifelong learning. Together, we aim to champion early childhood literacy and create a future where every child has the tools to succeed.
+        .mission-img-container(class="flex flex-wrap justify-center gap-8 animate-fadeInUp")
+          img(src="/children_playing.jpg" alt="Image 1" class="w-80 h-auto rounded-lg shadow-lg object-cover transition-transform transform hover:scale-105 duration-300 hover:rotate-2")
+          img(src="/children_playing.jpg" alt="Image 2" class="w-80 h-auto rounded-lg shadow-lg object-cover transition-transform transform hover:scale-105 duration-300 hover:rotate-2")
+          img(src="/children_playing.jpg" alt="Image 3" class="w-80 h-auto rounded-lg shadow-lg object-cover transition-transform transform hover:scale-105 duration-300 hover:rotate-2")
+
+    // Join Section
+    .join-main-container(class="flex items-center items-baseline justify-center gap-36 bg-customBlue w-full py-12")
+      .join-header-container(class="flex flex-col")
+        h3(class="text-3xl lg:text-4xl font-semibold text-white tracking-wide") JOIN THE TEAM!
+        div(class="h-1 bg-yellow-400 mt-2 rounded")
+      .register-button-container(class="bg-[#E0B07C] px-6 py-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer animate-bounce")
+        button(@click="openAccountSelectionWindow" class="text-2xl font-bold text-white") Register Here!
+        AccountSelectionWindow(v-if="showAccountSelectionWindow" @close="closeAccountSelectionWindow")
+
+    // Modules Section
+    div(class="flex flex-row items-baseline w-full h-auto p-9")
+      //- .module-header(class="flex justify-center align-center w-full h-auto py-3")
+      //-   h3(class="text-3xl lg:text-4xl font-bold text-customBlue uppercase tracking-wide") Start your reading huddle
+      .module-container(class="flex flex-wrap justify-center items-baseline gap-6 w-full py-10 px-4")
+        .module(class="flex flex-col justify-center items-center w-[20vw] h-[20vh] p-4 bg-[#FFCD98] rounded-lg shadow-lg hover:shadow-xl transition-transform hover:scale-105")
+          img(src="/bookstack.svg" alt="Bookstack icon" class="w-12 h-12 mr-4 rounded-full object-contain")
+          h2(class="text-xl font-semibold text-gray-800 hover:text-yellow-500 transition") Read any book
+        .module(class="flex flex-col justify-center items-center w-[20vw] h-[20vh] p-4 bg-[#FFCD98] rounded-lg shadow-lg hover:shadow-xl transition-transform hover:scale-105")
+          img(src="/home.svg" alt="Home icon" class="w-12 h-12 mr-4 rounded-full object-contain")
+          h2(class="text-xl font-semibold text-gray-800 hover:text-yellow-500 transition") Course Homepage
+      .mission-header-container(class="flex flex-col flex-wrap items-center justify-center pl-20 py-4 bg-customBlue w-[60vw] h-[20vw] max-w-4xl rounded-lg shadow-md animate-slideDown" style="clip-path: polygon(100% 0, 0 0, calc(0% + 30px) 50%, 0 100%, 100% 100%);")
+        h3(class="text-3xl lg:text-4xl font-bold text-white uppercase tracking-wide") Start your reading Huddle
+    // Huddle Section
+    .huddle-container(class="flex flex-col items-center bg-[#FFCD98] w-full py-12")
+      div(class="flex")
+        .huddle-header-container(class="flex items-center justify-center bg-[#E0B07C] w-full max-w-4xl rounded-lg shadow-md")
+          h3(class="text-3xl lg:text-4xl font-bold text-white uppercase tracking-wide") Inside The Huddle
+        .huddle-content-container(class="text-center mt-6 space-y-6 ml-16")
+          p(class="text-lg sm:text-xl px-4 font-medium text-gray-800 leading-relaxed") 
+            | Inside the huddle, we bring together families and sports icons to create meaningful story time experiences for children.
+          .huddle-img-container(class="flex flex-col px-7")
+            img(src="/children_playing.jpg" alt="Huddle image 1" class="self-start w-64 h-48 rounded-lg shadow-lg object-cover hover:scale-105 transition-transform")
+            img(src="/children_playing.jpg" alt="Huddle image 2" class="self-end w-64 h-48 rounded-lg shadow-lg object-cover hover:scale-105 transition-transform")
+
+    
+</template>

@@ -42,13 +42,14 @@
             .div(class="flex items-baseline space-x-12") 
               .radio-button-group(class="flex items-center space-x-8")
                 .radio-button(class="flex items-center space-x-4")
-                  input(type="radio" id="dual_lang_faculty" name="dual_lang_group" value="faculty" class="h-6 w-6 text-indigo-600 focus:ring-indigo-500")
-                  label(for="dual_lang_faculty" class="text-lg font-medium text-gray-700 hover:text-indigo-600") Faculty
+                  input(type="radio" id="dual_lang_faculty" name="dual_lang_group" value="faculty" class="appearance-none border border-gray-300 rounded-lg w-8 h-7 bg-transparent cursor-pointer checked:bg-customBlue checked:border-transparent focus:outline-none focus:ring-2 focus:ring-customBlue focus:ring-offset-2 transition duration-300 ease-in-out transform hover:scale-105 shadow-sm hover:shadow-md")
+                  label(for="dual_lang_faculty" class="text-lg font-medium text-gray-700 hover:text-teal-600") Faculty
                 .radio-button(class="flex items-center space-x-4")
-                  input(type="radio" id="dual_lang_parent" name="dual_lang_group" value="parent" class="h-6 w-6 text-indigo-600 focus:ring-indigo-500")
-                  label(for="dual_lang_parent" class="text-lg font-medium text-gray-700 hover:text-indigo-600") Parent
-
+                  input(type="radio" id="dual_lang_faculty" name="dual_lang_group" value="faculty" class="appearance-none border border-gray-300 rounded-lg w-8 h-7 bg-transparent cursor-pointer checked:bg-customBlue checked:border-transparent focus:outline-none focus:ring-2 focus:ring-customBlue focus:ring-offset-2 transition duration-300 ease-in-out transform hover:scale-105 shadow-sm hover:shadow-md")
+                  label(for="dual_lang_parent" class="text-lg font-medium text-gray-700 hover:text-teal-600") Parent
         // Submit Button
         .button-container(class="flex justify-center mt-5")
           button(type="submit" class="submit-button px-5 py-2.5 bg-[#122c4f] text-white border-0 rounded-lg cursor-pointer text-base transition-all duration-300 ease-in-out hover:bg-[#1a1a2e]") Submit
 </template>
+<script setup lang="ts">
+</script>
