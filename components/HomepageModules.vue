@@ -1,7 +1,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import Home from './Home.vue';
-import AboutUs from './AboutUs.vue';
+import About from './About.vue';
 import Login from './Login.vue';
 import Logout from './Logout.vue';
 
@@ -9,7 +9,7 @@ export default defineComponent({
   name: 'HomePageModules',
   components: {
     Home,
-    AboutUs,
+    About,
     Login,
     Logout
   },
@@ -39,7 +39,7 @@ export default defineComponent({
     div(v-if="activeModule === 'home'")
       Home
     div(v-if="activeModule === 'about'")
-      AboutUs
+      About
     div(v-if="activeModule === 'login'")
       Login
     div(v-if="activeModule === 'logout'")
