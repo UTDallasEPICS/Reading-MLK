@@ -135,8 +135,18 @@ export default {
                     p(class="text-white text-center") Developer behind innovative storytelling solutions.
 
         div(class="flex flex-row gap-5 py-[5vh] mx-[3vw]")
+
+            // Contact Us Section
+            .contact-container(class="flex flex-col w-[25vw] items-center py-12 px-6 bg-[#FFCD98] shadow-xl rounded-lg animate-fadeIn")
+                h2(class="text-4xl font-bold text-customBlue uppercase mb-8 tracking-wide") Contact Us
+                form(class="flex flex-col w-full max-w-md space-y-6")
+                    input(type="text" placeholder="Your Name" class="p-4 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-customBlue")
+                    input(type="email" placeholder="Your Email" class="p-4 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-customBlue")
+                    textarea(placeholder="Your Message" class="p-4 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-customBlue h-32")
+                    button(type="submit" class="px-6 py-3 bg-customBlue text-white font-bold rounded-lg shadow-md hover:bg-blue-700 transition") Send Message
+                
             // Location Section
-            .location-container(class="flex flex-col items-center w-[60vw] py-12 px-6 bg-customBlue/5 animate-fadeIn border shadow-xl rounded-xl border-[4px] border-customBlue")
+            .location-container(class="flex flex-col items-center w-[35vw] py-12 px-6 bg-customBlue/5 animate-fadeIn border shadow-xl rounded-xl border-[4px] border-customBlue")
                 h2(class="text-4xl font-bold text-customBlue uppercase mb-8 tracking-wide") Our Location
                 .address-container(class="flex baseline-center space-x-4 text-center")
                     svg(
@@ -163,21 +173,20 @@ export default {
                         referrerpolicy="no-referrer-when-downgrade"
                     )
 
-            // Contact Us Section
-            .contact-container(class="flex flex-col w-[25vw] items-center py-12 px-6 bg-[#FFCD98] shadow-xl rounded-lg animate-fadeIn")
-                h2(class="text-4xl font-bold text-customBlue uppercase mb-8 tracking-wide") Contact Us
+            // Feedback Section
+            .feedback-container(class="flex flex-col w-[25vw] items-center py-12 px-6 bg-[#FFCD98] shadow-xl rounded-lg animate-fadeIn")
+                h2(class="text-4xl font-bold text-customBlue uppercase mb-8 tracking-wide") Feedback
                 form(class="flex flex-col w-full max-w-md space-y-6")
                     input(type="text" placeholder="Your Name" class="p-4 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-customBlue")
-                    input(type="email" placeholder="Your Email" class="p-4 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-customBlue")
-                    textarea(placeholder="Your Message" class="p-4 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-customBlue h-32")
-                    button(type="submit" class="px-6 py-3 bg-customBlue text-white font-bold rounded-lg shadow-md hover:bg-blue-700 transition") Send Message
+                    textarea(placeholder="Your Feedback" class="p-4 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-customBlue h-52")
+                    button(type="submit" class="px-6 py-3 bg-customBlue text-white font-bold rounded-lg shadow-md hover:bg-blue-700 transition") Send Feedback
 
-        // Feedback Section
-        .feedback-container(class="flex flex-col items-center w-full py-12 px-6 bg-[#FFCD98] animate-fadeIn")
-            h2(class="text-4xl font-bold text-customBlue uppercase mb-8 tracking-wide") Feedback
-            p(class="text-lg text-center text-gray-700") We'd love to hear your thoughts and suggestions.
-            form(class="flex flex-col w-full max-w-md space-y-6")
-                input(type="text" placeholder="Your Name" class="p-4 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-customBlue")
-                textarea(placeholder="Your Feedback" class="p-4 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-customBlue h-32")
-                button(type="submit" class="px-6 py-3 bg-[#FFCD98] text-gray-800 font-bold rounded-lg shadow-md hover:bg-orange-300 transition") Submit Feedback
+            // Feedback Section
+            //- .feedback-container(class="flex flex-col items-center w-[-25vw] py-12 px-6 bg-[#FFCD98] animate-fadeIn")
+                h2(class="text-4xl font-bold text-customBlue uppercase mb-8 tracking-wide") Feedback
+                p(class="text-lg text-center text-gray-700") We'd love to hear your thoughts and suggestions.
+                form(class="flex flex-col w-full max-w-md space-y-6")
+                    input(type="text" placeholder="Your Name" class="p-4 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-customBlue")
+                    textarea(placeholder="Your Feedback" class="p-4 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-customBlue h-32")
+                    button(type="submit" class="px-6 py-3 bg-[#FFCD98] text-gray-800 font-bold rounded-lg shadow-md hover:bg-orange-300 transition") Submit Feedback
 </template>
