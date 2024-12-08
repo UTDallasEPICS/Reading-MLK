@@ -14,5 +14,8 @@ export default defineNuxtConfig({
       autoprefixer: {},
     },
   },
+  plugins: [
+    '~/plugins/font-awesome.js'
+  ],
   compatibilityDate: "2024-04-03"
 })

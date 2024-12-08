@@ -19,7 +19,7 @@
           tr
             th(v-for="header in h" :key="header" class="table-cell p-3 border-b border-gray-200 text-center") {{ header }}
         tbody
-          tr(v-for="(u, index) in Parents" :key="u.id" :class="['table-row', index % 2 === 0 ? 'bg-gray-100' : 'bg-white', 'hover:shadow-lg', 'hover:scale-[1.02]', 'transition-transform', 'duration-200']") 
+          tr(v-for="(u, index) in Parents" :key="u.id" :class="['table-row', index % 2 === 0 ? 'bg-gray-100' : 'bg-white', 'hover:shadow-lg', 'hover:scale-[0.99]', 'transition-transform', 'duration-200']") 
             td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.zipcode }}
             td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.yearly_income }}
             td(class="table-cell p-3 border-b border-gray-200 text-center") {{ new Date(u.birth_date).toLocaleString("en-US", {year: "numeric", month: "long", day: "numeric",}) }}

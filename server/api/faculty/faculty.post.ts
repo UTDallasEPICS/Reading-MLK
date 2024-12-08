@@ -1,45 +1,53 @@
+// Faculty POST Endpoint
 import { PrismaClient } from '@prisma/client';
 import { PrismaClientKnownRequestError, PrismaClientUnknownRequestError } from '@prisma/client/runtime/library';
-import { read } from 'fs';
+import { defineEventHandler, readBody } from 'h3';
+
 const prisma = new PrismaClient();
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event);
-
-    console.log("me event",event);
-
-    const district = body.faculty.district;
-    const dual_lang = body.faculty.dual_lang;
-    const faculty_email = body.faculty.faculty_email;
-    const first_name = body.faculty.Faculty.first_name;
-    const last_name = body.faculty.Faculty.last_name;
-    const school_name = body.faculty.school_name;
-    const phone_number = body.faculty.phone_number;
-    const department = body.faculty.department;
-    const grade = body.faculty.grade;
-    const user_id = body.faculty.user_id;
-
-
-    console.log("YO VAL:", [
-        district, 
-        dual_lang, 
-        faculty_email, 
-        first_name, 
-        last_name, 
-        school_name, 
-        phone_number, 
-        department, 
-        grade, 
-        user_id
-    ].join('|'));
+    console.log(body);
+    const {
+        
+        faculty_email,
+        phone_number,
+        school_name,
+        district,
+        department,
+        grade,
+        dual_lang
     
+    } = body;
 
+    //console.log("test");
     // Check for missing data
-    if (!(district && faculty_email && first_name && last_name && school_name && phone_number && department && grade && user_id)) {
-        return createError({ statusCode: 400, statusMessage: "Missing Data" });
+    /*
+    if (!district || !faculty_email || !school_name || 
+        !phone_number || !department || !grade || !dual_lang) {
+        return {
+            statusCode: 400,
+            statusMessage: "Missing required fields",
+        };
     }
+    */
 
     let newFaculty = null;
+    ///let newUser = null;
+    /*
+    try {
+        // First create the user record
+        newUser = await prisma.user.create({
+            data: {
+                user_name,
+                first_name,
+                last_name,
+                preferred_name,
+                faculty_email,
+                role: "faculty"  // default role to faculty if not provided
+            },
+        });
+    */
 
     try {
         // Create a new faculty record
@@ -59,16 +67,35 @@ export default defineEventHandler(async (event) => {
                 phone_number: phone_number,
                 department: department,
                 grade: grade,
+                //first_name,
+                //last_name,
+                //user_name,
+                //preferred_name,
+                id: undefined,
+                faculty_email: body.faculty.faculty_email,
+                phone_number: body.faculty.phone_number,
+                school_name: body.faculty.school_name,
+                district: body.faculty.district,
+                department: body.faculty.department,
+                grade: body.faculty.grade,
+                dual_lang: body.faculty.dual_lang,
+                user_id: event.context.user.id
+                //role: "faculty"
             },
         });
+        console.log('New faculty created successfully:', newFaculty);
     } catch (error) {
-        if (error instanceof PrismaClientKnownRequestError){
-            console.log('You exeperienced this error code: ' + error.code, error.meta, error.message, ' If you would like to find what this error message means please refer to this link: https://www.prisma.io/docs/orm/reference/error-reference  ')
+        console.error(error);
+        console.error('Error creating faculty:', error);
+        if (error instanceof PrismaClientKnownRequestError) {
+            console.log('You experienced this error code: ' + error.code, error.meta, error.message, ' If you would like to find what this error message means please refer to this link: https://www.prisma.io/docs/orm/reference/error-reference');
+        } else if (error instanceof PrismaClientUnknownRequestError) {
+            console.log('Unknown error: ', error.message);
         }
-        else if (error instanceof PrismaClientUnknownRequestError){
-            console.log('Unknown error: ' , error.message)
-        }
-        throw createError({ statusCode: 500, statusMessage: "Error creating faculty", });
+        return {
+            statusCode: 500,
+            statusMessage: "Error creating faculty",
+        };
     }
 
     return newFaculty;
