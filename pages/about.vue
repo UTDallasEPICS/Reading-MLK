@@ -74,8 +74,13 @@ export default {
                 p(class="text-lg text-center text-gray-700 mb-2 ") We'd love to hear your thoughts and suggestions.
                 form(class="flex flex-col w-full max-w-md space-y-6")
                     input(type="text" placeholder="Your Name" class="p-4 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-customBlue")
-                    textarea(placeholder="Your Feedback" class="p-4 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-customBlue h-52")
+                    input(type="email" placeholder="Your Email" class="p-4 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-customBlue")
+                    textarea(placeholder="Your Message" class="p-4 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-customBlue h-32")
                     button(type="submit" class="px-6 py-3 bg-customBlue text-white font-bold rounded-lg shadow-md hover:bg-gray-700 transition") Submit Feedback
+                //- form(class="flex flex-col w-full max-w-md space-y-6")
+                //-     input(type="text" placeholder="Your Name" class="p-4 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-customBlue")
+                //-     textarea(placeholder="Your Feedback" class="p-4 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-customBlue h-52")
+                //-     button(type="submit" class="px-6 py-3 bg-customBlue text-white font-bold rounded-lg shadow-md hover:bg-gray-700 transition") Submit Feedback
 
             // Location Section
             .location-container(class="flex flex-col items-center w-[40vw] py-12 px-6 bg-customBlue/5 animate-fadeIn border shadow-xl rounded-xl border-[4px] border-customBlue")
