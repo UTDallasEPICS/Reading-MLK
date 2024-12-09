@@ -52,4 +52,8 @@
           button(type="submit" class="submit-button px-5 py-2.5 bg-[#122c4f] text-white border-0 rounded-lg cursor-pointer text-base transition-all duration-300 ease-in-out hover:bg-[#1a1a2e]") Submit
 </template>
 <script setup lang="ts">
+
+const rhuser = useCookie<any>('rhuser')
+// const data_UserProfile
+
 </script>
