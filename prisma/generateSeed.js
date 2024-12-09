@@ -34,7 +34,8 @@ const studentProfile = (user_id, new_user) => {
         school_name: faker.company.name(),
         school_dist: faker.location.city(),
         pref_lang: faker.helpers.arrayElement(['English', 'Spanish', 'Other']),
-        user_id: user_id,
+        first_name: faker.person.firstName(),
+        last_name: faker.person.lastName()
     }
 }
 
