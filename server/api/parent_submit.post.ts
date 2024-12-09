@@ -1,3 +1,4 @@
+import type {ParentProfile} from '@prisma/client'
 export default defineEventHandler( async event => {
     const body = await readBody(event)
 
@@ -14,30 +15,39 @@ export default defineEventHandler( async event => {
         school_dist: string;
         pref_lang: string;
       }
+
+      let parent : ParentProfile= {
+        id: 0,
+        zipcode: '',
+        yearly_income: '',
+        birth_date: undefined,
+        average_number_books: 0,
+        phone_number: '',
+        gender: '',
+        marital_stat: '',
+        social_media: '',
+        user_id: 0
+      };
+      let studentlist = null;
     
-    const parent = await event.context.client.parentProfile.create({
+      try {
+       parent = await event.context.client.parentProfile.create({
         data: {
-          User: {
-            connect: {
-              id: body.parent.user_id
-            }
-          },
+         
+        
           zipcode: body.parent.zipcode,
           yearly_income: body.parent.yearly_income,
           birth_date: body.parent.birth_date,
           average_number_books: parseInt(body.parent.average_number_books),
-          password: body.parent.password,
           phone_number: body.parent.phone_number,
           gender: body.parent.gender,
           marital_stat: body.parent.marital_stat,
-          first_name: body.parent.first_name,
-          last_name: body.parent.last_name,
-          email: body.parent.email,
           social_media: body.parent.social_media,
+          user_id : body.parent.user_id
       }
       });
 
-      const studentList = await Promise.all(body.students.map((student:any) =>
+      studentlist = await Promise.all(body.students.map((student:any) =>
             event.context.client.studentProfile.create({
               data: {
                 ParentToChild: {
@@ -135,8 +145,12 @@ export default defineEventHandler( async event => {
         },
       })
     */
+      } catch(e)
+        {console.error(e);
+          return e;
+        }   
     return {
         parent: parent,
-        studentList: studentList,
+        studentList: studentlist,
     }
 })
