@@ -3,28 +3,35 @@ import { read } from 'fs'
 
 const prisma = new PrismaClient()
 
-export default defineEventHandler(async(event) => {
-    
+export default defineEventHandler(async (event) => {
+
     const body = await readBody(event)
 
     let user = null
     let error = null
 
-    // Check if all required fields are present in the request body
-    if (body.firstName && body.lastName && body.email && body.role) {
-        // Check if the user_name follows the specified pattern
-        const usernameRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/;
-        if (!usernameRegex.test(body.firstName + body.lastName)) {
-            return createError({ statusCode: 400, statusMessage: "Invalid username format" });
-        }
+    if (!body.user) {
+        throw createError({ statusCode: 400, statusMessage: "user data" });
+    }
 
+    if (!body.user.user_name || !body.user.first_name || !body.user.last_name || !body.user.email || !body.user.role) {
+        throw createError({ statusCode: 400, statusMessage: "Missing required fields" });
+    }
+
+    console.log(body)
+
+    // Check if all required fields are present in the request body
+    if (body.user.first_name && body.user.last_name && body.user.email && body.user.role) {
         try {
             // Create the user using Prisma
             user = await prisma.user.create({
                 data: {
-                    user_name: body.firstName + body.lastName,
-                    email: body.email,
-                    role: body.role,
+                    user_name: body.user.user_name,
+                    first_name: body.user.first_name,
+                    last_name: body.user.last_name,
+                    preferred_name: body.user.preferred_name,
+                    email: body.user.email,
+                    role: body.user.role,
                 },
             });
         } catch (e) {
