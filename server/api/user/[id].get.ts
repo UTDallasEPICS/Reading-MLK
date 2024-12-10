@@ -19,7 +19,7 @@ export default defineEventHandler(async event => {
                 Parents: true,
                 Admin: true,
                 Faculty: true,
-                Children:true,
+                // Children:true,
             },
         });
         return users;

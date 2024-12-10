@@ -24,7 +24,7 @@
             input#school-district(type="text" placeholder="School District" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" v-model="data_FacultyProfile.district")
           .form-element(class="flex flex-col")
             label(for="department-name" class="text-lg font-semibold text-gray-800 mb-2") Department Name
-            input#department-name(type="text" placeholder="Department Name" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" v-model="data_FacultyProfile.district")
+            input#department-name(type="text" placeholder="Department Name" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" v-model="data_FacultyProfile.department")
           .form-element(class="flex flex-col")  
             label(for="grade" class="text-lg font-semibold text-gray-800 mb-2") Grade
             input#grade(type="text" placeholder="Grade" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" v-model="data_FacultyProfile.grade")
