@@ -44,7 +44,7 @@ import { ref, onMounted } from 'vue';
 const rhuser = useCookie<any>('rhuser')
 const userRole = rhuser.value.role
 const faculties = ref(null)
-const client_cuid = rhuser.value?.client_cuid;
+const id = rhuser.value?.id;
 
 interface FacultyProfile {
   id: number | null;
@@ -89,7 +89,7 @@ onMounted(async()=>{
 // Fetch a faculty profile from the API
 async function getFaculty(): Promise<FacultyProfile> {
   try {
-    const response = await $fetch(`/api/faculty/${facultyId}`);
+    const response = await $fetch<FacultyProfile>(`/api/faculty/${facultyId}`);
     return response;
   } catch (error) {
     console.error("Error fetching faculty data:", error);
@@ -129,9 +129,9 @@ const editFaculty = async (editedFaculty: FacultyProfile) => {
 }
 
 const save = async() =>{
-const data = await $fetch('/api/faculty/', {
+const data = await $fetch<FacultyProfile>('/api/faculty/', {
   method: 'PUT',
-  body: ({...faculty.value, client_cuid: client_cuid.value as string})
+  body: ({...faculty.value, id: id.value as string})
 }).catch((error)=>{
   console.log("Error: ",error.data.message);
 });

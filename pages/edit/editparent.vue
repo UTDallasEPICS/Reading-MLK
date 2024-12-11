@@ -106,7 +106,7 @@
 import { ref, onMounted } from 'vue';
 const rhuser = useCookie<any>('rhuser')
 const userRole = rhuser.value.role
-const client_cuid = rhuser.value?.client_cuid;
+const id = rhuser.value?.id;
 
 interface ParentProfile {
   id: number | null;
@@ -155,7 +155,7 @@ onMounted(async()=>{
 
 async function getParent(): Promise<ParentProfile> {
   try{
-      const response= await $fetch(`/api/parent/${parentId}`);
+      const response= await $fetch<ParentProfile>(`/api/parent/${parentId}`);
       return response;
   } catch(error){
     console.error("Error fetching parent data: ", error);
@@ -197,9 +197,9 @@ const editParent = async (editedParent: ParentProfile) => {
 };
 
 const save = async () => {
-const data = await $fetch('/api/parent', {
+const data = await $fetch<ParentProfile>('/api/parent', {
   method:'PUT',
-  body: ({...parent.value, client_cuid: client_cuid.value as string})
+  body: ({...parent.value, id: id.value as string})
 }).catch((error)=>{
   console.log("Error: ",error.data.message);
 });

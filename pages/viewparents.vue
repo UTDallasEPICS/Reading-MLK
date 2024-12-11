@@ -8,8 +8,7 @@
       .search-form.flex.flex-wrap.gap-8.mb-6.justify-center
         .field(v-for="(header, index) in tableHeaders" :key="index" class="flex flex-col w-full max-w-xs mb-6")
           label(class="text-lg font-semibold text-gray-700 mb-2 transition-all duration-300 ease-in-out transform hover:text-teal-600") {{ header.label }}
-          input(v-if="header.type !== 'checkbox'" :id="header.id" :placeholder="header.placeholder" class="p-3 text-base border border-gray-300 rounded-md w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-500")
-          input(v-if="header.type === 'checkbox'" type="checkbox" :id="header.id" class="p-3 text-base border rounded-md w-10 h-full focus:border-blue-500 bg-transparent")
+          input(v-if="header.type !== 'checkbox'" :id="header.id" v-model="filters[header.id]" @change="keyfield=header.id " :placeholder="header.placeholder" class="p-3 text-base border border-gray-300 rounded-md w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-500")
       .button-group.flex.justify-center.gap-4.mt-6
         button(@click="performSearch" class="clear-button p-3 px-5 text-base font-semibold text-white bg-teal-500 rounded-lg transition-colors duration-300 hover:bg-teal-600 focus:outline-none") Search
         button(@click="clearSearch" class="clear-button p-3 px-5 text-base font-semibold text-white bg-red-500 rounded-lg transition-colors duration-300 hover:bg-red-600 focus:outline-none") Clear
@@ -40,25 +39,43 @@
 
 
 <script setup lang="ts">
-  import type { User } from "@prisma/client";
+  import type { User, ParentProfile } from "@prisma/client";
   import { ref } from "vue";
 
   const editButtonPressed = ref(false)  
   const searchButtonHover = ref("#48bb78")
   const clearButtonHover = ref("#e53e3e")
 
+  const keyfield = ref("zipcode");
+  const searchTerm = ref("");
+  const filters = ref<ParentProfile & Partial<User>>({
+    zipcode: "",
+    yearly_income: "",
+    birth_date: new Date(),
+    average_number_books: 0,
+    first_name: "",
+    last_name: "",
+    email: "",
+    phone_number: "",
+    gender: "",
+    marital_stat: "",
+    social_media: "",
+    id: 0,
+    user_id: 0
+  });
+
   const tableHeaders = [
-        { id: 'zipcode', label: 'Zip Code', placeholder: 'Zip Code', type: 'text' },
-        { id: 'yearlyIncome', label: 'Yearly Income', placeholder: 'Yearly Income', type: 'text' },
-        { id: 'birthDate', label: 'Birth Date', placeholder: 'Birth Date', type: 'text' },
-        { id: 'avgBookNum', label: 'Avg. # of Books', placeholder: 'Avg. # of Books', type: 'text' },
-        { id: 'phone', label: 'Phone Number', placeholder: 'Phone Number', type: 'text' },
-        { id: 'gender', label: 'Gender', placeholder: 'Gender', type: 'text' },
-        { id: 'maritalStat', label: 'Marital Status', placeholder: 'Marital Status', type: 'text' },
-        { id: 'firstname', label: 'First Name', placeholder: 'First Name', type: 'text' },
-        { id: 'lastname', label: 'Last Name', placeholder: 'Last Name', type: 'text' },
-        { id: 'email', label: 'Email', placeholder: 'Email', type: 'text' },
-        { id: 'socialmedia', label: 'Social Media', placeholder: 'Social Media', type: 'text' },
+        { id: 'zipcode', label: 'Zip Code', placeholder: 'Zip Code', type: 'string' },
+        { id: 'yearly_income', label: 'Yearly Income', placeholder: 'Yearly Income', type: 'string' },
+        { id: 'birth_date', label: 'Birth Date', placeholder: 'Birth Date', type: new Date() },
+        { id: 'average_number_books', label: 'Avg. # of Books', placeholder: 'Avg. # of Books', type: 5 },
+        { id: 'phone_number', label: 'Phone Number', placeholder: 'Phone Number', type: 'string' },
+        { id: 'gender', label: 'Gender', placeholder: 'Gender', type: 'string' },
+        { id: 'martial_stat', label: 'Marital Status', placeholder: 'Marital Status', type: 'string' },
+        { id: 'first_name', label: 'First Name', placeholder: 'First Name', type: 'string' },
+        { id: 'last_name', label: 'Last Name', placeholder: 'Last Name', type: 'string' },
+        { id: 'email', label: 'Email', placeholder: 'Email', type: 'string' },
+        { id: 'social_media', label: 'Social Media', placeholder: 'Social Media', type: 'string' },
       ];
 
   const h = [
@@ -144,7 +161,24 @@
     //  Parents.value = await getParents();
   } 
 
-  const performSearch = () => {}
+  const performSearch = async () => {
+
+    const searchQuery: Record<string, string>={};
+
+    Object.entries(ParentObject.value).forEach(([key,value])=>{
+      if(value !== "" && value !== null && value !== 0){
+        searchQuery[keyfield.value] = value as string;
+      }
+    });
+    console.log(keyfield.value)
+    console.log("Search Parameters:", searchQuery);
+    const {data: result}  = await useFetch('/api/parent/search/search', {
+      method: 'GET',
+      query: {searchQuery: filters.value, key: keyfield.value},
+    });
+    Parents.value = result.value?.data as unknown as Parent[];
+  }
+
   const clearSearch = () => {
     ParentObject.value = {
       zipcode: "",
