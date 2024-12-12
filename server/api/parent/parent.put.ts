@@ -11,7 +11,6 @@ export default defineEventHandler(async (event) => {
     const yearly_income = body.yearly_income;
     const birth_date = body.birth_date;
     const average_number_books = body.average_number_books;
-    const password = body.password;
     const phone_number = body.phone_number;
     const gender = body.gender;
     const marital_stat = body.marital_stat;
@@ -21,32 +20,35 @@ export default defineEventHandler(async (event) => {
     const social_media = body.social_media;
 
     // Check for missing data
-    if (!(id && zipcode && average_number_books && password && phone_number && gender && first_name && last_name && email)) {
+    if (!(id && zipcode && average_number_books && phone_number && gender && first_name && last_name && email)) {
         return createError({ statusCode: 400, statusMessage: "Missing Data" });
     }
 
-    let parent = null;
+    let updatedParent = null;
 
     // Check if ID is provided
     if (id) {
         try {
             // Update existing parent record
-            parent = await prisma.parentProfile.update({
+            updatedParent = await prisma.parentProfile.update({
                 where: {
                     id: id
                 },
                 data: {
+                    User: {
+                        update: {
+                            first_name: first_name,
+                            last_name: last_name,
+                            email: email,
+                        }
+                    },
                     zipcode: zipcode,
                     yearly_income: yearly_income,
                     birth_date: birth_date,
                     average_number_books: average_number_books,
-                    password: password,
                     phone_number: phone_number,
                     gender: gender,
                     marital_stat: marital_stat,
-                    first_name: first_name,
-                    last_name: last_name,
-                    email: email,
                     social_media: social_media
                 },
             });
@@ -61,5 +63,5 @@ export default defineEventHandler(async (event) => {
         }
     }
 
-    return parent;
+    return updatedParent;
 });

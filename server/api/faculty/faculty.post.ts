@@ -53,6 +53,20 @@ export default defineEventHandler(async (event) => {
         // Create a new faculty record
         newFaculty = await prisma.facultyProfile.create({
             data: {
+                Faculty: {
+                    connect: {
+                        id: user_id
+                    },
+                },
+                district: district,
+                dual_lang: dual_lang,
+                faculty_email: faculty_email,
+                // first_name: first_name,
+                // last_name: last_name,
+                school_name: school_name,
+                phone_number: phone_number,
+                department: department,
+                grade: grade,
                 //first_name,
                 //last_name,
                 //user_name,

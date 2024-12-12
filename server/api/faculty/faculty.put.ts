@@ -35,6 +35,12 @@ export default defineEventHandler(async (event) => {
                 id: id
             },
             data: {
+                Faculty: {
+                    update: {
+                        first_name: first_name,
+                        last_name: last_name,
+                    }
+                },
                 district: district,
                 dual_lang: dual_lang,
                 faculty_email: faculty_email,
