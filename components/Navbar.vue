@@ -1,6 +1,6 @@
 <template lang="pug">
   header.navbar(class="flex bg-customBlue")
-    .img-container(class="w-fit w-full")
+    .img-container(class="w-fit")
       img(
               src="/image.png" 
               alt="Company Logo"
