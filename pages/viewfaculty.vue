@@ -8,7 +8,7 @@
       .search-form.flex.flex-wrap.gap-8.mb-6.justify-center
         .field(v-for="(header, index) in tableHeaders" :key="index" class="flex flex-col w-full max-w-xs mb-6")
           label(v-if="header.type !== 'checkbox'" class="text-lg font-semibold text-gray-700 mb-2 transition-all duration-300 ease-in-out transform hover:text-teal-600") {{ header.label }}
-          input(v-if="header.type !== 'checkbox'" :id="header.id" :placeholder="header.placeholder" class="p-3 text-base border border-gray-300 rounded-md w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-500")
+          input(v-if="header.type !== 'checkbox'" :id="header.id" v-model="filters[header.id]" @change="keyfield=header.id" :placeholder="header.placeholder" class="p-3 text-base border border-gray-300 rounded-md w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-500")
           div(v-if="header.type === 'checkbox'" class="flex flex-col justify-center align-items-center")
             label(v-if="header.type === 'checkbox'" class="text-lg font-semibold text-gray-700 mb-2 transition-all duration-300 ease-in-out transform hover:text-teal-600") {{ header.label }}
             div(v-if="header.type === 'checkbox'" class="flex flex-col gap-5 justify-center align-items-center")
@@ -49,23 +49,38 @@
 
 
 <script setup lang="ts">
-  import type { User } from "@prisma/client";
+  import type { FacultyProfile, User } from "@prisma/client";
   import { ref } from "vue";
   
 
   const editButtonPressed = ref(false);
   const selectedOption = ref(false); // Initialize with a default value, e.g., 'no'
+  const keyfield = ref("district");
+  const searchTerm = ref("");
+  const filters = ref<FacultyProfile & Partial<User>>({
+    district: "",
+    dual_lang: false,
+    faculty_email: "",
+    first_name: "",
+    last_name: "",
+    school_name: "",
+    phone_number: "",
+    department: "",
+    grade: "",
+    id: 0,
+    user_id: 0
+  });
 
   const tableHeaders = [
         { id: 'district', label: 'District', placeholder: 'District', type: 'text' },
         { id: 'email', label: 'Email', placeholder: 'Email', type: 'text' },
-        { id: 'firstName', label: 'First Name', placeholder: 'First Name', type: 'text' },
-        { id: 'lastName', label: 'Last Name', placeholder: 'Last Name', type: 'text' },
-        { id: 'schoolName', label: 'School Name', placeholder: 'School Name', type: 'text' },
+        { id: 'first_name', label: 'First Name', placeholder: 'First Name', type: 'text' },
+        { id: 'last_name', label: 'Last Name', placeholder: 'Last Name', type: 'text' },
+        { id: 'school_name', label: 'School Name', placeholder: 'School Name', type: 'text' },
         { id: 'phone', label: 'Phone', placeholder: 'Phone', type: 'text' },
         { id: 'department', label: 'Department Name', placeholder: 'Department Name', type: 'text' },
         { id: 'grade', label: 'Grade', placeholder: 'Grade', type: 'text' },
-        { id: 'dualLanguage', label: 'Dual Language', type: 'checkbox' }
+        { id: 'dual_lang', label: 'Dual Language', type: 'checkbox' }
       ];
 
   const h = [
@@ -145,7 +160,22 @@
     //  Faculties.value = await getFaculties();
   }
 
-  const performSearch = () => {}
+  const performSearch = async () => {
+    const searchQuery: Record<string, string>={};
+
+    Object.entries(FacultyObject.value).forEach(([key,value])=>{
+      if(value !== "" && value !== null){
+        searchQuery[keyfield.value] = value as string;
+      }
+    });
+
+    const {data: result} = await useFetch('/api/parent/search/search',{
+        method: 'GET',
+        query:{searchQuery: filters.value, key: keyfield.value},
+      });
+      Faculties.value = result.value?.data as unknown as Faculty[];
+  
+  }
 
   const clearSearch = () => {
   // Clear FacultyObject and reset Faculties list

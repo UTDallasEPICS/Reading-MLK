@@ -8,7 +8,7 @@
       .search-form.flex.flex-wrap.gap-8.mb-6.justify-center
         .field(v-for="(header, index) in tableHeaders" :key="index" class="flex flex-col w-full max-w-xs mb-6")
           label(class="text-lg font-semibold text-gray-700 mb-2 transition-all duration-300 ease-in-out transform hover:text-teal-600") {{ header.label }}
-          input(v-if="header.type !== 'checkbox'" :id="header.id" v-model="filters[header.id]" @change="keyfield=header.id " :placeholder="header.placeholder" class="p-3 text-base border border-gray-300 rounded-md w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-500")
+          input(v-if="header.type !== 'checkbox'" :id="header.id" v-model="filters[header.id]" @change="keyfield=header.id" :placeholder="header.placeholder" class="p-3 text-base border border-gray-300 rounded-md w-full focus:border-blue-500 focus:ring-2 focus:ring-blue-500")
       .button-group.flex.justify-center.gap-4.mt-6
         button(@click="performSearch" class="clear-button p-3 px-5 text-base font-semibold text-white bg-teal-500 rounded-lg transition-colors duration-300 hover:bg-teal-600 focus:outline-none") Search
         button(@click="clearSearch" class="clear-button p-3 px-5 text-base font-semibold text-white bg-red-500 rounded-lg transition-colors duration-300 hover:bg-red-600 focus:outline-none") Clear

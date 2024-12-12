@@ -11,7 +11,8 @@ export default defineEventHandler(async (event) => {
         let searchQueryObject = JSON.parse(searchQuery as string)
         let keyString = key as string
         console.log(keyString)
-        if(keyString == "first_name" || keyString == "last_name"){
+        
+        if(keyString == "first_name"){
             searchTerm={
                 User:
                 {
@@ -21,6 +22,81 @@ export default defineEventHandler(async (event) => {
                     mode: "insensitive",
                     }
                 }
+             };
+        }
+        else if(keyString == "last_name"){
+            searchTerm={
+                User:
+                {
+                [keyString]:
+                    {
+                    contains: searchQueryObject.last_name,
+                    mode: "insensitive",
+                    }
+                }
+             };
+        }
+        else if(keyString == "zipcode"){
+            searchTerm={
+                [keyString]:
+                    {
+                    contains: searchQueryObject.zipcode,
+                    mode: "insensitive",
+                    }
+             };
+        }
+        else if(keyString == "yearly_income"){
+            searchTerm={
+                [keyString]:
+                    {
+                    contains: searchQueryObject.yearly_income,
+                    mode: "insensitive",
+                    }
+             };
+        }
+        else if(keyString == "phone_number"){
+            searchTerm={
+                [keyString]:
+                    {
+                    contains: searchQueryObject.phone_number,
+                    mode: "insensitive",
+                    }
+             };
+        }
+        else if(keyString == "gender"){
+            searchTerm={
+                [keyString]:
+                    {
+                    contains: searchQueryObject.gender,
+                    mode: "insensitive",
+                    }
+             };
+        }
+        else if(keyString == "marital_stat"){
+            searchTerm={
+                [keyString]:
+                    {
+                    contains: searchQueryObject.marital_stat,
+                    mode: "insensitive",
+                    }
+             };
+        }
+        else if(keyString == "email"){
+            searchTerm={
+                [keyString]:
+                    {
+                    contains: searchQueryObject.email,
+                    mode: "insensitive",
+                    }
+             };
+        }
+        else if(keyString == "social_media"){
+            searchTerm={
+                [keyString]:
+                    {
+                    contains: searchQueryObject.social_media,
+                    mode: "insensitive",
+                    }
              };
         }
         else if(keyString == "average_number_books"){
@@ -35,7 +111,7 @@ export default defineEventHandler(async (event) => {
             console.log("Date: ", searchQueryObject.birth_date)
             searchTerm={
                 [keyString]:{
-                    equals: parseISO(searchQueryObject.birth_date),
+                    equals: new Date(searchQueryObject.birth_date),
                 }
             }
 
