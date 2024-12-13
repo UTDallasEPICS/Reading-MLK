@@ -210,7 +210,6 @@ Interface for managing parent records.
 | Integration | Purpose                   | Role in Project                          |
 |-------------|---------------------------|------------------------------------------|
 | **Auth0**   | Authentication           | Secure user login and role management.   |
-| **Prisma**  | Database Management      | Simplifies schema and data queries.      |
 
 ## 🛠️ **Tech Stack**
 
@@ -225,13 +224,13 @@ Interface for managing parent records.
 
 ### Prerequisites
 
-- **Node.js**, **Docker**, **Git**, and **Postman** (optional).
+- **IDE (VS Code for EPICS)**, **Node.js**, **Docker**, **Git**, and **Postman** (optional).
 
 ### Steps
 
 1. **Clone the Repository**
    ```bash
-   git clone [repository_url]
+   git clone https://github.com/UTDallasEPICS/Reading-MLK/
    cd project_directory
    ```
 
@@ -251,11 +250,18 @@ Interface for managing parent records.
    ```
 
 5. **Seed the Database**
+   - Create defultCredentials.js with emails team members can login with and place into `./prisma`
    - Navigate to `./prisma/` directory and add starter credentials.
-   - Run seed script:
+   - Navigate and Run seed script:
      ```bash
+     cd prisma
      node ./generateSeed.js
      ```
+
+   - Or at top level, run 
+   ```bash
+   npx prisma db seed
+   ```
 
 6. **Start the Project**
    ```bash
@@ -263,11 +269,11 @@ Interface for managing parent records.
    ```
 
 7. **Access the Application**
-   - Open your browser at `http://localhost:3000`.
+   - Open your browser at `http://localhost:3000` and login with the loaded Auth0 page.
 
 
 
 For further details, refer to the official [Nuxt 3 Documentation](https://nuxt.com/docs/getting-started/introduction).
 
 ### Figma
-- See Figma Mockups in /Figma
+- See Figma Mockups in `./figma`
