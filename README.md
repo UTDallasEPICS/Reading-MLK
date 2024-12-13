@@ -14,6 +14,7 @@
 11. [Third-Party Integrations](#🔌-third-party-integrations)
 12. [Tech Stack](#🛠️-tech-stack)
 13. [Setting Up the Development Environment](#⚙️-setting-up-the-development-environment)
+14. [UI Mockups](#Figma)
 
 ## 🏢 **Partner Description**
 
@@ -267,3 +268,6 @@ Interface for managing parent records.
 
 
 For further details, refer to the official [Nuxt 3 Documentation](https://nuxt.com/docs/getting-started/introduction).
+
+### Figma
+- See Figma Mockups in /Figma
