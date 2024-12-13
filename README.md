@@ -233,7 +233,7 @@ Interface for managing parent records.
 1. **Clone the Repository**
    ```bash
    git clone https://github.com/UTDallasEPICS/Reading-MLK/
-   cd project_directory
+   cd Reading-MLK
    ```
 
 2. **Install Dependencies**
