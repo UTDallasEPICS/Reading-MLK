@@ -15,6 +15,8 @@
 12. [Tech Stack](#🛠️-tech-stack)
 13. [Setting Up the Development Environment](#⚙️-setting-up-the-development-environment)
 14. [UI Mockups](#Figma)
+15. [Migration Scripts](#Migration-Scripts)
+16. [Deployment](#Deployment)
 
 ## 🏢 **Partner Description**
 
@@ -278,7 +280,7 @@ For further details, refer to the official [Nuxt 3 Documentation](https://nuxt.c
 ### Figma
 - See Figma Mockups in `./figma`
 
-### Migration Scripts
+### Migration-Scripts
 - N/A
 ### Deployment
 - This project will be deployed in the future on AWS EC2
