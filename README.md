@@ -185,7 +185,7 @@ Page for viewing and managing faculty records.
 ### Key Features:
 
 - Search and filter functionality.
-- Editable table with sort and hover effects.
+- Editable table with hover effects.
 - Role-based access control.
 - Responsive and real-time data updates.
 
@@ -209,7 +209,6 @@ Interface for managing parent records.
 | Integration | Purpose                   | Role in Project                          |
 |-------------|---------------------------|------------------------------------------|
 | **Auth0**   | Authentication           | Secure user login and role management.   |
-| **HubSpot** | CRM                      | Manages user interactions and campaigns. |
 | **Prisma**  | Database Management      | Simplifies schema and data queries.      |
 
 ## 🛠️ **Tech Stack**
@@ -217,10 +216,8 @@ Interface for managing parent records.
 | Category         | Technology            |
 |------------------|-----------------------|
 | **Frontend**     | Vue.js, Tailwind CSS  |
-| **Backend**      | Express.js            |
+| **Backend**      | Nuxt.js               |
 | **Database**     | PostgreSQL, Prisma    |
-| **State Mgmt**   | Vuex                  |
-| **HTTP Requests**| Axios                 |
 | **Auth**         | Auth0                 |
 
 ## ⚙️ **Setting Up the Development Environment**
@@ -244,7 +241,7 @@ Interface for managing parent records.
 
 3. **Build Docker Environment**
    ```bash
-   docker-compose up --build
+   docker-compose up
    ```
 
 4. **Execute Prisma Migrations**
