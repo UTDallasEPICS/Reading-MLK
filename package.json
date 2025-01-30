@@ -11,20 +11,14 @@
     "seed": "node ./prisma/generateSeed.js && npx prisma db seed"
   },
   "dependencies": {
-    "@coreui/coreui": "^5.0.2",
-    "@coreui/vue": "^5.1.0",
     "@faker-js/faker": "^9.2.0",
     "@headlessui/vue": "^1.7.19",
     "@nuxtjs/auth-next": "^5.0.0-1667386184.dfbbb54",
     "@prisma/client": "^5.20.0",
     "@vuepic/vue-datepicker": "^8.8.1",
-    "aos": "^2.3.4",
-    "bootstrap": "^5.3.3",
     "faker-js": "^1.0.0",
     "jsonwebtoken": "^9.0.2",
     "nuxt": "^3.10.3",
-    "nuxt-app": "file:",
-    "pg": "^8.11.5",
     "pug": "^3.0.2",
     "vue-select": "^4.0.0-beta.6"
   },
@@ -37,7 +31,6 @@
     "postcss-loader": "^8.1.1",
     "prisma": "^5.20.0",
     "prisma-erd-generator": "^1.11.2",
-    "sass": "^1.76.0",
     "tailwindcss": "^3.4.14"
   },
   "prisma": {
