@@ -1,6 +1,8 @@
 <script setup>
-import { ref, reactive } from 'vue';
 const showAccountSelectionWindow = ref(false);
+
+const isHovered = ref(false)
+const showArrow = ref(true)
 
 function openAccountSelectionWindow() {
   console.log('Opening account selection window...');
@@ -11,6 +13,26 @@ function closeAccountSelectionWindow() {
   console.log('Closing account selection window...');
   showAccountSelectionWindow.value = false;
 }
+
+const scrollToNextSection = () => {
+  isHovered.value = true // Stop bouncing immediately on click
+  window.scrollTo({
+    top: window.innerHeight,
+    behavior: 'smooth'
+  })
+}
+
+const checkScroll = () => {
+  showArrow.value = window.scrollY < 100
+}
+
+onMounted(() => {
+  window.addEventListener('scroll', checkScroll)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', checkScroll)
+})
 </script>
 
 
@@ -25,8 +47,18 @@ function closeAccountSelectionWindow() {
         h3(class="text-2xl sm:text-3xl lg:text-5xl font-medium text-yellow-300 drop-shadow-lg italic tracking-wider") Creating story time wins
 
       // Scroll Down Pointer
-      .scroll-down-pointer(href="#mission" class="absolute bottom-10 animate-bounce w-8 h-8 bg-white rounded-full flex items-center justify-center text-black mx-auto cursor-pointer")
-        i(class="fa fa-chevron-down")
+      .scroll-down-pointer(
+        @click="scrollToNextSection"
+        @mouseenter="isHovered = true"
+        @mouseleave="isHovered = false"
+        v-show="showArrow"
+        class="absolute bottom-10 w-8 h-8 bg-white rounded-full flex items-center justify-center mx-auto cursor-pointer transition-all duration-300"
+        :class="{ 'animate-bounce': !isHovered }"
+      )
+        i(
+          class="fa fa-chevron-down"
+          :class="{ 'text-gray-400': !isHovered, 'text-gray-600': isHovered }"
+        )
 
     // Mission Section
     .mission-container(id="mission" class="relative flex flex-row justify-center items-center w-full py-12 px-6 animate-fadeIn")
