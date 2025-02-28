@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
             // Update existing parent record
             updatedParent = await prisma.parentProfile.update({
                 where: {
-                    id: id
+                    id,
                 },
                 data: {
                     User: {
