@@ -7,12 +7,13 @@ export default defineEventHandler(async (event) => {
     let parent = null;
     let error = null;
 
-    if (body.id) {
+    const {id} = body
 
+    if (id) {
         // Delete the parent record
         parent = await prisma.parentProfile.delete({
             where: {
-                id: body.id,
+                id,
             },
         }).catch(async (e) => {
             error = e;

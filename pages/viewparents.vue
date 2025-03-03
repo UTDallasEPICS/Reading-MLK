@@ -163,18 +163,18 @@
 
   const performSearch = async () => {
 
-    const searchQuery: Record<string, string>={};
+    const searchQuery: Record<string, string | Date>={};
 
-    Object.entries(ParentObject.value).forEach(([key,value])=>{
+    Object.entries(filters.value).forEach(([key,value])=>{
       if(value !== "" && value !== null && value !== 0){
-        searchQuery[keyfield.value] = value as string;
+        searchQuery[key] = value as string | Date;
       }
     });
-    console.log(keyfield.value)
     console.log("Search Parameters:", searchQuery);
+    console.log(keyfield.value)
     const {data: result}  = await useFetch('/api/parent/search/search', {
       method: 'GET',
-      query: {searchQuery: filters.value, key: keyfield.value},
+      query: {searchQuery: JSON.stringify(searchQuery.value), key: keyfield.value},
     });
     Parents.value = result.value?.data as unknown as Parent[];
   }

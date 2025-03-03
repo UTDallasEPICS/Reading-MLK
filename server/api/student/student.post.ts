@@ -6,35 +6,37 @@ const prisma = new PrismaClient();
 export default defineEventHandler(async (event) => {
     const body = await readBody(event);
 
+    const {age, grade, reading_lvl, birth_date, gender, school_dist, school_name, pref_lang, first_name, last_name, pref_name} = body
+
     // Check if all required fields are present in the request body
     if (
-        body.age &&
-        body.grade &&
-        body.reading_lvl &&
-        body.birth_date &&
-        body.gender &&
-        body.school_name &&
-        body.school_dist &&
-        body.pref_lang &&
-        body.first_name &&
-        body.last_name &&
-        body.pref_name
+        age &&
+        grade &&
+        reading_lvl &&
+        birth_date &&
+        gender &&
+        school_name &&
+        school_dist &&
+        pref_lang &&
+        first_name &&
+        last_name &&
+        pref_name
     ) {
         // Create a new student record
         try {
             const studentProfile = await prisma.studentProfile.create({
                 data: {
-                    age: parseInt(body.age),
-                    grade: parseInt(body.grade),
-                    reading_lvl: parseInt(body.reading_lvl),
-                    birth_date: body.birth_date,
-                    gender: body.gender,
-                    school_name: body.school_name,
-                    school_dist: body.school_dist,
-                    pref_lang: body.pref_lang,
-                    first_name: body.first_name,
-                    last_name: body.last_name,
-                    pref_name: body.pref_name
+                    age: parseInt(age),
+                    grade: parseInt(grade),
+                    reading_lvl: parseInt(reading_lvl),
+                    birth_date,
+                    gender,
+                    school_name,
+                    school_dist,
+                    pref_lang,
+                    first_name,
+                    last_name,
+                    pref_name,
                 },
             });
 

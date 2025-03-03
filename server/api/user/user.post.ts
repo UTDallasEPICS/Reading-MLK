@@ -20,18 +20,20 @@ export default defineEventHandler(async (event) => {
 
     console.log(body)
 
+    const {user_name, first_name, last_name, preferred_name, email, role} = body
+
     // Check if all required fields are present in the request body
     if (body.user.first_name && body.user.last_name && body.user.email && body.user.role) {
         try {
             // Create the user using Prisma
             user = await prisma.user.create({
                 data: {
-                    user_name: body.user.user_name,
-                    first_name: body.user.first_name,
-                    last_name: body.user.last_name,
-                    preferred_name: body.user.preferred_name,
-                    email: body.user.email,
-                    role: body.user.role,
+                    user_name,
+                    first_name,
+                    last_name,
+                    preferred_name,
+                    email,
+                    role,
                 },
             });
         } catch (e) {

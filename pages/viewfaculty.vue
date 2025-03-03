@@ -73,7 +73,7 @@
 
   const tableHeaders = [
         { id: 'district', label: 'District', placeholder: 'District', type: 'text' },
-        { id: 'email', label: 'Email', placeholder: 'Email', type: 'text' },
+        { id: 'faculty_email', label: 'Email', placeholder: 'Email', type: 'text' },
         { id: 'first_name', label: 'First Name', placeholder: 'First Name', type: 'text' },
         { id: 'last_name', label: 'Last Name', placeholder: 'Last Name', type: 'text' },
         { id: 'school_name', label: 'School Name', placeholder: 'School Name', type: 'text' },
@@ -161,19 +161,28 @@
   }
 
   const performSearch = async () => {
-    const searchQuery: Record<string, string>={};
+    const searchQuery: Record<string, string | boolean>={};
 
-    Object.entries(FacultyObject.value).forEach(([key,value])=>{
+    Object.entries(filters.value).forEach(([key,value])=>{
       if(value !== "" && value !== null){
-        searchQuery[keyfield.value] = value as string;
+        searchQuery[key] = value as string | boolean;
       }
     });
 
-    const {data: result} = await useFetch('/api/parent/search/search',{
+    if (selectedOption.value !== null){
+        searchQuery['dual_lang'] = selectedOption.value;
+    }
+    console.log("Search Parameters:", searchQuery);
+    console.log(filters.value);
+    try{
+    const result = await $fetch('/api/faculty/search/search',{
         method: 'GET',
-        query:{searchQuery: filters.value, key: keyfield.value},
+        query:{searchQuery: JSON.stringify(searchQuery), key: keyfield.value},
       });
-      Faculties.value = result.value?.data as unknown as Faculty[];
+      Faculties.value = result as unknown as Faculty[];
+    }catch(error){
+      console.error("Error with perform search: ", error);
+    }
   
   }
 

@@ -10,93 +10,17 @@ export default defineEventHandler(async (event) => {
         let searchTerm = searchQuery;
         let searchQueryObject = JSON.parse(searchQuery as string)
         let keyString = key as string
-        console.log(keyString)
         
-        if(keyString == "first_name"){
+        if(keyString == "first_name" || keyString == "last_name"){
             searchTerm={
                 User:
                 {
                 [keyString]:
                     {
-                    contains: searchQueryObject.first_name,
+                    contains: searchQueryObject[keyString],
                     mode: "insensitive",
                     }
                 }
-             };
-        }
-        else if(keyString == "last_name"){
-            searchTerm={
-                User:
-                {
-                [keyString]:
-                    {
-                    contains: searchQueryObject.last_name,
-                    mode: "insensitive",
-                    }
-                }
-             };
-        }
-        else if(keyString == "zipcode"){
-            searchTerm={
-                [keyString]:
-                    {
-                    contains: searchQueryObject.zipcode,
-                    mode: "insensitive",
-                    }
-             };
-        }
-        else if(keyString == "yearly_income"){
-            searchTerm={
-                [keyString]:
-                    {
-                    contains: searchQueryObject.yearly_income,
-                    mode: "insensitive",
-                    }
-             };
-        }
-        else if(keyString == "phone_number"){
-            searchTerm={
-                [keyString]:
-                    {
-                    contains: searchQueryObject.phone_number,
-                    mode: "insensitive",
-                    }
-             };
-        }
-        else if(keyString == "gender"){
-            searchTerm={
-                [keyString]:
-                    {
-                    contains: searchQueryObject.gender,
-                    mode: "insensitive",
-                    }
-             };
-        }
-        else if(keyString == "marital_stat"){
-            searchTerm={
-                [keyString]:
-                    {
-                    contains: searchQueryObject.marital_stat,
-                    mode: "insensitive",
-                    }
-             };
-        }
-        else if(keyString == "email"){
-            searchTerm={
-                [keyString]:
-                    {
-                    contains: searchQueryObject.email,
-                    mode: "insensitive",
-                    }
-             };
-        }
-        else if(keyString == "social_media"){
-            searchTerm={
-                [keyString]:
-                    {
-                    contains: searchQueryObject.social_media,
-                    mode: "insensitive",
-                    }
              };
         }
         else if(keyString == "average_number_books"){
@@ -108,7 +32,6 @@ export default defineEventHandler(async (event) => {
             }
         }
         else if(keyString == "birth_date"){
-            console.log("Date: ", searchQueryObject.birth_date)
             searchTerm={
                 [keyString]:{
                     equals: new Date(searchQueryObject.birth_date),
@@ -129,7 +52,7 @@ export default defineEventHandler(async (event) => {
         if ((searchQuery as string) != "" && searchSpacesRemoved.length !=0){
             try{
             const pageResult = await prisma.parentProfile.findMany({
-                    where: searchTerm,
+                 where: searchTerm,
                     include:{
                         User: true,
                     },

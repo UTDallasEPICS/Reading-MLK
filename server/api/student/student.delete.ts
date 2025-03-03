@@ -7,12 +7,14 @@ export default defineEventHandler(async (event) => {
     let student = null;
     let error = null;
 
-    if (body.id) {
+    const {id} = body
+
+    if (id) {
 
             // Delete the student record
             student = await prisma.studentProfile.delete({
                 where: {
-                    id: body.id,
+                    id,
                 },
             }).then((response) => {
                 student = response

@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 export default defineEventHandler(async (event) => {
     const body = await readBody(event);
 
-    const id = body.id;
+    const {id} = body
 
     // Check if ID is provided
     if (!id) {
@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
         // Delete faculty record
         deletedFaculty = await prisma.facultyProfile.delete({
             where: {
-                id: id
+                id,
             }
         });
     } catch (error) {
