@@ -9,97 +9,23 @@ export default defineEventHandler(async (event) => {
         let searchTerm = searchQuery;
         let searchQueryObject = JSON.parse(searchQuery as string)
         let keyString = key as string;
-        if(keyString == "first_name"){
+        
+        if(keyString == "first_name" || keyString == "last_name"){
             searchTerm={
                 User:
                 {
                 [keyString]:
                     {
-                    contains: searchQueryObject.first_name,
+                    contains: searchQueryObject[keyString],
                     mode: "insensitive",
                     }
                 }
              };
-        }
-        else if(keyString == "last_name"){
-            searchTerm={
-                User:
-                {
-                [keyString]:
-                    {
-                    contains: searchQueryObject.last_name,
-                    mode: "insensitive",
-                    }
-                }
-             };
-        }
-        else if (keyString == "district"){
-            searchTerm={
-                [keyString]:{
-                    contains: searchQueryObject.district,
-                    mode: "insensitive", 
-                }
-            }
-        }
-        else if (keyString == "faculty_email"){
-            searchTerm={
-                [keyString]:{
-                    contains: searchQueryObject.faculty_email,
-                    mode: "insensitive", 
-                }
-            }
-        }
-        else if (keyString == "school_name"){
-            searchTerm={
-                [keyString]:{
-                    contains: searchQueryObject.school_name,
-                    mode: "insensitive", 
-                }
-            }
-        }
-        else if (keyString == "phone_number"){
-            searchTerm={
-                [keyString]:{
-                    contains: searchQueryObject.phone_number,
-                    mode: "insensitive", 
-                }
-            }
-        }
-        else if (keyString == "departments"){
-            searchTerm={
-                [keyString]:{
-                    contains: searchQueryObject.departments,
-                    mode: "insensitive", 
-                }
-            }
-        }
-        else if (keyString == "grade"){
-            searchTerm={
-                [keyString]:{
-                    contains: searchQueryObject.grade,
-                    mode: "insensitive", 
-                }
-            }
-        }
-        else if (keyString == "district"){
-            searchTerm={
-                [keyString]:{
-                    contains: searchQueryObject.district,
-                    mode: "insensitive", 
-                }
-            }
-        }
-        else if (keyString == "dual_lang"){
-            searchTerm={
-                [keyString]:{
-                    dual_lang: searchQueryObject.dual_lang === 'true',
-                }
-            }
         }
         else {
             searchTerm={
                 [keyString]:{
-                    contains: searchTerm as string,
+                    contains: searchQueryObject[keyString],
                     mode: "insensitive",
                 }
             }

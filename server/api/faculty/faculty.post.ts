@@ -15,8 +15,11 @@ export default defineEventHandler(async (event) => {
         district,
         department,
         grade,
-        dual_lang
-    
+        dual_lang,
+        first_name,
+        last_name,
+        user_name,
+        id,
     } = body;
 
     //console.log("test");
@@ -42,18 +45,18 @@ export default defineEventHandler(async (event) => {
                         id: event.context.user.id,
                     },
                 },
-                district: district,
-                dual_lang: dual_lang,
-                faculty_email: faculty_email,
-                school_name: school_name,
-                phone_number: phone_number,
-                department: department,
-                grade: grade,
+                district,
+                dual_lang,
+                faculty_email,
+                school_name,
+                phone_number,
+                department,
+                grade,
                 //first_name,
                 //last_name,
                 //user_name,
                 //preferred_name,
-                id: undefined,
+                id,
             },
         });
         console.log('New faculty created successfully:', newFaculty);
