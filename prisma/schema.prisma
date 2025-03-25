@@ -30,6 +30,8 @@ model User {
   // Children StudentProfile?
   Faculty  FacultyProfile?
   Admin    AdminProfile?
+  StudentProfile StudentProfile?
+
 
   @@map("users")
 }
@@ -78,6 +80,7 @@ model StudentProfile {
   reading_lvl Int /// should reference AR level to indicate reading level
   birth_date  DateTime? @default(now())
   gender      String
+  // zipcode     String
   school_name String /// asssume that all the school names will be elementary schools so we should ask them to give the name of the school 
   school_dist String /// example format should be GISD (garland independent school district)
   pref_lang   String? /// drop down option for either english, spanish(espanol), or other (only temporary until we can get more info on what languages they speak)
@@ -85,8 +88,8 @@ model StudentProfile {
   last_name   String
   // pref_name   String
 
-  // user_id Int  @unique
-  // Student User @relation(fields: [user_id], references: [id])
+  user_id Int  @unique
+  Student User @relation(fields: [user_id], references: [id])
 
   ParentToChild ParentToChild[]
   Classes       StudentToClass[]

@@ -1,3 +1,87 @@
+<script lang="ts" setup>
+import VueDatePicker from '@vuepic/vue-datepicker';
+import '@vuepic/vue-datepicker/dist/main.css';
+import type { StudentProfile } from '@prisma/client';
+const props = defineProps<{ modelValue: Object }>() //defines properties to pass in
+const rhuser = useCookie<any>('rhuser')
+
+const showStudentForm = ref(false);
+
+const studentForms = ref <StudentProfile[]> ([])
+
+const data_ParentProfile = ref({
+    birth_date: null,
+    zipcode: null,
+    phone_number: null,
+    email: null,
+    social_media: null,
+    average_number_books: null,
+    yearly_income: null,
+    gender: null,
+    marital_stat: null,
+    user_id: rhuser.value.id,
+});
+
+const data_StudentProfile = ref([{
+    first_name: "",
+    last_name: "",
+    pref_name: "",
+    age: 0,
+    grade: 0,
+    reading_lvl: 0,
+    birth_date: "",
+    gender: "",
+    school_name: "",
+    school_dist: "",
+    pref_lang: "",
+    user_id: rhuser.value.id,
+
+}]);
+
+const toggleStudentForm = () => {
+    showStudentForm.value = !showStudentForm.value;
+    // if (showStudentForm.value) {
+        addStudent;
+        console.log('adding stu')
+        console.log(data_StudentProfile)
+    // }
+};
+
+const addStudent = () => {
+    data_StudentProfile.value.push({
+        first_name: "",
+        last_name: "",
+        pref_name: "",
+        age: 0,
+        grade: 0,
+        reading_lvl: 0,
+        birth_date: "",
+        gender: "",
+        school_name: "",
+        school_dist: "",
+        pref_lang: "",
+        user_id: rhuser.value.id,
+    })
+}
+
+const removeStudent = (index: number) => {
+    data_StudentProfile.value.splice(index - 1, 1);
+}
+
+const submitAccounts = async () => {
+    const parentResponse = await $fetch('/api/parent_submit', {
+        method: "POST",
+        body: {
+            parent: data_ParentProfile.value,
+            students: studentForms.value
+        }
+    });
+
+};
+
+
+</script>
+
 <template lang="pug"> 
   .centered-container(class="flex justify-center items-center my-[5vh]")
     .form
@@ -71,91 +155,7 @@
               span(class="text-red-500") 
             input(type="text" id="marital_stat" v-model="data_ParentProfile.marital_stat" placeholder="Parent Marital Status" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" @focus="this.style.borderColor='#007BFF'" @blur="this.style.borderColor='#ccc'")
 
-        studentform()
+        studentform(v-model="studentForms")
         .button-container(class="flex justify-center mt-5")
           button(type="submit" class="submit-button p-3 px-6 bg-customBlue text-white rounded-lg cursor-pointer text-lg transition-all ease-in-out" @click="submitAccounts") Submit
 </template>
-
-
-
-<script lang="ts" setup>
-import { ref } from 'vue';
-import VueDatePicker from '@vuepic/vue-datepicker';
-import '@vuepic/vue-datepicker/dist/main.css';
-import studentform from "./studentform.vue"
-const props = defineProps<{ modelValue: Object }>()
-const rhuser = useCookie<any>('rhuser')
-
-const showStudentForm = ref(false);
-
-const data_ParentProfile = ref({
-    birth_date: null,
-    zipcode: null,
-    phone_number: null,
-    email: null,
-    social_media: null,
-    average_number_books: null,
-    yearly_income: null,
-    gender: null,
-    marital_stat: null,
-    user_id: rhuser.value.id,
-});
-
-const data_StudentProfile = ref([{
-    first_name: "",
-    last_name: "",
-    pref_name: "",
-    age: 0,
-    grade: 0,
-    reading_lvl: 0,
-    birth_date: "",
-    gender: "",
-    school_name: "",
-    school_dist: "",
-    pref_lang: "",
-    user_id: rhuser.value.id,
-
-}]);
-
-const toggleStudentForm = () => {
-    showStudentForm.value = !showStudentForm.value;
-    // if (showStudentForm.value) {
-        addStudent;
-        console.log('adding stu')
-        console.log(data_StudentProfile)
-    // }
-};
-
-const addStudent = () => {
-    data_StudentProfile.value.push({
-        first_name: "",
-        last_name: "",
-        pref_name: "",
-        age: 0,
-        grade: 0,
-        reading_lvl: 0,
-        birth_date: "",
-        gender: "",
-        school_name: "",
-        school_dist: "",
-        pref_lang: "",
-        user_id: rhuser.value.id,
-    })
-}
-
-const removeStudent = (index: number) => {
-    data_StudentProfile.value.splice(index - 1, 1);
-}
-
-const submitAccounts = async () => {
-    const parentResponse = await $fetch('/api/parent_submit', {
-        method: "POST",
-        body: {
-            parent: data_ParentProfile.value,
-            students: data_StudentProfile.value
-        }
-    });
-
-};
-
-</script>
