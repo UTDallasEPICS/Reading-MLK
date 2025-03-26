@@ -1,4 +1,5 @@
 import type {ParentProfile} from '@prisma/client'
+import type { StudentProfile } from '@prisma/client';
 export default defineEventHandler( async event => {
     const body = await readBody(event)
 
@@ -20,7 +21,7 @@ export default defineEventHandler( async event => {
         id: 0,
         zipcode: '',
         yearly_income: '',
-        birth_date: undefined,
+        birth_date: null,
         average_number_books: 0,
         phone_number: '',
         gender: '',
@@ -28,7 +29,20 @@ export default defineEventHandler( async event => {
         social_media: '',
         user_id: 0
       };
-      let studentlist = null;
+
+      let studentlist : StudentProfile[] = [{
+          id: 0,
+          age: 0,
+          grade: 1,
+          reading_lvl: 0,
+          first_name: '',
+          last_name: '',
+          birth_date: null, // Use null for dates
+          gender: '',
+          school_name: '',  /// asssume that all the school names will be elementary schools so we should ask them to give the name of the school 
+          school_dist: '',  /// example format should be GISD (garland independent school district)
+          pref_lang: '', /// drop down option for either english, spanish(espanol), or other (only temporary until we can get more info on what languages they speak)  
+      }];
     
       try {
        parent = await event.context.client.parentProfile.create({
@@ -47,7 +61,7 @@ export default defineEventHandler( async event => {
       }
       });
 
-      studentlist = await Promise.all(body.students.map((student:any) =>
+      studentlist = await Promise.all(body.students.map((student: StudentProfile) =>
             event.context.client.studentProfile.create({
               data: {
                 ParentToChild: {
@@ -59,9 +73,9 @@ export default defineEventHandler( async event => {
                     }
                   }
                 },
-                age: parseInt(student.age),
-                grade: parseInt(student.grade),
-                reading_lvl: parseInt(student.reading_lvl),
+                age: student.age,
+                grade: student.grade,
+                reading_lvl: student.reading_lvl,
                 birth_date: student.birth_date,
                 gender: student.gender,
                 school_name: student.school_name,
@@ -69,8 +83,8 @@ export default defineEventHandler( async event => {
                 pref_lang: student.pref_lang,
                 first_name: student.first_name,
                 last_name: student.last_name,
-                pref_name: student.pref_name,
-                user_id: student.user_id,
+                //pref_name: student.pref_name,
+                //user_id: student.user_id,
               }
             })
           ));

@@ -7,7 +7,19 @@ const rhuser = useCookie<any>('rhuser')
 
 const showStudentForm = ref(false);
 
-const studentForms = ref <StudentProfile[]> ([])
+const studentForms = ref <StudentProfile[]> ([{
+    id: 0,
+    age: 0,
+    grade: 1,
+    reading_lvl: 0,
+    first_name: '',
+    last_name: '',
+    birth_date: null, // Use null for dates
+    gender: '',
+    school_name: '',  /// asssume that all the school names will be elementary schools so we should ask them to give the name of the school 
+    school_dist: '',  /// example format should be GISD (garland independent school district)
+    pref_lang: '', /// drop down option for either english, spanish(espanol), or other (only temporary until we can get more info on what languages they speak)  
+  }])
 
 const data_ParentProfile = ref({
     birth_date: null,
