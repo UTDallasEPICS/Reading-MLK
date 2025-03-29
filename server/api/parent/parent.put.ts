@@ -5,19 +5,7 @@ const prisma = new PrismaClient();
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event);
-
-    const id = body.id;
-    const zipcode = body.zipcode;
-    const yearly_income = body.yearly_income;
-    const birth_date = body.birth_date;
-    const average_number_books = body.average_number_books;
-    const phone_number = body.phone_number;
-    const gender = body.gender;
-    const marital_stat = body.marital_stat;
-    const first_name = body.first_name;
-    const last_name = body.last_name;
-    const email = body.email;
-    const social_media = body.social_media;
+    const { id, first_name, last_name, email, zipcode, yearly_income, birth_date, average_number_books, phone_number, gender, marital_stat, social_media} = body
 
     // Check for missing data
     if (!(id && zipcode && average_number_books && phone_number && gender && first_name && last_name && email)) {
@@ -32,24 +20,24 @@ export default defineEventHandler(async (event) => {
             // Update existing parent record
             updatedParent = await prisma.parentProfile.update({
                 where: {
-                    id: id
+                    id,
                 },
                 data: {
                     User: {
                         update: {
-                            first_name: first_name,
-                            last_name: last_name,
-                            email: email,
+                            first_name,
+                            last_name,
+                            email,
                         }
                     },
-                    zipcode: zipcode,
-                    yearly_income: yearly_income,
-                    birth_date: birth_date,
-                    average_number_books: average_number_books,
-                    phone_number: phone_number,
-                    gender: gender,
-                    marital_stat: marital_stat,
-                    social_media: social_media
+                    zipcode,
+                    yearly_income,
+                    birth_date,
+                    average_number_books,
+                    phone_number,
+                    gender,
+                    marital_stat,
+                    social_media,
                 },
             });
         } catch (error) {

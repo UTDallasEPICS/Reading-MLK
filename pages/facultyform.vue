@@ -78,11 +78,10 @@ const handleSubmit = async () => {
     return;
   }
   
-  
     await $fetch('/api/faculty/faculty', {
       method: "POST",
       body: {
-        faculty: data_FacultyProfile.value,
+        ...data_FacultyProfile.value
       }
     });
     alert("Faculty successfully registered in the system.");
