@@ -69,30 +69,3 @@
           class="text-white font-bold no-underline font-sans text-base lg:text-lg px-2 lg:px-4 hover:scale-110 transform transition-all duration-700 inline-flex items-center justify-center"
         ) Logout
 </template>
-
-<style scoped>
-  body {
-    margin-top: 80px;
-  }
-</style>
-
-
-
-<script setup>
-const props = defineProps(['userRole']);
-const viewFontSize = ref('16px');
-const registerFontSize = ref('16px');
-const homeFontSize = ref('16px');
-const aboutFontSize = ref('16px');
-const logoutFontSize = ref('16px');
-
-const showViewDropdown = ref(false);
-const showRegisterDropdown = ref(false);
-
-const viewFacultyBackground = ref('white');
-const viewParentBackground = ref('white');
-
-const registerFacultyBackground = ref('white');
-const registerParentBackground = ref('white');
-
-</script>

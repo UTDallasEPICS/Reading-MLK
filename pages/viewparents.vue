@@ -172,7 +172,7 @@
     });
     console.log("Search Parameters:", searchQuery);
     console.log(keyfield.value)
-    const {data: result}  = await useFetch('/api/parent/search/search', {
+    const {data: result}  = await useFetch('/api/parent/search', {
       method: 'GET',
       query: {searchQuery: JSON.stringify(searchQuery.value), key: keyfield.value},
     });

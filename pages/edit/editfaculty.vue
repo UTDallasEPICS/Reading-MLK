@@ -1,43 +1,46 @@
 <template lang = "pug">
-    div(class="text-center")
-        .flex.flex-col.gap-5(class="text-center px-10")
-            TitleDisplay Edit Faculty
-            div(class = "text-center px-10 border-solid border border-gray-700 border-2")
+  div(class="content-center")
+      <!-- Submission form for editing faculty profile -->
+      .flex.flex-col.gap-5(class="content-center px-10")
+        h2.text-center.text-3xl.font-bold.mt-6 Edit Faculty Profile
+        hr.rounded.center-text(style="border-top: 7px solid #122C4F; width: 65%; margin: 0 auto; margin-top: 7px")
+
+        <!-- Form fields -->
+        div(class="mt-10 w-3/5 mx-auto grid grid-cols-1 gap-y-8")
             div(class="")
                 .py-4.grid(class="" )
-                    Label * First Name:
+                    Label First Name
                         Input(v-model='faculty.first_name' name="first_name" id="first_name" placeholder="(user defined)" required)
                 .py-4.grid(class="" )
-                    Label * Last Name:
+                    Label Last Name
                         Input(v-model='faculty.last_name' name="last_name" id="last_name" placeholder="(user defined)" required)
                 .py-4.grid(class="" )
-                    Label * School District currently working in: 
+                    Label School District currently working in
                         Input(v-model='faculty.district' name="district_teach" id="district_teach" placeholder="(Ex: DISD)" required)
                 .py-4.grid(class="" )
-                    Label * Faculty Email:
+                    Label Faculty Email
                         Input(v-model='faculty.faculty_email' name="faculty_email" id="faculty_email" placeholder="(user defined)" required)
                 .py-4.grid(class="" )
-                    Label * Do you teach a dual language class?
+                    Label Do you teach a dual language class?
                         select(v-model="faculty.dual_lang" name="dual_lang" id="dual_lang" class="block w-full rounded-md border border-gray-700 focus:ring-indigo-500"  placeholder = "(Do you Teach a Bilingual Class)")
                             option(:value="false") Do you Teach a Bilingual Class
                             option(:value="true") Yes
                             option(:value="false") No
                 .py-4.grid(class="" )
-                    Label * School Name:
+                    Label School Name
                         Input(v-model='faculty.school_name' name="school_name" id="school_name" placeholder="(user defined)" required)
                 .py-4.grid(class="" )
-                    Label * Department:
+                    Label Department
                         Input(v-model='faculty.department' name="department" id="department" placeholder="(Ex: English, Science, or Math)" required)
                 .py-4.grid(class="" )
-                    Label * Phone number:
+                    Label Phone number
                         Input(v-model='faculty.phone_number' name="phone_number" id="phone_number" placeholder="(Ex: 1234567891)" required)
                 .py-4.grid(class="" )
-                    Label * Grade you teach:
+                    Label Grade you teach
                         Input(v-model='faculty.grade' name="grade" id="grade" placeholder="(Ex: First, Second, or Pre-K)" required)
-        .flex.flex-col.gap-5(class="border-solid border border-gray-700 border-2")
-        .flex-col.gap-5(class="py-2")
-            Button.mx-auto.text-md(name="Submitt Faculty" @click= "editFaculty(faculty)" class="transition duration-500 bg-blue-500 hover:bg-green-400 rounded-lg px-2 py-2") Apply Edits
-    </template>
+      .flex
+           button(type="button" class="rounded mb-4 bg-indigo-600 px-3 py-2 text-lg font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 w-60 mx-auto" @click="editFaculty(faculty)") Apply Edits
+</template>
     
 <script setup lang='ts'>
 import { ref, onMounted } from 'vue';

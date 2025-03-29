@@ -1,106 +1,56 @@
-<template lang="">
-    <div class="content-center">
-      <!-- Submission form for editing parent profile -->
-      <div class="container content-center" id="form" style="margin: 0 auto">
-        <h2 class="text-center text-3xl font-bold mt-6">Edit Parent Profile</h2>
-        <hr class="rounded center-text" style="border-top: 7px solid #122C4F; width: 65%; margin: 0 auto; margin-top: 7px">
-        
+<template lang = "pug">
+  div(class="content-center")
+      <!-- Submission form for editing faculty profile -->
+      .flex.flex-col.gap-5(class="content-center px-10")
+        h2.text-center.text-3xl.font-bold.mt-6 Edit Faculty Profile
+        hr.rounded.center-text(style="border-top: 7px solid #122C4F; width: 65%; margin: 0 auto; margin-top: 7px")
+
         <!-- Form fields -->
-        <div class="mt-10 grid grid-cols-1 gap-x-24 gap-y-8 sm:grid-cols-6 mx-40">
-          <!-- Zipcode -->
-          <div class="sm:col-span-3 ml-28">
-            <label for="zipcode" class="block text-lg font-medium leading-6 text-gray-900">Zipcode</label>
-            <div class="mt-2">
-              <input v-model='parent.zipcode' type="number" name="zipcode" id="zipcode" placeholder="(user defined)" class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-lg sm:leading-6">
-            </div>
-          </div>
-          <!-- Yearly Income -->
-          <div class="sm:col-span-3 mr-28">
-            <label for="yearly-income" class="block text-lg font-medium leading-6 text-gray-900">Yearly Income</label>
-            <div class="mt-2">
-              <input v-model='parent.yearly_income' type="text" name="yearly-income" id="yearly-income" placeholder="(user defined)" class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-lg sm:leading-6">
-            </div>
-          </div>
-          <!-- Birth Date -->
-          <div class="sm:col-span-3 ml-28">
-            <label for="birth-date" class="block text-lg font-medium leading-6 text-gray-900">Birth Date</label>
-            <div class="mt-2">
-              <input v-model='parent.birth_date' type="date" name="birth-date" id="birth-date" placeholder="(user defined)" class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-lg sm:leading-6">
-            </div>
-          </div>
-          <!-- Average Number of Books Read to Child -->
-          <div class="sm:col-span-3 mr-28">
-            <label for="average_number_books" class="block text-lg font-medium leading-6 text-gray-900">Avg. Number of Books Read to Child</label>
-            <div class="mt-2">
-              <input v-model='parent.average_number_books' type="number" name="average_number_books" id="average_number_books" placeholder="(user defined)" class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-lg sm:leading-6">
-            </div>
-          </div>
-          <!-- Phone Number -->
-          <div class="sm:col-span-3 mr-28">
-            <label for="phone-number" class="block text-lg font-medium leading-6 text-gray-900">Phone Number</label>
-            <div class="mt-2">
-              <input v-model='parent.phone_number' type="tel" name="phone-number" id="phone-number" placeholder="(user defined)" class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-lg sm:leading-6">
-            </div>
-          </div>
-          <!-- Gender -->
-          <div class="sm:col-span-3 ml-28">
-            <label for="gender" class="block text-lg font-medium leading-6 text-gray-900">Gender</label>
-            <div class="mt-2">
-              <select v-model='parent.gender' name="gender" id="gender" class="block w-full bg-gray-200 text-gray-700 border rounded-md py-2 px-3 mb-3 leading-tight focus:outline-none focus:bg-white">
-                <option disabled value="">Please select gender</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-          </div>
-          <!-- Marital Status -->
-          <div class="sm:col-span-3 mr-28">
-            <label for="marital-status" class="block text-lg font-medium leading-6 text-gray-900">Marital Status</label>
-            <div class="mt-2">
-              <select v-model='parent.marital_stat' name="marital-status" id="marital-status" class="block w-full bg-gray-200 text-gray-700 border rounded-md py-2 px-3 mb-3 leading-tight focus:outline-none focus:bg-white">
-                <option disabled value="">Please select marital status</option>
-                <option value="Single">Single</option>
-                <option value="Married">Married</option>
-                <option value="Divorced">Divorced</option>
-                <option value="Widowed">Widowed</option>
-              </select>
-            </div>
-          </div>
-          <!-- First Name -->
-          <div class="sm:col-span-3 ml-28">
-            <label for="first-name" class="block text-lg font-medium leading-6 text-gray-900">First Name</label>
-            <div class="mt-2">
-              <input v-model='parent.first_name' type="text" name="first-name" id="first-name" placeholder="(user defined)" class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-lg sm:leading-6">
-            </div>
-          </div>
-          <!-- Last Name -->
-          <div class="sm:col-span-3 mr-28">
-            <label for="last-name" class="block text-lg font-medium leading-6 text-gray-900">Last Name</label>
-            <div class="mt-2">
-              <input v-model='parent.last_name' type="text" name="last-name" id="last-name" placeholder="(user defined)" class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-lg sm:leading-6">
-            </div>
-          </div>
-          <!-- Email -->
-          <div class="sm:col-span-3 ml-28">
-            <label for="email" class="block text-lg font-medium leading-6 text-gray-900">Email</label>
-            <div class="mt-2">
-              <input v-model='parent.email' type="email" name="email" id="email" placeholder="(user defined)" class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-lg sm:leading-6">
-            </div>
-          </div>
-          <!-- Social Media -->
-          <div class="sm:col-span-3 mr-28">
-            <label for="social-media" class="block text-lg font-medium leading-6 text-gray-900">Social Media</label>
-            <div class="mt-2">
-              <input v-model='parent.social_media' type="text" name="social-media" id="social-media" placeholder="(user defined)" class="block w-full rounded-md border-0 py-1.5 pl-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-lg sm:leading-6">
-            </div>
-          </div>
-          <!-- Submit Button -->
-          <button type="button" class="rounded-md bg-indigo-600 px-3 py-2 text-lg font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 w-60 mx-72" @click="editParent(parent)">Apply Edits</button>
-        </div>
-      </div>
-    </div>
-    </template>
+        div(class="mt-10 w-3/5 mx-auto grid grid-cols-1 gap-y-8")
+            div(class="")
+                .py-4.grid(class="" )
+                    Label Zipcode
+                        Input(v-model='parent.zipcode' name="zipcode" id="zipcode" placeholder="(Ex: 12345)" required)
+                .py-4.grid(class="" )
+                    Label Yearly Income
+                        Input(v-model='parent.yearly_income' name="yearly_income" id="yearly_income" placeholder="(Ex: 12345)" required)
+                .py-4.grid(class="" )
+                    Label Birth Date
+                        Input(v-model='parent.birth_date' name="birth_date" type="Date" id="birth_date" placeholder="(Ex: 01/01/2000)" required)
+                .py-4.grid(class="" )
+                    Label Avg. Number of Books Read to Child
+                        Input(v-model='parent.average_number_books' name="average_number_books" id="average_number_books" placeholder="(Ex: 1)" required)
+                .py-4.grid(class="" )
+                    Label Phone Number
+                        Input(v-model='parent.phone_number' name="phone_number" id="phone_number" placeholder="(Ex: 1234567891)" required)
+                .py-4.grid(class="" )
+                    Label Gender
+                        select(v-model="parent.gender" name="gender" id="gender" class="block w-full rounded-md border border-gray-700 focus:ring-indigo-500"  placeholder = "(Ex: Male, Female, or Other)" required)
+                            option(:value="Male") Male
+                            option(:value="Female") Female
+                            option(:value="Other") Other
+                .py-4.grid(class="" )
+                    Label Marital Status
+                        select(v-model="parent.marital_stat" name="marital_stat" id="marital_stat" class="block w-full rounded-md border border-gray-700 focus:ring-indigo-500"  placeholder = "(Ex: Single, Married, Divorced, or Widowed)" required)
+                            option(:value="Single") Single
+                            option(:value="Married") Married
+                            option(:value="Divorced") Divorced
+                            option(:value="Widowed") Widowed
+                .py-4.grid(class="" )
+                    Label First Name
+                        Input(v-model='parent.first_name' name="first_name" id="first_name" placeholder="(user defined)" required)
+                .py-4.grid(class="" )
+                    Label Last Name
+                        Input(v-model='parent.last_name' name="last_name" id="last_name" placeholder="(user defined)" required)
+                .py-4.grid(class="" )
+                    Label Email
+                        Input(v-model='parent.email' name="email" id="email" placeholder="(user defined)" required)
+                .py-4.grid(class="" )
+                    Label Social Media
+                        Input(v-model='parent.social_media' name="social_media" id="social_media" placeholder="(user defined)" required)
+      .flex
+            button(type="button" class="rounded mb-4 bg-indigo-600 px-3 py-2 text-lg font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 w-60 mx-auto" @click="editFaculty(faculty)") Apply Edits
+      </template>
       
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';

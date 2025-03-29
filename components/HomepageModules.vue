@@ -28,13 +28,13 @@ export default defineComponent({
 
 
 <template lang="pug">
-  div.homepage-modules
+  div(class = "text-center")
     h1 Homepage Modules
-    div.module-buttons
-      button(@click="showModule('home')") Home
-      button(@click="showModule('about')") About Us
-      button(@click="showModule('login')") Login
-      button(@click="showModule('logout')") Logout
+    div(class="mb-5")
+      button(class = " mt-0 mb-2.5 pt-2.5 pb-5 text-4 cursor-pointer" @click="showModule('home')") Home
+      button(class = " mt-0 mb-2.5 pt-2.5 pb-5 text-4 cursor-pointer" @click="showModule('about')") About Us
+      button(class = " mt-0 mb-2.5 pt-2.5 pb-5 text-4 cursor-pointer" @click="showModule('login')") Login
+      button( class = " mt-0 mb-2.5 pt-2.5 pb-5 text-4 cursor-pointer" @click="showModule('logout')") Logout
 
     div(v-if="activeModule === 'home'")
       Home
@@ -45,22 +45,4 @@ export default defineComponent({
     div(v-if="activeModule === 'logout'")
       Logout
 </template>
-
-  
-  <style scoped>
-  .homepage-modules {
-    text-align: center;
-  }
-  
-  .module-buttons {
-    margin-bottom: 20px;
-  }
-  
-  .module-buttons button {
-    margin: 0 10px;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-  }
-  </style>
   
