@@ -22,14 +22,14 @@ model User {
   first_name     String
   last_name      String
   preferred_name String?
-  email  String  @unique // should hold the email of the private account @map("email")
+  email          String  @unique // should hold the email of the private account @map("email")
   // client_cuid    String  @map("client_cuid")
   role           String
 
-  Parents  ParentProfile?
+  Parents ParentProfile?
   // Children StudentProfile?
-  Faculty  FacultyProfile?
-  Admin    AdminProfile?
+  Faculty FacultyProfile?
+  Admin   AdminProfile?
 
   @@map("users")
 }
@@ -90,6 +90,7 @@ model StudentProfile {
 
   ParentToChild ParentToChild[]
   Classes       StudentToClass[]
+  QuizResponse  QuizResponse[]
 
   @@map("student_profile")
 }
@@ -147,4 +148,117 @@ model ParentToChild {
 
   @@id([parent_id, child_id])
   @@map("parent_to_kids")
+}
+
+// Models for reading quiz related things
+model Video {
+  id         Int    @id @default(autoincrement())
+  book_title String
+  author     String
+  isbn       String
+  vid_length Int
+}
+
+model Quiz {
+  id        Int            @id @default(autoincrement())
+  questions Question[]
+  responses QuizResponse[]
+
+  @@map("quizzes")
+}
+
+model Question {
+  id       Int    @id @default(autoincrement())
+  quiz_id  Int
+  text     String
+  feedback String
+  quiz     Quiz   @relation(fields: [quiz_id], references: [id])
+  score    Int
+
+  // Question types
+  MultipleChoice MCQuestion?
+  FreeResponse   FRQuestion?
+
+  // Responses
+  mcAnswers MCAnswer[]
+  frAnswers FRAnswer[]
+
+  @@map("questions")
+}
+
+model MCQuestion {
+  id          Int        @id @default(autoincrement())
+  question_id Int        @unique
+  options     MCOption[]
+  Question    Question   @relation(fields: [question_id], references: [id])
+
+  @@map("multiple_choice_question")
+}
+
+model MCOption {
+  id         Int        @id @default(autoincrement())
+  questionId Int
+  text       String
+  isCorrect  Boolean // @default(false)
+  mcQuestion MCQuestion @relation(fields: [questionId], references: [id])
+
+  @@map("multiple_choice_options")
+}
+
+model FRQuestion {
+  id          Int      @id @default(autoincrement())
+  question_id Int      @unique
+  Question    Question @relation(fields: [question_id], references: [id])
+
+  @@map("free_response_question")
+}
+
+model QuizResponse {
+  id               Int            @id @default(autoincrement())
+  studentProfileId Int
+  quizId           Int
+  StudentProfile   StudentProfile @relation(fields: [studentProfileId], references: [id])
+  quiz             Quiz           @relation(fields: [quizId], references: [id])
+  answers          Answer[]
+  MCAnswer         MCAnswer[]
+  FRAnswer         FRAnswer[]
+
+  @@map("quiz_responses")
+}
+
+// Base model for free response and multiple choice
+model Answer {
+  id Int @id @default(autoincrement())
+
+  QuizResponse QuizResponse[]
+}
+
+model MCAnswer {
+  id             Int          @id @default(autoincrement())
+  quizResponseId Int
+  questionId     Int
+  selectedOption String
+  quizResponse   QuizResponse @relation(fields: [quizResponseId], references: [id])
+  question       Question     @relation(fields: [questionId], references: [id])
+
+  @@map("multiple_choice_answers")
+}
+
+model FRAnswer {
+  id             Int          @id @default(autoincrement())
+  quizResponseId Int
+  questionId     Int
+  responseText   String       @db.Text
+  quizResponse   QuizResponse @relation(fields: [quizResponseId], references: [id])
+  question       Question     @relation(fields: [questionId], references: [id])
+
+  @@map("free_response_answers")
+}
+
+model Book {
+  id         Int    @id @default(autoincrement())
+  book_title String
+  author     String
+  isbn       String
+  page_count Int
 }
