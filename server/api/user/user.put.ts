@@ -7,6 +7,8 @@ export default defineEventHandler(async(event) => {
     
     const body = await readBody(event)
 
+    const {user_name, email, role, first_name, last_name} = body 
+
     let user = null
     let error = null
 
@@ -16,14 +18,15 @@ export default defineEventHandler(async(event) => {
             // Create the user using Prisma
             user = await prisma.user.create({
                 data: {
-                    user_name: body.user_name,
-                    email: body.email,
-                    client_cuid: body.client_cuid,
-                    role: body.role,
+                    user_name,
+                    first_name,
+                    last_name,
+                    email,
+                    role,
                 },
             });
-        } catch (e) {
-            error = e;
+        } catch (error) {
+            error = error;
         }
     } else {
         return createError({ statusCode: 400, statusMessage: "Missing required fields" });
