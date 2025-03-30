@@ -1,6 +1,10 @@
 <script setup>
 import { ref } from 'vue'
 
+definePageMeta({
+  coursePage: true
+})
+
 const message = ref('Welcome to the Course Home Page!')
 </script>
 
