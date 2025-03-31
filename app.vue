@@ -15,7 +15,9 @@ const isCoursePage = computed(() => route.meta.coursePage == true)
 </script>
 <template lang="pug">
 component(v-bind:is="isCoursePage ? CoursePageNavbar : Navbar")
-component(v-if="isCoursePage" :is="CoursePageSidebar")
-NuxtPage
+.main-layout.flex.min-h-screen.bg-white
+  component(v-if="isCoursePage" :is="CoursePageSidebar")
+  .content-area.flex-1
+    NuxtPage
 component(v-if="!isCoursePage" :is="Footer")
 </template>
