@@ -1,23 +1,22 @@
 <template lang="pug">
-    div.about-container(style="width: 100%; margin: 0 auto")
+    div( class="max-w-[900px] bg-[#fdd487] rounded-lg p-4 mx-auto shadow-lg font-[system-ui] w-full mx-auto")
         // h2.text-4xl.lg:text-7xl.font-extrabold.text-gray-800 About Us
-        h2.text-center.text-4xl.font-bold.mt-4(style="margin-top:10px; font-size: 3rem; text-align: center") About Us
-        hr.rounded.center-text(style="border-top: 7px solid #122C4F; width: 100%; margin: 0 auto; margin-top: 7px")
+        h2.text-center.text-4xl.font-bold.mt-4(class = "mt-[10px] text-[3rem] items-center") About Us
+        hr.rounded.center-text( class="rounded mx-auto mt-[7px] border-t-[7px] border-[#122C4F] w-full")
+        div.mt-8(class = "flex flex-row items-center font-[system-ui]")
+            img(src="https://media.istockphoto.com/id/1397843796/photo/shot-of-a-group-of-kids-reading-a-book-outside.jpg?s=612x612&w=0&k=20&c=VSI7oX0jIfmEZm4C-RJgz_t2frI9otsZIqHHapOoCS0=" alt="Non-profit image" class="w-[60%] max-w-[600px] rounded-lg shadow-lg")
 
-        div.about-content.flex.items-center.mt-8
-            img(src="https://media.istockphoto.com/id/1397843796/photo/shot-of-a-group-of-kids-reading-a-book-outside.jpg?s=612x612&w=0&k=20&c=VSI7oX0jIfmEZm4C-RJgz_t2frI9otsZIqHHapOoCS0=" alt="Non-profit image" class="image-left rounded-lg shadow-lg")
-
-            div.text-container.ml-12.text-lg
+            div(class= "text-lg flex-1 ml-12 font-[system-ui]")
                 p.mb-4 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce fermentum scelerisque malesuada. In luctus nunc massa, sed auctor ante condimentum et. Nunc in vestibulum ante, ut aliquet eros. Suspendisse congue ultrices pharetra. Vivamus non ex accumsan, elementum diam et, laoreet nulla. Sed auctor felis a justo finibus, nec congue lectus ultrices.
                 p Nunc egestas ipsum sit amet erat blandit, et fringilla nulla egestas. Sed et ornare lacus.
 
-        div.tabs-container.flex.justify-around.mt-8.border-t.border-gray-300.pt-4
-            button(type="button" @click="activeTab = 'contact'" :class="['tab-btn', { 'active': activeTab === 'contact' } ]") Contact
-            button(type="button" @click="activeTab = 'location'" :class="['tab-btn', { 'active': activeTab === 'location' } ]") Location
-            button(type="button" @click="activeTab = 'feedback'" :class="['tab-btn', { 'active': activeTab === 'feedback' } ]") Feedback
+        div(class=" flex justify-around mt-8 border-t border-gray-300 pt-4 text-left text-base font-medium font-[system-ui]")
+            button(type="button" @click="activeTab = 'contact'" :class="['py-2 px-6 rounded-lg font-bold font-[system-ui] transition-colors duration-300', activeTab === 'contact' ?  'bg-[#2e629a] text-white' : 'bg-white text-black hover:bg-[#2e629a] hover:text-white'  ]") Contact
+            button(type="button" @click="activeTab = 'location'" :class="['py-2 px-6 rounded-lg font-bold font-[system-ui] transition-colors duration-300', activeTab === 'location' ?  'bg-[#2e629a] text-white' : 'bg-white text-black hover:bg-[#2e629a] hover:text-white' ]") Location
+            button(type="button" @click="activeTab = 'feedback'" :class="['py-2 px-6 rounded-lg font-bold font-[system-ui] transition-colors duration-300', activeTab === 'feedback' ?  'bg-[#2e629a] text-white' : 'bg-white text-black hover:bg-[#2e629a] hover:text-white' ]") Feedback
 
         //- Tab Content Section
-        div.tab-content.mt-6.p-4.bg-gray-100.rounded-lg
+        div.mt-6.p-4.bg-gray-100.rounded-lg(class="text-left text-base font-medium font-[system-ui] ")
             //- Contact Tab Content
             div(v-if="activeTab === 'contact'")
                 p.text-lg Email: info@ReadingHuddle.com
@@ -33,7 +32,7 @@
                 p.text-lg Leave Feeback Here!
 </template>
 
-<script>
+<script lang = "ts">
 export default {
     data() {
         return {
@@ -42,56 +41,3 @@ export default {
     }
 }
 </script>
-
-<style scoped>
-    .about-container {
-        max-width: 900px;
-        background-color: #fdd487;
-        border-radius: 10px; 
-        padding: 1rem;
-        margin: 0 auto;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-        font-family: system-ui; 
-    }
-    .about-content {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        font-family: system-ui;
-    }
-    .image-left {
-        width: 60%; 
-        max-width: 600px; 
-    }
-    .text-container {
-        font-size: large;
-        flex: 1;
-        margin-left: 3rem;
-        font-family: system-ui;
-    }
-    .tab-btn {
-        font-size: 1rem;
-        cursor: pointer;
-        background-color: white; /* Fixed */
-        color: black;
-        padding: 0.5rem 1.5rem;
-        border-radius: 8px;
-        transition: background-color 0.3s;
-        font-family: system-ui;
-        font-weight: bold;
-    }
-    .tab-btn:hover {
-        background-color: #2e629a;
-        color: white;
-    }
-    .tab-btn.active {
-        background-color: #2e629a;
-        color: white;
-    }
-    .tab-content {
-        font-size: 1rem;
-        font-weight: 500;
-        text-align: left;
-        font-family: system-ui;
-    }
-</style>

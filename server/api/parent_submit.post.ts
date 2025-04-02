@@ -20,7 +20,7 @@ export default defineEventHandler( async event => {
         id: 0,
         zipcode: '',
         yearly_income: '',
-        birth_date: undefined,
+        birth_date: null,
         average_number_books: 0,
         phone_number: '',
         gender: '',
