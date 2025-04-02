@@ -1,7 +1,7 @@
 <template lang="pug">
-    div.about-container(class="max-w-[900px] bg-[#fdd487] rounded-lg p-4 mx-auto shadow-lg font-sans")
+    div.about-container(class="max-w-[900px] bg-customPeach rounded-lg p-4 mx-auto shadow-lg font-sans")
         h2.text-center.text-4xl.font-bold.mt-4 About Us
-        hr.rounded.center-text(class="border-t-8 border-[#122C4F] w-full mx-auto mt-2")
+        hr.rounded.center-text(class="border-t-8 border-BlueElements w-full mx-auto mt-2")
 
         div.about-content.flex.items-center.mt-8
             img(src="https://media.istockphoto.com/id/1397843796/photo/shot-of-a-group-of-kids-reading-a-book-outside.jpg?s=612x612&w=0&k=20&c=VSI7oX0jIfmEZm4C-RJgz_t2frI9otsZIqHHapOoCS0=" alt="Non-profit image" class="w-3/5 max-w-[600px] rounded-lg shadow-lg")
@@ -11,9 +11,9 @@
                 p Nunc egestas ipsum sit amet erat blandit, et fringilla nulla egestas. Sed et ornare lacus.
 
         div.tabs-container.flex.justify-around.mt-8.border-t.border-gray-300.pt-4
-            button(type="button" @click="activeTab = 'contact'" :class="['tab-btn', { 'active': activeTab === 'contact' } ]" class="text-lg cursor-pointer bg-white text-black py-2 px-6 rounded-lg transition duration-300 font-bold hover:bg-[#2e629a] hover:text-white active:bg-[#2e629a] active:text-white") Contact
-            button(type="button" @click="activeTab = 'location'" :class="['tab-btn', { 'active': activeTab === 'location' } ]" class="text-lg cursor-pointer bg-white text-black py-2 px-6 rounded-lg transition duration-300 font-bold hover:bg-[#2e629a] hover:text-white active:bg-[#2e629a] active:text-white") Location
-            button(type="button" @click="activeTab = 'feedback'" :class="['tab-btn', { 'active': activeTab === 'feedback' } ]" class="text-lg cursor-pointer bg-white text-black py-2 px-6 rounded-lg transition duration-300 font-bold hover:bg-[#2e629a] hover:text-white active:bg-[#2e629a] active:text-white") Feedback
+            button(type="button" @click="activeTab = 'contact'" :class="['tab-btn', { 'active': activeTab === 'contact' } ]" class="text-lg cursor-pointer bg-white text-black py-2 px-6 rounded-lg transition duration-300 font-bold hover:bg-customBlueHover hover:text-white active:bg-customBlueHover active:text-white") Contact
+            button(type="button" @click="activeTab = 'location'" :class="['tab-btn', { 'active': activeTab === 'location' } ]" class="text-lg cursor-pointer bg-white text-black py-2 px-6 rounded-lg transition duration-300 font-bold hover:bg-customBlueHover hover:text-white active:bg-customBlueHover active:text-white") Location
+            button(type="button" @click="activeTab = 'feedback'" :class="['tab-btn', { 'active': activeTab === 'feedback' } ]" class="text-lg cursor-pointer bg-white text-black py-2 px-6 rounded-lg transition duration-300 font-bold hover:bg-customBlueHover hover:text-white active:bg-customBlueHover active:text-white") Feedback
 
         //- Tab Content Section
         div.tab-content.mt-6.p-4.bg-gray-100.rounded-lg

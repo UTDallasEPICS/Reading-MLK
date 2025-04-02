@@ -13,6 +13,9 @@ module.exports = {
       stroke: ['hover', 'focus'],
       colors: {
         customBlue: '#2d3748',
+        customeBlueElements: '#122C4F',
+        customBlueHover: '#2e629a',
+        customPeach: '#fdd487',
       },
       keyframes: {
         slideFadeIn: {
