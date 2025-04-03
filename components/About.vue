@@ -38,7 +38,7 @@ import { ref} from 'vue'
 const activeTab = ref('contact'); 
 
 const buttonClasses = ( tab_name: string) => {
-  return ['py-2 px-6 rounded-lg font-bold font-[system-ui] transition-colors duration-300', activeTab.value=== tab_name ? 'bg-[#2e629a] text-white' : 'bg-white text-black hover:bg-[#2e629a] hover:text-white',]
+  return ['py-2 px-6 rounded-lg font-bold transition-colors duration-300', activeTab.value=== tab_name ? 'bg-[#2e629a] text-white' : 'bg-white text-black hover:bg-[#2e629a] hover:text-white',]
 };
 
 export default {
