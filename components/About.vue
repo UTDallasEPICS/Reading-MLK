@@ -11,9 +11,9 @@
                 p Nunc egestas ipsum sit amet erat blandit, et fringilla nulla egestas. Sed et ornare lacus.
 
         div(class=" flex justify-around mt-8 border-t border-gray-300 pt-4 text-left text-base font-medium font-[system-ui]")
-            button(type="button" @click="activeTab = 'contact'" :class="['py-2 px-6 rounded-lg font-bold font-[system-ui] transition-colors duration-300', activeTab === 'contact' ?  'bg-[#2e629a] text-white' : 'bg-white text-black hover:bg-[#2e629a] hover:text-white'  ]") Contact
-            button(type="button" @click="activeTab = 'location'" :class="['py-2 px-6 rounded-lg font-bold font-[system-ui] transition-colors duration-300', activeTab === 'location' ?  'bg-[#2e629a] text-white' : 'bg-white text-black hover:bg-[#2e629a] hover:text-white' ]") Location
-            button(type="button" @click="activeTab = 'feedback'" :class="['py-2 px-6 rounded-lg font-bold font-[system-ui] transition-colors duration-300', activeTab === 'feedback' ?  'bg-[#2e629a] text-white' : 'bg-white text-black hover:bg-[#2e629a] hover:text-white' ]") Feedback
+            button(type="button" @click="activeTab = 'contact'" :class="buttonClasses('contact')") Contact
+            button(type="button" @click="activeTab = 'location'" :class="buttonClasses('location')") Location
+            button(type="button" @click="activeTab = 'feedback'" :class="buttonClasses('feedback')") Feedback
 
         //- Tab Content Section
         div.mt-6.p-4.bg-gray-100.rounded-lg(class="text-left text-base font-medium font-[system-ui] ")
@@ -33,6 +33,14 @@
 </template>
 
 <script lang = "ts">
+import { ref} from 'vue'
+
+const activeTab = ref('contact'); 
+
+const buttonClasses = ( tab_name: string) => {
+  return ['py-2 px-6 rounded-lg font-bold font-[system-ui] transition-colors duration-300', activeTab.value=== tab_name ? 'bg-[#2e629a] text-white' : 'bg-white text-black hover:bg-[#2e629a] hover:text-white',]
+};
+
 export default {
     data() {
         return {
@@ -40,4 +48,5 @@ export default {
         }
     }
 }
+
 </script>
