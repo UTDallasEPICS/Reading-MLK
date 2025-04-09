@@ -20,6 +20,13 @@ const message = ref('Welcome to the Course Home Page!')
           @click="message = 'Thanks for clicking!'"
           class="px-6 py-3 bg-customBlue text-white rounded-lg shadow-md hover:bg-blue-700 transition-all duration-300"
         ) Click Me
+
+        // link to Quiz page
+        router-link(
+          to="quiz"
+          class="inline-block mt-6 px-6 py-3 bg-customBlue text-white rounded-lg shadow-md hover:bg-blue-700 transition-all duration-300"
+        ) Start Quiz
+
     </template>
     
 
