@@ -44,8 +44,8 @@ function submitQuiz() {
   .main-content.flex.flex-col.items-center.justify-content-center.p-10.w-full
 
     // Progress display
-    .w-full.flex.justify-end.mb-4
-      p.text-lg.font-semibold.text-gray-700 {{ answeredQuestions }} / {{ questions.length }} questions
+    .quiz-progress.py-2.w-full.flex.justify-end.mb-4
+      span.bg-customQuizLightGray.p-3.text-lg.font-semibold.text-gray-700 {{ answeredQuestions }} / {{ questions.length }} questions
 
     // Containers
     .quiz-bg-gray.bg-customQuizGray.p-8.w-full(style="height: 70vh;")

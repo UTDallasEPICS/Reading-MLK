@@ -17,6 +17,7 @@ module.exports = {
         customBlueHover: '#2e629a',
         customPeach: '#fdd487',
         customQuizGray: "#9d9d9a",
+        customQuizLightGray: "#c4c4c2",
       },
       keyframes: {
         slideFadeIn: {
