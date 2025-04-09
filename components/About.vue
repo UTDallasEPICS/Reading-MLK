@@ -14,7 +14,6 @@
             button(type="button" @click="activeTab = 'contact'" :class="buttonClasses('contact')") Contact
             button(type="button" @click="activeTab = 'location'" :class="buttonClasses('location')") Location
             button(type="button" @click="activeTab = 'feedback'" :class="buttonClasses('feedback')") Feedback
-
         //- Tab Content Section
         div.mt-6.p-4.bg-gray-100.rounded-lg(class="text-left text-base font-medium font-[system-ui] ")
             //- Contact Tab Content
@@ -29,24 +28,13 @@
 
             //- Feedback Tab Content
             div(v-if="activeTab === 'feedback'")
-                p.text-lg Leave Feeback Here!
+                p.text-lg Leave Feedback Here!
 </template>
 
-<script lang = "ts">
-import { ref} from 'vue'
-
+<script lang="ts">
 const activeTab = ref('contact'); 
 
-const buttonClasses = ( tab_name: string) => {
+const buttonClasses = (tab_name: string) => {
   return ['py-2 px-6 rounded-lg font-bold transition-colors duration-300', activeTab.value=== tab_name ? 'bg-[#2e629a] text-white' : 'bg-white text-black hover:bg-[#2e629a] hover:text-white',]
 };
-
-export default {
-    data() {
-        return {
-            activeTab: 'contact'
-        }
-    }
-}
-
 </script>

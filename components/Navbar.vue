@@ -9,16 +9,15 @@
     .navbar-container(
       class="flex justify-center items-center gap-6 md:gap-10 py-4 mx-auto max-w-full"
     )
-      .log
       nuxt-link#homebtn(
         to="/"
         class="text-white font-bold no-underline font-sans text-base lg:text-lg px-2 lg:px-4 hover:scale-110 transform transition-all duration-700 inline-flex items-center justify-center"
       ) Home
-      .log
-        nuxt-link#aboutbtn(
-          to="/about"
-          class="text-white font-bold no-underline font-sans text-base lg:text-lg px-2 lg:px-4 hover:scale-110 transform transition-all duration-700 inline-flex items-center justify-center"
-        ) About Us
+
+      nuxt-link#aboutbtn(
+        to="/about"
+        class="text-white font-bold no-underline font-sans text-base lg:text-lg px-2 lg:px-4 hover:scale-110 transform transition-all duration-700 inline-flex items-center justify-center"
+      ) About Us
 
       // Register dropdown
       .dropdown.relative.inline-block.gap-4(
@@ -61,7 +60,6 @@
             to="/viewparents"
             class="text-black py-3 px-4 no-underline block hover:bg-gray-200 rounded-md"
           ) Parent
-
       .log
         a#logoutbtn(
           href="/api/logout"
@@ -69,3 +67,10 @@
           class="text-white font-bold no-underline font-sans text-base lg:text-lg px-2 lg:px-4 hover:scale-110 transform transition-all duration-700 inline-flex items-center justify-center"
         ) Logout
 </template>
+
+<script lang="ts" setup>
+const props = defineProps<{ userRole: string }>(); 
+
+const showViewDropdown = ref<boolean>(false);
+const showRegisterDropdown = ref<boolean>(false);
+</script>
