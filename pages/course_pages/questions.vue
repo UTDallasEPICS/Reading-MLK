@@ -5,7 +5,7 @@ definePageMeta({
   coursePage: true
 })
 
-// Example quiz questions
+// Example questions
 const questions = ref([
   { id: 1, text: '[Question 1 here]' },
   { id: 2, text: '[Question 2 here]' },
@@ -32,8 +32,8 @@ function prevQuestion() {
   if (!isFirst.value) currentIndex.value--
 }
 
-function submitQuiz() {
-  alert('Quiz submitted!')
+function submitQuestion() {
+  alert('Answers submitted!')
 }
 </script>
 
@@ -44,12 +44,12 @@ function submitQuiz() {
   .main-content.flex.flex-col.items-center.justify-content-center.p-10.w-full
 
     // Progress display
-    .quiz-progress.py-2.w-full.flex.justify-end.mb-4
-      span.bg-customQuizLightGray.p-3.text-lg.font-semibold.text-gray-700 {{ answeredQuestions }} / {{ questions.length }} questions
+    .question-progress.py-2.w-full.flex.justify-end.mb-4
+      span.bg-customQuestionLightGray.p-3.text-lg.font-semibold.text-gray-700 {{ answeredQuestions }} / {{ questions.length }} questions
 
     // Containers
-    .quiz-bg-gray.bg-customQuizGray.p-8.w-full(style="height: 70vh;")
-      .quiz-bg-white.bg-white.p-8.h-full.flex.flex-col.justify-self
+    .question-bg-gray.bg-customQuestionGray.p-8.w-full(style="height: 70vh;")
+      .question-bg-white.bg-white.p-8.h-full.flex.flex-col.justify-self
 
         // Question Section
         .question-section.mb-6
@@ -82,7 +82,7 @@ function submitQuiz() {
 
                 router-link(
                 to="coursehomepage"
-                @click="submitQuiz"
+                @click="submitQuestion"
                 v-if="isLast"
                 class="px-8 py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all text-lg"
                 ) Submit
