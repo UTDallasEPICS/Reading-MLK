@@ -49,8 +49,8 @@ function submitQuiz() {
 
     // Containers
     .quiz-bg-gray.bg-customQuizGray.p-8.w-full(style="height: 70vh;")
-      .quiz-bg-white.bg-white.p-8.h-full
-      
+      .quiz-bg-white.bg-white.p-8.h-full.flex.flex-col.justify-self
+
         // Question Section
         .question-section.mb-6
             h2.text-xl.font-semibold.text-gray-800.mb-2 Question {{ currentIndex + 1 }}
@@ -66,24 +66,25 @@ function submitQuiz() {
             )
 
         // Navigation Section (Previous, Next, Submit)
-        .controls.flex.justify-between.items-center
+        .controls.flex.justify-between.items-center.mt-auto
             button(
             @click="prevQuestion"
             v-if="!isFirst"
-            class="px-5 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition-all"
+            class="px-8 py-4 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition-all text-lg"
             ) Previous
 
-            button(
-            @click="nextQuestion"
-             v-if="!isLast"
-            class="px-5 py-2 bg-customBlue text-white rounded-lg hover:bg-blue-700 transition-all"
-            ) Next
+            .flex.gap-4.ml-auto
+                button(
+                @click="nextQuestion"
+                v-if="!isLast"
+                class="px-8 py-4 bg-customBlue text-white rounded-lg hover:bg-blue-700 transition-all text-lg"
+                ) Next
 
-            router-link(
-            to="coursehomepage"
-            @click="submitQuiz"
-            v-if="isLast"
-            class="px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all"
-            ) Submit
+                router-link(
+                to="coursehomepage"
+                @click="submitQuiz"
+                v-if="isLast"
+                class="px-8 py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all text-lg"
+                ) Submit
 
 </template>
