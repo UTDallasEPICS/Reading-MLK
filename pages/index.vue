@@ -62,7 +62,7 @@ onUnmounted(() => {
 
     // Mission Section
     .mission-container(id="mission" class="relative flex flex-row justify-center items-center w-full py-12 px-6 animate-fadeIn")
-      .mission-header-container(class="flex flex-col items-center justify-center px-8 py-4 bg-customBlue w-full h-[20vw] max-w-4xl rounded-lg shadow-md animate-slideDown" style="clip-path: polygon(0 0, 100% 0, calc(100% - 30px) 50%, 100% 100%, 0 100%);")
+      .mission-header-container(class="flex flex-col items-center justify-center px-8 py-4 bg-missionBox w-full h-[20vw] max-w-4xl rounded-lg shadow-md animate-slideDown" style="clip-path: polygon(0 0, 100% 0, calc(100% - 30px) 50%, 100% 100%, 0 100%);")
         h3(class="text-3xl lg:text-4xl font-bold text-white uppercase tracking-wide") Our Mission
       .mission-content-container(class="text-center space-y-6 ")
         p(class="text-lg sm:text-xl px-4 sm:px-6 font-medium text-gray-800 leading-relaxed") 
@@ -77,29 +77,28 @@ onUnmounted(() => {
       .join-header-container(class="flex flex-col")
         h3(class="text-3xl lg:text-4xl font-semibold text-white tracking-wide") JOIN THE TEAM!
         div(class="h-1 bg-yellow-400 mt-2 rounded")
-      .register-button-container(class="bg-[#E0B07C] px-6 py-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer animate-bounce")
+      .register-button-container(class="bg-registerGold px-6 py-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer animate-bounce")
         button(@click="openAccountSelectionWindow" class="text-2xl font-bold text-white") Register Here!
         AccountSelectionWindow(v-if="showAccountSelectionWindow" @close="closeAccountSelectionWindow")
 
     // Modules Section
     div(class="flex flex-row items-baseline w-full h-auto p-9")
-      //- .module-header(class="flex justify-center align-center w-full h-auto py-3")
-      //-   h3(class="text-3xl lg:text-4xl font-bold text-customBlue uppercase tracking-wide") Start your reading huddle
       .module-container(class="flex flex-wrap justify-center items-baseline gap-6 w-full py-10 px-4")
-        .module(class="flex flex-col justify-center items-center w-[20vw] h-[20vh] p-4 bg-[#FFCD98] rounded-lg shadow-lg hover:shadow-xl transition-transform hover:scale-105")
-          img(src="/bookstack.svg" alt="Bookstack icon" class="w-12 h-12 mr-4 rounded-full object-contain")
-          h2(class="text-xl font-semibold text-gray-800 hover:text-yellow-500 transition") Read any book
-        router-link(to="/course_pages/coursehomepage" class="flex flex-col justify-center items-center w-[20vw] h-[20vh] p-4 bg-[#FFCD98] rounded-lg shadow-lg hover:shadow-xl transition-transform hover:scale-105")
-          img(src="/home.svg" alt="Home icon" class="w-12 h-12 mr-4 rounded-full object-contain")
-          h2(class="text-xl font-semibold text-gray-800 hover:text-yellow-500 transition") Course Homepage
-      .mission-header-container(class="flex flex-col flex-wrap items-center justify-center pl-20 py-4 bg-customBlue w-[60vw] h-[20vw] max-w-4xl rounded-lg shadow-md animate-slideDown" style="clip-path: polygon(100% 0, 0 0, calc(0% + 30px) 50%, 0 100%, 100% 100%);")
+        .module(class="flex flex-col justify-center items-center w-[20vw] h-[20vh] p-4 bg-moduleGold text-white rounded-lg shadow-lg hover:shadow-xl transition-transform hover:scale-105")
+          img(src="/whitebookstack.svg" alt="Bookstack icon" class="w-12 h-12 mr-4 object-contain")
+          h2(class="text-xl font-semibold hover:text-yellow-300 transition") Read any book
+        router-link(to="/course_pages/coursehomepage" class="flex flex-col justify-center items-center w-[20vw] h-[20vh] p-4 bg-moduleGold text-white rounded-lg shadow-lg hover:shadow-xl transition-transform hover:scale-105")
+          img(src="/whitehome.svg" alt="Home icon" class="w-12 h-12 mr-4 object-contain")
+          h2(class="text-xl font-semibold hover:text-yellow-300 transition") Course Homepage
+
+      .mission-header-container(class="flex flex-col flex-wrap items-center justify-center pl-20 py-4 bg-missionBox w-[60vw] h-[20vw] max-w-4xl rounded-lg shadow-md animate-slideDown" style="clip-path: polygon(100% 0, 0 0, calc(0% + 30px) 50%, 0 100%, 100% 100%);")
         h3(class="text-3xl lg:text-4xl font-bold text-white uppercase tracking-wide") Start your reading Huddle
 
 
     // Huddle Section
-    .huddle-container(class="flex flex-col items-center bg-[#FFCD98] w-full py-12")
+    .huddle-container(class="flex flex-col items-center bg-[#C2963A] w-full py-12")
       div(class="flex")
-        .huddle-header-container(class="flex items-center justify-center bg-[#E0B07C] w-full max-w-4xl rounded-lg shadow-md")
+        .huddle-header-container(class="flex items-center justify-center bg-[#A17C30] w-full max-w-4xl rounded-lg shadow-md")
           h3(class="text-3xl lg:text-4xl font-bold text-white uppercase tracking-wide") Inside The Huddle
         .huddle-content-container(class="text-center mt-6 space-y-6 ml-16")
           p(class="text-lg sm:text-xl px-4 font-medium text-gray-800 leading-relaxed") 

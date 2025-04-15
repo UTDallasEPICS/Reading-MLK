@@ -18,6 +18,9 @@ module.exports = {
         customPeach: '#fdd487',
         customQuestionGray: "#9d9d9a",
         customQuestionLightGray: "#c4c4c2",
+        missionBox: '#192233',
+        registerGold: '#A17C30',
+        moduleGold: '#C2963A',
       },
       keyframes: {
         slideFadeIn: {
