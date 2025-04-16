@@ -140,80 +140,46 @@ Container
     div
         TitleDisplay Admin Page
     div.table-container
-        table
-            td
+        table(class = "border-collapse w-full")
+            td(class ="border border-black p-8px text-center")
                 TitleDisplay Number of users:
-            td
+            td(class ="border border-black p-8px text-center")
                 TitleDisplay Number of parents:
-            td
+            td(class ="border border-black p-8px text-center")
                 TitleDisplay Number of children:
-            td
+            td(class ="border border-black p-8px text-center")
                 TitleDisplay Number of Teachers:
-    div.flex-container
-        div.flex-item
-            Label.flex-item Search by parent name:
+    div(class = "flex flex-row mt-0 flex-nowrap justify-start content-start gap-2.5")
+        div(class = "items-start ml-0 mt-2 mb-24")
+            Label(class = "items-start ml-0 mt-2 mb-24") Search by parent name:
                 .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                     Input(v-model='parentfirstname' placeholder="(first)" required)
                     .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                     Input(v-model='parentlastname' placeholder="(last)" required)
-            SubmitQueryButton.flex-item(:parentfirstname="parentfirstname" :parentlastname="parentlastname" @submit="handleQuery") 
-            DisplayAllButton.flex-item(:parentfirstname="parentfirstname" :parentlastname="parentlastname" @submit="handleQuery")
-        div.flex-item
+            SubmitQueryButton(class = "items-start ml-0 mt-2 mb-24" :parentfirstname="parentfirstname" :parentlastname="parentlastname" @submit="handleQuery") 
+            DisplayAllButton(class = "items-start ml-0 mt-2 mb-24" :parentfirstname="parentfirstname" :parentlastname="parentlastname" @submit="handleQuery")
+        div(class = "items-start ml-0 mt-2 mb-24")
             Label Search by child name:
                 .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                     Input(v-model='childfirstname' placeholder="(first)" required)
                     .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                     Input(v-model='childlastname' placeholder="(last)" required)
-            SubmitQueryButton.flex-item(:childfirstname="childfirstname" :childlastname="childlastname" @submit="handleChildQuery")
-            DisplayAllButton.flex-item(:parentfirstname="parentfirstname" :parentlastname="parentlastname" @submit="handleQuery")
-        div.flex-item
+            SubmitQueryButton(class = "items-start ml-0 mt-2 mb-24" :childfirstname="childfirstname" :childlastname="childlastname" @submit="handleChildQuery")
+            DisplayAllButton(class = "items-start ml-0 mt-2 mb-24" :parentfirstname="parentfirstname" :parentlastname="parentlastname" @submit="handleQuery")
+        div(class = "items-start ml-0 mt-2 mb-24")
             Label Search by Teacher name:
                 .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                     Input(v-model='childfirstname' placeholder="(first)" required)
                     .col-md-9.mx-10(class="sm:col-span-2 sm:mr-11")
                     Input(v-model='childlastname' placeholder="(last)" required)
-            SubmitQueryButton.flex-item(:childfirstname="childfirstname" :childlastname="childlastname" @submit="handleChildQuery")
-            DisplayAllButton.flex-item(:parentfirstname="parentfirstname" :parentlastname="parentlastname" @submit="handleQuery")
-    div.flex-container
-        DownloadExcelButton.flex-item(:parentfirstname="parentfirstname" :parentlastname="parentlastname" @submit="handleQuery")
+            SubmitQueryButton(class = "items-start ml-0 mt-2 mb-24" :childfirstname="childfirstname" :childlastname="childlastname" @submit="handleChildQuery")
+            DisplayAllButton(class = "items-start ml-0 mt-2 mb-24" :parentfirstname="parentfirstname" :parentlastname="parentlastname" @submit="handleQuery")
+    div(class = "flex flex-row mt-0 flex-nowrap justify-start content-start gap-2.5")
+        DownloadExcelButton(class = "items-start ml-0 mt-2 mb-24" :parentfirstname="parentfirstname" :parentlastname="parentlastname" @submit="handleQuery")
         
        
             
 
-            
+           
 
 </template>
-
-<style lang="css">
-.flex-container {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between; /* Adjust horizontal spacing */
-  margin-top: 0px; /* Adjust top margin */
-
-  flex-wrap: nowrap;
-  justify-content: flex-start;
-  align-content: flex-start;
-  gap: 10px;
-}
-
-.flex-item {
-  align-items: flex-start;
-  margin-left: 0;
-  margin: 10px 0 100px 0; /* Adjust spacing between flex items */
-  
-}
-
-table {
-  border-collapse: collapse;
-  width: 100%;
-}
-
-td {
-  border: 1px solid #000;
-  padding: 8px;
-  text-align: center;
-}
-
-
-</style>
