@@ -18,6 +18,10 @@ module.exports = {
         customPeach: '#fdd487',
         customQuestionGray: "#9d9d9a",
         customQuestionLightGray: "#c4c4c2",
+        lighterBlue: '#123A6B',
+        LighterGold: '#C2963A',
+        moduleGold: '#A97D21FF',
+        cwhite: '#ffffff',
       },
       keyframes: {
         slideFadeIn: {
