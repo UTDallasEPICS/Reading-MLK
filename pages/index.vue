@@ -62,7 +62,7 @@ onUnmounted(() => {
 
     // Mission Section
     .mission-container(id="mission" class="relative flex flex-row justify-center items-center w-full py-12 px-6 animate-fadeIn")
-      .mission-header-container(class="flex flex-col items-center justify-center px-8 py-4 bg-missionBox w-full h-[20vw] max-w-4xl rounded-lg shadow-md animate-slideDown" style="clip-path: polygon(0 0, 100% 0, calc(100% - 30px) 50%, 100% 100%, 0 100%);")
+      .mission-header-container(class="flex flex-col items-center justify-center px-8 py-4 bg-lighterBlue w-full h-[20vw] max-w-4xl rounded-lg shadow-md animate-slideDown" style="clip-path: polygon(0 0, 100% 0, calc(100% - 30px) 50%, 100% 100%, 0 100%);")
         h3(class="text-3xl lg:text-4xl font-bold text-white uppercase tracking-wide") Our Mission
       .mission-content-container(class="text-center space-y-6 ")
         p(class="text-lg sm:text-xl px-4 sm:px-6 font-medium text-gray-800 leading-relaxed") 
@@ -77,7 +77,7 @@ onUnmounted(() => {
       .join-header-container(class="flex flex-col")
         h3(class="text-3xl lg:text-4xl font-semibold text-white tracking-wide") JOIN THE TEAM!
         div(class="h-1 bg-yellow-400 mt-2 rounded")
-      .register-button-container(class="bg-registerGold px-6 py-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer animate-bounce")
+      .register-button-container(class="bg-LighterGold px-6 py-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer animate-bounce")
         button(@click="openAccountSelectionWindow" class="text-2xl font-bold text-white") Register Here!
         AccountSelectionWindow(v-if="showAccountSelectionWindow" @close="closeAccountSelectionWindow")
 
@@ -91,7 +91,7 @@ onUnmounted(() => {
           img(src="/whitehome.svg" alt="Home icon" class="w-12 h-12 mr-4 object-contain")
           h2(class="text-xl font-semibold hover:text-yellow-300 transition") Course Homepage
 
-      .mission-header-container(class="flex flex-col flex-wrap items-center justify-center pl-20 py-4 bg-missionBox w-[60vw] h-[20vw] max-w-4xl rounded-lg shadow-md animate-slideDown" style="clip-path: polygon(100% 0, 0 0, calc(0% + 30px) 50%, 0 100%, 100% 100%);")
+      .mission-header-container(class="flex flex-col flex-wrap items-center justify-center pl-20 py-4 bg-lighterBlue w-[60vw] h-[20vw] max-w-4xl rounded-lg shadow-md animate-slideDown" style="clip-path: polygon(100% 0, 0 0, calc(0% + 30px) 50%, 0 100%, 100% 100%);")
         h3(class="text-3xl lg:text-4xl font-bold text-white uppercase tracking-wide") Start your reading Huddle
 
 

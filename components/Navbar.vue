@@ -1,5 +1,5 @@
 <template lang="pug">
-  header.navbar(class="flex bg-customBlue")
+  header.navbar(class="flex bg-lighterBlue")
     .img-container(class="w-fit")
       img(
               src="/image.png" 
