@@ -22,13 +22,13 @@ const message = ref('Welcome to the Course Home Page!')
         ) Click Me
 
         // link to Questions page
-        router-link(
+        nuxt-link(
           to="questions"
           class="inline-block mt-6 px-6 py-3 bg-customBlue text-white rounded-lg shadow-md hover:bg-blue-700 transition-all duration-300"
         ) Start Questions
 
         // link to Multiple Choice Questions page (multiplechoicequiz)
-        router-link(
+        nuxt-link(
           to="multiplechoicequiz"
           class="inline-block mt-6 px-6 py-3 bg-customBlue text-white rounded-lg shadow-md hover:bg-blue-700 transition-all duration-300"
         ) Start Multiple Choice Quiz

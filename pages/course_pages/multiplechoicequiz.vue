@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router';
+// import { useRouter } from 'vue-router';
 
 definePageMeta({
   coursePage: true
@@ -115,7 +115,7 @@ function submitQuestion() {
                 class="px-8 py-4 bg-customBlue text-white rounded-lg hover:bg-blue-700 transition-all text-lg"
                 ) Next
 
-                router-link(
+                nuxt-link(
                 to="coursehomepage"
                 @click="submitQuestion"
                 v-if="isLast"
