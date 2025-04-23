@@ -161,29 +161,36 @@
   }
 
   const performSearch = async () => {
-    const searchQuery: Record<string, string | boolean>={};
+    const searchQuery: Record<string, string | boolean> = {};
 
-    Object.entries(filters.value).forEach(([key,value])=>{
-      if(value !== "" && value !== null){
+    Object.entries(filters.value).forEach(([key, value]) => {
+      if (value !== "" && value !== null) {
         searchQuery[key] = value as string | boolean;
       }
     });
 
-    if (selectedOption.value !== null){
-        searchQuery['dual_lang'] = selectedOption.value;
+    if (selectedOption.value !== null) {
+      searchQuery['dual_lang'] = selectedOption.value;
     }
-    console.log("Search Parameters:", searchQuery);
-    console.log(filters.value);
-    try{
-    const result = await $fetch('/api/faculty/search/search',{
+
+    try {
+      const result = await $fetch('/api/faculty/search/search', {
         method: 'GET',
-        query:{searchQuery: JSON.stringify(searchQuery), key: keyfield.value},
+        query: {
+          searchQuery: JSON.stringify(searchQuery),
+          key: keyfield.value
+        },
       });
-      Faculties.value = result as unknown as Faculty[];
-    }catch(error){
-      console.error("Error with perform search: ", error);
+
+      if (result?.data) {
+        Faculties.value = result.data as unknown as Faculty[];
+      } else {
+        Faculties.value = [];
+      }
+    } catch (error) {
+      console.error("Error performing search:", error);
+      Faculties.value = [];
     }
-  
   }
 
   const clearSearch = () => {
