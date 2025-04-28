@@ -63,6 +63,7 @@ const addStudent = () => {
     school_dist: '',  /// example format should be GISD (garland independent school district)
     pref_lang: '', /// drop down option for either english, spanish(espanol), or other (only temporary until we can get more info on what languages they speak)  
   });
+  emit("update:modelValue", studentForms.value)
 };
 
 // Method to remove the last student form
@@ -103,7 +104,7 @@ const isAddStudentDisabled = computed(() => {
       //- School District
       div(class="flex flex-col mb-5")
         label(for="student_school_district" class="text-lg font-semibold text-gray-800 mb-2") School District
-        input(type="text" v-model="form.firstName" placeholder="School District" 
+        input(type="text" v-model="form.school_dist" placeholder="School District" 
                required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" id="student_school_district")
 
       //- Preferred Languauge
@@ -115,13 +116,13 @@ const isAddStudentDisabled = computed(() => {
       //- First Name
       div(class="flex flex-col mb-5")
         label(for="student_first_name" class="text-lg font-semibold text-gray-800 mb-2") First Name
-        input(type="text" v-model="form.firstName" placeholder="Student First Name" 
+        input(type="text" v-model="form.first_name" placeholder="Student First Name" 
                required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" id="student_first_name")
 
       //- Last Name
       div(class="flex flex-col mb-5")
         label(for="student_last_name" class="text-lg font-semibold text-gray-800 mb-2") Last Name
-        input(type="text" v-model="form.lastName" placeholder="Student Last Name" 
+        input(type="text" v-model="form.last_name" placeholder="Student Last Name" 
                required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" id="student_last_name")
 
       //- Gender (dropdown selection)
