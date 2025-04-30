@@ -32,8 +32,28 @@ function prevQuestion() {
   if (!isFirst.value) currentIndex.value--
 }
 
-function submitQuestion() {
-  alert('Answers submitted!')
+async function submitQuestion() {
+  try {
+    const payload = {
+      quizId: 1, 
+      studentProfileId: 2, 
+      answers: userAnswers.value.map((text, index) => ({
+        questionId: questions.value[index].id,
+        responseText: text
+      }))
+    };
+
+    const response = await $fetch('/api/quiz/fr_submit', {
+      method: 'POST',
+      body: payload
+    });
+    
+    alert('Answers submitted successfully!');
+    console.log(response);
+  } catch (error) {
+    console.error('Failed to submit answers:', error);
+    alert('Something went wrong while submitting your answers.');
+  }
 }
 </script>
 
