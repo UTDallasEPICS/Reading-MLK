@@ -89,11 +89,13 @@ onUnmounted(() => {
         .module(class="flex flex-col justify-center items-center w-[20vw] h-[20vh] p-4 bg-[#FFCD98] rounded-lg shadow-lg hover:shadow-xl transition-transform hover:scale-105")
           img(src="/bookstack.svg" alt="Bookstack icon" class="w-12 h-12 mr-4 rounded-full object-contain")
           h2(class="text-xl font-semibold text-gray-800 hover:text-yellow-500 transition") Read any book
-        .module(class="flex flex-col justify-center items-center w-[20vw] h-[20vh] p-4 bg-[#FFCD98] rounded-lg shadow-lg hover:shadow-xl transition-transform hover:scale-105")
+        router-link(to="/course_pages/coursehomepage" class="flex flex-col justify-center items-center w-[20vw] h-[20vh] p-4 bg-[#FFCD98] rounded-lg shadow-lg hover:shadow-xl transition-transform hover:scale-105")
           img(src="/home.svg" alt="Home icon" class="w-12 h-12 mr-4 rounded-full object-contain")
           h2(class="text-xl font-semibold text-gray-800 hover:text-yellow-500 transition") Course Homepage
       .mission-header-container(class="flex flex-col flex-wrap items-center justify-center pl-20 py-4 bg-customBlue w-[60vw] h-[20vw] max-w-4xl rounded-lg shadow-md animate-slideDown" style="clip-path: polygon(100% 0, 0 0, calc(0% + 30px) 50%, 0 100%, 100% 100%);")
         h3(class="text-3xl lg:text-4xl font-bold text-white uppercase tracking-wide") Start your reading Huddle
+
+
     // Huddle Section
     .huddle-container(class="flex flex-col items-center bg-[#FFCD98] w-full py-12")
       div(class="flex")

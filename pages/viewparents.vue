@@ -71,7 +71,7 @@
         // { id: 'average_number_books', label: 'Avg. # of Books', placeholder: 'Avg. # of Books', type: 5 }, // in review
         { id: 'phone_number', label: 'Phone Number', placeholder: 'Phone Number', type: 'string' },
         { id: 'gender', label: 'Gender', placeholder: 'Gender', type: 'string' },
-        { id: 'martial_stat', label: 'Marital Status', placeholder: 'Marital Status', type: 'string' },
+        { id: 'marital_stat', label: 'Marital Status', placeholder: 'Marital Status', type: 'string' },
         { id: 'first_name', label: 'First Name', placeholder: 'First Name', type: 'string' },
         { id: 'last_name', label: 'Last Name', placeholder: 'Last Name', type: 'string' },
         { id: 'email', label: 'Email', placeholder: 'Email', type: 'string' },
@@ -181,7 +181,7 @@
     });
 
     try {
-      const result = await $fetch('/api/parent/search/search', {
+      const result = await $fetch('/api/parent/search', {
         method: 'GET',
         query: {
           searchQuery: JSON.stringify(searchQuery),

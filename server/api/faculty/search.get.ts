@@ -4,7 +4,7 @@ const prisma = new PrismaClient();
 
 export default defineEventHandler(async (event) => {
     const runtime = useRuntimeConfig()
-    if(event.context.user?.id != undefined) {
+    if(event.context.user.id) {
         const {searchQuery, key} = getQuery(event);
         console.log("Search Query:", searchQuery);
         let searchTerm = {};
@@ -19,14 +19,9 @@ export default defineEventHandler(async (event) => {
         
         let keyString = key as string;
         
-        // Skip null or empty values
-        if (searchQueryObject[keyString] === null || searchQueryObject[keyString] === undefined || searchQueryObject[keyString] === "") {
-            return { data: [] };
-        }
-        
         if(keyString == "first_name" || keyString == "last_name"){
             searchTerm = {
-                User: {
+                Faculty: {
                     [keyString]: {
                         contains: searchQueryObject[keyString],
                         mode: "insensitive",
@@ -34,27 +29,8 @@ export default defineEventHandler(async (event) => {
                 }
             };
         }
-        else if(keyString == "average_number_books"){
-            searchTerm = {
-                [keyString]: {
-                    equals: parseInt(searchQueryObject[keyString]),
-                }
-            };
-        }
-        else if(keyString == "birth_date"){
-            // Only search by birth_date if it's not null or empty
-            if (searchQueryObject[keyString] && searchQueryObject[keyString] !== "") {
-                searchTerm = {
-                    [keyString]: {
-                        equals: new Date(searchQueryObject[keyString]),
-                    }
-                };
-            } else {
-                return { data: [] };
-            }
-        }
         else {
-            searchTerm = { 
+            searchTerm = {
                 [keyString]: {
                     contains: searchQueryObject[keyString],
                     mode: "insensitive",
@@ -66,10 +42,10 @@ export default defineEventHandler(async (event) => {
         
         if ((searchQuery as string) != "" && searchSpacesRemoved.length != 0){
             try {
-                const pageResult = await prisma.parentProfile.findMany({
+                const pageResult = await prisma.facultyProfile.findMany({
                     where: searchTerm,
                     include: {
-                        User: true,
+                        Faculty: true,
                     },
                 });
                 return {
@@ -83,14 +59,10 @@ export default defineEventHandler(async (event) => {
                 else if (error instanceof PrismaClientUnknownRequestError){
                     console.log('Unknown request error:', error.message);
                 }
-                throw createError({ statusCode: 500, statusMessage: "Error searching parents" });
+                throw createError({ statusCode: 500, statusMessage: "Error searching faculty" });
             }
         }
         return { data: [] };
     }
     throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
 });
-
-function parseISO(arg0: string) {
-    throw new Error('Function not implemented.');
-}

@@ -26,24 +26,24 @@
             th(v-for="header in h" :key="header" class="table-cell py-3 border-b border-gray-200 text-center") {{ header }}
         tbody
           tr(v-for="(u, index) in Faculties" :key="u.id" :class="['table-row', index % 2 === 0 ? 'bg-gray-100' : 'bg-white', 'hover:shadow-lg', 'hover:scale-[0.99]', 'transition-transform', 'duration-200']")
-            td.table-cell.py-3.grid.place-items-center
+            td(class="table-cell p-3 border-b border-gray-200 text-center")
               svg(v-if="u.dual_lang" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check-circle")
                 circle(cx="12" cy="12" r="10")
                 path(d="M9 12l2 2 4-4")
               svg(v-else xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x-circle")
                 circle(cx="12" cy="12" r="10")
                 path(d="M15 9l-6 6M9 9l6 6")
-            td.table-cell.py-3.text-center {{ u.district }} 
-            td.table-cell.py-3.text-center {{ u.faculty_email }}
-            td.table-cell.py-3.text-center {{ u.Faculty.first_name }}
-            td.table-cell.py-3.text-center {{ u.Faculty.last_name }}
-            td.table-cell.py-3.text-center {{ u.school_name }}
-            td.table-cell.py-3.text-center {{ u.phone_number }}
-            td.table-cell.py-3.text-center {{ u.department }}
-            td.table-cell.py-3.text-center {{ u.grade }}
-            td.table-cell.py-3.text-center
+            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.district }} 
+            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.faculty_email }}
+            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.Faculty.first_name }}
+            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.Faculty.last_name }}
+            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.school_name }}
+            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.phone_number }}
+            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.department }}
+            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.grade }}
+            td(class="table-cell p-3 border-b border-gray-200 text-center")
               button(v-if="!editButtonPressed" @click="goToEdit(u.id)" class="action-button edit-button rounded-md py-2 px-4 text-xs font-semibold text-white cursor-pointer bg-teal-500 hover:bg-teal-600 focus:outline-none transition-all") Edit
-            td.table-cell.py-3.text-center
+            td(class="table-cell p-3 border-b border-gray-200 text-center")
               button(@click="removeFaculty(u.id)" class="action-button remove-button rounded-md py-2 px-4 text-xs font-semibold text-white cursor-pointer bg-red-500 hover:bg-red-600 focus:outline-none transition-all") Remove
 </template>
 
@@ -77,7 +77,7 @@
         { id: 'first_name', label: 'First Name', placeholder: 'First Name', type: 'text' },
         { id: 'last_name', label: 'Last Name', placeholder: 'Last Name', type: 'text' },
         { id: 'school_name', label: 'School Name', placeholder: 'School Name', type: 'text' },
-        { id: 'phone', label: 'Phone', placeholder: 'Phone', type: 'text' },
+        { id: 'phone_number', label: 'Phone', placeholder: 'Phone', type: 'text' },
         { id: 'department', label: 'Department Name', placeholder: 'Department Name', type: 'text' },
         { id: 'grade', label: 'Grade', placeholder: 'Grade', type: 'text' },
         { id: 'dual_lang', label: 'Dual Language', type: 'checkbox' }
@@ -174,7 +174,7 @@
     }
 
     try {
-      const result = await $fetch('/api/faculty/search/search', {
+      const result = await $fetch('/api/faculty/search', {
         method: 'GET',
         query: {
           searchQuery: JSON.stringify(searchQuery),
