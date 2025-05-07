@@ -207,6 +207,18 @@ Interface for managing parent records.
 
 
 
+## 📚 **Student Dashboard**
+Page for students to track reading and learning progress.
+
+### Features:
+- Page accessible from homepage.
+- Free-response and multiple choice question forms created.
+- Sidebar navigation to Library, ...
+- Wishlist ...
+
+
+
+
 ## 🔌 **Third-Party Integrations**
 
 | Integration | Purpose                   | Role in Project                          |
