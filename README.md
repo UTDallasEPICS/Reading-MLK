@@ -11,12 +11,13 @@
 8. [Student Form Page](#👨‍🎓-student-form-page)
 9. [Faculty View Page](#📋-faculty-view-page)
 10. [Parents View Page](#👪-parents-view-page)
-11. [Third-Party Integrations](#🔌-third-party-integrations)
-12. [Tech Stack](#🛠️-tech-stack)
-13. [Setting Up the Development Environment](#⚙️-setting-up-the-development-environment)
-14. [UI Mockups](#Figma)
-15. [Migration Scripts](#Migration-Scripts)
-16. [Deployment](#Deployment)
+11. [Course Homepage](#🧒-course-home-page)
+12. [Third-Party Integrations](#🔌-third-party-integrations)
+13. [Tech Stack](#🛠️-tech-stack)
+14. [Setting Up the Development Environment](#⚙️-setting-up-the-development-environment)
+15. [UI Mockups](#Figma)
+16. [Migration Scripts](#Migration-Scripts)
+17. [Deployment](#Deployment)
 
 ## 🏢 **Partner Description**
 
@@ -206,6 +207,17 @@ Interface for managing parent records.
 - Pagination for large datasets.
 
 
+
+## 🧒 **Course Home Page**
+Interface for students to view and access their reading statistics.
+
+### Features:
+
+- Library page for student to keep track of books read.
+- Log page for individual books that have been read.
+- Progress page with intuitive graphs for child to understand their progress, access teacher feedback, and see class goals (also accessible to teacher and parent).
+- Wishlist page for student to add books for future reading.
+- Favorites page to encourage students to keep track of their favorite books.
 
 ## 📚 **Student Dashboard**
 Page for students to track reading and learning progress.
