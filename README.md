@@ -219,6 +219,15 @@ Interface for students to view and access their reading statistics.
 - Wishlist page for student to add books for future reading.
 - Favorites page to encourage students to keep track of their favorite books.
 
+## 📚 **Student Dashboard**
+Page for students to track reading and learning progress.
+
+### Features:
+- Page accessible from homepage.
+- Free-response and multiple choice question forms created.
+- Sidebar navigation links to other pages.
+- Working Wishlist, Favorites, and Library Pages.
+
 
 
 ## 🔌 **Third-Party Integrations**

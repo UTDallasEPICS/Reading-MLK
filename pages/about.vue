@@ -20,9 +20,9 @@ export default {
                 h1(class="text-6xl font-bold text-white uppercase tracking-wide") About Us
         div(class="flex flex-row justify-center bg-white w-full py-14")
             // Vision Section
-            .vision-card(class="relative flex flex-col justify-center items-center bg-[#FFCD98] rounded-lg shadow-lg animate-fadeIn m-4 w-[25vw]")
-                h3(class="text-3xl lg:text-4xl font-bold text-customBlue uppercase tracking-wide mb-4") Our Vision
-                p(class="text-lg sm:text-xl px-4 sm:px-6 font-medium text-customBlue text-center leading-relaxed")
+            .vision-card(class="relative flex flex-col justify-center items-center bg-[#C2963A] rounded-lg shadow-lg animate-fadeIn m-4 w-[25vw]")
+                h3(class="text-3xl lg:text-3xl font-bold text-cwhite uppercase tracking-wide mb-4") Our Vision
+                p(class="text-lg sm:text-l px-2 sm:px-4 font-small text-cwhite text-center leading-relaxed")
                     | At Reading Huddle, our vision is to create a world where every child has access to literacy resources and inspiring role models. 
                     | By championing early education, we aim to bridge gaps and create opportunities for every child to thrive.
 
@@ -39,10 +39,10 @@ export default {
                         p(class="text-gray-100 text-center") Empowering families with a love for reading.
 
                     // Value Item - Community
-                    .value-item(class="flex flex-col items-center p-6 bg-[#FFCD98] rounded-lg shadow-lg transition-transform hover:scale-105")
-                        i(class="fa fa-users text-4xl text-blue-500 mb-4")
-                        h3(class="text-xl font-semibold text-gray-800") Community
-                        p(class="text-gray-600 text-center") Fostering connections that inspire growth.
+                    .value-item(class="flex flex-col items-center p-6 bg-[#C2963A] rounded-lg shadow-lg transition-transform hover:scale-105")
+                        i(class="fa fa-users text-4xl text-cwhite mb-4")
+                        h3(class="text-xl font-semibold text-cwhite") Community
+                        p(class="text-white text-center") Fostering connections that inspire growth.
                     
                     // Value Item - Education
                     .value-item(class="flex flex-col items-center p-6 bg-customBlue rounded-lg shadow-lg transition-transform hover:scale-105")
@@ -51,26 +51,26 @@ export default {
                         p(class="text-gray-100 text-center") Building lifelong learners through literacy.
 
         // Team Section
-        .team-container(id="team" class="flex flex-col items-center w-full py-12 px-6 bg-[#FFCD98] animate-fadeIn")
-            h2(class="text-4xl font-bold text-customBlue uppercase mb-8 tracking-wide") Meet Our Team
+        .team-container(id="team" class="flex flex-col items-center w-full py-12 px-6 bg-[#A17C30] animate-fadeIn")
+            h2(class="text-4xl font-bold text-cwhite uppercase mb-8 tracking-wide") Meet Our Team
             .team-grid(class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8")
-                .team-member(class="flex flex-col items-center p-6 bg-customBlue rounded-lg shadow-lg border border-[4px] border-customBlue transition-transform hover:scale-105")
+                .team-member(class="flex flex-col items-center p-6 bg-lighterBlue rounded-lg shadow-lg border border-[4px] border-customBlue transition-transform hover:scale-105")
                     img(src="/children_playing.jpg" alt="Team Member 2" class="w-32 h-32 rounded-full object-cover mb-4")
                     h3(class="text-xl font-semibold text-white") John Doe
                     p(class="text-white text-center") Visionary Founder with a passion for childhood literacy and storytelling.
-                .team-member(class="flex flex-col items-center p-6 bg-customBlue rounded-lg shadow-lg border border-[4px] border-customBlue transition-transform hover:scale-105")
+                .team-member(class="flex flex-col items-center p-6 bg-lighterBlue rounded-lg shadow-lg border border-[4px] border-customBlue transition-transform hover:scale-105")
                     img(src="/children_playing.jpg" alt="Team Member 2" class="w-32 h-32 rounded-full object-cover mb-4")
                     h3(class="text-xl font-semibold text-white") Jane Smith
                     p(class="text-white text-center") Educator and literacy advocate connecting communities.
-                .team-member(class="flex flex-col items-center p-6 bg-customBlue rounded-lg shadow-lg border border-[4px] border-customBlue transition-transform hover:scale-105")
+                .team-member(class="flex flex-col items-center p-6 bg-lighterBlue rounded-lg shadow-lg border border-[4px] border-customBlue transition-transform hover:scale-105")
                     img(src="/children_playing.jpg" alt="Team Member 2" class="w-32 h-32 rounded-full object-cover mb-4")
                     h3(class="text-xl font-semibold text-white") Mark Lee
                     p(class="text-white text-center") Developer behind innovative storytelling solutions.
 
         div(class="flex flex-row gap-5 py-[5vh] mx-[3vw]")
             // Feedback Section
-            .feedback-container(class="flex flex-col w-[25vw] items-center py-12 px-6 bg-[#FFCD98] shadow-xl rounded-lg animate-fadeIn")
-                h2(class="text-4xl font-bold text-customBlue uppercase mb-3 tracking-wide") Feedback
+            .feedback-container(class="flex flex-col w-[25vw] items-center py-12 px-6 bg-[#C2963A] shadow-xl rounded-lg animate-fadeIn")
+                h2(class="text-4xl font-bold text-cwhite uppercase mb-3 tracking-wide") Feedback
                 p(class="text-lg text-center text-gray-700 mb-2 ") We'd love to hear your thoughts and suggestions.
                 form(class="flex flex-col w-full max-w-md space-y-6")
                     input(type="text" placeholder="Your Name" class="p-4 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-customBlue")
@@ -111,8 +111,8 @@ export default {
                     )
 
             // Contact Us Section
-            .contact-container(class="flex flex-col w-[25vw] items-center py-12 px-6 bg-[#FFCD98] shadow-xl rounded-lg animate-fadeIn")
-                h2(class="text-4xl font-bold text-customBlue uppercase mb-3 tracking-wide") Contact Us
+            .contact-container(class="flex flex-col w-[25vw] items-center py-12 px-6 bg-[#C2963A] shadow-xl rounded-lg animate-fadeIn")
+                h2(class="text-4xl font-bold text-cwhite uppercase mb-3 tracking-wide") Contact Us
                 p(class="text-lg text-center text-gray-700 mb-2 ") We'd love to get in touch with you!
                 form(class="flex flex-col w-full max-w-md space-y-6")
                     input(type="text" placeholder="Your Name" class="p-4 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-customBlue")
