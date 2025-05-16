@@ -9,15 +9,17 @@ export default defineEventHandler(async (event) => {
     const body = await readBody(event);
     console.log(body);
     const {
-        
         faculty_email,
         phone_number,
         school_name,
         district,
         department,
         grade,
-        dual_lang
-    
+        dual_lang,
+        first_name,
+        last_name,
+        user_name,
+        id,
     } = body;
 
     //console.log("test");
@@ -33,21 +35,6 @@ export default defineEventHandler(async (event) => {
     */
 
     let newFaculty = null;
-    ///let newUser = null;
-    /*
-    try {
-        // First create the user record
-        newUser = await prisma.user.create({
-            data: {
-                user_name,
-                first_name,
-                last_name,
-                preferred_name,
-                faculty_email,
-                role: "faculty"  // default role to faculty if not provided
-            },
-        });
-    */
 
     try {
         // Create a new faculty record
@@ -55,32 +42,21 @@ export default defineEventHandler(async (event) => {
             data: {
                 Faculty: {
                     connect: {
-                        id: user_id
+                        id: event.context.user.id,
                     },
                 },
-                district: district,
-                dual_lang: dual_lang,
-                faculty_email: faculty_email,
-                // first_name: first_name,
-                // last_name: last_name,
-                school_name: school_name,
-                phone_number: phone_number,
-                department: department,
-                grade: grade,
+                district,
+                dual_lang,
+                faculty_email,
+                school_name,
+                phone_number,
+                department,
+                grade,
                 //first_name,
                 //last_name,
                 //user_name,
                 //preferred_name,
-                id: undefined,
-                faculty_email: body.faculty.faculty_email,
-                phone_number: body.faculty.phone_number,
-                school_name: body.faculty.school_name,
-                district: body.faculty.district,
-                department: body.faculty.department,
-                grade: body.faculty.grade,
-                dual_lang: body.faculty.dual_lang,
-                user_id: event.context.user.id
-                //role: "faculty"
+                id,
             },
         });
         console.log('New faculty created successfully:', newFaculty);

@@ -22,6 +22,8 @@ const studentForms = ref <StudentProfile[]> ([{
   }])
 
 const data_ParentProfile = ref({
+    first_name: null,
+    last_name: null,
     birth_date: null,
     zipcode: null,
     phone_number: null,
@@ -37,7 +39,8 @@ const data_ParentProfile = ref({
 const data_StudentProfile = ref([{
     first_name: "",
     last_name: "",
-    pref_name: "",
+    email: "",
+    preferred_name: "",
     age: 0,
     grade: 0,
     reading_lvl: 0,
@@ -63,7 +66,8 @@ const addStudent = () => {
     data_StudentProfile.value.push({
         first_name: "",
         last_name: "",
-        pref_name: "",
+        email: "",
+        preferred_name: "",
         age: 0,
         grade: 0,
         reading_lvl: 0,

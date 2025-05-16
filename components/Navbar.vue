@@ -1,5 +1,5 @@
 <template lang="pug">
-  header.navbar(class="flex bg-customBlue")
+  header.navbar(class="flex bg-lighterBlue")
     .img-container(class="w-fit")
       img(
               src="/image.png" 
@@ -9,16 +9,15 @@
     .navbar-container(
       class="flex justify-center items-center gap-6 md:gap-10 py-4 mx-auto max-w-full"
     )
-      .log
       nuxt-link#homebtn(
         to="/"
         class="text-white font-bold no-underline font-sans text-base lg:text-lg px-2 lg:px-4 hover:scale-110 transform transition-all duration-700 inline-flex items-center justify-center"
       ) Home
-      .log
-        nuxt-link#aboutbtn(
-          to="/about"
-          class="text-white font-bold no-underline font-sans text-base lg:text-lg px-2 lg:px-4 hover:scale-110 transform transition-all duration-700 inline-flex items-center justify-center"
-        ) About Us
+
+      nuxt-link#aboutbtn(
+        to="/about"
+        class="text-white font-bold no-underline font-sans text-base lg:text-lg px-2 lg:px-4 hover:scale-110 transform transition-all duration-700 inline-flex items-center justify-center"
+      ) About Us
 
       // Register dropdown
       .dropdown.relative.inline-block.gap-4(
@@ -61,7 +60,6 @@
             to="/viewparents"
             class="text-black py-3 px-4 no-underline block hover:bg-gray-200 rounded-md"
           ) Parent
-
       .log
         a#logoutbtn(
           href="/api/logout"
@@ -70,29 +68,9 @@
         ) Logout
 </template>
 
-<style scoped>
-  body {
-    margin-top: 80px;
-  }
-</style>
+<script lang="ts" setup>
+const props = defineProps<{ userRole: string }>(); 
 
-
-
-<script setup>
-const props = defineProps(['userRole']);
-const viewFontSize = ref('16px');
-const registerFontSize = ref('16px');
-const homeFontSize = ref('16px');
-const aboutFontSize = ref('16px');
-const logoutFontSize = ref('16px');
-
-const showViewDropdown = ref(false);
-const showRegisterDropdown = ref(false);
-
-const viewFacultyBackground = ref('white');
-const viewParentBackground = ref('white');
-
-const registerFacultyBackground = ref('white');
-const registerParentBackground = ref('white');
-
+const showViewDropdown = ref<boolean>(false);
+const showRegisterDropdown = ref<boolean>(false);
 </script>
