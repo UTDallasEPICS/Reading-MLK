@@ -6,7 +6,7 @@ input.rounded-md.outline-0.border-box.w-full.p-3( v-model="value" class="border 
 const props = defineProps<{ modelValue: string }>()
 
 const emit = defineEmits(["update:modelValue"])
-const value = computed({
+const value = computed({  // recieves wtv you put in the string box
     get(){
         return props.modelValue
     },
