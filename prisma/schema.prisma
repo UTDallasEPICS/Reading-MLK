@@ -30,8 +30,6 @@ model User {
   // Children StudentProfile?
   Faculty  FacultyProfile?
   Admin    AdminProfile?
-  StudentProfile StudentProfile?
-
 
   @@map("users")
 }
@@ -87,9 +85,6 @@ model StudentProfile {
   first_name  String
   last_name   String
   // pref_name   String
-
-  user_id Int  @unique
-  Student User @relation(fields: [user_id], references: [id])
 
   ParentToChild ParentToChild[]
   Classes       StudentToClass[]

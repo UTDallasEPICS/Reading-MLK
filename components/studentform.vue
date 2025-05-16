@@ -136,7 +136,7 @@ const isAddStudentDisabled = computed(() => {
       //- Birth Date (calendar)
       div(class="flex flex-col mb-5")
         label(for="student_birth_date" class="text-lg font-semibold text-gray-800 mb-2") Birth Date
-        VueDatePicker(v-model="form.birthDate" name="student_birth_date" required 
+        VueDatePicker(v-model="form.birth_date" name="student_birth_date" required 
                       class="w-full border-none text-lg transition-colors duration-300 focus:border-blue-500" id="student_birth_date" placeholder="Birth Date" :enable-time-picker="false")
 
       //- Grade (dropdown selection)
@@ -149,16 +149,9 @@ const isAddStudentDisabled = computed(() => {
       //- Reading Level (dropdown selection)
       div(class="flex flex-col mb-5")
         label(for="student_reading_level" class="text-lg font-semibold text-gray-800 mb-2") Reading Level
-        select(v-model="form.readingLevel" required class="w-full px-4 py-3 border border-gray-300 rounded-lg" id="student_reading_level")
+        select(v-model="form.reading_lvl" required class="w-full px-4 py-3 border border-gray-300 rounded-lg" id="student_reading_level")
           option(value="" disabled selected) Select Reading Level
           option(v-for="rLevel in 10" :key="rLevel" :value="rLevel") {{ rLevel }}
-
-      //- Zipcode (allow only numbers)
-      div(class="flex flex-col mb-5")
-        label(for="student_zipcode" class="text-lg font-semibold text-gray-800 mb-2") Zipcode
-        input(type="number" v-model="form.zipcode" placeholder="Student Zipcode" 
-               required class="w-full px-4 py-3 border border-gray-300 rounded-lg transition-colors duration-300 focus:border-blue-500" id="student_zipcode")
-
     .button-container(class="flex justify-center gap-5 mt-4")
       button(v-if="studentForms.length == (index+1)" @click="addStudent" :disabled="index+1 != studentForms.length" 
              class="px-6 py-3 bg-[#122c4f] text-white rounded-lg cursor-pointer font-semibold text-lg transition-all duration-300 ease-in-out hover:bg-[#1a1a2e]") + Student
