@@ -22,7 +22,7 @@
             td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.zipcode }}
             td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.yearly_income }}
             td(class="table-cell p-3 border-b border-gray-200 text-center") {{ new Date(u.birth_date).toLocaleString("en-US", {year: "numeric", month: "long", day: "numeric",}) }}
-            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.average_number_books }}
+            //- td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.average_number_books }} // in review
             td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.phone_number }}
             td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.gender }}
             td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.marital_stat }}
@@ -51,7 +51,7 @@
   const filters = ref<ParentProfile & Partial<User>>({
     zipcode: "",
     yearly_income: "",
-    birth_date: new Date(),
+    birth_date: null,
     average_number_books: 0,
     first_name: "",
     last_name: "",
@@ -68,7 +68,7 @@
         { id: 'zipcode', label: 'Zip Code', placeholder: 'Zip Code', type: 'string' },
         { id: 'yearly_income', label: 'Yearly Income', placeholder: 'Yearly Income', type: 'string' },
         { id: 'birth_date', label: 'Birth Date', placeholder: 'Birth Date', type: new Date() },
-        { id: 'average_number_books', label: 'Avg. # of Books', placeholder: 'Avg. # of Books', type: 5 },
+        // { id: 'average_number_books', label: 'Avg. # of Books', placeholder: 'Avg. # of Books', type: 5 }, // in review
         { id: 'phone_number', label: 'Phone Number', placeholder: 'Phone Number', type: 'string' },
         { id: 'gender', label: 'Gender', placeholder: 'Gender', type: 'string' },
         { id: 'martial_stat', label: 'Marital Status', placeholder: 'Marital Status', type: 'string' },
@@ -79,7 +79,9 @@
       ];
 
   const h = [
-    "Zip Code", "Yearly Income", "Birth Date", "Avg. # of Books", "Phone Number", "Gender", "Marital Status", "First Name", "Last Name", "Email", "Social Media", "Edit", "Remove"
+    "Zip Code", "Yearly Income", "Birth Date", 
+    // "Avg. # of Books", // in review
+    "Phone Number", "Gender", "Marital Status", "First Name", "Last Name", "Email", "Social Media", "Edit", "Remove"
   ]
   
   const addDataToDatabase = async (jsonData: any) => {
@@ -126,13 +128,13 @@
   const ParentObject = ref({
     zipcode: "",     
     yearly_income: "", 
-    birth_date: new Date(),  
+    birth_date: null,  
     average_number_books: 0,   
     first_name: "",   
     last_name: "",
     email: "",    
     phone_number: "",  
-    gender: "",    
+    gender: "",     
     marital_stat: "",
     social_media: "",
   })
@@ -162,28 +164,47 @@
   } 
 
   const performSearch = async () => {
+    const searchQuery: Record<string, string | Date | number> = {};
 
-    const searchQuery: Record<string, string | Date>={};
-
-    Object.entries(filters.value).forEach(([key,value])=>{
-      if(value !== "" && value !== null && value !== 0){
-        searchQuery[key] = value as string | Date;
+    Object.entries(filters.value).forEach(([key, value]) => {
+      // Only include non-null, non-empty values in the search query
+      if (value !== "" && value !== null && value !== 0 && value !== undefined) {
+        // For birth_date, only include if it's a valid date
+        if (key === "birth_date") {
+          if (value instanceof Date && !isNaN(value.getTime())) {
+            searchQuery[key] = value;
+          }
+        } else {
+          searchQuery[key] = value;
+        }
       }
     });
-    console.log("Search Parameters:", searchQuery);
-    console.log(keyfield.value)
-    const {data: result}  = await useFetch('/api/parent/search', {
-      method: 'GET',
-      query: {searchQuery: JSON.stringify(searchQuery.value), key: keyfield.value},
-    });
-    Parents.value = result.value?.data as unknown as Parent[];
+
+    try {
+      const result = await $fetch('/api/parent/search', {
+        method: 'GET',
+        query: {
+          searchQuery: JSON.stringify(searchQuery),
+          key: keyfield.value
+        },
+      });
+
+      if (result?.data) {
+        Parents.value = result.data as unknown as Parent[];
+      } else {
+        Parents.value = [];
+      }
+    } catch (error) {
+      console.error("Error performing search:", error);
+      Parents.value = [];
+    }
   }
 
   const clearSearch = () => {
     ParentObject.value = {
       zipcode: "",
       yearly_income: "",
-      birth_date: new Date(),
+      birth_date: null,
       average_number_books: 0,
       first_name: "",
       last_name: "",
