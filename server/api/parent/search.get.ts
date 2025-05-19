@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
             return { data: [] };
         }
         
-        if(keyString == "first_name" || keyString == "last_name"){
+        if(keyString == "first_name" || keyString == "last_name" || keyString == "email"){
             searchTerm = {
                 User: {
                     [keyString]: {

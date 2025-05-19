@@ -59,11 +59,11 @@ const rhuser = useCookie<any>('rhuser')
 
 // Define the form data
 const data_UserProfile = ref({
-  user_name: "df",
-  first_name: "df",
-  last_name: "df",
-  preferred_name: "df",
-  email: "df",
+  user_name: "",
+  first_name: "",
+  last_name: "",
+  preferred_name: "",
+  email: "",
   role: "Parent",
 })
 

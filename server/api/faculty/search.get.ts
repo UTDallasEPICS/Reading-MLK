@@ -4,7 +4,7 @@ const prisma = new PrismaClient();
 
 export default defineEventHandler(async (event) => {
     const runtime = useRuntimeConfig()
-    if(event.context.user?.cuid != undefined) {
+    if(event.context.user.id) {
         const {searchQuery, key} = getQuery(event);
         console.log("Search Query:", searchQuery);
         let searchTerm = {};
@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
         
         if(keyString == "first_name" || keyString == "last_name"){
             searchTerm = {
-                User: {
+                Faculty: {
                     [keyString]: {
                         contains: searchQueryObject[keyString],
                         mode: "insensitive",

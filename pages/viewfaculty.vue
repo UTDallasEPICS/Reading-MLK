@@ -77,7 +77,7 @@
         { id: 'first_name', label: 'First Name', placeholder: 'First Name', type: 'text' },
         { id: 'last_name', label: 'Last Name', placeholder: 'Last Name', type: 'text' },
         { id: 'school_name', label: 'School Name', placeholder: 'School Name', type: 'text' },
-        { id: 'phone', label: 'Phone', placeholder: 'Phone', type: 'text' },
+        { id: 'phone_number', label: 'Phone', placeholder: 'Phone', type: 'text' },
         { id: 'department', label: 'Department Name', placeholder: 'Department Name', type: 'text' },
         { id: 'grade', label: 'Grade', placeholder: 'Grade', type: 'text' },
         { id: 'dual_lang', label: 'Dual Language', type: 'checkbox' }
