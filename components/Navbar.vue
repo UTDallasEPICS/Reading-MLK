@@ -60,17 +60,15 @@
             to="/viewparents"
             class="text-black py-3 px-4 no-underline block hover:bg-gray-200 rounded-md"
           ) Parent
-
-      a#logoutbtn(
-        href="javascript:void(0)" 
-        @click="logout"
-        class="text-white font-bold no-underline font-sans text-base lg:text-lg px-2 lg:px-4 hover:scale-110 transform transition-all duration-700 inline-flex items-center justify-center"
-      ) Logout
+      .log
+        a#logoutbtn(
+          href="/api/logout"
+          @click="logout"
+          class="text-white font-bold no-underline font-sans text-base lg:text-lg px-2 lg:px-4 hover:scale-110 transform transition-all duration-700 inline-flex items-center justify-center"
+        ) Logout
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
-
 const props = defineProps<{ userRole: string }>(); 
 
 const showViewDropdown = ref<boolean>(false);
