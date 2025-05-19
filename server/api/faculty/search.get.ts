@@ -4,56 +4,65 @@ const prisma = new PrismaClient();
 
 export default defineEventHandler(async (event) => {
     const runtime = useRuntimeConfig()
-    if(event.context.user?.cuid != undefined) {
+    if(event.context.user.id) {
         const {searchQuery, key} = getQuery(event);
-        let searchTerm = searchQuery;
-        let searchQueryObject = JSON.parse(searchQuery as string)
+        console.log("Search Query:", searchQuery);
+        let searchTerm = {};
+        let searchQueryObject = {};
+        
+        try {
+            searchQueryObject = JSON.parse(searchQuery as string);
+        } catch (e) {
+            console.error("Error parsing search query:", e);
+            throw createError({ statusCode: 400, statusMessage: "Invalid search query format" });
+        }
+        
         let keyString = key as string;
         
         if(keyString == "first_name" || keyString == "last_name"){
-            searchTerm={
-                User:
-                {
-                [keyString]:
-                    {
-                    contains: searchQueryObject[keyString],
-                    mode: "insensitive",
+            searchTerm = {
+                Faculty: {
+                    [keyString]: {
+                        contains: searchQueryObject[keyString],
+                        mode: "insensitive",
                     }
                 }
-             };
+            };
         }
         else {
-            searchTerm={
-                [keyString]:{
+            searchTerm = {
+                [keyString]: {
                     contains: searchQueryObject[keyString],
                     mode: "insensitive",
                 }
-            }
+            };
         }
-        const searchSpacesRemoved = (searchQuery as string).replaceAll(" ", "")
 
-        if ((searchQuery as string) != "" && searchSpacesRemoved.length !=0){
-        try{
-            const pageResult =  await prisma.facultyProfile.findMany({
-                where: searchTerm,
-                include: {
-                    Faculty: true,
-                },
+        const searchSpacesRemoved = (searchQuery as string).replaceAll(" ", "");
+        
+        if ((searchQuery as string) != "" && searchSpacesRemoved.length != 0){
+            try {
+                const pageResult = await prisma.facultyProfile.findMany({
+                    where: searchTerm,
+                    include: {
+                        Faculty: true,
+                    },
                 });
                 return {
                     data: pageResult,
                 };
-        }
-        catch(error){
-            if (error instanceof PrismaClientKnownRequestError){
-                console.log('You exeperienced this error code: ' + error.code, error.meta, error.message, ' If you would like to find what this error message means please refer to this link: https://www.prisma.io/docs/orm/reference/error-reference  ')
+            } catch(error) {
+                console.error("Search error:", error);
+                if (error instanceof PrismaClientKnownRequestError){
+                    console.log('Prisma error code:', error.code, error.meta, error.message);
+                }
+                else if (error instanceof PrismaClientUnknownRequestError){
+                    console.log('Unknown request error:', error.message);
+                }
+                throw createError({ statusCode: 500, statusMessage: "Error searching faculty" });
             }
-            else if (error instanceof PrismaClientUnknownRequestError){
-                console.log('Unknown request error: ' , error.message)
-            }
-            throw createError({ statusCode: 500, statusMessage: "Error fetching faculties" });
         }
-        }
+        return { data: [] };
     }
-    
+    throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
 });

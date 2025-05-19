@@ -6,72 +6,89 @@ export default defineEventHandler(async (event) => {
     const runtime = useRuntimeConfig()
     if(event.context.user?.id != undefined) {
         const {searchQuery, key} = getQuery(event);
-        console.log(searchQuery);
-        let searchTerm = searchQuery;
-        let searchQueryObject = JSON.parse(searchQuery as string)
-        let keyString = key as string
+        console.log("Search Query:", searchQuery);
+        let searchTerm = {};
+        let searchQueryObject = {};
         
-        if(keyString == "first_name" || keyString == "last_name"){
-            searchTerm={
-                User:
-                {
-                [keyString]:
-                    {
-                    contains: searchQueryObject[keyString],
-                    mode: "insensitive",
+        try {
+            searchQueryObject = JSON.parse(searchQuery as string);
+        } catch (e) {
+            console.error("Error parsing search query:", e);
+            throw createError({ statusCode: 400, statusMessage: "Invalid search query format" });
+        }
+        
+        let keyString = key as string;
+        
+        // Skip null or empty values
+        if (searchQueryObject[keyString] === null || searchQueryObject[keyString] === undefined || searchQueryObject[keyString] === "") {
+            return { data: [] };
+        }
+        
+        if(keyString == "first_name" || keyString == "last_name" || keyString == "email"){
+            searchTerm = {
+                User: {
+                    [keyString]: {
+                        contains: searchQueryObject[keyString],
+                        mode: "insensitive",
                     }
                 }
-             };
+            };
         }
         else if(keyString == "average_number_books"){
-            console.log("Int: ", searchQueryObject.average_number_books)
-            searchTerm={
-                [keyString]:{
-                    equals: parseInt(searchQueryObject.average_number_books),
+            searchTerm = {
+                [keyString]: {
+                    equals: parseInt(searchQueryObject[keyString]),
                 }
-            }
+            };
         }
         else if(keyString == "birth_date"){
-            searchTerm={
-                [keyString]:{
-                    equals: new Date(searchQueryObject.birth_date),
-                }
+            // Only search by birth_date if it's not null or empty
+            if (searchQueryObject[keyString] && searchQueryObject[keyString] !== "") {
+                searchTerm = {
+                    [keyString]: {
+                        equals: new Date(searchQueryObject[keyString]),
+                    }
+                };
+            } else {
+                return { data: [] };
             }
-
         }
         else {
-            searchTerm={ 
+            searchTerm = { 
                 [keyString]: {
-                    contains: searchQuery as string,
+                    contains: searchQueryObject[keyString],
                     mode: "insensitive",
                 }
-            }
+            };
         }
-        const searchSpacesRemoved = (searchQuery as string).replaceAll(" ", "")
-        // let searchResult = null;
-        if ((searchQuery as string) != "" && searchSpacesRemoved.length !=0){
-            try{
-            const pageResult = await prisma.parentProfile.findMany({
-                 where: searchTerm,
-                    include:{
+
+        const searchSpacesRemoved = (searchQuery as string).replaceAll(" ", "");
+        
+        if ((searchQuery as string) != "" && searchSpacesRemoved.length != 0){
+            try {
+                const pageResult = await prisma.parentProfile.findMany({
+                    where: searchTerm,
+                    include: {
                         User: true,
                     },
-                    });
-            return {
-                data: pageResult,
-            };
-        } catch(error){
-            console.error(error);
-            if (error instanceof PrismaClientKnownRequestError){
-                console.log('You exeperienced this error code: ' + error.code, error.meta, error.message, ' If you would like to find what this error message means please refer to this link: https://www.prisma.io/docs/orm/reference/error-reference  ')
+                });
+                return {
+                    data: pageResult,
+                };
+            } catch(error) {
+                console.error("Search error:", error);
+                if (error instanceof PrismaClientKnownRequestError){
+                    console.log('Prisma error code:', error.code, error.meta, error.message);
+                }
+                else if (error instanceof PrismaClientUnknownRequestError){
+                    console.log('Unknown request error:', error.message);
+                }
+                throw createError({ statusCode: 500, statusMessage: "Error searching parents" });
             }
-            else if (error instanceof PrismaClientUnknownRequestError){
-                console.log('Unknown request error: ' , error.message)
-            }
-            throw createError({ statusCode: 500, statusMessage: "Error fetching faculties" });
         }
-        }
+        return { data: [] };
     }
+    throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
 });
 
 function parseISO(arg0: string) {
