@@ -47,8 +47,6 @@ export default defineEventHandler( async event => {
       try {
        parent = await event.context.client.parentProfile.create({
         data: {
-         
-        
           zipcode: body.parent.zipcode,
           yearly_income: body.parent.yearly_income,
           birth_date: body.parent.birth_date,
