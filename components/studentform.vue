@@ -4,7 +4,7 @@ import VueDatePicker from '@vuepic/vue-datepicker';
 import '@vuepic/vue-datepicker/dist/main.css';
 import type { StudentProfile } from '@prisma/client';
 import { Studentform } from '#components';
-const props = defineProps<{ modelValue: StudentProfile }>()
+const props = defineProps<{ modelValue: StudentProfile[] }>()
 const emit = defineEmits(["update:modelValue"])
 const rhuser = useCookie<any>('rhuser') // might need to delete
 
@@ -17,21 +17,7 @@ const value = computed({  // recieves wtv you put in the string box
     },
 })
 
-const studentForms = ref <StudentProfile[]> ([
-  {
-    id: 0,
-    age: 0,
-    grade: 1,
-    reading_lvl: 0,
-    first_name: '',
-    last_name: '',
-    birth_date: null, // Use null for dates
-    gender: '',
-    school_name: '',  /// asssume that all the school names will be elementary schools so we should ask them to give the name of the school 
-    school_dist: '',  /// example format should be GISD (garland independent school district)
-    pref_lang: '', /// drop down option for either english, spanish(espanol), or other (only temporary until we can get more info on what languages they speak)  
-  }
-])
+const studentForms = ref <StudentProfile[]> (props.modelValue)
 
 // const studentForms = ref([
 //   {
@@ -71,6 +57,7 @@ const removeStudent = (index:number) => {
   if (studentForms.value.length > 1) {
     studentForms.value.splice(index,1);
   }
+  emit("update:modelValue", studentForms.value)
 };
 
 // Computed property to check if "Add Student" button should be disabled
@@ -81,7 +68,7 @@ const isAddStudentDisabled = computed(() => {
 </script>
 
 <template lang="pug">
-  div(v-for="(form, index) in value " :key="index" class="bg-gray-100 rounded-lg shadow-lg p-8 mx-auto mb-8 max-w-4xl w-full"
+  div(v-for="(form, index) in value" :key="index" class="bg-gray-100 rounded-lg shadow-lg p-8 mx-auto mb-8 max-w-4xl w-full"
   )
     .form-header(class="text-center bg-customBlue p-6 rounded-t-lg text-gray-100")
       h2(class="text-4xl font-medium uppercase tracking-wider") Student \#{{index+1}} Registration

@@ -16,16 +16,14 @@ export default defineEventHandler(async (event) => {
   const rhtoken = getCookie(event, 'rhtoken') || '';
 
   if (!rhtoken && !(event.node.req.url?.includes('/api/callback'))) {
-    //await sendRedirect(event, loginRedirectUrl());
+    await sendRedirect(event, loginRedirectUrl());
   } else if (rhtoken) {
     try {
-      /*const decoded = jwt.verify(
+      const decoded = jwt.verify(
         rhtoken, 
         fs.readFileSync(process.cwd() + '/cert-dev.pem')
-      );*/
-      const claims = {
-        email: "your email here",
-      }
+      );
+      const claims = decoded as MyTokenPayload;
       if (claims.email) {
         event.context.claims = claims;
         // Using username field to find the user, assuming username stores the email
