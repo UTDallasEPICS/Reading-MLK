@@ -98,7 +98,7 @@ model StudentProfile {
 // model to hold the administrators from Friends of MLK
 model AdminProfile {
   id          Int    @id @default(autoincrement())
-  admin_email String @unique
+  admin_email String @unique // TODO: we dont need this field kill it
 
   admin_id Int  @unique
   Admin    User @relation(fields: [admin_id], references: [id])
