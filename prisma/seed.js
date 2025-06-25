@@ -1,4 +1,6 @@
 import { PrismaClient } from '@prisma/client';
+import {config} from 'dotenv';
+config({ path: '.env' }); // Load environment variables from .env file
 const prisma = new PrismaClient();
 
 import fs from 'fs';
@@ -46,42 +48,82 @@ async function clearDatabase() {
 
 async function main() {
 
-    clearDatabase();
+    await clearDatabase();
 
     // Reset auto-increment values for PostgreSQL
-    await prisma.$queryRaw`SELECT setval(pg_get_serial_sequence('users', 'id'), 1, false)`;
-    await prisma.$queryRaw`SELECT setval(pg_get_serial_sequence('parent_profile', 'id'), 1, false)`;
-    await prisma.$queryRaw`SELECT setval(pg_get_serial_sequence('faculty_profile', 'id'), 1, false)`;
-    await prisma.$queryRaw`SELECT setval(pg_get_serial_sequence('student_profile', 'id'), 1, false)`;
-    await prisma.$queryRaw`SELECT setval(pg_get_serial_sequence('admin_profile', 'id'), 1, false)`;
-    await prisma.$queryRaw`SELECT setval(pg_get_serial_sequence('classes', 'id'), 1, false)`;
+    //await prisma.$queryRaw`SELECT setval(pg_get_serial_sequence('users', 'id'), 1, false)`;
+    //await prisma.$queryRaw`SELECT setval(pg_get_serial_sequence('parent_profile', 'id'), 1, false)`;
+    //await prisma.$queryRaw`SELECT setval(pg_get_serial_sequence('faculty_profile', 'id'), 1, false)`;
+    //await prisma.$queryRaw`SELECT setval(pg_get_serial_sequence('student_profile', 'id'), 1, false)`;
+    //await prisma.$queryRaw`SELECT setval(pg_get_serial_sequence('admin_profile', 'id'), 1, false)`;
+    //await prisma.$queryRaw`SELECT setval(pg_get_serial_sequence('classes', 'id'), 1, false)`;
+    const adminUser =   {
+        "user_name": "mfarrell3",
+        "first_name": "Maurine",
+        "last_name": "Farrell",
+        "preferred_name": "Katlyn",
+        "email": process.env.DEV_EMAIL,
+        "role": "admin",
+        Admin:{
+            create: {
+            admin_email: "pajkfdsnkjvfdsn@gmail.com",
+            }
+        }
+    }
+    const parentUser =   {
+        "user_name": "mfarrell13",
+        "first_name": "Maurine",
+        "last_name": "Farrell",
+        "preferred_name": "Katlyn",
+        "email": "student@gmail.com",
+        "role": "parent",
+        Parents:{
+            create: {
+            "zipcode": "53375",
+            "yearly_income": "170.11",
+            "birth_date": "2024-08-31T06:09:42.427Z",
+            "average_number_books": 15,
+            "phone_number": "(583) 601-7432 x403",
+            "gender": "Female",
+            "marital_stat": "Married",
+            "social_media": "hnicolas253",
+        }}
+    }
+    const facultyUser =   {
+        "user_name": "mfarrell23",
+        "first_name": "Maurine",
+        "last_name": "Farrell",
+        "preferred_name": "Katlyn",
+        "email": "faculty@gmail.com",
+        "role": "faculty",
+        Faculty:{
+            create: {
+            "district": "53375",
+            "dual_lang": true,
+            "faculty_email": "faculty@gmail.com",
+            "school_name": "Lemke - Lemke",
+            "phone_number": "(583) 601-7432 x403",
+            "department": "Math",
+            "grade": "5th"
+        }}
+    }
 
     // Seeding users
-    await prisma.user.createMany({ data: JSON.parse(fs.readFileSync(path.resolve('./prisma/userData.json'), 'utf8'))});
-
-    // Seeding parent profiles
-    await prisma.parentProfile.createMany({ data: JSON.parse(fs.readFileSync(path.resolve('./prisma/parentData.json'), 'utf8')) });
-
-    // Seeding faculty profiles
-    await prisma.facultyProfile.createMany({ data: JSON.parse(fs.readFileSync(path.resolve('./prisma/facultyData.json'), 'utf8')), skipDuplicates: true });
-
-    // Seeding student profiles
-    await prisma.studentProfile.createMany({ data: JSON.parse(fs.readFileSync(path.resolve('./prisma/studentData.json'), 'utf8')), skipDuplicates: true });
-
-    // Seeding admin profiles
-    await prisma.adminProfile.createMany({ data: JSON.parse(fs.readFileSync(path.resolve('./prisma/adminData.json'), 'utf8')), skipDuplicates: true });
-
+    // TODO: parent/faculty/student/admin data gets seeded as part of the user data, see https://www.prisma.io/docs/orm/prisma-client/queries/relation-queries#nested-writes
+    await prisma.user.create({ data: facultyUser });
+    await prisma.user.create({ data: adminUser });
+    await prisma.user.create({ data: parentUser });
     // Seeding classes
-    await prisma.class.createMany({ data: JSON.parse(fs.readFileSync(path.resolve('./prisma/classData.json'), 'utf8')), skipDuplicates: true });
+    //await prisma.class.createMany({ data: JSON.parse(fs.readFileSync(path.resolve('./prisma/classData.json'), 'utf8')), skipDuplicates: true });
 
     // Seeding TeacherToClass
-    await prisma.teacherToClass.createMany({ data: JSON.parse(fs.readFileSync(path.resolve('./prisma/teacherToClassData.json'), 'utf8')), skipDuplicates: true });
+   // await prisma.teacherToClass.createMany({ data: JSON.parse(fs.readFileSync(path.resolve('./prisma/teacherToClassData.json'), 'utf8')), skipDuplicates: true });
 
     // Seeding StudentToClass
-    await prisma.studentToClass.createMany({ data: JSON.parse(fs.readFileSync(path.resolve('./prisma/studentToClassData.json'), 'utf8')), skipDuplicates: true });
+    //await prisma.studentToClass.createMany({ data: JSON.parse(fs.readFileSync(path.resolve('./prisma/studentToClassData.json'), 'utf8')), skipDuplicates: true });
 
     // Seeding ParentToChild
-    await prisma.parentToChild.createMany({ data: JSON.parse(fs.readFileSync(path.resolve('./prisma/parentToChildData.json'), 'utf8')), skipDuplicates: true });
+    //await prisma.parentToChild.createMany({ data: JSON.parse(fs.readFileSync(path.resolve('./prisma/parentToChildData.json'), 'utf8')), skipDuplicates: true });
 
     console.log('Database seeded successfully!');
 }
