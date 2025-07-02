@@ -66,7 +66,7 @@ async function main() {
         "role": "admin",
         Admin:{
             create: {
-            admin_email: "pajkfdsnkjvfdsn@gmail.com",
+            admin_email: process.env.DEV_EMAIL,
             }
         }
     }

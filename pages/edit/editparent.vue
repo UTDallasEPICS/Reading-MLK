@@ -49,7 +49,7 @@
                     Label Social Media
                         Input(v-model='parent.social_media' name="social_media" id="social_media" placeholder="(user defined)" required)
       .flex
-            button(type="button" class="rounded mb-4 bg-indigo-600 px-3 py-2 text-lg font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 w-60 mx-auto" @click="editFaculty(faculty)") Apply Edits
+            button(type="button" class="rounded mb-4 bg-indigo-600 px-3 py-2 text-lg font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 w-60 mx-auto" @click="editParent(parent)") Apply Edits
       </template>
       
 <script setup lang="ts">
@@ -147,15 +147,17 @@ const editParent = async (editedParent: ParentProfile) => {
 };
 
 const save = async () => {
-const data = await $fetch<ParentProfile>('/api/parent', {
-  method:'PUT',
-  body: ({...parent.value, id: id.value as string})
-}).catch((error)=>{
-  console.log("Error: ",error.data.message);
-});
-console.log(data)
-if(data && (data as any).success){
-  await navigateTo('/parent')
-}
-}
+  const data = await $fetch<ParentProfile>(`/api/parent/${id.value}`, {
+    method: 'PUT',
+    body: parent.value
+  }).catch((error) => {
+    console.log("Error: ", error.data.message);
+  });
+
+  console.log(data);
+
+  if (data && (data as any).success) {
+    await navigateTo('/parent');
+  }
+};
 </script>
