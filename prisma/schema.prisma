@@ -1,6 +1,12 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
+// OFFICIAL USER TABLES (approved by rae)
+// Students: username, email, FN, LN, PN, Bday, zipcode, school dist, school, gender, acccreationdate, startingreadinglevel, preflang, childtoparents, childtoteacher
+// Parents: username, email, FN, LN, PN, Bday, zipcode, gender, acccreationdate, startingreadinglevel, parenttochild, parenttoteacher
+// Faculty: username, email, FN, LN, PN, Bday, zipcode, school dist, school, gender, acccreationdate, startingreadinglevel, teachertochild, teachertoparent
+// EMAIL IS A UNIQUE IDENTIFIER!! accounts attached to the same email have seperate usernames
+
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["driverAdapters"]
@@ -15,21 +21,14 @@ datasource db {
 //  provider = "prisma-erd-generator"
 //}
 
-// standard user profile 
+// UNIQUE EMAIL table
 model User {
-  id             Int     @id @default(autoincrement())
-  user_name      String  @unique // should have one upper case and lower case alongside a number
+  email          String  @unique // [primary key] should hold the email of the private account @map("email")
   first_name     String
   last_name      String
   preferred_name String?
-  email          String  @unique // should hold the email of the private account @map("email")
-  // client_cuid    String  @map("client_cuid")
-  role           String
-
-  Parents ParentProfile?
-  // Children StudentProfile?
-  Faculty FacultyProfile?
-  Admin   AdminProfile?
+  gender        String?
+  creationDate  DateTime @default(now()) // should hold the date when the account was created
 
   @@map("users")
 }
@@ -46,7 +45,6 @@ model ParentProfile {
   marital_stat         String? /// martial status of the parent (will be optional choice)
   social_media         String?         @unique /// could be other social media handle but should ask for twitter(X) handle (most likely social media handle they have)
   user_id              Int             @unique
-  User                 User            @relation(fields: [user_id], references: [id])
   ParentToChild        ParentToChild[]
 
   @@map("parent_profile")

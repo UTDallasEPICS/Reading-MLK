@@ -14,7 +14,11 @@ parents register their children after making an account of their own
           // Form fields
           .form-input.grid.gap-6.p-8.bg-white.rounded-b-lg
             
-            
+            // Children Already Registered Button
+            .button-container(class="flex justify-center mt-5", v-if="children.length > 0")
+              button(
+                
+                class="submit-button px-5 py-2.5 bg-[#122c4f] text-white border-0 rounded-lg cursor-pointer text-base transition-all duration-300 ease-in-out hover:bg-[#1a1a2e]") My Children are Already Registered. (Skip this step)
 
             // School Field
             .form-element.flex.flex-col

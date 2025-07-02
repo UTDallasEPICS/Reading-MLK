@@ -2,55 +2,48 @@
   .centered-container.flex.justify-center.items-center.my-10
     .form
       .form-container(class="p-8 bg-white rounded-lg shadow-lg max-w-4xl w-full min-w-[900px]")
-        
+
         // Header section
         .form-header.text-center.bg-customBlue.p-6.rounded-t-lg.text-gray-100
-          h2.text-4xl.font-medium.uppercase.tracking-wider Sign Up
+          h2.text-4xl.font-medium.uppercase.tracking-wider New User Sign Up
           .heading-line.w-32.h-1.bg-green-400.my-2.mx-auto.rounded-sm
+
+          
         
+        .info-box.bg-gray-100.border.border-gray-300.rounded-lg.p-4.mb-6
+          h1.text-2xl.font-semibold.text-gray-800.text-center Please type in your email, and hit the "Send" button. Check your email for a code from readinghuddle@gmail.com, and type in the code below to register your account.
         // Form fields
         .form-input.grid.gap-6.p-8.bg-white.rounded-b-lg
-          
-          // First Name Field
+
+          // Email Field
           .form-element.flex.flex-col
-            label(for="first-name" class="text-lg font-semibold text-gray-800 mb-2" required) First Name
-            input#first-name(type="text" placeholder="Type your legal first name here." required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" v-model="data_UserProfile.first_name")
+            label(for="email" class="text-lg font-semibold text-gray-800 mb-2 text-center" required) My Email
+            input#email(type="email" placeholder="Type your email address here." required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" v-model="data_UserProfile.email")
           
-          // Last Name Field
-          .form-element.flex.flex-col
-            label(for="last-name" class="text-lg font-semibold text-gray-800 mb-2" required) Last Name
-            input#last-name(type="text" placeholder="Type your legal last name here." required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" v-model="data_UserProfile.last_name")
-          
-          // Username Field
-          .form-element.flex.flex-col
-            label(for="username" class="text-lg font-semibold text-gray-800 mb-2" required) User Name
-            input#username(type="text" placeholder="Come up with a username and type it here." required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" v-model="data_UserProfile.user_name")
-          
-          // Preferred Field
-          .form-element.flex.flex-col
-            label(for="preferredname" class="text-lg font-semibold text-gray-800 mb-2" optional) Preferred Name
-            input#preferredname(type="text" placeholder="Type your preferred name here." required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" v-model="data_UserProfile.preferred_name")
-          
-          // Assigned Role
-          .div(class="flex items-center justify-center  flex-col space-y-3") 
-            label(class="block text-xl font-semibold") I am a...
-            .div(class="flex items-baseline space-x-12") 
-              .radio-button-group(class="flex items-center space-x-8")
-                .radio-button(class="flex items-center space-x-4")
-                  input(type="radio" id="dual_lang_faculty" name="dual_lang_group" value="faculty" v-model="data_UserProfile.role" class="appearance-none border border-gray-300 rounded-lg w-8 h-7 bg-transparent cursor-pointer checked:bg-customBlue checked:border-transparent focus:outline-none focus:ring-2 focus:ring-customBlue focus:ring-offset-2 transition duration-300 ease-in-out transform hover:scale-105 shadow-sm hover:shadow-md")
-                  label(for="dual_lang_faculty" class="text-lg font-medium text-gray-700 hover:text-teal-600") Student
-                .radio-button(class="flex items-center space-x-4")
-                  input(type="radio" id="dual_lang_faculty" name="dual_lang_group" value="parent" v-model="data_UserProfile.role" class="appearance-none border border-gray-300 rounded-lg w-8 h-7 bg-transparent cursor-pointer checked:bg-customBlue checked:border-transparent focus:outline-none focus:ring-2 focus:ring-customBlue focus:ring-offset-2 transition duration-300 ease-in-out transform hover:scale-105 shadow-sm hover:shadow-md")
-                  label(for="dual_lang_parent" class="text-lg font-medium text-gray-700 hover:text-teal-600") Parent
-                .radio-button(class="flex items-center space-x-4")
-                  input(type="radio" id="dual_lang_faculty" name="dual_lang_group" value="parent" v-model="data_UserProfile.role" class="appearance-none border border-gray-300 rounded-lg w-8 h-7 bg-transparent cursor-pointer checked:bg-customBlue checked:border-transparent focus:outline-none focus:ring-2 focus:ring-customBlue focus:ring-offset-2 transition duration-300 ease-in-out transform hover:scale-105 shadow-sm hover:shadow-md")
-                  label(for="dual_lang_parent" class="text-lg font-medium text-gray-700 hover:text-teal-600") Teacher
-        // Submit Button
+        // Send Code Button
         .button-container(class="flex justify-center mt-5")
           button(
-            type="submit"
-            @click="handleSubmit"
-            class="submit-button px-5 py-2.5 bg-[#122c4f] text-white border-0 rounded-lg cursor-pointer text-base transition-all duration-300 ease-in-out hover:bg-[#1a1a2e]") Submit
+            type="button"
+            class="submit-button px-5 py-2.5 bg-[#122c4f] text-white border-0 rounded-lg cursor-pointer text-base transition-all duration-300 ease-in-out hover:bg-[#1a1a2e]"
+            @click="showCode = true") Send
+
+
+        transition(name="slide-down")
+        .additional-content(v-if="showCode" class="mt-8 pt-8 border-t border-gray-200")
+          .form-element.flex.flex-col.mb-4
+            label(class="text-lg font-semibold text-gray-800 mb-2 text-center") Verification Code
+            .div(class="flex justify-center gap-2")
+              input(
+              v-for="index in 6"
+              :key="index"
+              type="text"
+              maxlength="1"
+              class="w-12 h-12 text-center text-lg border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500"
+              )
+          .button-container(class="flex justify-center mt-5")
+            button(class="submit-button px-5 py-2.5 bg-green-600 text-white border-0 rounded-lg cursor-pointer text-base transition-all duration-300 ease-in-out hover:bg-green-700") Register
+
+            
 </template>
 <script setup lang="ts">
 const rhuser = useCookie<any>('rhuser')
@@ -64,6 +57,9 @@ const data_UserProfile = ref({
   email: "",
   role: "Parent",
 })
+
+// Define the reactive variable for conditional rendering
+const showCode = ref(false);
 
 // Handle the form submission
 const handleSubmit = async() => {
@@ -87,6 +83,8 @@ const handleSubmit = async() => {
     }
     });
     alert("User successfully registered in the system.");
+    // Show additional content after successful registration
+    showCode.value = true;
   } catch(error) {
     console.error('Error submitting user profile:', error);
 
