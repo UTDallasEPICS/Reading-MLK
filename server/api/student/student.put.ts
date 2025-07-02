@@ -20,6 +20,13 @@ export default defineEventHandler(async (event) => {
     // Check if ID is provided
     if (id) {
         try {
+            if (event.context.user?.user_role !== "parent") { // If user role is not parent, throws an error
+                throw createError({
+                    statusCode: 403,
+                    statusMessage: 'Forbidden',
+                    message: 'You do not have permission to update student profiles.'
+                });
+            }
             // Update existing student record
             student = await prisma.studentProfile.update({
                 where: {

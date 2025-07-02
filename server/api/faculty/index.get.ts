@@ -3,10 +3,13 @@ import { PrismaClientKnownRequestError, PrismaClientUnknownRequestError } from '
 import { read } from 'fs';
 const prisma = new PrismaClient();
 
-export default defineEventHandler(async () => {
+//Changed async () to async (event)
+export default defineEventHandler(async (event) => {
     let faculties = null;
-
+    const body = await readBody(event);
+    
     try {
+        
         // Retrieve all faculty profiles
         faculties = await prisma.facultyProfile.findMany({ 
             include: {
@@ -14,6 +17,14 @@ export default defineEventHandler(async () => {
                 Faculty: true
             }
         });
+
+        if (event.context.user?.user_role !== "admin") { //If role of user is not admin, should not be able to retrieve all faculty profiles
+            throw createError({
+                statusCode: 403,
+                statusMessage: 'Forbidden',
+                message: 'You do not have permission to access this resource.'
+            });
+        }
 
         // console.log("LET'S WORK THIS: ", faculties[0]);
     } catch (error) {

@@ -15,6 +15,13 @@ export default defineEventHandler(async (event) => {
     let deletedFaculty = null;
 
     try {
+        if (event.context.user?.user_role !== "admin" || event.context.user?.user_role !== "faculty") {
+            throw createError({
+                statusCode: 403,
+                statusMessage: 'Forbidden',
+                message: 'You do not have permission to delete this account.'
+            });
+        }
         // Delete faculty record
         deletedFaculty = await prisma.facultyProfile.delete({
             where: {

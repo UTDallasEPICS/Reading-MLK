@@ -7,7 +7,18 @@ export default defineEventHandler(async (event) => {
     const body = await readBody(event);
 
     const {age, grade, reading_lvl, birth_date, gender, school_dist, school_name, pref_lang, first_name, last_name, pref_name} = body
-
+    try {
+        if (event.context.user?.user_role !== "parent") {
+            throw createError({
+                statusCode: 403,
+                statusMessage: 'Forbidden',
+                message: 'You do not have permission to create a student profile.'
+            });
+        }
+    } catch (e) {
+        console.error('Error checking user role:', e);
+        throw createError({ statusCode: 500, statusMessage: "Error checking user role" });
+    }
     // Check if all required fields are present in the request body
     if (
         age &&

@@ -37,6 +37,13 @@ export default defineEventHandler(async (event) => {
     let newFaculty = null;
 
     try {
+        if (event.context.user?.user_role !== "faculty") {
+            throw createError({
+                statusCode: 403,
+                statusMessage: 'Forbidden',
+                message: 'You do not have permission to create a faculty profile.'
+            });
+        }
         // Create a new faculty record
         newFaculty = await prisma.facultyProfile.create({
             data: {

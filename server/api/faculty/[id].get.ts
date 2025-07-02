@@ -12,6 +12,14 @@ export default defineEventHandler(async event => {
     console.log(id as string)
 
     try {
+        //If role of user is not admin, should not be able to retrieve all faculty profiles
+        if (event.context.user?.user_role !== "admin") { // Checks role of user, and if role is not admin, throws an error
+            throw createError({
+                statusCode: 403,
+                statusMessage: 'Forbidden',
+                message: 'You do not have permission to access this resource.'
+            });
+        }
         // Retrieve all faculty profiles
         faculties = await prisma.facultyProfile.findFirst({ 
             where: {
