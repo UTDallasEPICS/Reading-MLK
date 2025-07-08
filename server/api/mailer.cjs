@@ -1,5 +1,6 @@
 //https://nodemailer.com/ for documentation
 //>npm install nodemailer
+// updated server side api
 
 import nodemailer from "nodemailer";
 import crypto from "crypto";
