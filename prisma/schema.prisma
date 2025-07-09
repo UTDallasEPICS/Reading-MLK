@@ -95,14 +95,6 @@ model StudentProfile {
   @@map("student_profile")
 }
 
-// Admin profile for Friends of MLK administrators
-model AdminProfile {
-  id          Int    @id @default(autoincrement())
-  admin_email String @unique
-
-  @@map("admin_profile")
-}
-
 // Join tables for many-to-many relationships
 model ParentToStudent {
   parent_id  Int
