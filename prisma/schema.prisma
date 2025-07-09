@@ -3,8 +3,8 @@
 
 // OFFICIAL USER TABLES (approved by rae)
 // Students: username, email, FN, LN, PN, Bday, zipcode, school dist, school, gender, acccreationdate, startingreadinglevel, preflang, childtoparents, childtoteacher
-// Parents: username, email, FN, LN, PN, Bday, zipcode, gender, acccreationdate, startingreadinglevel, parenttochild, parenttoteacher
-// Faculty: username, email, FN, LN, PN, Bday, zipcode, school dist, school, gender, acccreationdate, startingreadinglevel, teachertochild, teachertoparent
+// Parents: username, email, FN, LN, PN, Bday, zipcode, gender, acccreationdate, parenttochild, parenttoteacher
+// Teachers: username, email, FN, LN, PN, Bday, zipcode, school dist, school, gender, acccreationdate, teachertochild, teachertoparent
 // EMAIL IS A UNIQUE IDENTIFIER!! accounts attached to the same email have seperate usernames
 
 generator client {
@@ -17,137 +17,136 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-//generator erd {
-//  provider = "prisma-erd-generator"
-//}
-
-// UNIQUE EMAIL table
+// user contains data that ALL accounts need regardless of type-
+// profile tables contain the specifics each type of account needs
+// UNIQUE EMAIL table - contains shared information for all accounts under one email
 model User {
-  email          String  @unique // [primary key] should hold the email of the private account @map("email")
+  email          String   @unique @id // Primary key using email
   first_name     String
   last_name      String
-  preferred_name String?
-  gender        String?
-  creationDate  DateTime @default(now()) // should hold the date when the account was created
+  preferred_name String
+  gender         String
+  birth_date     DateTime @default(now())
+  creationDate   DateTime @default(now())
+
+  // Relations to profile tables
+  parentProfiles  ParentProfile[]
+  teacherProfiles TeacherProfile[]
+  studentProfiles StudentProfile[]
 
   @@map("users")
 }
 
-// parent profile
+// Parent profile - can have multiple parent profiles per email
 model ParentProfile {
-  id                   Int             @id @default(autoincrement())
-  zipcode              String
-  yearly_income        String? /// must be optional to give the parent income for sensitivity issues // changed to string to allow for more dynamic input
-  birth_date           DateTime?       @default(now())
-  average_number_books Int /// average number of books read to child (before they registered with program/school and this will not be changed)
-  phone_number         String          @unique /// parent should provide their mobile for easy contact their extension is not required (we are assuming they have a US extension)
-  gender               String
-  marital_stat         String? /// martial status of the parent (will be optional choice)
-  social_media         String?         @unique /// could be other social media handle but should ask for twitter(X) handle (most likely social media handle they have)
-  user_id              Int             @unique
-  ParentToChild        ParentToChild[]
+  id       Int    @id @default(autoincrement())
+  zipcode  String
+  username String @unique
+  
+  // Foreign key to User table
+  user_email String
+  user       User   @relation(fields: [user_email], references: [email], onDelete: Cascade)
 
+  // Relationships
+  ParentToStudent ParentToStudent[]
+  ParentToTeacher ParentToTeacher[]
+  
   @@map("parent_profile")
 }
 
-// teacher profile (principle will also have a faculty profile)
-model FacultyProfile {
-  id            Int     @id @default(autoincrement())
-  district      String
-  dual_lang     Boolean /// True if they are spanish or other language teacher with non-english kids, otherwise false to indicate they are english speaking teachers      
-  faculty_email String  @unique
-  school_name   String
-  phone_number  String
-  department    String
-  grade         String // multi to indicate that they teach multiple 
+// Teacher profile - can have multiple teacher profiles per email
+// WARNING- teachers do not make accounts on the same as students they can hack in
+model TeacherProfile {
+  id          Int    @id @default(autoincrement())
+  zipcode     String
+  username    String @unique
+  school_dist String
+  school_name String
+  
+  // Foreign key to User table
+  user_email String
+  user       User   @relation(fields: [user_email], references: [email], onDelete: Cascade)
 
-  user_id        Int              @unique
-  Faculty        User             @relation(fields: [user_id], references: [id])
-  TeacherToClass TeacherToClass[]
-
-  @@map("faculty_profile")
+  // Relationships
+  TeacherToStudent TeacherToStudent[]
+  TeacherToParent  ParentToTeacher[]
+  
+  @@map("teacher_profile")
 }
 
-// registered students profile 
+// Student profile - can have multiple student profiles per email
 model StudentProfile {
-  id          Int       @id @default(autoincrement())
-  age         Int
-  grade       Int /// preschool should be given 0 to denote their grade level
-  reading_lvl Int /// should reference AR level to indicate reading level
-  birth_date  DateTime? @default(now())
-  gender      String
-  school_name String /// asssume that all the school names will be elementary schools so we should ask them to give the name of the school 
-  school_dist String /// example format should be GISD (garland independent school district)
-  pref_lang   String? /// drop down option for either english, spanish(espanol), or other (only temporary until we can get more info on what languages they speak)
-  first_name  String
-  last_name   String
-  // pref_name   String
+  id                     Int     @id @default(autoincrement())
+  username               String  @unique
+  zipcode                String?
+  school_dist            String
+  school_name            String
+  starting_reading_level String
+  preferred_language     String
+  
+  // Foreign key to User table
+  user_email String
+  user       User   @relation(fields: [user_email], references: [email], onDelete: Cascade)
 
-  // user_id Int  @unique
-  // Student User @relation(fields: [user_id], references: [id])
-
-  ParentToChild ParentToChild[]
-  Classes       StudentToClass[]
-  QuizResponse  QuizResponse[]
-
+  // Relationships
+  StudentToTeacher TeacherToStudent[]
+  StudentToParent  ParentToStudent[]
+  
   @@map("student_profile")
 }
 
-// model to hold the administrators from Friends of MLK
+// Admin profile for Friends of MLK administrators
 model AdminProfile {
   id          Int    @id @default(autoincrement())
   admin_email String @unique
 
-  admin_id Int  @unique
-  Admin    User @relation(fields: [admin_id], references: [id])
-
   @@map("admin_profile")
 }
 
-// class model to create relation between teacher and student (should be one-to-many)
-model Class {
-  id         Int              @id @default(autoincrement())
-  class_name String /// example: Bayard class
-  class_year Int
-  Teacher    TeacherToClass[]
-  Student    StudentToClass[]
-
-  @@map("classes")
-}
-
-// join table for teacher to class relationship
-model TeacherToClass {
-  class_id   Int
-  teacher_id Int
-  Class      Class          @relation(fields: [class_id], references: [id])
-  Teacher    FacultyProfile @relation(fields: [teacher_id], references: [id])
-
-  @@id([class_id, teacher_id])
-  @@map("teacher_to_classes")
-}
-
-// join table for student to class relationship
-model StudentToClass {
-  class_id   Int
+// Join tables for many-to-many relationships
+model ParentToStudent {
+  parent_id  Int
   student_id Int
-  Class      Class          @relation(fields: [class_id], references: [id])
-  Student    StudentProfile @relation(fields: [student_id], references: [id])
+  
+  parent  ParentProfile  @relation(fields: [parent_id], references: [id], onDelete: Cascade)
+  student StudentProfile @relation(fields: [student_id], references: [id], onDelete: Cascade)
 
-  @@id([class_id, student_id])
-  @@map("student_to_classes")
+  @@id([parent_id, student_id])
+  @@map("parent_to_student")
 }
 
-// join table for relationship between parents and child (student) (should be one-to-many)
-model ParentToChild {
-  parent_id Int
-  child_id  Int
-  Parent    ParentProfile  @relation(fields: [parent_id], references: [id])
-  Child     StudentProfile @relation(fields: [child_id], references: [id])
+model ParentToTeacher {
+  parent_id  Int
+  teacher_id Int
+  
+  parent  ParentProfile  @relation(fields: [parent_id], references: [id], onDelete: Cascade)
+  teacher TeacherProfile @relation(fields: [teacher_id], references: [id], onDelete: Cascade)
 
-  @@id([parent_id, child_id])
-  @@map("parent_to_kids")
+  @@id([parent_id, teacher_id])
+  @@map("parent_to_teacher")
 }
 
+model TeacherToStudent {
+  teacher_id Int
+  student_id Int
+  
+  teacher TeacherProfile @relation(fields: [teacher_id], references: [id], onDelete: Cascade)
+  student StudentProfile @relation(fields: [student_id], references: [id], onDelete: Cascade)
+
+  @@id([teacher_id, student_id])
+  @@map("teacher_to_student")
+}
+
+// class model to create relation between teacher and student (should be one-to-many)
+// model Class {
+//   id         Int              @id @default(autoincrement())
+//   class_name String /// example: Bayard class
+//   class_year Int
+//   Teacher    TeacherToClass[]
+//   Student    StudentToClass[]
+
+//   @@map("classes")
+// }
 // Models for reading quiz related things
 
 model Book {
