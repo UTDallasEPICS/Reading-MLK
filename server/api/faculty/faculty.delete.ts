@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
     let deletedFaculty = null;
 
     try {
-        if (event.context.user?.role !== "admin" || event.context.user?.role !== "faculty") {
+        if (event.context.user?.role !== "admin") { // If user role is not admin, throws an error
             throw createError({
                 statusCode: 403,
                 statusMessage: 'Forbidden',

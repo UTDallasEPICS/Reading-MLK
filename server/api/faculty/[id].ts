@@ -15,6 +15,22 @@ export default defineEventHandler(async (event) => {
     ...cleanData
   } = raw;
 
+  //Checks if user is an admin, throws error if not
+  try {
+    if (event.context.user?.role !== "admin") { // If user role is not admin, throws an error
+      throw createError({
+        statusCode: 403,
+        statusMessage: 'Forbidden',
+        message: 'You do not have permission to create a faculty profile.'
+      });
+    }
+  } catch (e) {
+    if (e instanceof Error) {
+      console.error('Error checking user role:', e.message);
+    }
+    return;
+  }
+
   try {
     // 1. Update FacultyProfile
     const updatedFaculty = await prisma.facultyProfile.update({

@@ -28,6 +28,16 @@ export default defineEventHandler(async (event) => {
                 message: 'You do not have permission to update faculty profiles.'
             });
         }
+    } catch (e) {
+        if (e instanceof Error) {
+            return {
+                statusCode: 403,
+                statusMessage: 'Forbidden',
+            };
+        }
+    }
+
+    try {
         // Update existing faculty record
         updatedFaculty = await prisma.facultyProfile.update({
             where: {

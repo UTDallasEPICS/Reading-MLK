@@ -36,7 +36,7 @@ export default defineEventHandler(async (event) => {
 
     let newFaculty = null;
     try {
-        if (event.context.user?.role !== "admin") {
+        if (event.context.user?.role !== "admin") { // If user role is not admin, throws an error
             throw createError({
                 statusCode: 403,
                 statusMessage: 'Forbidden',
@@ -73,7 +73,7 @@ export default defineEventHandler(async (event) => {
                 id,
             },
         });
-        console.log('New faculty created successfully:', newFaculty);
+        //console.log('New faculty created successfully:', newFaculty);
     } catch (error) {
         console.error(error);
         console.error('Error creating faculty:', error);
