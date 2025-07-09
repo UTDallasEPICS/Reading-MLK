@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 export default defineEventHandler(async (event) => {
     const body = await readBody(event);
     try{
-        if (event.context.user?.user_role !== "admin") { //If user role is not an admin, throws an error
+        if (event.context.user?.role !== "admin") { //If user role is not an admin, throws an error
             throw createError({
                 statusCode: 403,
                 statusMessage: 'Forbidden',

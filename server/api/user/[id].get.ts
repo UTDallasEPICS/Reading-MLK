@@ -10,7 +10,7 @@ export default defineEventHandler(async event => {
         const id = getRouterParam(event, 'id');
 
         console.log(id as string)
-        if (event.context.user?.user_role === "admin") { //If user role is not an admin, throws an error
+        if (event.context.user?.role === "admin") { //If user role is not an admin, throws an error
             users = await prisma.user.findFirst({
             where: {
                 id: parseInt(id as string)

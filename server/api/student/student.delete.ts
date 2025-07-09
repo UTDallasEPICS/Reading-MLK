@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
     const {id} = body
     try {
         // Check if the user has permission to delete a student profile
-        if (event.context.user?.user_role !== "admin") {
+        if (event.context.user?.role !== "admin") {
             throw createError({
                 statusCode: 403,
                 statusMessage: 'Forbidden',

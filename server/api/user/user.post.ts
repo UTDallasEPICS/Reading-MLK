@@ -9,7 +9,7 @@ export default defineEventHandler(async (event) => {
 
     try {
         // Check if the user has permission to create a user profile
-        if (event.context.user?.user_role !== "parent") {
+        if (event.context.user?.role !== "admin") {
             throw createError({
                 statusCode: 403,
                 statusMessage: 'Forbidden',

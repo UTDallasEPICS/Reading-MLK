@@ -13,7 +13,7 @@ export default defineEventHandler(async event => {
   console.log(id as string)
 
   try {
-    if (event.context.user?.user_role !== "admin" && event.context.user?.user_role !== "parent") {
+    if (event.context.user?.role !== "admin") {
       throw createError({
         statusCode: 403,
         statusMessage: 'Forbidden',

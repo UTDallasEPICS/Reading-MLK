@@ -13,7 +13,7 @@ export default defineEventHandler(async event => {
 
     try {
         //If role of user is not admin, should not be able to retrieve all faculty profiles
-        if (event.context.user?.user_role !== "admin") { // Checks role of user, and if role is not admin, throws an error
+        if (event.context.user?.role !== "admin") { // Checks role of user, and if role is not admin, throws an error
             throw createError({
                 statusCode: 403,
                 statusMessage: 'Forbidden',

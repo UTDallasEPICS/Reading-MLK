@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
     const {id} = body
 
     try {
-        if (event.context.user?.user_role !== "admin") {
+        if (event.context.user?.role !== "admin") {
             throw createError({
                 statusCode: 403,
                 statusMessage: 'Forbidden',

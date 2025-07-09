@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
     let updatedFaculty = null;
 
     try {
-        if (event.context.user?.user_role !== "admin") { // If user role is not admin, throws an error
+        if (event.context.user?.role !== "admin") { // If user role is not admin, throws an error
             throw createError({
                 statusCode: 403,
                 statusMessage: 'Forbidden',

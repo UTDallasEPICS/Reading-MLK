@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
 
     const {age, grade, reading_lvl, birth_date, gender, school_dist, school_name, pref_lang, first_name, last_name, pref_name} = body
     try {
-        if (event.context.user?.user_role !== "parent") {
+        if (event.context.user?.role !== "admin") {
             throw createError({
                 statusCode: 403,
                 statusMessage: 'Forbidden',
