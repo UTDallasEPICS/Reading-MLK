@@ -23,8 +23,7 @@ export default defineEventHandler(async (event) => {
         rhtoken, 
         fs.readFileSync(process.cwd() + '/cert-dev.pem')
       );
-      const claims = decoded as MyTokenPayload; // Type assertion
-
+      const claims = decoded as MyTokenPayload;
       if (claims.email) {
         event.context.claims = claims;
         // Using username field to find the user, assuming username stores the email

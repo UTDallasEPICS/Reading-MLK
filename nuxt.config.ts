@@ -2,6 +2,7 @@
 export default defineNuxtConfig({
   devtools: { enabled: true },
   css: ['~/assets/css/main.css'],
+  components: true,
   runtimeConfig:{
     AUTH0_CLIENTID: '',
     AUTH0_SECRET: '',

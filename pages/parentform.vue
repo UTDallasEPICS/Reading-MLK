@@ -95,7 +95,6 @@ const submitAccounts = async () => {
 
 };
 
-
 </script>
 
 <template lang="pug"> 
