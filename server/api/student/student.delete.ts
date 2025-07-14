@@ -8,7 +8,20 @@ export default defineEventHandler(async (event) => {
     let error = null;
 
     const {id} = body
-
+    try {
+        // Check if the user has permission to delete a student profile
+        if (event.context.user?.role !== "admin") {
+            throw createError({
+                statusCode: 403,
+                statusMessage: 'Forbidden',
+                message: 'You do not have permission to delete this account.'
+            });
+        }
+    } catch (e) {
+        console.error('Error checking user role:', e);
+        throw createError({ statusCode: 500, statusMessage: "Error checking user role" });
+    }
+    
     if (id) {
 
             // Delete the student record

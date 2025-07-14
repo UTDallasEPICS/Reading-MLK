@@ -10,6 +10,19 @@ export default defineEventHandler(async(event) => {
     let error = null
 
     const {id} = body
+    
+    try {
+      if (event.context.user?.role !== "admin") { //If user role is not an admin, throws an error
+        throw createError({
+          statusCode: 403,
+          statusMessage: 'Forbidden',
+          message: 'You do not have permission to delete this account.'
+        })
+      }
+    } catch (e) {
+      console.error('Error checking user role:', e)
+      throw createError({ statusCode: 500, statusMessage: "Error checking user role" })
+    }
 
     if(id)
         await prisma.user.delete({

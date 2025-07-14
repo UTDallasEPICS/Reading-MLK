@@ -7,6 +7,20 @@ export default defineEventHandler(async (event) => {
 
     const body = await readBody(event)
 
+    try {
+        // Check if the user has permission to create a user profile
+        if (event.context.user?.role !== "admin") {
+            throw createError({
+                statusCode: 403,
+                statusMessage: 'Forbidden',
+                message: 'You do not have permission to create a user profile.'
+            });
+        }
+    } catch (e) {
+        console.error('Error checking user role:', e);
+        throw createError({ statusCode: 500, statusMessage: "Error checking user role" });
+    }
+
     let user = null
     let error = null
 

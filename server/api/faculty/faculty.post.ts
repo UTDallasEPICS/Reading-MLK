@@ -35,6 +35,20 @@ export default defineEventHandler(async (event) => {
     */
 
     let newFaculty = null;
+    try {
+        if (event.context.user?.role !== "admin") { // If user role is not admin, throws an error
+            throw createError({
+                statusCode: 403,
+                statusMessage: 'Forbidden',
+                message: 'You do not have permission to create a faculty profile.'
+            });
+        }
+    } catch (e) {
+        if (e instanceof Error) {
+            console.error('Error checking user role:', e.message);
+        }
+        return;
+    }
 
     try {
         // Create a new faculty record
@@ -59,7 +73,7 @@ export default defineEventHandler(async (event) => {
                 id,
             },
         });
-        console.log('New faculty created successfully:', newFaculty);
+        //console.log('New faculty created successfully:', newFaculty);
     } catch (error) {
         console.error(error);
         console.error('Error creating faculty:', error);

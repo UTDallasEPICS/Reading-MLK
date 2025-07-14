@@ -4,6 +4,23 @@ const prisma = new PrismaClient();
 
 export default defineEventHandler(async (event) => {
     const runtime = useRuntimeConfig()
+
+    //Checks if user has permission
+    try {
+        if (event.context.user?.role !== "admin") { // If user role is not admin, throws an error
+            throw createError({
+                statusCode: 403,
+                statusMessage: 'Forbidden',
+                message: 'You do not have permission to search parents.'
+            });
+        }
+    } catch (e) {
+        if (e instanceof Error) {
+            console.error('Error checking user role:', e.message);
+        }
+        throw createError({ statusCode: 500, statusMessage: "Error checking user role" });
+    }
+
     if(event.context.user?.id != undefined) {
         const {searchQuery, key} = getQuery(event);
         console.log("Search Query:", searchQuery);
