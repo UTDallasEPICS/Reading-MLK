@@ -37,6 +37,13 @@ model User {
   @@map("users")
 }
 
+//Admins still need to log in with an email, username is for tracking what admin did what
+model AdminProfile {
+  id       Int    @id @default(autoincrement())
+  username String @unique
+  email   String @unique
+}
+
 // Parent profile - can have multiple parent profiles per email
 model ParentProfile {
   id       Int    @id @default(autoincrement())
@@ -50,6 +57,8 @@ model ParentProfile {
   // Relationships
   ParentToStudent ParentToStudent[]
   ParentToTeacher ParentToTeacher[]
+  StudentToParent StudentToParent[]
+  TeacherToParent TeacherToParent[]
   
   @@map("parent_profile")
 }
@@ -69,7 +78,9 @@ model TeacherProfile {
 
   // Relationships
   TeacherToStudent TeacherToStudent[]
-  TeacherToParent  ParentToTeacher[]
+  ParentToTeacher  ParentToTeacher[]
+  TeacherToParent  TeacherToParent[]
+  TeacherToClass   TeacherToClass[]
   
   @@map("teacher_profile")
 }
@@ -89,8 +100,11 @@ model StudentProfile {
   user       User   @relation(fields: [user_email], references: [email], onDelete: Cascade)
 
   // Relationships
-  StudentToTeacher TeacherToStudent[]
-  StudentToParent  ParentToStudent[]
+  TeacherToStudent TeacherToStudent[]
+  ParentToStudent  ParentToStudent[]
+  StudentToParent  StudentToParent[]
+  QuizResponse     QuizResponse[]
+  StudentToClass   StudentToClass[]
   
   @@map("student_profile")
 }
@@ -107,6 +121,17 @@ model ParentToStudent {
   @@map("parent_to_student")
 }
 
+model StudentToParent {
+  parent_id  Int
+  student_id Int
+  
+  parent  ParentProfile  @relation(fields: [parent_id], references: [id], onDelete: Cascade)
+  student StudentProfile @relation(fields: [student_id], references: [id], onDelete: Cascade)
+
+  @@id([parent_id, student_id])
+  @@map("student_to_parent")
+}
+
 model ParentToTeacher {
   parent_id  Int
   teacher_id Int
@@ -116,6 +141,17 @@ model ParentToTeacher {
 
   @@id([parent_id, teacher_id])
   @@map("parent_to_teacher")
+}
+
+model TeacherToParent {
+  parent_id  Int
+  teacher_id Int
+  
+  parent  ParentProfile  @relation(fields: [parent_id], references: [id], onDelete: Cascade)
+  teacher TeacherProfile @relation(fields: [teacher_id], references: [id], onDelete: Cascade)
+
+  @@id([parent_id, teacher_id])
+  @@map("teacher_to_parent")
 }
 
 model TeacherToStudent {
@@ -129,16 +165,43 @@ model TeacherToStudent {
   @@map("teacher_to_student")
 }
 
-// class model to create relation between teacher and student (should be one-to-many)
-// model Class {
-//   id         Int              @id @default(autoincrement())
-//   class_name String /// example: Bayard class
-//   class_year Int
-//   Teacher    TeacherToClass[]
-//   Student    StudentToClass[]
+// Join tables for class relationships
+model TeacherToClass {
+  teacher_id Int
+  class_id   Int
+  
+  teacher TeacherProfile @relation(fields: [teacher_id], references: [id], onDelete: Cascade)
+  class   Class          @relation(fields: [class_id], references: [id], onDelete: Cascade)
 
-//   @@map("classes")
-// }
+  @@id([teacher_id, class_id])
+  @@map("teacher_to_class")
+}
+
+model StudentToClass {
+  student_id Int
+  class_id   Int
+  
+  student StudentProfile @relation(fields: [student_id], references: [id], onDelete: Cascade)
+  class   Class          @relation(fields: [class_id], references: [id], onDelete: Cascade)
+
+  @@id([student_id, class_id])
+  @@map("student_to_class")
+}
+
+// Class model to create relation between teachers and students (many-to-many)
+model Class {
+  id            Int    @id @default(autoincrement())
+  class_name    String /// example: Bayard class
+  class_year    Int
+  school_name   String
+  school_dist   String
+  
+  // Many-to-many relationships
+  Teachers      TeacherToClass[]
+  Students      StudentToClass[]
+
+  @@map("classes")
+}
 // Models for reading quiz related things
 
 model Book {
