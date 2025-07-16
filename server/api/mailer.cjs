@@ -36,7 +36,33 @@ export default async (event) => {
       to,
       subject: "Your OTP for Reading Huddle",
       text: `Your OTP is: ${otp}`,
-      html: `<b>Your OTP is: ${otp}</b>`,
+      html: `
+        <div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; border: 1px solid #ddd; border-radius: 8px; padding: 30px;">
+          <div style="text-align: center; margin-bottom: 20px;">
+            <h1 style="color: #003366;">Welcome to Reading Huddle!</h1>
+          </div>
+          
+          <p style="font-size: 16px;">Hi there,</p>
+
+          <p style="font-size: 16px; line-height: 1.5;">
+            We received your request to log in or sign up. Here's your one-time password (OTP):
+          </p>
+
+          <div style="font-size: 24px; font-weight: bold; color: goldenrod; text-align: center; margin: 30px 0;">
+            ${otp}
+          </div>
+
+          <p style="font-size: 14px; color: #555;">
+            This OTP is valid for 10 minutes. Please don’t share it with anyone.
+          </p>
+
+          <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
+
+          <p style="font-size: 12px; color: #888; text-align: center;">
+            If you didn’t request this, please ignore this email.
+          </p>
+        </div>
+      `,
     });
 
     return send(event, { message: "OTP sent" });
