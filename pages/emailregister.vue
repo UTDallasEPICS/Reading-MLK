@@ -98,48 +98,71 @@ const handleClick = () => {
 };
 
 // Handle the form submission
-const handleSubmit = async () => {
-  console.log("handle submit called");
+// const handleSubmit = async () => {
+//   console.log("handle submit called");
 
+//   if (otpCode.value.length < 6) {
+//     alert("Please enter the full 6-digit OTP.");
+//     return;
+//   }
+
+//   const result = await $fetch("/api/verifyotp", {
+//     method: "POST",
+//     body: {
+//       email: data_UserProfile.value.email,
+//       code: otpCode.value,
+//     },
+//   });
+
+//   console.log("OTP verified:", result);
+
+// Log current form data for debugging purposes
+// console.log("Submitting User Profile:", data_UserProfile.value);
+
+// // Ensure all required fields are filled out
+// if (!data_UserProfile.value.role) {
+//   console.log("myrole: " + data_UserProfile.value.role);
+//   alert("Please fill out all required fields before submitting the form.");
+//   return;
+// }
+
+// // console.log("myroleout: "+ data_UserProfile.value.role);
+
+// try {
+//   await $fetch("/api/user/user", {
+//     method: "POST",
+//     body: {
+//       user: data_UserProfile.value,
+//     },
+//   });
+//   alert("User successfully registered in the system.");
+//   // Show additional content after successful registration
+//   //showAdditionalContent.value = true;
+// } catch (error) {
+//   console.error("Error submitting user profile:", error);
+// }
+// };
+
+const handleSubmit = async () => {
   if (otpCode.value.length < 6) {
     alert("Please enter the full 6-digit OTP.");
     return;
   }
 
-  const result = await $fetch("/api/verifyotp", {
-    method: "POST",
-    body: {
-      email: data_UserProfile.value.email,
-      code: otpCode.value,
-    },
-  });
+  try {
+    const result = await $fetch("/api/verifyotp", {
+      method: "POST",
+      body: {
+        email: data_UserProfile.value.email,
+        code: otpCode.value,
+      },
+    });
 
-  console.log("OTP verified:", result);
-
-  // Log current form data for debugging purposes
-  // console.log("Submitting User Profile:", data_UserProfile.value);
-
-  // // Ensure all required fields are filled out
-  // if (!data_UserProfile.value.role) {
-  //   console.log("myrole: " + data_UserProfile.value.role);
-  //   alert("Please fill out all required fields before submitting the form.");
-  //   return;
-  // }
-
-  // // console.log("myroleout: "+ data_UserProfile.value.role);
-
-  // try {
-  //   await $fetch("/api/user/user", {
-  //     method: "POST",
-  //     body: {
-  //       user: data_UserProfile.value,
-  //     },
-  //   });
-  //   alert("User successfully registered in the system.");
-  //   // Show additional content after successful registration
-  //   //showAdditionalContent.value = true;
-  // } catch (error) {
-  //   console.error("Error submitting user profile:", error);
-  // }
+    console.log("OTP verified:", result);
+    alert(result.message || "OTP verified successfully! 🎉");
+  } catch (error: any) {
+    console.error("OTP verification failed:", error);
+    alert(error?.data?.statusMessage || "Incorrect OTP. Please try again.");
+  }
 };
 </script>

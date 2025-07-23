@@ -21,12 +21,18 @@ export default async (event) => {
 
     const otp = crypto.randomInt(100000, 999999).toString();
 
+    await prisma.oTP.upsert({
+      where: { email: to },
+      update: { code: otp },
+      create: { email: to, code: otp },
+    });
+
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
       port: 587,
       secure: false,
       auth: {
-        user: "rkriti16@gmail.com",
+        user: "",
         pass: "", // App password
       },
     });
@@ -37,14 +43,22 @@ export default async (event) => {
       subject: "Your OTP for Reading Huddle",
       text: `Your OTP is: ${otp}`,
       html: `
-        <div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; border: 1px solid #ddd; border-radius: 8px; padding: 30px;">
-          <div style="text-align: center; margin-bottom: 20px;">
-            <h1 style="color: #003366;">Welcome to Reading Huddle!</h1>
-          </div>
-          
-          <p style="font-size: 16px;">Hi there,</p>
+      <div style="max-width: 600px; margin: auto; font-family: Arial, sans-serif; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
+        <!-- Header with blue background -->
+        <div style="background-color: #003366; text-align: center; padding: 20px;">
+          <img
+            src="/image.png"
+            alt="Company Logo"
+            style="height: 80px; object-fit: contain; margin-bottom: 10px;"
+          />
+          <h1 style="color: white; font-size: 24px; margin: 0;">Welcome to Reading Huddle!</h1>
+        </div>
 
-          <p style="font-size: 16px; line-height: 1.5;">
+        <!-- Main content -->
+        <div style="padding: 30px;">
+          <p style="font-size: 16px; margin-bottom: 10px;">Hi there,</p>
+
+          <p style="font-size: 16px; line-height: 1.5; margin-bottom: 20px;">
             We received your request to log in or sign up. Here's your one-time password (OTP):
           </p>
 
@@ -52,16 +66,18 @@ export default async (event) => {
             ${otp}
           </div>
 
-          <p style="font-size: 14px; color: #555;">
+          <p style="font-size: 14px; color: #555; margin-bottom: 30px;">
             This OTP is valid for 10 minutes. Please don’t share it with anyone.
           </p>
 
-          <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
+          <hr style="border: none; border-top: 1px solid #eee; margin-bottom: 20px;">
 
           <p style="font-size: 12px; color: #888; text-align: center;">
             If you didn’t request this, please ignore this email.
           </p>
         </div>
+      </div>
+
       `,
     });
 

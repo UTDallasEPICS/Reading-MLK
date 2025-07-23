@@ -98,7 +98,7 @@ model StudentProfile {
 // model to hold the administrators from Friends of MLK
 model AdminProfile {
   id          Int    @id @default(autoincrement())
-  admin_email String @unique // TODO: we dont need this field kill it
+  //admin_email String @unique // TODO: we dont need this field kill it
 
   admin_id Int  @unique
   Admin    User @relation(fields: [admin_id], references: [id])
@@ -259,4 +259,12 @@ model FRAnswer {
   question       Question     @relation(fields: [questionId], references: [id])
 
   @@map("free_response_answers")
+}
+
+model OTP {
+  id    Int    @id @default(autoincrement())
+  email String @unique
+  code  String
+
+  @@map("otp_codes")
 }

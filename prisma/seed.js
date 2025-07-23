@@ -63,9 +63,9 @@ async function main() {
     email: process.env.DEV_EMAIL,
     role: "admin",
     Admin: {
-      create: {
-        admin_email: process.env.DEV_EMAIL,
-      },
+      // create: {
+      //   admin_email: process.env.DEV_EMAIL,
+      // },
     },
   };
   const parentUser = {
