@@ -1,3 +1,15 @@
+/**
+ * Notes for the person who works on Registration next:
+ * flow chart: 
+ * user visits emailregister.vue, puts in their email and confirms it with a code
+ * after code is verified, email is stored in a cookie variable and sent over to register.vue
+ * user gets redirected to register.vue and chooses either student or parent form to fill out and submits
+ * IF parent account is chosen, user is redirected to register-children.vue to register their children
+ * that page creates child accounts that are linked to the parent account
+ * after that, every user type gets redirected to the home page of the app with a screen that asks for a class code
+ * 
+ */
+
 <template lang="pug">
   .centered-container.flex.justify-center.items-center.my-10
     .form
@@ -12,7 +24,7 @@
         .form-input.p-8.bg-white.rounded-b-lg(v-if="!selectedAccountType")
           .account-type-selection.text-center
             h3.text-2xl.font-semibold.text-gray-800.mb-8 I am a...
-            .account-types.grid.grid-cols-1.gap-6(class="md:grid-cols-3")
+            .account-types.grid.grid-cols-1.gap-6(class="md:grid-cols-2")
               
               // Student Account Type
               .account-type-card(
@@ -28,14 +40,6 @@
               )
                 .icon.text-6xl.mb-6.flex.justify-center.items-center 🧑‍🧒‍🧒
                 h4.text-2xl.font-semibold.text-gray-800.mb-2.text-center Parent
-              
-              // Faculty Account Type
-              .account-type-card(
-                @click="selectAccountType('faculty')"
-                class="p-6 border-2 border-gray-200 rounded-lg cursor-pointer transition-all duration-300 hover:border-blue-500 hover:shadow-lg hover:transform hover:scale-105"
-              )
-                .icon.text-6xl.mb-6.flex.justify-center.items-center 👨‍🏫
-                h4.text-2xl.font-semibold.text-gray-800.mb-2.text-center Teacher
         
         // Dynamic Form Fields
         .form-input.p-8.bg-white.rounded-b-lg(v-if="selectedAccountType")
@@ -54,6 +58,46 @@
             
             // Common fields for all account types
             .form-element.flex.flex-col
+              label(for="user_name" class="text-lg font-semibold text-gray-800 mb-2") Username *
+              input#user_name(
+                v-model="data_UserProfile.user_name"
+                type="text" 
+                placeholder="Come up with a unique username, for example: johndoe1234." 
+                required 
+                class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" 
+              )
+
+            .form-element.flex.flex-col
+              label(for="first_name" class="text-lg font-semibold text-gray-800 mb-2") First Name *
+              input#first_name(
+                v-model="data_UserProfile.first_name"
+                type="text" 
+                placeholder="Enter your first name." 
+                required 
+                class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" 
+              )
+
+            .form-element.flex.flex-col
+              label(for="last_name" class="text-lg font-semibold text-gray-800 mb-2") Last Name *
+              input#last_name(
+                v-model="data_UserProfile.last_name"
+                type="text" 
+                placeholder="Enter your last name." 
+                required 
+                class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" 
+              )
+
+            .form-element.flex.flex-col
+              label(for="preferred_name" class="text-lg font-semibold text-gray-800 mb-2") Preferred Name *
+              input#preferred_name(
+                v-model="data_UserProfile.preferred_name"
+                type="text" 
+                placeholder="Enter your preferred name." 
+                required 
+                class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" 
+              )
+
+            .form-element.flex.flex-col
               label(for="date-of-birth" class="text-lg font-semibold text-gray-800 mb-2") Date of Birth *
               input#date-of-birth(
               v-model="data_UserProfile.date_of_birth"
@@ -61,31 +105,44 @@
               required 
               class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" 
               )
-            
-            // Student and Teacher specific fields
-            template(v-if="selectedAccountType === 'student' || selectedAccountType === 'faculty'")
-              .form-element.flex.flex-col
-                label(for="school-district" class="text-lg font-semibold text-gray-800 mb-2") School District *
-                input#school-district(
-                  v-model="data_UserProfile.school_dist"
-                  type="text" 
-                  placeholder="Enter your school district." 
-                  required 
-                  class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" 
-                )
-              
-              .form-element.flex.flex-col
-                label(for="school-name" class="text-lg font-semibold text-gray-800 mb-2") School Name *
-                input#school-name(
-                  v-model="data_UserProfile.school_name"
-                  type="text" 
-                  placeholder="Enter your school name." 
-                  required 
-                  class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" 
-                )
+
+            .form-element.flex.flex-col
+              label(for="gender" class="text-lg font-semibold text-gray-800 mb-2") Gender *
+              select#gender(
+                v-model="data_UserProfile.gender"
+                required 
+                class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" 
+              )
+                option(value="" disabled) Select gender
+                option(value="Male") Male
+                option(value="Female") Female
+                option(value="Other") Other
+                option(value="Prefer not to say") Prefer not to say
             
             // Student-specific fields
             template(v-if="selectedAccountType === 'student'")
+              .form-element.flex.flex-col
+                label(for="school-district" class="text-lg font-semibold text-gray-800 mb-2") School District *
+                select#school-district(
+                  v-model="selectedDistrict"
+                  @change="onDistrictChange"
+                  required 
+                  class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" 
+                )
+                  option(value="" disabled) Select a school district
+                  option(v-for="district in schoolDistricts" :key="district.id" :value="district.id") {{ district.name }}
+              
+              .form-element.flex.flex-col(v-if="selectedDistrict && filteredSchools.length > 0")
+                label(for="school-name" class="text-lg font-semibold text-gray-800 mb-2") School Name *
+                select#school-name(
+                  v-model="selectedSchool"
+                  @change="onSchoolChange"
+                  required 
+                  class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" 
+                )
+                  option(value="" disabled) Select a school
+                  option(v-for="school in filteredSchools" :key="school.id" :value="school.id") {{ school.name }}
+
               .form-element.flex.flex-col
                 label(for="grade-level" class="text-lg font-semibold text-gray-800 mb-2") Starting Reading Level *
                 select#grade-level(
@@ -108,6 +165,10 @@
                   option(value="10") 10th Grade
                   option(value="11") 11th Grade
                   option(value="12") 12th Grade
+                  option(value="13") Level 13
+                  option(value="12") Level 14
+                  option(value="12") Level 15
+                  option(value="12") Level 16
               
               .form-element.flex.flex-col
                 label(for="preferred-language" class="text-lg font-semibold text-gray-800 mb-2") Preferred Language *
@@ -117,68 +178,28 @@
                   class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" 
                 )
                   option(value="" disabled) Select preferred language
+
+                  // list of top 10 languages spoken in the world
                   option(value="English") English
                   option(value="Spanish") Spanish
                   option(value="French") French
+                  option(value="Chinese") Chinese
+                  option(value="Hindi") Hindi
+                  option(value="Arabic") Arabic
+                  option(value="Russian") Russian
+                  option(value="Urdu") Urdu
+                  option(value="Bengali") Bengali
+                  option(value="Portuguese") Portuguese
                   option(value="Other") Other
             
             // Parent-specific fields
             template(v-if="selectedAccountType === 'parent'")
               .form-element.flex.flex-col
-                label(for="phone-number" class="text-lg font-semibold text-gray-800 mb-2") Phone Number *
-                input#phone-number(
-                  v-model="data_UserProfile.phone_number"
-                  type="tel" 
-                  placeholder="Enter your phone number." 
-                  required 
-                  class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" 
-                )
-              
-              .form-element.flex.flex-col
-                label(for="emergency-contact" class="text-lg font-semibold text-gray-800 mb-2") Emergency Contact
-                input#emergency-contact(
-                  v-model="data_UserProfile.emergency_contact"
-                  type="text" 
-                  placeholder="Enter emergency contact name and phone." 
-                  class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" 
-                )
-
-              .form-element.flex.flex-col
-                label(for="zip-code" class="text-lg font-semibold text-gray-800 mb-2") Zip Code
-                input#emergency-contact(
+                label(for="zip-code" class="text-lg font-semibold text-gray-800 mb-2") Zip Code *
+                input#zip-code(
                   v-model="data_UserProfile.zipcode"
                   type="text" 
-                  placeholder="Enter the zipcode of your current living space." 
-                  class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" 
-                )
-            
-            // Faculty-specific fields
-            template(v-if="selectedAccountType === 'faculty'")
-              .form-element.flex.flex-col
-                label(for="employee-id" class="text-lg font-semibold text-gray-800 mb-2") Employee ID *
-                input#employee-id(
-                  v-model="data_UserProfile.employee_id"
-                  type="text" 
-                  placeholder="Enter your employee ID number." 
-                  required 
-                  class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" 
-                )
-              
-              .form-element.flex.flex-col
-                label(for="position" class="text-lg font-semibold text-gray-800 mb-2") Position *
-                input#position(
-                  v-model="data_UserProfile.position"
-                  type="text" 
-                  placeholder="Enter your job title/position." 
-                  required 
-                  class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" 
-                )
-              
-              .form-element.flex.flex-col
-                label(for="hire-date" class="text-lg font-semibold text-gray-800 mb-2") Hire Date *
-                input#hire-date(
-                  v-model="data_UserProfile.hire_date"
-                  type="date" 
+                  placeholder="Enter your zip code." 
                   required 
                   class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" 
                 )
@@ -200,6 +221,30 @@ const rhuser = useCookie<any>('rhuser')
 // Track the selected account type and form submission state
 const selectedAccountType = ref<string>('')
 const isSubmitting = ref(false)
+
+// Cascading dropdown variables
+const selectedDistrict = ref('')
+const selectedSchool = ref('')
+
+// Sample data - in real app, this would come from an API
+const schoolDistricts = ref([
+  { id: 1, name: "Dallas Independent School District" }
+  // other school ISD's go here in the future...
+])
+
+const schools = ref([
+  // Dallas ISD schools
+  { id: 1, name: "Adams High School", districtId: 1 },
+  { id: 2, name: "Adamson High School", districtId: 1 },
+  { id: 3, name: "Seagoville High School", districtId: 1 },
+  
+])
+
+// Computed property to filter schools based on selected district
+const filteredSchools = computed(() => {
+  if (!selectedDistrict.value) return []
+  return schools.value.filter(school => school.districtId == selectedDistrict.value)
+})
 
 // Define the form data with fields for all account types
 const data_UserProfile = ref({
@@ -235,6 +280,9 @@ const selectAccountType = (type: string) => {
 // Function to go back to account type selection
 const goBack = () => {
   selectedAccountType.value = ''
+  // Reset cascading dropdown selections
+  selectedDistrict.value = ''
+  selectedSchool.value = ''
   // Reset form data
   data_UserProfile.value = {
     user_name: "",
@@ -258,10 +306,27 @@ const goBack = () => {
   }
 }
 
+// Function called when district changes
+const onDistrictChange = () => {
+  // Reset school selection when district changes
+  selectedSchool.value = ''
+  // Update the form data with district name
+  const districtName = schoolDistricts.value.find(d => d.id == selectedDistrict.value)?.name || ''
+  data_UserProfile.value.school_dist = districtName
+  // Clear school name since district changed
+  data_UserProfile.value.school_name = ''
+}
+
+// Function called when school changes
+const onSchoolChange = () => {
+  // Update the form data with school name
+  const schoolName = schools.value.find(s => s.id == selectedSchool.value)?.name || ''
+  data_UserProfile.value.school_name = schoolName
+}
+
 // Function to validate required fields based on account type
 const validateRequiredFields = () => {
-  const commonFields = ['first_name', 'last_name', 'email', 'user_name', 'zipcode']
-  
+  const commonFields = ['first_name', 'last_name', 'preferred_name', 'email', 'user_name', 'date_of_birth', 'gender']
   // Check common required fields
   for (const field of commonFields) {
     if (!data_UserProfile.value[field as keyof typeof data_UserProfile.value]) {
@@ -271,22 +336,19 @@ const validateRequiredFields = () => {
   
   // Check account-specific required fields
   if (selectedAccountType.value === 'student') {
-    const studentFields = ['school_dist', 'school_name', 'starting_reading_level', 'preferred_language', 'date_of_birth']
+    const studentFields = ['starting_reading_level', 'preferred_language']
     for (const field of studentFields) {
       if (!data_UserProfile.value[field as keyof typeof data_UserProfile.value]) {
         return false
       }
     }
-  } else if (selectedAccountType.value === 'parent') {
-    const parentFields = ['phone_number']
-    for (const field of parentFields) {
-      if (!data_UserProfile.value[field as keyof typeof data_UserProfile.value]) {
-        return false
-      }
+    // Check if district and school are selected
+    if (!selectedDistrict.value || !selectedSchool.value) {
+      return false
     }
-  } else if (selectedAccountType.value === 'faculty') {
-    const facultyFields = ['school_dist', 'school_name', 'employee_id', 'position', 'hire_date']
-    for (const field of facultyFields) {
+  } else if (selectedAccountType.value === 'parent') {
+    const parentFields = ['zipcode']
+    for (const field of parentFields) {
       if (!data_UserProfile.value[field as keyof typeof data_UserProfile.value]) {
         return false
       }

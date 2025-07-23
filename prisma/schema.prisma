@@ -2,7 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 // OFFICIAL USER TABLES (approved by rae)
-// Students: username, email, FN, LN, PN, Bday, zipcode, school dist, school, gender, acccreationdate, startingreadinglevel, preflang, childtoparents, childtoteacher
+// Students: username, email, FN, LN, PN, Bday, school dist, school, gender, acccreationdate, startingreadinglevel, preflang, childtoparents, childtoteacher
 // Parents: username, email, FN, LN, PN, Bday, zipcode, gender, acccreationdate, parenttochild, parenttoteacher
 // Teachers: username, email, FN, LN, PN, Bday, zipcode, school dist, school, gender, acccreationdate, teachertochild, teachertoparent
 // EMAIL IS A UNIQUE IDENTIFIER!! accounts attached to the same email have seperate usernames
@@ -191,8 +191,8 @@ model StudentToClass {
 // Class model to create relation between teachers and students (many-to-many)
 model Class {
   id            Int    @id @default(autoincrement())
-  class_name    String /// example: Bayard class
-  class_year    Int
+  class_name    String // ex. Teacher raeed's class
+  class_code    Int
   school_name   String
   school_dist   String
   
