@@ -25,7 +25,7 @@
           tr
             th(v-for="header in h" :key="header" class="table-cell py-3 border-b border-gray-200 text-center") {{ header }}
         tbody
-          tr(v-for="(u, index) in Faculties" :key="u.id" :class="['table-row', index % 2 === 0 ? 'bg-gray-100' : 'bg-white', 'hover:shadow-lg', 'hover:scale-[0.99]', 'transition-transform', 'duration-200']")
+          tr(v-for="(u, index) in Assignments" :key="u.id" :class="['table-row', index % 2 === 0 ? 'bg-gray-100' : 'bg-white', 'hover:shadow-lg', 'hover:scale-[0.99]', 'transition-transform', 'duration-200']")
             td(class="table-cell p-3 border-b border-gray-200 text-center")
               svg(v-if="u.dual_lang" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check-circle")
                 circle(cx="12" cy="12" r="10")
@@ -33,23 +33,24 @@
               svg(v-else xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x-circle")
                 circle(cx="12" cy="12" r="10")
                 path(d="M15 9l-6 6M9 9l6 6")
-            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.district }} 
-            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.faculty_email }}
-            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.Faculty.first_name }}
-            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.Faculty.last_name }}
-            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.school_name }}
-            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.phone_number }}
-            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.department }}
-            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.grade }}
-            td(class="table-cell p-3 border-b border-gray-200 text-center")
+            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.id }} 
+            //td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.faculty_email }}
+            //td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.Faculty.first_name }}
+            //td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.Faculty.last_name }}
+            //td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.school_name }}
+            //td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.phone_number }}
+            //td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.department }}
+            //td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.grade }}
+            //td(class="table-cell p-3 border-b border-gray-200 text-center")
               button(v-if="!editButtonPressed" @click="goToEdit(u.id)" class="action-button edit-button rounded-md py-2 px-4 text-xs font-semibold text-white cursor-pointer bg-teal-500 hover:bg-teal-600 focus:outline-none transition-all") Edit
             td(class="table-cell p-3 border-b border-gray-200 text-center")
-              button(@click="removeFaculty(u.id)" class="action-button remove-button rounded-md py-2 px-4 text-xs font-semibold text-white cursor-pointer bg-red-500 hover:bg-red-600 focus:outline-none transition-all") Remove
+              button(@click="removeAssignments(u.id)" class="action-button remove-button rounded-md py-2 px-4 text-xs font-semibold text-white cursor-pointer bg-red-500 hover:bg-red-600 focus:outline-none transition-all") Remove
 </template>
 
 
 <script setup lang="ts">
-  import type { FacultyProfile, User } from "@prisma/client";
+  const Assignments = ref<Quiz[]>([]);
+  import type { Quiz, User } from "@prisma/client";
   import { ref } from "vue";
   
 
@@ -57,18 +58,8 @@
   const selectedOption = ref(false); // Initialize with a default value, e.g., 'no'
   const keyfield = ref("district");
   const searchTerm = ref("");
-  const filters = ref<FacultyProfile & Partial<User>>({
-    district: "",
-    dual_lang: false,
-    faculty_email: "",
-    first_name: "",
-    last_name: "",
-    school_name: "",
-    phone_number: "",
-    department: "",
-    grade: "",
+  const filters = ref<Quiz & Partial<User>>({
     id: 0,
-    user_id: 0
   });
 
   const tableHeaders = [
@@ -80,22 +71,14 @@
       ];
 
   const h = [
-    "Class", "Assignments", "First Name", "Last Name", "Submitted", "Grade", "Edit", "Remove"
+    "Quiz ID", "Class", "Assignments", "First Name", "Last Name", "Submitted", "Grade", "Edit", "Remove"
   ];
 
-  const addDataToDatabase = async (jsonData: any) => {
+  /*const addDataToDatabase = async (jsonData: any) => {
   // Iterate through jsonData and add each record to the Prisma database
   for (const record of jsonData) {
-    const newFaculty = {
-        district: record['district'],     
-        dual_lang: record['dual_lang'],
-        faculty_email: record['faculty_email'],  
-        first_name: record['first_name'],   
-        last_name: record['last_name'],    
-        school_name: record['school_name'],   
-        phone_number: record['phone_number'],  
-        department: record['department'],    
-        grade: record['grade'], 
+    const newQuiz = {
+        id: record['id'],
     };
 
     // Use Prisma to add the new Faculty to the database
@@ -107,8 +90,8 @@
 
   // Refresh the list of Faculties after importing data
   // Faculties.value = await getFaculties();
-};
-  type Faculty = {
+};*/
+  /*type Faculty = {
     id: number,
     district: string,     
     dual_lang: boolean, 
@@ -131,19 +114,17 @@
     phone_number: "",  
     department: "",    
     grade: "",
-  })
+  })*/
   
-  await getFaculties()
+  await getAssignments()
 
-  async function getFaculties() {
-    const { data: FacultyList } = await useFetch('/api/faculty', {
-          method: 'GET',
-      })
-      Faculties.value = FacultyList.value as unknown as Faculty[];
-      return FacultyList;
+  async function getAssignments() {
+    const { data: AssignmentList } = await useFetch('/api/assignments');
+      Assignments.value = AssignmentList.value ?? [];
+      return AssignmentList;
   }
 
-  async function goToEdit(FacultyId: number) {
+  /*async function goToEdit(FacultyId: number) {
     const editUrl = '/edit/editfaculty?' + 'id=' + FacultyId
     await navigateTo(editUrl)
   }
@@ -154,10 +135,10 @@
           body: { id },
       });
     //  Faculties.value = await getFaculties();
-  }
+  }*/
 
   const performSearch = async () => {
-    const searchQuery: Record<string, string | boolean> = {};
+    /*const searchQuery: Record<string, string | boolean> = {};
 
     Object.entries(filters.value).forEach(([key, value]) => {
       if (value !== "" && value !== null) {
@@ -166,11 +147,11 @@
     });
 
     if (selectedOption.value !== null) {
-      searchQuery['dual_lang'] = selectedOption.value;
+      searchQuery[''] = selectedOption.value;
     }
 
     try {
-      const result = await $fetch('/api/faculty/search', {
+      const result = await $fetch('/api/assignments/search', {
         method: 'GET',
         query: {
           searchQuery: JSON.stringify(searchQuery),
@@ -179,17 +160,25 @@
       });
 
       if (result?.data) {
-        Faculties.value = result.data as unknown as Faculty[];
+        Assignments.value = result.data as unknown as Quiz[];
       } else {
-        Faculties.value = [];
+        Assignments.value = [];
       }
     } catch (error) {
       console.error("Error performing search:", error);
-      Faculties.value = [];
+      Assignments.value = [];
+    }*/
+
+    try {
+      const { data: AssignmentList } = await useFetch('/api/assignments/search');
+      Assignments.value = AssignmentList.value?.data as Quiz[] ?? [];
+    } catch (error) {
+      console.error("Error performing search:", error);
+      Assignments.value = [];
     }
   }
 
-  const clearSearch = () => {
+  /*const clearSearch = () => {
   // Clear FacultyObject and reset Faculties list
   FacultyObject.value = {
     district: "",     
@@ -202,7 +191,7 @@
     department: "",    
     grade: "",
   };
-}
+}*/
 
   const rhuser = useCookie<User>('rhuser')
   const userRole = (rhuser.value?.role)
