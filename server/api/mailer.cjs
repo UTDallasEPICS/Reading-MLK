@@ -35,7 +35,7 @@ export default async (event) => {
       port: 587,
       secure: false,
       auth: {
-        user: process.env.SMTP_USER, // 
+        user: process.env.SMTP_USER, // user account
         pass: process.env.SMTP_APP_PASSWORD, // App password
       },
     });
