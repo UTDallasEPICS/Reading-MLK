@@ -119,79 +119,21 @@
   await getAssignments()
 
   async function getAssignments() {
-    const { data: AssignmentList } = await useFetch('/api/assignments');
+    const { data: AssignmentList } = await useFetch('/api/assignments/search');
       Assignments.value = AssignmentList.value ?? [];
       return AssignmentList;
   }
 
-  /*async function goToEdit(FacultyId: number) {
-    const editUrl = '/edit/editfaculty?' + 'id=' + FacultyId
-    await navigateTo(editUrl)
-  }
-
-  const removeFaculty = async (id: number) => {
-      await $fetch('/api/faculty/faculty', {
-          method: 'DELETE',
-          body: { id },
-      });
-    //  Faculties.value = await getFaculties();
-  }*/
-
   const performSearch = async () => {
-    /*const searchQuery: Record<string, string | boolean> = {};
-
-    Object.entries(filters.value).forEach(([key, value]) => {
-      if (value !== "" && value !== null) {
-        searchQuery[key] = value as string | boolean;
-      }
-    });
-
-    if (selectedOption.value !== null) {
-      searchQuery[''] = selectedOption.value;
-    }
-
-    try {
-      const result = await $fetch('/api/assignments/search', {
-        method: 'GET',
-        query: {
-          searchQuery: JSON.stringify(searchQuery),
-          key: keyfield.value
-        },
-      });
-
-      if (result?.data) {
-        Assignments.value = result.data as unknown as Quiz[];
-      } else {
-        Assignments.value = [];
-      }
-    } catch (error) {
-      console.error("Error performing search:", error);
-      Assignments.value = [];
-    }*/
-
     try {
       const { data: AssignmentList } = await useFetch('/api/assignments/search');
       Assignments.value = AssignmentList.value?.data as Quiz[] ?? [];
+      console.log("Search results:", Assignments.value);
     } catch (error) {
       console.error("Error performing search:", error);
       Assignments.value = [];
     }
   }
-
-  /*const clearSearch = () => {
-  // Clear FacultyObject and reset Faculties list
-  FacultyObject.value = {
-    district: "",     
-    dual_lang: false, 
-    faculty_email: "",  
-    first_name: "",   
-    last_name: "",    
-    school_name: "",   
-    phone_number: "",  
-    department: "",    
-    grade: "",
-  };
-}*/
 
   const rhuser = useCookie<User>('rhuser')
   const userRole = (rhuser.value?.role)

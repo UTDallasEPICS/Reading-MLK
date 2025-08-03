@@ -3,6 +3,7 @@ import { PrismaClientKnownRequestError, PrismaClientUnknownRequestError } from '
 const prisma = new PrismaClient();
 
 export default defineEventHandler(async (event) => {
+    console.log("API /api/assignments/search called"); // Add this for debugging
     const runtime = useRuntimeConfig()
     
     //Checks for permission
@@ -21,48 +22,20 @@ export default defineEventHandler(async (event) => {
         return;
     }
 
-    if(event.context.user.id) {
-        const {searchQuery, key} = getQuery(event);
-        console.log("Search Query:", searchQuery);
-        let searchQueryObject = {};
-        try {
-            searchQueryObject = JSON.parse(searchQuery as string);
-        } catch (e) {
-            console.error("Error parsing search query:", e);
-            throw createError({ statusCode: 400, statusMessage: "Invalid search query format" });
-        }
-        
-        /*let searchTerm: any = {};
-        if ('id' in searchQueryObject) {
-            searchTerm.id = Number(searchQueryObject.id);
-        }
-        
-            try {
-                const pageResult = await prisma.quiz.findMany({
-                    where: searchTerm,
-                });
-                return {
-                    data: pageResult,
-                };
-            } catch(error) {
-                console.error("Search error:", error);
-                if (error instanceof PrismaClientKnownRequestError){
-                    console.log('Prisma error code:', error.code, error.meta, error.message);
-                }
-                else if (error instanceof PrismaClientUnknownRequestError){
-                    console.log('Unknown request error:', error.message);
-                }
-                throw createError({ statusCode: 500, statusMessage: "Error searching assignments" });
-            }   
-    }
-    throw createError({ statusCode: 401, statusMessage: "Unauthorized" });*/
+    //Fetches all quizzes/assignments from database
     try {
-        const pageResult = await prisma.Quiz.findMany({
-            return {
-                data: pageResult,
-            };
-        } catch (error) {
-            console.error("Error fetching assignments:", error);
-            throw createError({ statusCode: 500, statusMessage: "Error fetching assignments" });
-        }
+        const pageResult = await prisma.quiz.findMany();
+        //console.log("Fetched assignments:", pageResult[0]);
+        return {
+            data: pageResult,
+        };
+    } catch (error) { //Prints error message if there was an error
+        console.error("Error fetching assignments:", error);
+        throw createError({
+            statusCode: 500,
+            statusMessage: "Internal Server Error",
+            message: "Failed to fetch assignments"
+        });
+    }
+    
 });
