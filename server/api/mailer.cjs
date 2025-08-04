@@ -4,12 +4,13 @@
 
 import nodemailer from "nodemailer";
 import crypto from "crypto";
-import { readBody, send, setResponseStatus } from "h3";
+import { defineEventHandler, readBody, send, setResponseStatus } from "h3";
+
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-export default async (event) => {
+export default defineEventHandler(async (event) => {
   try {
     const body = await readBody(event);
     const { to } = body;
@@ -32,8 +33,8 @@ export default async (event) => {
       port: 587,
       secure: false,
       auth: {
-        user: "",
-        pass: "", // App password
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_APP_PASSWORD, // App password
       },
     });
 
@@ -67,7 +68,7 @@ export default async (event) => {
           </div>
 
           <p style="font-size: 14px; color: #555; margin-bottom: 30px;">
-            This OTP is valid for 10 minutes. Please don’t share it with anyone.
+            This OTP is only valid for one use. Please don’t share it with anyone.
           </p>
 
           <hr style="border: none; border-top: 1px solid #eee; margin-bottom: 20px;">
@@ -87,4 +88,4 @@ export default async (event) => {
     setResponseStatus(event, 500);
     return send(event, { message: "Server error: " + err.message });
   }
-};
+});
