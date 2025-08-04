@@ -24,7 +24,20 @@ export default defineEventHandler(async (event) => {
 
     //Fetches all quizzes/assignments from database
     try {
-        const pageResult = await prisma.quiz.findMany();
+        const pageResult = await prisma.quiz.findMany({
+            include: {
+                AssignmentToStudent: {
+                    include: {
+                        Student: true
+                    }
+                },
+                AssignmentToClass: {
+                    include: {
+                        Class: true
+                    }
+                }
+            }
+        });
         //console.log("Fetched assignments:", pageResult[0]);
         return {
             data: pageResult,
