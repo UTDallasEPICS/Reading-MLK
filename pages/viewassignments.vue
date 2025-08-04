@@ -25,29 +25,18 @@
           tr
             th(v-for="header in h" :key="header" class="table-cell py-3 border-b border-gray-200 text-center") {{ header }}
         tbody
-          tr(v-for="(u, index) in Assignments" :key="u.id" :class="['table-row', index % 2 === 0 ? 'bg-gray-100' : 'bg-white', 'hover:shadow-lg', 'hover:scale-[0.99]', 'transition-transform', 'duration-200']")
-            //td(class="table-cell p-3 border-b border-gray-200 text-center")
-              svg(v-if="u.dual_lang" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-check-circle")
-                circle(cx="12" cy="12" r="10")
-                path(d="M9 12l2 2 4-4")
-              svg(v-else xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x-circle")
-                circle(cx="12" cy="12" r="10")
-                path(d="M15 9l-6 6M9 9l6 6")
-            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.id }}
+          tr(v-for="(row, index) in assignmentRows" :key="row.id" :class="['table-row', index % 2 === 0 ? 'bg-gray-100' : 'bg-white', 'hover:shadow-lg', 'hover:scale-[0.99]', 'transition-transform', 'duration-200']")
+            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ row.id }}
+            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ row.class_name }}
+            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ row.assignment_name }}
+            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ row.first_name}}
+            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ row.last_name }}
+            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ row.submitted }}
+            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ row.grade }}
             td(class="table-cell p-3 border-b border-gray-200 text-center")
-              span(v-for="ac in u.AssignmentToClass" :key="ac.class_id") {{ ac.Class?.class_name || 'N/A' }}<br>
-            //td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.AssignmentToClass.Class?.class_name }}
-            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.name }}
+              button(v-if="!editButtonPressed" @click="goToEdit(row.id)" class="action-button edit-button rounded-md py-2 px-4 text-xs font-semibold text-white cursor-pointer bg-teal-500 hover:bg-teal-600 focus:outline-none transition-all") Edit
             td(class="table-cell p-3 border-b border-gray-200 text-center")
-              span(v-for="ac in u.AssignmentToStudent" :key="ac.student_id") {{ ac.Student?.first_name || 'N/A' }}<br>
-            td(class="table-cell p-3 border-b border-gray-200 text-center")
-              span(v-for="ac in u.AssignmentToStudent" :key="ac.student_id") {{ ac.Student?.last_name || 'N/A' }}<br>
-            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.submitted }}
-            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ u.grade }}
-            td(class="table-cell p-3 border-b border-gray-200 text-center")
-              button(v-if="!editButtonPressed" @click="goToEdit(u.id)" class="action-button edit-button rounded-md py-2 px-4 text-xs font-semibold text-white cursor-pointer bg-teal-500 hover:bg-teal-600 focus:outline-none transition-all") Edit
-            td(class="table-cell p-3 border-b border-gray-200 text-center")
-              button(@click="removeAssignments(u.id)" class="action-button remove-button rounded-md py-2 px-4 text-xs font-semibold text-white cursor-pointer bg-red-500 hover:bg-red-600 focus:outline-none transition-all") Remove
+              button(@click="removeAssignments(row.id)" class="action-button remove-button rounded-md py-2 px-4 text-xs font-semibold text-white cursor-pointer bg-red-500 hover:bg-red-600 focus:outline-none transition-all") Remove
 </template>
 
 
@@ -76,50 +65,31 @@
   const h = [
     "Quiz ID", "Class", "Assignments", "First Name", "Last Name", "Submitted", "Grade", "Edit", "Remove"
   ];
-
-  /*const addDataToDatabase = async (jsonData: any) => {
-  // Iterate through jsonData and add each record to the Prisma database
-  for (const record of jsonData) {
-    const newQuiz = {
-        id: record['id'],
-    };
-
-    // Use Prisma to add the new Faculty to the database
-    await $fetch('/api/faculty/faculty', {
-      method: 'POST',
-      body: newFaculty,
-    });
-  }
-
-  // Refresh the list of Faculties after importing data
-  // Faculties.value = await getFaculties();
-};*/
-  /*type Faculty = {
-    id: number,
-    district: string,     
-    dual_lang: boolean, 
-    faculty_email: string,  
-    first_name: string,   
-    last_name: string,    
-    school_name: string,   
-    phone_number: string,  
-    department: string,    
-    grade: string,
-  }
-  const Faculties = ref<Faculty[]>([])
-  const FacultyObject = ref({
-    district: "",     
-    dual_lang: false, 
-    faculty_email: "",  
-    first_name: "",   
-    last_name: "",    
-    school_name: "",   
-    phone_number: "",  
-    department: "",    
-    grade: "",
-  })*/
   
-  await getAssignments()
+  //await getAssignments()
+
+  const assignmentRows = computed(() => {
+    const rows: any[] = [];
+    for (const assignment of Assignments.value) {
+      const classes = assignment.AssignmentToClass?.length ? assignment.AssignmentToClass : [null];
+      const students = assignment.AssignmentToStudent?.length ? assignment.AssignmentToStudent : [null];
+
+      for (const ac of classes) {
+        for (const as of students) {
+          rows.push({
+            id: assignment.id,
+            class_name: ac?.Class?.class_name || 'N/A',
+            assignment_name: assignment.name,
+            first_name: as?.Student?.first_name || 'N/A',
+            last_name: as?.Student?.last_name || 'N/A',
+            submitted: assignment.submitted ? 'Yes' : 'No',
+            grade: assignment.grade || 100,
+          })
+        }
+      }
+    }
+    return rows;
+  });
 
   async function getAssignments() {
     const { data: AssignmentList } = await useFetch('/api/assignments/search');
@@ -136,6 +106,10 @@
       console.error("Error performing search:", error);
       Assignments.value = [];
     }
+  }
+
+  const clearSearch = () => {
+    Assignments.value = [];
   }
 
   const rhuser = useCookie<User>('rhuser')
