@@ -17,10 +17,13 @@ export default defineEventHandler(async (event) => {
 
     if (!to) {
       setResponseStatus(event, 400);
-      return send(event, { message: "'to' field is required" });
+      return event, { message: "'to' field is required" };
     }
 
     const otp = crypto.randomInt(100000, 999999).toString();
+
+    console.log("sending message to; ", to);
+    console.log("otp contents: ", otp);
 
     await prisma.oTP.upsert({
       where: { email: to },
@@ -33,13 +36,13 @@ export default defineEventHandler(async (event) => {
       port: 587,
       secure: false,
       auth: {
-        user: process.env.SMTP_USER,
+        user: process.env.SMTP_USER, // user account
         pass: process.env.SMTP_APP_PASSWORD, // App password
       },
     });
 
     await transporter.sendMail({
-      from: '"Kriti Raja" <rkriti16@gmail.com>',
+      from: `"Reading Huddle Team" <${process.env.SMTP_USER}>`,
       to,
       subject: "Your OTP for Reading Huddle",
       text: `Your OTP is: ${otp}`,
@@ -82,10 +85,11 @@ export default defineEventHandler(async (event) => {
       `,
     });
 
-    return send(event, { message: "OTP sent" });
+    return event, { message: "OTP sent" };
   } catch (err) {
     console.error("Mailer error:", err);
     setResponseStatus(event, 500);
-    return send(event, { message: "Server error: " + err.message });
+
+    return event, { message: "Server error: " + err.message };
   }
 });
