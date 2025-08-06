@@ -5,7 +5,11 @@
 // Students: username, email, FN, LN, PN, Bday, school dist, school, gender, acccreationdate, startingreadinglevel, preflang, childtoparents, childtoteacher
 // Parents: username, email, FN, LN, PN, Bday, zipcode, gender, acccreationdate, parenttochild, parenttoteacher
 // Teachers: username, email, FN, LN, PN, Bday, zipcode, school dist, school, gender, acccreationdate, teachertochild, teachertoparent
-// EMAIL IS A UNIQUE IDENTIFIER!! accounts attached to the same email have seperate usernames
+// EMAIL IS A UNIQUE IDENTIFIER!! accounts attached to the same email have seperate usernames (interface to select which user needs to be made)
+
+// rae does not want to use usernames to log in because its hard for people to remember- this is why
+
+// if you change the database do a migration so the updates actually go through (also dont mess with user tables registration is functional)
 
 generator client {
   provider        = "prisma-client-js"

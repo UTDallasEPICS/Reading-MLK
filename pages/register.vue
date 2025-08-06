@@ -8,6 +8,8 @@
  * that page creates child accounts that are linked to the parent account
  * after that, every user type gets redirected to the home page of the app with a screen that asks for a class code
  * 
+ * user registration is functional, user verification is not functional (the code thing)
+ * checked this with prisma studio
  */
 
 <template lang="pug">
@@ -58,9 +60,9 @@
             
             // Common fields for all account types
             .form-element.flex.flex-col
-              label(for="user_name" class="text-lg font-semibold text-gray-800 mb-2") Username *
-              input#user_name(
-                v-model="data_UserProfile.user_name"
+              label(for="username" class="text-lg font-semibold text-gray-800 mb-2") Username *
+              input#username(
+                v-model="data_UserProfile.username"
                 type="text" 
                 placeholder="Come up with a unique username, for example: johndoe1234." 
                 required 
@@ -98,9 +100,9 @@
               )
 
             .form-element.flex.flex-col
-              label(for="date-of-birth" class="text-lg font-semibold text-gray-800 mb-2") Date of Birth *
-              input#date-of-birth(
-              v-model="data_UserProfile.date_of_birth"
+              label(for="birth_date" class="text-lg font-semibold text-gray-800 mb-2") Date of Birth *
+              input#birth_date(
+              v-model="data_UserProfile.birth_date"
               type="date" 
               required 
               class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" 
@@ -166,9 +168,9 @@
                   option(value="11") 11th Grade
                   option(value="12") 12th Grade
                   option(value="13") Level 13
-                  option(value="12") Level 14
-                  option(value="12") Level 15
-                  option(value="12") Level 16
+                  option(value="14") Level 14
+                  option(value="15") Level 15
+                  option(value="16") Level 16
               
               .form-element.flex.flex-col
                 label(for="preferred-language" class="text-lg font-semibold text-gray-800 mb-2") Preferred Language *
@@ -216,8 +218,6 @@
 </template>
 
 <script setup lang="ts">
-const rhuser = useCookie<any>('rhuser')
-
 // Track the selected account type and form submission state
 const selectedAccountType = ref<string>('')
 const isSubmitting = ref(false)
@@ -226,7 +226,7 @@ const isSubmitting = ref(false)
 const selectedDistrict = ref('')
 const selectedSchool = ref('')
 
-// Sample data - in real app, this would come from an API
+// Sample data (where to find actual data...?)
 const schoolDistricts = ref([
   { id: 1, name: "Dallas Independent School District" }
   // other school ISD's go here in the future...
@@ -237,38 +237,54 @@ const schools = ref([
   { id: 1, name: "Adams High School", districtId: 1 },
   { id: 2, name: "Adamson High School", districtId: 1 },
   { id: 3, name: "Seagoville High School", districtId: 1 },
-  
 ])
 
-// Computed property to filter schools based on selected district
+
 const filteredSchools = computed(() => {
   if (!selectedDistrict.value) return []
   return schools.value.filter(school => school.districtId == selectedDistrict.value)
 })
 
-// Define the form data with fields for all account types
+
 const data_UserProfile = ref({
-  user_name: "",
+  // Fields that match User table
+  email: "",
   first_name: "",
   last_name: "",
   preferred_name: "",
-  email: "",
-  role: "",
   gender: "",
-  zipcode: "",
+  birth_date: "",
+  
+  // Fields for profile tables
+  username: "", // for profile tables
+  role: "", // to determine which profile to create
+  
+  // Student-specific fields (for StudentProfile)
+  zipcode: "", // nullable in StudentProfile
   school_dist: "",
-  school_name: "",
-  // Student-specific fields
+  school_name: "", 
   starting_reading_level: "",
   preferred_language: "",
-  date_of_birth: "",
-  // Parent-specific fields
-  phone_number: "",
-  emergency_contact: "",
-  // Faculty-specific fields
-  employee_id: "",
-  position: "",
-  hire_date: ""
+  
+  // Parent-specific fields (for ParentProfile) 
+  // zipcode is shared with student
+})
+
+// Initialize email from cookie on mount
+onMounted(() => {
+  const emailCookie = useCookie('userEmail')
+  const rhuser = useCookie<any>('rhuser')
+  
+  // Try to get email from either cookie
+  if (emailCookie.value) {
+    data_UserProfile.value.email = emailCookie.value
+    console.log('Email loaded from userEmail cookie:', emailCookie.value)
+  } else if (rhuser.value?.email) {
+    data_UserProfile.value.email = rhuser.value.email
+    console.log('Email loaded from rhuser cookie:', rhuser.value.email)
+  } else {
+    console.log('No email found in cookies - user may need to go through email verification')
+  }
 })
 
 // Function to select account type
@@ -283,26 +299,22 @@ const goBack = () => {
   // Reset cascading dropdown selections
   selectedDistrict.value = ''
   selectedSchool.value = ''
-  // Reset form data
+  // Reset form data but keep email
+  const email = data_UserProfile.value.email
   data_UserProfile.value = {
-    user_name: "",
+    email: email, // Keep email from cookie
     first_name: "",
     last_name: "",
     preferred_name: "",
-    email: "",
-    role: "",
     gender: "",
+    birth_date: "",
+    username: "",
+    role: "",
     zipcode: "",
     school_dist: "",
     school_name: "",
     starting_reading_level: "",
     preferred_language: "",
-    date_of_birth: "",
-    phone_number: "",
-    emergency_contact: "",
-    employee_id: "",
-    position: "",
-    hire_date: ""
   }
 }
 
@@ -326,10 +338,19 @@ const onSchoolChange = () => {
 
 // Function to validate required fields based on account type
 const validateRequiredFields = () => {
-  const commonFields = ['first_name', 'last_name', 'preferred_name', 'email', 'user_name', 'date_of_birth', 'gender']
+  console.log('Form data:', data_UserProfile.value)
+  console.log('Selected account type:', selectedAccountType.value)
+  console.log('Selected district:', selectedDistrict.value)
+  console.log('Selected school:', selectedSchool.value)
+  
+  const commonFields = ['first_name', 'last_name', 'preferred_name', 'email', 'username', 'birth_date', 'gender']
+  
   // Check common required fields
   for (const field of commonFields) {
-    if (!data_UserProfile.value[field as keyof typeof data_UserProfile.value]) {
+    const value = data_UserProfile.value[field as keyof typeof data_UserProfile.value]
+    if (!value || value.toString().trim() === '') {
+      console.log(`Missing required field: ${field}`)
+      alert(`Please fill out the required field: ${field.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}`)
       return false
     }
   }
@@ -338,23 +359,48 @@ const validateRequiredFields = () => {
   if (selectedAccountType.value === 'student') {
     const studentFields = ['starting_reading_level', 'preferred_language']
     for (const field of studentFields) {
-      if (!data_UserProfile.value[field as keyof typeof data_UserProfile.value]) {
+      const value = data_UserProfile.value[field as keyof typeof data_UserProfile.value]
+      if (!value || value.toString().trim() === '') {
+        console.log(`Missing required student field: ${field}`)
+        alert(`Please fill out the required field: ${field.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}`)
         return false
       }
     }
     // Check if district and school are selected
-    if (!selectedDistrict.value || !selectedSchool.value) {
+    if (!selectedDistrict.value || selectedDistrict.value === '') {
+      console.log('Missing school district')
+      alert('Please select a school district')
+      return false
+    }
+    if (!selectedSchool.value || selectedSchool.value === '') {
+      console.log('Missing school selection')
+      alert('Please select a school')
+      return false
+    }
+    // Check if school district and name are properly set in form data
+    if (!data_UserProfile.value.school_dist || data_UserProfile.value.school_dist.trim() === '') {
+      console.log('School district not set in form data')
+      alert('Please select a school district')
+      return false
+    }
+    if (!data_UserProfile.value.school_name || data_UserProfile.value.school_name.trim() === '') {
+      console.log('School name not set in form data')
+      alert('Please select a school')
       return false
     }
   } else if (selectedAccountType.value === 'parent') {
     const parentFields = ['zipcode']
     for (const field of parentFields) {
-      if (!data_UserProfile.value[field as keyof typeof data_UserProfile.value]) {
+      const value = data_UserProfile.value[field as keyof typeof data_UserProfile.value]
+      if (!value || value.toString().trim() === '') {
+        console.log(`Missing required parent field: ${field}`)
+        alert(`Please fill out the required field: ${field.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}`)
         return false
       }
     }
   }
   
+  console.log('All validation checks passed')
   return true
 }
 
@@ -371,10 +417,31 @@ const handleSubmit = async () => {
   isSubmitting.value = true
   
   try {
-    const response = await $fetch('/api/user/user', {
+    const response = await $fetch('/api/user/register', {
       method: "POST",
       body: {
-        user: data_UserProfile.value,
+        userData: {
+          email: data_UserProfile.value.email,
+          first_name: data_UserProfile.value.first_name,
+          last_name: data_UserProfile.value.last_name,
+          preferred_name: data_UserProfile.value.preferred_name,
+          gender: data_UserProfile.value.gender,
+          birth_date: new Date(data_UserProfile.value.birth_date).toISOString(),
+        },
+        profileData: {
+          username: data_UserProfile.value.username,
+          role: selectedAccountType.value,
+          ...(selectedAccountType.value === 'student' ? {
+            zipcode: data_UserProfile.value.zipcode || null,
+            school_dist: data_UserProfile.value.school_dist,
+            school_name: data_UserProfile.value.school_name,
+            starting_reading_level: data_UserProfile.value.starting_reading_level,
+            preferred_language: data_UserProfile.value.preferred_language,
+          } : {}),
+          ...(selectedAccountType.value === 'parent' ? {
+            zipcode: data_UserProfile.value.zipcode,
+          } : {})
+        }
       }
     })
     
