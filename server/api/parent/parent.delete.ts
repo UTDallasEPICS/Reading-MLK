@@ -9,15 +9,7 @@ export default defineEventHandler(async (event) => {
 
     const {id} = body
 
-    try {
-        if (event.context.user?.role !== "admin") {
-            throw createError({
-                statusCode: 403,
-                statusMessage: 'Forbidden',
-                message: 'You do not have permission to delete this account.'
-            });
-        }
-        if (id) {
+    if (id) {
         // Delete the parent record
         parent = await prisma.parentProfile.delete({
             where: {
@@ -26,15 +18,12 @@ export default defineEventHandler(async (event) => {
         }).catch(async (e) => {
             error = e;
         });
-        }
-
-        // Check if an error occurred during the deletion
-        if (error) {
-            return createError({ statusCode: 500, statusMessage: "Server Delete Error" });
-        }
-    } catch (e) {
-        console.error('Error deleting parent:', e);
-        throw createError({ statusCode: 500, statusMessage: "Error deleting parent" });
     }
+
+    // Check if an error occurred during the deletion
+    if (error) {
+        return createError({ statusCode: 500, statusMessage: "Server Delete Error" });
+    }
+
     return parent;
 });

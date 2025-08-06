@@ -13,13 +13,6 @@ export default defineEventHandler(async event => {
   console.log(id as string)
 
   try {
-    if (event.context.user?.role !== "admin") {
-      throw createError({
-        statusCode: 403,
-        statusMessage: 'Forbidden',
-        message: 'You do not have permission to access this resource.'
-      });
-    }
     parents = await prisma.parentProfile.findFirst({
       where: {
         id: parseInt(id as string)

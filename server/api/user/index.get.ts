@@ -4,16 +4,8 @@ import { read } from 'fs'
 
 const prisma = new PrismaClient();
 
-export default defineEventHandler(async (event) => {
-    const body = await readBody(event);
+export default defineEventHandler(async () => {
     try{
-        if (event.context.user?.role !== "admin") { //If user role is not an admin, throws an error
-            throw createError({
-                statusCode: 403,
-                statusMessage: 'Forbidden',
-                message: 'You do not have permission to access this resource.'
-            });
-        }
         let users = null;
         users = await prisma.user.findMany({
             include:{

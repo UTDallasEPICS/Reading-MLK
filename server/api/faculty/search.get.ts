@@ -4,23 +4,6 @@ const prisma = new PrismaClient();
 
 export default defineEventHandler(async (event) => {
     const runtime = useRuntimeConfig()
-    
-    //Checks for permission
-    try {
-        if (event.context.user?.role !== "admin") { // If user role is not admin, throws an error
-            throw createError({
-                statusCode: 403,
-                statusMessage: 'Forbidden',
-                message: 'You do not have permission to create a faculty profile.'
-            });
-        }
-    } catch (e) {
-        if (e instanceof Error) {
-            console.error('Error checking user role:', e.message);
-        }
-        return;
-    }
-
     if(event.context.user.id) {
         const {searchQuery, key} = getQuery(event);
         console.log("Search Query:", searchQuery);

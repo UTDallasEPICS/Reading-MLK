@@ -8,15 +8,8 @@ export default defineEventHandler(async event => {
   const id = getRouterParam(event, 'id');
 
   console.log(id as string)
-
+  
   try {
-      if (event.context.user?.role !== "admin") { //Checks role of user, and if role is not admin, throws an error
-        throw createError({
-          statusCode: 403,
-          statusMessage: 'Forbidden',
-          message: 'You do not have permission to access this resource.'
-        });
-      }
       students = await prisma.studentProfile.findFirst({
       where: {
         id: parseInt(id as string)

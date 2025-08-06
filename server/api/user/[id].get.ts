@@ -10,27 +10,19 @@ export default defineEventHandler(async event => {
         const id = getRouterParam(event, 'id');
 
         console.log(id as string)
-        if (event.context.user?.role === "admin") { //If user role is not an admin, throws an error
-            users = await prisma.user.findFirst({
+        
+        users = await prisma.user.findFirst({
             where: {
                 id: parseInt(id as string)
-                },
+            },
             include:{
                 Parents: true,
                 Admin: true,
                 Faculty: true,
                 // Children:true,
-                },
-            });
-            return users;
-        } else {
-            throw createError({
-                statusCode: 403,
-                statusMessage: 'Forbidden',
-                message: 'You do not have permission to access this resource.'
-            });
-        }
-        
+            },
+        });
+        return users;
     } catch(error){
         if (error instanceof PrismaClientKnownRequestError){
             console.log('You exeperienced this error code: ' + error.code, error.meta, error.message, ' If you would like to find what this error message means please refer to this link: https://www.prisma.io/docs/orm/reference/error-reference  ')
