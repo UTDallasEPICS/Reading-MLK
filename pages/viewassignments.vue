@@ -57,8 +57,8 @@
   const tableHeaders = [
         { id: 'first_name', label: 'First Name', placeholder: 'First Name', type: 'text' },
         { id: 'last_name', label: 'Last Name', placeholder: 'Last Name', type: 'text' },
-        { id: 'class_id', label: 'Class ID', placeholder: 'Class ID', type: 'text' },
-        { id: 'assignment', label: 'Assignment Name', placeholder: 'Assignment', type: 'text' },
+        { id: 'class_name', label: 'Class Name', placeholder: 'Class Name', type: 'text' },
+        { id: 'assignment_name', label: 'Assignment Name', placeholder: 'Assignment', type: 'text' },
         { id: 'submission_type', label: 'Submitted', type: 'checkbox' }
       ];
 
@@ -71,9 +71,31 @@
   const assignmentRows = computed(() => {
     const rows: any[] = [];
     for (const assignment of Assignments.value) {
-      const classes = assignment.AssignmentToClass?.length ? assignment.AssignmentToClass : [null];
-      const students = assignment.AssignmentToStudent?.length ? assignment.AssignmentToStudent : [null];
+      if (filters.value.assignment_name && !assignment.name?.toLowerCase().startsWith(filters.value.assignment_name.toLowerCase())) {
+        continue;
+      }
 
+      if (selectedOption.value && !assignment.submitted) {
+        continue;
+      }
+
+      let classes = assignment.AssignmentToClass?.length ? assignment.AssignmentToClass : [null];
+      let students = assignment.AssignmentToStudent?.length ? assignment.AssignmentToStudent : [null];
+
+      //Filter students if a first_name filter is applied
+      if (filters.value.first_name) {
+        students = students.filter(as => as?.Student?.first_name?.toLowerCase().startsWith(filters.value.first_name.toLowerCase()));
+      }
+      //Filter students if a last_name filter is applied
+      if (filters.value.last_name) {
+        students = students.filter(as => as?.Student?.last_name?.toLowerCase().startsWith(filters.value.last_name.toLowerCase()));
+      }
+
+      //Filter assignments if a name filter is applied
+      if (filters.value.class_name) {
+        classes = classes.filter(ac => ac?.Class?.class_name?.toLowerCase().startsWith(filters.value.class_name.toLowerCase()));
+      }
+      
       for (const ac of classes) {
         for (const as of students) {
           rows.push({
@@ -93,20 +115,33 @@
 
   async function getAssignments() {
     const { data: AssignmentList } = await useFetch('/api/assignments/search');
-      Assignments.value = AssignmentList.value ?? [];
+      Assignments.value = AssignmentList.value?.data ?? [];
       return AssignmentList;
   }
 
   const performSearch = async () => {
-    try {
-      const { data: AssignmentList } = await useFetch('/api/assignments/search');
-      Assignments.value = AssignmentList.value?.data as Quiz[] ?? [];
-      console.log("Search results:", Assignments.value);
-    } catch (error) {
-      console.error("Error performing search:", error);
-      Assignments.value = [];
+    const searchQuery: Record<string | number, string | number | boolean> = {};
+    if (filters.value.first_name) searchQuery.first_name = filters.value.first_name;
+    if (filters.value.last_name) searchQuery.last_name = filters.value.last_name;
+    if (filters.value.class_name) searchQuery.class_name = filters.value.class_name;
+    if (filters.value.assignment_name) searchQuery.name = filters.value.name; //assuming 'name' is the assignment name field
+
+    //If no fields are filled, fetch all
+    if (Object.keys(searchQuery).length === 0) {
+      await getAssignments();
+      return;
     }
-  }
+
+    //Otherwise, filter
+    const { data: AssignmentList } = await useFetch('/api/assignments/search', {
+      method: 'GET',
+      query: {
+        searchQuery: JSON.stringify(searchQuery),
+      },
+    });
+
+    Assignments.value = AssignmentList.value?.data as Quiz[] ?? [];
+  };
 
   const clearSearch = () => {
     Assignments.value = [];

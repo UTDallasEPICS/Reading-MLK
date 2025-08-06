@@ -23,32 +23,84 @@ export default defineEventHandler(async (event) => {
     }
 
     //Fetches all quizzes/assignments from database
-    try {
-        const pageResult = await prisma.quiz.findMany({
-            include: {
-                AssignmentToStudent: {
-                    include: {
-                        Student: true
-                    }
-                },
-                AssignmentToClass: {
-                    include: {
-                        Class: true
-                    }
-                }
+    if (event.context.user.id) {
+        const {searchQuery, key} = getQuery(event);
+        console.log("Search Query:", searchQuery);
+        let searchTerm = {};
+        let searchQueryObject: Record<string, any> = {};
+        if (Object.keys(searchQueryObject).length === 0) {
+            searchTerm = {}; // No filter, return all
+        }
+
+        if (searchQuery) {
+            try {
+                searchQueryObject = JSON.parse(searchQuery as string);
+            } catch (error) {
+                console.error("Error parsing search query:", error);
+                throw createError({ statusCode: 400, statusMessage: "Invalid search query format" });
             }
-        });
-        //console.log("Fetched assignments:", pageResult[0]);
-        return {
-            data: pageResult,
-        };
-    } catch (error) { //Prints error message if there was an error
-        console.error("Error fetching assignments:", error);
-        throw createError({
-            statusCode: 500,
-            statusMessage: "Internal Server Error",
-            message: "Failed to fetch assignments"
-        });
+        }
+
+        if (key && searchQueryObject[key]) {
+            let keyString = key as string;
+            if (keyString == "first_name" || keyString == "last_name") {
+                searchTerm = {
+                    AssignmentToStudent: {
+                        some: {
+                            Student: {
+                                [keyString]: {
+                                    contains: searchQueryObject[keyString],
+                                    mode: "insensitive",
+                                }
+                            }
+                        }
+                    }
+                };
+            } else if (keyString == "class_name") {
+                searchTerm = {
+                    AssignmentToClass: {
+                        some: {
+                            Class: {
+                                class_name: {
+                                    equals: searchQueryObject[keyString],
+                                }
+                            }
+                        }
+                    }
+                };
+            } else if (keyString == "assignment_name") {
+                searchTerm = {
+                    name: {
+                        contains: searchQueryObject[keyString],
+                        mode: "insensitive",
+                    }
+                };
+            } else {
+                searchTerm = {
+                    [keyString]: {
+                        contains: searchQueryObject[keyString],
+                        mode: "insensitive",
+                    }
+                };
+            }
+        } else {
+            searchTerm = {}; // No filter, return all
+        }
+
+        
+            const pageResult = await prisma.quiz.findMany({
+                where: searchTerm,
+                include: {
+                    AssignmentToStudent: { include: { Student: true } },
+                    AssignmentToClass: { include: { Class: true } }
+                }
+            });
+
+            console.log("Assignments returned:", pageResult);
+
+            return {
+                data: pageResult,
+            };
     }
     
 });
