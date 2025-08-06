@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "quizzes" ADD COLUMN     "grade" INTEGER NOT NULL DEFAULT 100,
+ADD COLUMN     "submitted" BOOLEAN NOT NULL DEFAULT false;
