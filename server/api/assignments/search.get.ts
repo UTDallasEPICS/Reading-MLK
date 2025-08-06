@@ -3,12 +3,12 @@ import { PrismaClientKnownRequestError, PrismaClientUnknownRequestError } from '
 const prisma = new PrismaClient();
 
 export default defineEventHandler(async (event) => {
-    console.log("API /api/assignments/search called"); // Add this for debugging
+    console.log("API /api/assignments/search called"); //Add this for debugging
     const runtime = useRuntimeConfig()
     
     //Checks for permission
     try {
-        if (event.context.user?.role !== "admin") { // If user role is not admin, throws an error
+        if (event.context.user?.role !== "admin") { //If user role is not admin, throws an error
             throw createError({
                 statusCode: 403,
                 statusMessage: 'Forbidden',
@@ -25,17 +25,20 @@ export default defineEventHandler(async (event) => {
     //Fetches all quizzes/assignments from database
     if (event.context.user.id) {
         const {searchQuery, key} = getQuery(event);
+        //Console log statement for debugging, returns search query filters
         console.log("Search Query:", searchQuery);
         let searchTerm = {};
         let searchQueryObject: Record<string, any> = {};
         if (Object.keys(searchQueryObject).length === 0) {
-            searchTerm = {}; // No filter, return all
+            searchTerm = {}; //No filter, return all
         }
 
+        //If the searchQuery object was properly initialized, parse it, otherwise throws an error.
         if (searchQuery) {
             try {
                 searchQueryObject = JSON.parse(searchQuery as string);
             } catch (error) {
+                //Console log returns error message if parsing fails
                 console.error("Error parsing search query:", error);
                 throw createError({ statusCode: 400, statusMessage: "Invalid search query format" });
             }
@@ -43,7 +46,8 @@ export default defineEventHandler(async (event) => {
 
         if (key && searchQueryObject[key]) {
             let keyString = key as string;
-            if (keyString == "first_name" || keyString == "last_name") {
+            //If the filter is searching for the first or last name.
+            if (keyString == "first_name" || keyString == "last_name") { 
                 searchTerm = {
                     AssignmentToStudent: {
                         some: {
@@ -56,7 +60,7 @@ export default defineEventHandler(async (event) => {
                         }
                     }
                 };
-            } else if (keyString == "class_name") {
+            } else if (keyString == "class_name") { //If the filter is searching for the class name
                 searchTerm = {
                     AssignmentToClass: {
                         some: {
@@ -68,7 +72,7 @@ export default defineEventHandler(async (event) => {
                         }
                     }
                 };
-            } else if (keyString == "assignment_name") {
+            } else if (keyString == "assignment_name") { //If the filter is searching for the assignment name
                 searchTerm = {
                     name: {
                         contains: searchQueryObject[keyString],
@@ -76,7 +80,7 @@ export default defineEventHandler(async (event) => {
                     }
                 };
             } else {
-                searchTerm = {
+                searchTerm = { //else, search by other fields
                     [keyString]: {
                         contains: searchQueryObject[keyString],
                         mode: "insensitive",
@@ -84,23 +88,24 @@ export default defineEventHandler(async (event) => {
                 };
             }
         } else {
-            searchTerm = {}; // No filter, return all
+            searchTerm = {}; //No filter, return all
         }
 
         
-            const pageResult = await prisma.quiz.findMany({
-                where: searchTerm,
-                include: {
-                    AssignmentToStudent: { include: { Student: true } },
-                    AssignmentToClass: { include: { Class: true } }
-                }
-            });
+        const pageResult = await prisma.quiz.findMany({
+            where: searchTerm,
+            include: {
+                AssignmentToStudent: { include: { Student: true } },
+                AssignmentToClass: { include: { Class: true } }
+            }
+        });
 
-            console.log("Assignments returned:", pageResult);
+        //Console log for debugging
+        console.log("Assignments returned:", pageResult);
 
-            return {
-                data: pageResult,
-            };
+        return {
+            data: pageResult,
+        };
     }
     
 });

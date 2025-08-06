@@ -71,10 +71,12 @@
   const assignmentRows = computed(() => {
     const rows: any[] = [];
     for (const assignment of Assignments.value) {
+      //Filters out for assignment names
       if (filters.value.assignment_name && !assignment.name?.toLowerCase().startsWith(filters.value.assignment_name.toLowerCase())) {
         continue;
       }
 
+      //If the submitted button is pressed, filter out assignments that are not submitted, and vice versa.
       if (selectedOption.value && !assignment.submitted) {
         continue;
       }
@@ -95,7 +97,8 @@
       if (filters.value.class_name) {
         classes = classes.filter(ac => ac?.Class?.class_name?.toLowerCase().startsWith(filters.value.class_name.toLowerCase()));
       }
-      
+
+      //Pushes the filtered results into the rows array
       for (const ac of classes) {
         for (const as of students) {
           rows.push({
@@ -121,10 +124,11 @@
 
   const performSearch = async () => {
     const searchQuery: Record<string | number, string | number | boolean> = {};
+    //Populates the searchQuery object with the filters applied
     if (filters.value.first_name) searchQuery.first_name = filters.value.first_name;
     if (filters.value.last_name) searchQuery.last_name = filters.value.last_name;
     if (filters.value.class_name) searchQuery.class_name = filters.value.class_name;
-    if (filters.value.assignment_name) searchQuery.name = filters.value.name; //assuming 'name' is the assignment name field
+    if (filters.value.assignment_name) searchQuery.name = filters.value.name;
 
     //If no fields are filled, fetch all
     if (Object.keys(searchQuery).length === 0) {
