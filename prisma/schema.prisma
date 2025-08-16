@@ -56,15 +56,16 @@ model ParentProfile {
 model FacultyProfile {
   id            Int     @id @default(autoincrement())
   district      String
-  dual_lang     Boolean /// True if they are spanish or other language teacher with non-english kids, otherwise false to indicate they are english speaking teachers      
+  dual_lang     Boolean
   faculty_email String  @unique
   school_name   String
   phone_number  String
   department    String
-  grade         String // multi to indicate that they teach multiple 
+  grade         String
 
-  user_id        Int              @unique
-  Faculty        User             @relation(fields: [user_id], references: [id])
+  user_id Int  @unique
+  Faculty User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
   TeacherToClass TeacherToClass[]
 
   @@map("faculty_profile")
@@ -97,7 +98,7 @@ model StudentProfile {
 
 // model to hold the administrators from Friends of MLK
 model AdminProfile {
-  id          Int    @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
   admin_id Int  @unique
   Admin    User @relation(fields: [admin_id], references: [id])
@@ -120,8 +121,9 @@ model Class {
 model TeacherToClass {
   class_id   Int
   teacher_id Int
-  Class      Class          @relation(fields: [class_id], references: [id])
-  Teacher    FacultyProfile @relation(fields: [teacher_id], references: [id])
+
+  Class   Class          @relation(fields: [class_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  Teacher FacultyProfile @relation(fields: [teacher_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@id([class_id, teacher_id])
   @@map("teacher_to_classes")
@@ -159,6 +161,7 @@ model Book {
   page_count Int
 
   Videos Video[]
+
   @@map("books")
 }
 
@@ -166,7 +169,7 @@ model Video {
   id         Int    @id @default(autoincrement())
   vid_length Int
   url        String
-  book_id    Int    
+  book_id    Int
   Book       Book   @relation(fields: [book_id], references: [id])
 
   @@map("video_form")

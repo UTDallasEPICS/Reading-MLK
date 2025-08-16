@@ -1,176 +1,104 @@
 <script lang="ts" setup>
-import VueDatePicker from '@vuepic/vue-datepicker';
-import '@vuepic/vue-datepicker/dist/main.css';
-import type { StudentProfile } from '@prisma/client';
-const props = defineProps<{ modelValue: Object }>() //defines properties to pass in
+import VueDatePicker from '@vuepic/vue-datepicker'
+import '@vuepic/vue-datepicker/dist/main.css'
+import type { StudentProfile } from '@prisma/client'
+
 const rhuser = useCookie<any>('rhuser')
+const showStudentForm = ref(false)
 
-const showStudentForm = ref(false);
-
-const studentForms = ref <StudentProfile[]> ([{
-    id: 0,
-    age: 0,
-    grade: 1,
-    reading_lvl: 0,
-    first_name: '',
-    last_name: '',
-    birth_date: null, // Use null for dates
-    gender: '',
-    school_name: '',  /// asssume that all the school names will be elementary schools so we should ask them to give the name of the school 
-    school_dist: '',  /// example format should be GISD (garland independent school district)
-    pref_lang: '', /// drop down option for either english, spanish(espanol), or other (only temporary until we can get more info on what languages they speak)  
-  }])
+const studentForms = ref<StudentProfile[]>([{
+  id: 0, age: 0, grade: 1, reading_lvl: 0, first_name: '', last_name: '', birth_date: null, gender: '',
+  school_name: '', school_dist: '', pref_lang: ''
+}])
 
 const data_ParentProfile = ref({
-    first_name: null,
-    last_name: null,
-    birth_date: null,
-    zipcode: null,
-    phone_number: null,
-    email: null,
-    social_media: null,
-    average_number_books: null,
-    yearly_income: null,
-    gender: null,
-    marital_stat: null,
-    user_id: rhuser.value.id,
-});
-
-const data_StudentProfile = ref([{
-    first_name: "",
-    last_name: "",
-    email: "",
-    preferred_name: "",
-    age: 0,
-    grade: 0,
-    reading_lvl: 0,
-    birth_date: "",
-    gender: "",
-    school_name: "",
-    school_dist: "",
-    pref_lang: "",
-    user_id: rhuser.value.id,
-
-}]);
-
-const toggleStudentForm = () => {
-    showStudentForm.value = !showStudentForm.value;
-    // if (showStudentForm.value) {
-        addStudent;
-        console.log('adding stu')
-        console.log(data_StudentProfile)
-    // }
-};
+  first_name: '', last_name: '',
+  birth_date: null as any,
+  zipcode: '',
+  phone_number: '',
+  email: '',
+  social_media: '',
+  average_number_books: '',
+  yearly_income: '',
+  gender: '',
+  marital_stat: '',
+  user_id: rhuser.value?.id || 0,
+})
 
 const addStudent = () => {
-    data_StudentProfile.value.push({
-        first_name: "",
-        last_name: "",
-        email: "",
-        preferred_name: "",
-        age: 0,
-        grade: 0,
-        reading_lvl: 0,
-        birth_date: "",
-        gender: "",
-        school_name: "",
-        school_dist: "",
-        pref_lang: "",
-        user_id: rhuser.value.id,
-    })
-}
-
-const removeStudent = (index: number) => {
-    data_StudentProfile.value.splice(index - 1, 1);
+  studentForms.value.push({
+    id: 0, age: 0, grade: 1, reading_lvl: 0, first_name: '', last_name: '', birth_date: null, gender: '',
+    school_name: '', school_dist: '', pref_lang: ''
+  } as any)
 }
 
 const submitAccounts = async () => {
-    const parentResponse = await $fetch('/api/parent_submit', {
-        method: "POST",
-        body: {
-            parent: data_ParentProfile.value,
-            students: studentForms.value
-        }
-    });
-
-};
-
+  await $fetch('/api/parent_submit', {
+    method: 'POST',
+    body: { parent: data_ParentProfile.value, students: studentForms.value }
+  })
+  alert('Parent registered.')
+}
 </script>
 
-<template lang="pug"> 
-  .centered-container(class="flex justify-center items-center my-[5vh]")
-    .form
-      .form-container(class="p-8 bg-white rounded-lg shadow-lg max-w-4xl w-full min-w-[900px]")
-        .form-header(class="text-center bg-customBlue p-6 rounded-t-lg text-gray-100")
-          h2(class="text-4xl font-medium uppercase tracking-wider") Parent Registration Form
-          .heading-line(class="w-32 h-1 bg-green-400 my-2 mx-auto rounded-sm")
-        .form-input(class="grid gap-6 p-8 bg-white rounded-b-lg")
-          
-          // Birth Date
-          .form-element(class="flex flex-col")
-            label(for="birth_date" class="text-lg font-semibold text-gray-800 mb-2")
-              Enter Birth Date
-              span(class="text-red-500") 
-            VueDatePicker(v-model="data_ParentProfile.birth_date" name="birth_date" id="birth_date" required :enable-time-picker="false")
-            
-          
-          div(class="flex flex-col mb-5")
-            label(for="student_gender" class="text-lg font-semibold text-gray-800 mb-2") Gender
-            select(v-model="data_ParentProfile.gender" required class="w-full px-4 py-3 border border-gray-300 rounded-lg text-lg" id="student_gender")
-              option(value="" selected disabled) Select Gender
-              option(value="M") Male
-              option(value="F") Female
+<template lang="pug">
+div(class="centered-container flex justify-center items-center my-20")
+  .form
+    .form-container(class="p-8 bg-white rounded-lg shadow-lg max-w-4xl w-full min-w-[900px]")
+      .form-header.text-center.bg-customBlue.p-6.rounded-t-lg.text-gray-100
+        h2.text-4xl.font-medium.uppercase.tracking-wider Parent Registration Form
+        .heading-line.w-32.h-1.bg-green-400.my-2.mx-auto.rounded-sm
+      .form-input.grid.gap-6.p-8.bg-white.rounded-b-lg
+        .form-element.flex.flex-col
+          label.text-lg.font-semibold.text-gray-800.mb-2 First Name
+          input.p-3.text-base.border.border-gray-300.rounded-sm(v-model="data_ParentProfile.first_name" required)
+        .form-element.flex.flex-col
+          label.text-lg.font-semibold.text-gray-800.mb-2 Last Name
+          input.p-3.text-base.border.border-gray-300.rounded-sm(v-model="data_ParentProfile.last_name" required)
 
-          // Zipcode
-          .form-element(class="flex flex-col")
-            label(for="zipcode" class="text-lg font-semibold text-gray-800 mb-2")
-              Enter Zipcode
-              span(class="text-red-500") 
-            input(type="text" id="zipcode" v-model="data_ParentProfile.zipcode" placeholder="Parent Zipcode" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" @focus="this.style.borderColor='#007BFF'" @blur="this.style.borderColor='#ccc'")
+        .form-element.flex.flex-col
+          label.text-lg.font-semibold.text-gray-800.mb-2 Enter Birth Date
+          VueDatePicker(v-model="data_ParentProfile.birth_date" :enable-time-picker="false" class="p-3 text-base border border-gray-300 rounded-sm")
 
-          // Yearly Income
-          .form-element(class="flex flex-col")
-            label(for="yearly_income" class="text-lg font-semibold text-gray-800 mb-2")
-              Enter Yearly Income
-              span(class="text-red-500") 
-            input(type="text" id="yearly_income" v-model="data_ParentProfile.yearly_income" placeholder="Parent Yearly Income" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" @focus="this.style.borderColor='#007BFF'" @blur="this.style.borderColor='#ccc'")
+        .form-element.flex.flex-col
+          label.text-lg.font-semibold.text-gray-800.mb-2 Gender
+          select.p-3.text-base.border.border-gray-300.rounded-sm(v-model="data_ParentProfile.gender" required)
+            option(value="" disabled selected) Select Gender
+            option(value="M") Male
+            option(value="F") Female
 
-          // Phone Number
-          .form-element(class="flex flex-col")
-            label(for="phone_number" class="text-lg font-semibold text-gray-800 mb-2")
-              Enter Phone Number
-              span(class="text-red-500") 
-            input(type="text" id="phone_number" v-model="data_ParentProfile.phone_number" placeholder="Parent Phone Number" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" @focus="this.style.borderColor='#007BFF'" @blur="this.style.borderColor='#ccc'")
+        .form-element.flex.flex-col
+          label.text-lg.font-semibold.text-gray-800.mb-2 Zipcode
+          input.p-3.text-base.border.border-gray-300.rounded-sm(v-model="data_ParentProfile.zipcode" required)
 
-          // Private Email
-          .form-element(class="flex flex-col")
-            label(for="email" class="text-lg font-semibold text-gray-800 mb-2")
-              Enter Email
-              span(class="text-red-500") 
-            input(type="email" id="email" v-model="data_ParentProfile.email" placeholder="Parent Email" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" @focus="this.style.borderColor='#007BFF'" @blur="this.style.borderColor='#ccc'")
+        .form-element.flex.flex-col
+          label.text-lg.font-semibold.text-gray-800.mb-2 Yearly Income
+          input.p-3.text-base.border.border-gray-300.rounded-sm(v-model="data_ParentProfile.yearly_income" required)
 
-          // Social Media
-          .form-element(class="flex flex-col")
-            label(for="social_media" class="text-lg font-semibold text-gray-800 mb-2")
-              Enter Twitter Handle
-              span(class="text-red-500") 
-            input(type="text" id="social_media" v-model="data_ParentProfile.social_media" placeholder="Parent Twitter Handle" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" @focus="this.style.borderColor='#007BFF'" @blur="this.style.borderColor='#ccc'")
+        .form-element.flex.flex-col
+          label.text-lg.font-semibold.text-gray-800.mb-2 Phone Number
+          input.p-3.text-base.border.border-gray-300.rounded-sm(v-model="data_ParentProfile.phone_number" required)
 
-          // Average Number of Books read
-          .form-element(class="flex flex-col")
-            label(for="average_number_books" class="text-lg font-semibold text-gray-800 mb-2")
-              Enter On average, how many books a year does your child read (a guess is fine)?
-              span(class="text-red-500") 
-            input(type="text" id="average_number_books" v-model="data_ParentProfile.average_number_books" placeholder="Enter # of books" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" @focus="this.style.borderColor='#007BFF'" @blur="this.style.borderColor='#ccc'")
+        .form-element.flex.flex-col
+          label.text-lg.font-semibold.text-gray-800.mb-2 Email
+          input.p-3.text-base.border.border-gray-300.rounded-sm(type="email" v-model="data_ParentProfile.email" required)
 
-          // Marital Status
-          .form-element(class="flex flex-col")
-            label(for="marital_stat" class="text-lg font-semibold text-gray-800 mb-2")
-              Enter Marital Status
-              span(class="text-red-500") 
-            input(type="text" id="marital_stat" v-model="data_ParentProfile.marital_stat" placeholder="Parent Marital Status" required class="p-3 text-base border border-gray-300 rounded-sm transition-all duration-300 ease-in-out focus:border-blue-500 focus:ring-2 focus:ring-customBlue-500" @focus="this.style.borderColor='#007BFF'" @blur="this.style.borderColor='#ccc'")
+        .form-element.flex.flex-col
+          label.text-lg.font-semibold.text-gray-800.mb-2 Twitter Handle
+          input.p-3.text-base.border.border-gray-300.rounded-sm(v-model="data_ParentProfile.social_media")
 
-        studentform(v-model="studentForms")
-        .button-container(class="flex justify-center mt-5")
-          button(type="submit" class="submit-button p-3 px-6 bg-customBlue text-white rounded-lg cursor-pointer text-lg transition-all ease-in-out" @click="submitAccounts") Submit
+        .form-element.flex.flex-col
+          label.text-lg.font-semibold.text-gray-800.mb-2 Avg. Books/Year
+          input.p-3.text-base.border.border-gray-300.rounded-sm(v-model="data_ParentProfile.average_number_books")
+
+        .form-element.flex.flex-col
+          label.text-lg.font-semibold.text-gray-800.mb-2 Marital Status
+          input.p-3.text-base.border.border-gray-300.rounded-sm(v-model="data_ParentProfile.marital_stat")
+
+      //- student sub-form (if you use a component, keep yours)
+      .p-6
+        button.bg-gray-700.text-white.rounded-md.py-2.px-4(@click="addStudent") + Add Student
+
+      .button-container.flex.justify-center.mt-5
+        button(type="submit" @click="submitAccounts" class="submit-button p-3 px-6 bg-customBlue text-white rounded-lg cursor-pointer text-lg") Submit
 </template>

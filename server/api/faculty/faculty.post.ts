@@ -1,92 +1,117 @@
-// Faculty POST Endpoint
-import { PrismaClient } from '@prisma/client';
-import { PrismaClientKnownRequestError, PrismaClientUnknownRequestError } from '@prisma/client/runtime/library';
-import { defineEventHandler, readBody } from 'h3';
+import { PrismaClient } from '@prisma/client'
+import { defineEventHandler, readBody } from 'h3'
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient()
 
 export default defineEventHandler(async (event) => {
-    const body = await readBody(event);
-    console.log(body);
-    const {
-        faculty_email,
-        phone_number,
-        school_name,
-        district,
-        department,
-        grade,
-        dual_lang,
-        first_name,
-        last_name,
-        user_name,
-        id,
-    } = body;
+  // Admin-only
+  if (event.context.user?.role !== 'admin') {
+    throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
+  }
 
-    //console.log("test");
-    // Check for missing data
-    /*
-    if (!district || !faculty_email || !school_name || 
-        !phone_number || !department || !grade || !dual_lang) {
-        return {
-            statusCode: 400,
-            statusMessage: "Missing required fields",
-        };
-    }
-    */
+  const body = await readBody(event)
+  const {
+    // EITHER point to an existing user_id...
+    user_id,
+    // ...OR provide data to create a new user
+    user_name,
+    first_name,
+    last_name,
+    email, // login email for the user account (NOT faculty_email)
 
-    let newFaculty = null;
-    try {
-        if (event.context.user?.role !== "admin") { // If user role is not admin, throws an error
-            throw createError({
-                statusCode: 403,
-                statusMessage: 'Forbidden',
-                message: 'You do not have permission to create a faculty profile.'
-            });
+    // FacultyProfile fields
+    district,
+    dual_lang,
+    faculty_email,    // contact email for faculty profile
+    school_name,
+    phone_number,
+    department,
+    grade,
+  } = body || {}
+
+  // Basic validation of profile fields
+  const required = [district, faculty_email, school_name, phone_number, department, grade]
+  if (required.some(v => v === undefined || v === null || v === '')) {
+    throw createError({ statusCode: 400, statusMessage: 'Missing required profile fields' })
+  }
+
+  // We’ll resolve the user within a transaction
+  try {
+    const created = await prisma.$transaction(async (tx) => {
+      let connectUserId: number
+
+      if (Number.isFinite(Number(user_id))) {
+        // Connect to an existing user
+        const existing = await tx.user.findUnique({
+          where: { id: Number(user_id) },
+          select: { id: true, role: true },
+        })
+        if (!existing) {
+          throw createError({ statusCode: 404, statusMessage: 'User not found' })
         }
-    } catch (e) {
-        if (e instanceof Error) {
-            console.error('Error checking user role:', e.message);
-        }
-        return;
-    }
 
-    try {
-        // Create a new faculty record
-        newFaculty = await prisma.facultyProfile.create({
-            data: {
-                Faculty: {
-                    connect: {
-                        id: event.context.user.id,
-                    },
-                },
-                district,
-                dual_lang,
-                faculty_email,
-                school_name,
-                phone_number,
-                department,
-                grade,
-                //first_name,
-                //last_name,
-                //user_name,
-                //preferred_name,
-                id,
-            },
-        });
-        //console.log('New faculty created successfully:', newFaculty);
-    } catch (error) {
-        console.error(error);
-        console.error('Error creating faculty:', error);
-        if (error instanceof PrismaClientKnownRequestError) {
-            console.log('You experienced this error code: ' + error.code, error.meta, error.message, ' If you would like to find what this error message means please refer to this link: https://www.prisma.io/docs/orm/reference/error-reference');
-        } else if (error instanceof PrismaClientUnknownRequestError) {
-            console.log('Unknown error: ', error.message);
+        // Ensure the role matches reality
+        if (existing.role !== 'faculty') {
+          await tx.user.update({
+            where: { id: existing.id },
+            data: { role: 'faculty' },
+          })
         }
-        return {
-            statusCode: 500,
-            statusMessage: "Error creating faculty",
-        };
-    }
 
-    return newFaculty;
-});
+        connectUserId = existing.id
+      } else if (user_name && first_name && last_name && email) {
+        // Create a new user and connect
+        const newUser = await tx.user.create({
+          data: {
+            user_name,
+            first_name,
+            last_name,
+            email,
+            role: 'faculty',
+          },
+        })
+        connectUserId = newUser.id
+      } else {
+        throw createError({
+          statusCode: 400,
+          statusMessage:
+            'Provide either a valid user_id OR user_name + first_name + last_name + email to create a user.',
+        })
+      }
+
+      // Create the faculty profile linked to that user
+      const profile = await tx.facultyProfile.create({
+        data: {
+          Faculty: { connect: { id: connectUserId } },
+          district,
+          dual_lang,
+          faculty_email,
+          school_name,
+          phone_number,
+          department,
+          grade,
+        },
+        include: { Faculty: true }, // return the linked User for UI convenience
+      })
+
+      return profile
+    })
+
+    return { success: true, data: created }
+  } catch (err: any) {
+    // Unique constraint niceties
+    if (err?.code === 'P2002') {
+      // err.meta?.target usually contains ["faculty_email"] or ["user_id"]
+      const target = Array.isArray(err.meta?.target) ? err.meta.target.join(',') : 'unique field'
+      throw createError({
+        statusCode: 409,
+        statusMessage: `Faculty already exists (conflict on ${target}).`,
+      })
+    }
+    // Re-throw h3 createError from inside the tx as-is
+    if (err?.statusCode) throw err
+
+    console.error('Error creating faculty:', err)
+    throw createError({ statusCode: 500, statusMessage: 'Error creating faculty' })
+  }
+})

@@ -1,168 +1,159 @@
-import type {ParentProfile} from '@prisma/client'
-import type { StudentProfile } from '@prisma/client';
-export default defineEventHandler( async event => {
-    const body = await readBody(event)
+import { PrismaClient, Prisma, type ParentProfile, type StudentProfile } from '@prisma/client'
+import { defineEventHandler, readBody } from 'h3'
 
-        interface Student {
-        first_name: string;
-        last_name: string;
-        pref_name: string;
-        age: number;
-        grade: number;
-        reading_lvl: number;
-        birth_date: string;
-        gender: string;
-        school_name: string;
-        school_dist: string;
-        pref_lang: string;
-      }
+type ParentInput = {
+  user_id: number
+  zipcode: string
+  yearly_income?: string | null
+  birth_date?: string | Date | null
+  average_number_books: number | string
+  phone_number: string
+  gender: string
+  marital_stat?: string | null
+  social_media?: string | null
+}
 
-      let parent : ParentProfile= {
-        id: 0,
-        zipcode: '',
-        yearly_income: '',
-        birth_date: null,
-        average_number_books: 0,
-        phone_number: '',
-        gender: '',
-        marital_stat: '',
-        social_media: '',
-        user_id: 0
-      };
+type StudentInput = {
+  first_name: string
+  last_name: string
+  age: number | string
+  grade: number | string
+  reading_lvl: number | string
+  birth_date?: string | Date | null
+  gender: string
+  school_name: string
+  school_dist: string
+  pref_lang?: string | null
+}
 
-      let studentlist : StudentProfile[] = [{
-          id: 0,
-          age: 0,
-          grade: 1,
-          reading_lvl: 0,
-          first_name: '',
-          last_name: '',
-          birth_date: null, // Use null for dates
-          gender: '',
-          school_name: '',  /// asssume that all the school names will be elementary schools so we should ask them to give the name of the school 
-          school_dist: '',  /// example format should be GISD (garland independent school district)
-          pref_lang: '', /// drop down option for either english, spanish(espanol), or other (only temporary until we can get more info on what languages they speak)  
-      }];
-    
-      try {
-       parent = await event.context.client.parentProfile.create({
-        data: {
-          zipcode: body.parent.zipcode,
-          yearly_income: body.parent.yearly_income,
-          birth_date: body.parent.birth_date,
-          average_number_books: parseInt(body.parent.average_number_books),
-          phone_number: body.parent.phone_number,
-          gender: body.parent.gender,
-          marital_stat: body.parent.marital_stat,
-          social_media: body.parent.social_media,
-          user_id : body.parent.user_id
-      }
-      });
+type BodyShape = {
+  parent: ParentInput
+  students: StudentInput[]
+}
 
-      studentlist = await Promise.all(body.students.map((student: StudentProfile) =>
-            event.context.client.studentProfile.create({
-              data: {
-                ParentToChild: {
-                  create: {
-                    Parent: {
-                      connect: {
-                        id: parent.id
-                      }
-                    }
-                  }
-                },
-                age: student.age,
-                grade: student.grade,
-                reading_lvl: student.reading_lvl,
-                birth_date: student.birth_date,
-                gender: student.gender,
-                school_name: student.school_name,
-                school_dist: student.school_dist,
-                pref_lang: student.pref_lang,
-                first_name: student.first_name,
-                last_name: student.last_name,
-                //pref_name: student.pref_name,
-                //user_id: student.user_id,
-              }
-            })
-          ));
-        /*
-    const studentList = await tx.studentProfile.createMany({
-        data: {
-          ParentToChild: {
-            create: {
-              id: parent.id
-            }
-          },
-          age: parseInt(body.students[0].age),
-          grade: parseInt(body.students[0].grade),
-          reading_lvl: parseInt(body.students[0].reading_lvl),
-          birth_date: body.students[0].birth_date,
-          gender: body.students[0].gender,
-          school_name: body.students[0].school_name,
-          school_dist: body.students[0].school_dist,
-          pref_lang: body.students[0].pref_lang,
-          first_name: body.students[0].first_name,
-          last_name: body.students[0].last_name,
-          pref_name: body.students[0].pref_name,
-          user_id: body.students[0].user_id,
-        }        
-    })})*/
-    /*
-    try {
-      // Create a new faculty record
-      newParent = await prisma.facultyProfile.create({
-          data: {
-              Faculty: {
-                  connect: {
-                      id: user_id
-                  }
-              },
-              district: district,
-              dual_lang: dual_lang,
-              faculty_email: faculty_email,
-              first_name: first_name,
-              last_name: last_name,
-              school_name: school_name,
-              phone_number: phone_number,
-              department: department,
-              grade: grade,
-          },
-      });
-  } catch (error) {
-      console.error('Error creating faculty:', error);
-      throw createError({ statusCode: 500, statusMessage: "Error creating faculty" });
-  }*/
-  /*
-    console.log("Testing too")
-    const {user_id, ...d} = body.parent
-      event.context.client.parentProfile.create({
-        ...d,
-        User: {
-          connect: { id: user_id },
-        },
-        ParentToChild: {
-          createMany: {
-            data: [
-              ...body.students.map((s:any) => ({
-                ...s,
-                User: {
-                  data: {
-                    email: s.email,
-                  },
-                },
-              })),
-            ],
-          },
-        },
-      })
-    */
-      } catch(e)
-        {console.error(e);
-          return e;
-        }   
-    return {
-        parent: parent,
-        studentList: studentlist,
+export default defineEventHandler(async (event) => {
+  // If you want admin-only creation, keep this guard. Otherwise, remove it.
+  if (event.context.user?.role !== 'admin') {
+    throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
+  }
+
+  const prisma: PrismaClient =
+    // prefer the client placed on event.context if your app does that
+    (event as any).context?.client ?? new PrismaClient()
+
+  const body = await readBody<BodyShape>(event)
+
+  if (!body || !body.parent) {
+    throw createError({ statusCode: 400, statusMessage: 'Missing request body' })
+  }
+
+  const p = body.parent
+  const students = Array.isArray(body.students) ? body.students : []
+
+  // Minimal validation to match your schema
+  const missing: string[] = []
+  if (p.user_id === undefined || p.user_id === null || Number.isNaN(Number(p.user_id))) missing.push('parent.user_id')
+  if (!p.zipcode) missing.push('parent.zipcode')
+  if (!p.phone_number) missing.push('parent.phone_number')
+  if (!p.gender) missing.push('parent.gender')
+  if (p.average_number_books === undefined || p.average_number_books === null) missing.push('parent.average_number_books')
+  if (missing.length) {
+    throw createError({ statusCode: 400, statusMessage: `Missing required fields: ${missing.join(', ')}` })
+  }
+
+  // Normalize/parse types
+  const parentData: Omit<ParentProfile, 'id'> = {
+    user_id: Number(p.user_id),
+    zipcode: String(p.zipcode),
+    yearly_income: p.yearly_income ?? null,
+    birth_date: p.birth_date ? new Date(p.birth_date as any) : null,
+    average_number_books: Number(p.average_number_books ?? 0),
+    phone_number: String(p.phone_number),
+    gender: String(p.gender),
+    marital_stat: p.marital_stat ?? null,
+    social_media: p.social_media ?? null
+  }
+
+  // Prepare students; validate essential fields for each
+  const normalizedStudents: Omit<StudentProfile, 'id'>[] = students.map((s, idx) => {
+    const errs: string[] = []
+    if (!s.first_name) errs.push(`students[${idx}].first_name`)
+    if (!s.last_name) errs.push(`students[${idx}].last_name`)
+    if (s.age === undefined || s.age === null) errs.push(`students[${idx}].age`)
+    if (s.grade === undefined || s.grade === null) errs.push(`students[${idx}].grade`)
+    if (s.reading_lvl === undefined || s.reading_lvl === null) errs.push(`students[${idx}].reading_lvl`)
+    if (!s.gender) errs.push(`students[${idx}].gender`)
+    if (!s.school_name) errs.push(`students[${idx}].school_name`)
+    if (!s.school_dist) errs.push(`students[${idx}].school_dist`)
+
+    if (errs.length) {
+      throw createError({ statusCode: 400, statusMessage: `Missing required student fields: ${errs.join(', ')}` })
     }
+
+    return {
+      first_name: String(s.first_name),
+      last_name: String(s.last_name),
+      age: Number(s.age ?? 0),
+      grade: Number(s.grade ?? 1),
+      reading_lvl: Number(s.reading_lvl ?? 0),
+      birth_date: s.birth_date ? new Date(s.birth_date as any) : null,
+      gender: String(s.gender),
+      school_name: String(s.school_name),
+      school_dist: String(s.school_dist),
+      pref_lang: s.pref_lang ?? null
+    }
+  })
+
+  try {
+    let createdParent!: ParentProfile
+    const createdStudents: StudentProfile[] = []
+
+    await prisma.$transaction(async (tx) => {
+      // 1) create parent profile
+      createdParent = await tx.parentProfile.create({ data: parentData })
+
+      // 2) create each student and link with ParentToChild
+      for (const s of normalizedStudents) {
+        const child = await tx.studentProfile.create({
+          data: {
+            ...s,
+            ParentToChild: {
+              create: {
+                Parent: { connect: { id: createdParent.id } }
+              }
+            }
+          }
+        })
+        createdStudents.push(child)
+      }
+    })
+
+    return {
+      success: true,
+      parent: createdParent,
+      studentList: createdStudents
+    }
+  } catch (e: any) {
+    // Neat error messages for common cases
+    if (e instanceof Prisma.PrismaClientKnownRequestError) {
+      if (e.code === 'P2002') {
+        // Unique constraint failed (phone_number, social_media, or user_id are @unique in your schema)
+        const target = (e.meta as any)?.target ?? []
+        throw createError({
+          statusCode: 409,
+          statusMessage: `Unique constraint failed on: ${Array.isArray(target) ? target.join(', ') : String(target)}`
+        })
+      }
+      if (e.code === 'P2003') {
+        // Foreign key failed (user_id might not exist)
+        throw createError({
+          statusCode: 409,
+          statusMessage: 'Foreign key constraint failed (does the referenced user_id exist?)'
+        })
+      }
+    }
+
+    console.error('parent_submit error:', e)
+    throw createError({ statusCode: 500, statusMessage: 'Failed to create parent and students' })
+  }
 })
