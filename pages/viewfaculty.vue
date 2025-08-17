@@ -206,6 +206,7 @@
     department: "",    
     grade: "",
   };
+  Faculties.value = [];
 }
 
   const rhuser = useCookie<User>('rhuser')
