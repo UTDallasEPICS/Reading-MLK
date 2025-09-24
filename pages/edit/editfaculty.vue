@@ -101,37 +101,46 @@ async function getFaculty(): Promise<FacultyProfile> {
 }
 
 const editFaculty = async (editedFaculty: FacultyProfile) => {
-  console.log("editFaculty triggered");
-  console.log("Edited Faculty Profile", editedFaculty);
-
-  try {
-    const response = await $fetch(`/api/faculty/${facultyId}`, {
+  console.log("Edited Faculty Profile", editFaculty);
+  console.log(editedFaculty)
+  let faculty = null;
+  try{
+    faculty = await $fetch('/api/faculty/faculty', {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: editedFaculty,
+      body: {
+        //JSON.stringify(editedFaculty)
+        id: editedFaculty.id,
+        district: editedFaculty.district,
+        dual_lang: editedFaculty.dual_lang,
+        faculty_email: editedFaculty.faculty_email,
+        first_name: editedFaculty.first_name,
+        last_name: editedFaculty.last_name,
+        school_name: editedFaculty.school_name,
+        phone_number: editedFaculty.phone_number,
+        department: editedFaculty.department,
+        grade: editedFaculty.grade,
+      },
     });
-
-    console.log("Faculty profile edited successfully", response);
-    await navigateTo(`/viewfaculty?id=${facultyId}`);
-  } catch (error: any) {
-    console.error("Error editing Faculty profile:", error?.data?.message || error);
+    console.log("Faculty profile edited successfully");
+  }catch(error){
+    console.log('Error editing Faculty profile');
   }
-};
+  navigateTo('/viewfaculty')
+}
 
-const save = async () => {
-  const data = await $fetch<FacultyProfile>(`/api/faculty/${id.value}`, {
-    method: 'PUT',
-    body: faculty.value
-  }).catch((error) => {
-    console.log("Error: ", error.data.message);
-  });
-
-  console.log(data);
-
-  if (data && (data as any).success) {
-    await navigateTo('/faculty');
-  }
-};
+const save = async() =>{
+const data = await $fetch<FacultyProfile>('/api/faculty/', {
+  method: 'PUT',
+  body: ({...faculty.value, id: id.value as string})
+}).catch((error)=>{
+  console.log("Error: ",error.data.message);
+});
+console.log(data);
+if (data && (data as any).success){
+  await navigateTo('/parent');
+}
+}
 </script>

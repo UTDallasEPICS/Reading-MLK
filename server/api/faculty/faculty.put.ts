@@ -21,23 +21,6 @@ export default defineEventHandler(async (event) => {
     let updatedFaculty = null;
 
     try {
-        if (event.context.user?.role !== "admin") { // If user role is not admin, throws an error
-            throw createError({
-                statusCode: 403,
-                statusMessage: 'Forbidden',
-                message: 'You do not have permission to update faculty profiles.'
-            });
-        }
-    } catch (e) {
-        if (e instanceof Error) {
-            return {
-                statusCode: 403,
-                statusMessage: 'Forbidden',
-            };
-        }
-    }
-
-    try {
         // Update existing faculty record
         updatedFaculty = await prisma.facultyProfile.update({
             where: {

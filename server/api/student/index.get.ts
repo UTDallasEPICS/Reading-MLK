@@ -3,16 +3,8 @@ import { PrismaClientKnownRequestError, PrismaClientUnknownRequestError } from '
 
 const prisma = new PrismaClient();
 
-export default defineEventHandler(async (event) => {
-  const body = await readBody(event);
+export default defineEventHandler(async () => {
   try {
-    if (event.context.user?.role !== "admin") {
-      throw createError({
-        statusCode: 403,
-        statusMessage: 'Forbidden',
-        message: 'You do not have permission to access this resource.'
-      });
-    }
     const students = await prisma.studentProfile.findMany({
       include: {
         ParentToChild: true,
