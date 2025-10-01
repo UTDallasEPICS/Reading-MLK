@@ -15,6 +15,7 @@
     "@headlessui/vue": "^1.7.19",
     "@nuxtjs/auth-next": "^5.0.0-1667386184.dfbbb54",
     "@prisma/client": "^6.9.0",
+    "@sidebase/nuxt-auth": "^1.1.0",
     "@vuepic/vue-datepicker": "^8.8.1",
     "consola": "^3.4.0",
     "defu": "^6.1.4",
@@ -22,7 +23,8 @@
     "fs-extra": "^11.3.0",
     "i": "^0.3.7",
     "jsonwebtoken": "^9.0.2",
-    "nodemailer": "^7.0.6",
+    "next-auth": "~4.21.1",
+    "nodemailer": "^6.10.1",
     "nuxt": "^3.10.3",
     "pug": "^3.0.2"
   },
