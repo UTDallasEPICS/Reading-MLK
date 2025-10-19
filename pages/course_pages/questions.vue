@@ -1,35 +1,117 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 definePageMeta({
   coursePage: true
 })
 
+const questions = ref([])
+
 // Example questions
-const questions = ref([
+/*const questions = ref([
   { id: 1, text: '[Question 1 here]' },
   { id: 2, text: '[Question 2 here]' },
   { id: 3, text: '[Question 3 here]' }
-])
+])*/
 
 const currentIndex = ref(0)
+const quizId = ref(null)
+const isLoading = ref(true)
+const error = ref('')
+onMounted(async () => {
+  await loadQuestions()
+})
+
+
+
+async function loadQuestions() {
+  try {
+    isLoading.value = true
+    error.value = ''
+
+    //get quiz ID from route params
+    quizId.value = useRoute().params.quizId
+
+    //fetch questions from API
+    const response = await $fetch(`/api/quiz/${quizId.value}/questions`)
+    questions.value = response.questions
+    
+    //initialize userAnswers array if empty
+    if(userAnswers.value.length === 0) {
+      userAnswers.value = Array(questions.value.length).fill('') 
+    }
+    //if there are existing answers, load them (may need another async function)
+    try {
+      const loadExistingAnswers = await $fetch(`/api/quiz/${quizId.value}/answers`)
+      loadExistingAnswers.forEach(answer => {userAnswers.value[answer.questionIndex] = answer.text})
+    }
+    catch (error) {
+      console.error('Error loading existing answers:', error)
+      error.value = 'Failed to load existing answers.'
+    }
+  }
+  catch (error) {
+    console.error('Error loading quiz:', error)
+    error.value = 'Failed to load quiz. Please try again later.'
+  }
+  finally{
+    isLoading.value = false
+  }
+}
+
+//Save answers to the database
+async function saveAnswer(questionIndex){
+  try { 
+    const answer = userAnswers.value[questionIndex]
+    const questionId = questions.value[questionIndex].id
+    //send answer to API
+    await $fetch(`/api/quiz/${quizId.value}/save`, { method: 'POST', headers: {'Content-Type': 'application/json'}})
+  }
+  catch (error) {
+    console.error('Error saving answer:', error)
+    error.value = 'Failed to save answer. Please try again.'
+  }
+}
+
+//submit answers to the database
+async function submitAnswers(){
+  try {
+    await saveAnswer(currentIndex.value) //save answer before submission
+    //send all answers to API
+    await $fetch(`/api/quiz/${quizId.value}/submit`, { method: 'POST', headers: {'Content-Type': 'application/json'}})
+    //redirect to course homepage after submission
+    await navigateTo('/course_pages/coursehomepage') 
+  } 
+  catch (error) {
+    console.error('Error submitting answers:', error)
+  }
+}
 
 const currentQuestion = computed(() => questions.value[currentIndex.value])
 const isFirst = computed(() => currentIndex.value === 0)
 const isLast = computed(() => currentIndex.value === questions.value.length - 1)
 
-const userAnswers = ref(Array(questions.value.length).fill('')); // Initialize an array to store answers for each question
+//const userAnswers = ref(Array(questions.value.length).fill('')); // Initialize an array to store answers for each question
+const userAnswers = ref([]); // Initialize an array to store answers for each question
 
 const answeredQuestions = computed(() => {
   return userAnswers.value.filter((answer) => answer.trim() !== '').length;
 });
 
-function nextQuestion() {
-  if (!isLast.value) currentIndex.value++
+async function nextQuestion() {
+  if (!isLast.value) { 
+    //save the answer before going to the next question
+    await saveAnswer(currentIndex.value) 
+    currentIndex.value++
+  }
 }
 
-function prevQuestion() {
-  if (!isFirst.value) currentIndex.value--
+async function prevQuestion() {
+  if (!isFirst.value) { 
+    //save the answer before going to the previous question
+    await saveAnswer(currentIndex.value)
+    currentIndex.value--
+  }
 }
 
 function submitQuestion() {
