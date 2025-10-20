@@ -1,70 +1,89 @@
 import { PrismaClient } from '@prisma/client';
-import { PrismaClientKnownRequestError, PrismaClientUnknownRequestError } from '@prisma/client/runtime/library';
-const prisma = new PrismaClient();
+
+const prisma = (globalThis as any).prisma || new PrismaClient();
+;(globalThis as any).prisma = prisma;
 
 export default defineEventHandler(async (event) => {
-    const runtime = useRuntimeConfig()
-    if(event.context.user?.id != undefined) {
-        const {searchQuery, key} = getQuery(event);
-        console.log("Search Query:", searchQuery);
-        let searchTerm = {};
-        let searchQueryObject = {};
-
-        try {
-            searchQueryObject = JSON.parse(searchQuery as string);
-        } catch (e) {
-            console.error("Error parsing search query:", e);
-            throw createError({ statusCode: 400, statusMessage: "Invalid search query format" });
-        }
-
-        let keyString = key as String;
-
-        // Skip null or empty values
-        if (searchQueryObject[keyString] === null || searchQueryObject[keyString] === undefined || searchQueryObject[keyString] === "") {
-            return { data: [] };
-        }
-
-        if(keyString == "first_name" || keyString == "last_name" || keyString == "email"){
-            searchTerm = {
-                User: {
-                    [keyString]: {
-                        contains: searchQueryObject[keyString],
-                        mode: "insensitive",
-                    }
-                }
-            };
-        }
-        else {
-            searchTerm = {
-                [keyString]: {
-                    contains: searchQueryObject[keyString],
-                    mode: "insensitive",
-                }
-            };
-        }
-
-        const searchSpacesRemoved = (searchQuery as string).replaceAll(" ", "");
-                
-        if ((searchQuery as string) != "" && searchSpacesRemoved.length != 0){
-            try {
-                const pageResult = await prisma.studentProfile.findMany({
-                    where: searchTerm,
-                });
-                return {
-                    data: pageResult,
-                };
-            } catch(error) {
-                console.error("Search error:", error);
-                if (error instanceof PrismaClientKnownRequestError){
-                    console.log('Prisma error code:', error.code, error.meta, error.message);
-                }
-                else if (error instanceof PrismaClientUnknownRequestError){
-                    console.log('Unknown request error:', error.message);
-                }
-                throw createError({ statusCode: 500, statusMessage: "Error searching students" });
-            }
-        }
-        return { data: [] };
+  try {
+    // return 401 + empty data instead of throwing
+    if (!event.context.user?.id) {
+      setResponseStatus(event, 401);
+      return { data: [] };
     }
-    throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
+
+    const q = getQuery(event);
+    // accept `filters` (multi-field) or `searchQuery` JSON
+    const raw = q.filters ?? q.searchQuery ?? '{}';
+    let filters: Record<string, any> = {};
+    try {
+      filters = JSON.parse(String(raw));
+    } catch (e) {
+      console.warn('Invalid filters JSON:', e);
+      setResponseStatus(event, 400);
+      return { data: [] };
+    }
+
+    // if legacy single-key search was used (searchQuery + key), preferred if filters empty
+    const key = q.key ? String(q.key) : '';
+
+    const conditions: any[] = [];
+    // only match fields that actually exist on StudentProfile
+    const allowedFields = new Set([
+      'id', 'age', 'grade', 'reading_lvl', 'birth_date', 'gender',
+      'school_name', 'school_dist', 'pref_lang', 'first_name', 'last_name'
+    ]);
+
+    Object.entries(filters).forEach(([k, v]) => {
+      if (!allowedFields.has(k)) return;          // ignore unknown fields
+      if (v === null || v === undefined) return;
+      const s = String(v).trim();
+      if (s === '') return;
+
+      // for numeric fields, convert to number and use equals
+      if (['age', 'grade', 'reading_lvl', 'id'].includes(k)) {
+        const n = Number(s);
+        if (!Number.isNaN(n)) conditions.push({ [k]: n });
+        return;
+      }
+
+      // for date fields, use contains string
+      conditions.push({ [k]: { contains: s } });
+    });
+
+    // legacy single-key: if nothing in filters but key + searchQuery exist, use that
+    if (conditions.length === 0 && key && q.searchQuery) {
+      let parsed: any = {};
+      try {
+        parsed = JSON.parse(String(q.searchQuery));
+      } catch (e) {
+        parsed = { [key]: String(q.searchQuery) };
+      }
+      const val = parsed[key];
+      if (val !== undefined && String(val).trim() !== '') {
+        const s = String(val).trim();
+        if (['age', 'grade', 'reading_lvl', 'id'].includes(key)) {
+          const n = Number(s);
+          if (!Number.isNaN(n)) conditions.push({ [key]: n });
+        } else {
+          conditions.push({ [key]: { contains: s } });
+        }
+      }
+    }
+
+    if (conditions.length === 0) return { data: [] };
+
+    const where = conditions.length === 1 ? conditions[0] : { AND: conditions };
+
+    // query StudentProfile
+    const students = await prisma.studentProfile.findMany({
+      where,
+      take: 200,
+    });
+
+    return { data: students };
+  } catch (err) {
+    console.error('student search handler error:', err);
+    setResponseStatus(event, 500);
+    return { data: [] };
+  }
 });
