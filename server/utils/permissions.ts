@@ -1,15 +1,19 @@
 import type { User, StudentProfile, FacultyProfile, ParentProfile } from '@prisma/client';
 
 //EXTENDED TYPES 
+
+//student profile plus IDs that connect them to a teacher and a parent
 type StudentWithRelations = StudentProfile & {
   teacher_id?: number | null;
   parent_id?: number | null;
 };
 
+//parent profile plus a list of their children (students)
 type ParentWithChildren = ParentProfile & {
   children?: StudentWithRelations[];
 };
 
+//faculty profile plus a list of students they teach
 type FacultyWithStudents = FacultyProfile & {
   students?: StudentWithRelations[];
 };
