@@ -15,7 +15,8 @@ const questions = ref([])
 ])*/
 
 const currentIndex = ref(0)
-const quizId = ref(null)
+const studentId = ref(Number(route.params.studentId)) //pull studentId from URL params
+const quizId = ref(Number(route.params.quizId)) //pull quizId from URL params
 const isLoading = ref(true)
 const error = ref('')
 onMounted(async () => {
@@ -29,21 +30,32 @@ async function loadQuestions() {
     isLoading.value = true
     error.value = ''
 
-    //get quiz ID from route params
-    quizId.value = useRoute().params.quizId
-
-    //fetch questions from API
-    const response = await $fetch(`/api/quiz/${quizId.value}/questions`)
-    questions.value = response.questions
-    
+    //fetch questions from API 
+    const response = await $fetch(`/api/quiz/questions`, {
+      method: 'GET',
+      params: { quizId: quizId.value } 
+    })
+    questions.value = response
     //initialize userAnswers array if empty
     if(userAnswers.value.length === 0) {
       userAnswers.value = Array(questions.value.length).fill('') 
     }
     //if there are existing answers, load them (may need another async function)
     try {
-      const loadExistingAnswers = await $fetch(`/api/quiz/${quizId.value}/answers`)
-      loadExistingAnswers.forEach(answer => {userAnswers.value[answer.questionIndex] = answer.text})
+      //NOTE: Adjust the endpoint as necessary based on your API design
+      const loadExistingAnswers = await $fetch(`/api/quiz/responses`, {
+        method: 'GET',
+        params: { 
+          quizId: quizId.value,
+          studentProfileId: studentId.value
+        }
+      })
+      loadExistingAnswers.forEach(answer => {
+        const questionIndex = questions.value.findIndex(q => q.id === answer.questionId)
+        if (questionIndex !== -1) {
+          userAnswers.value[questionIndex] = answer.responseText
+        }
+      })
     }
     catch (error) {
       console.error('Error loading existing answers:', error)
@@ -64,8 +76,25 @@ async function saveAnswer(questionIndex){
   try { 
     const answer = userAnswers.value[questionIndex]
     const questionId = questions.value[questionIndex].id
-    //send answer to API
-    await $fetch(`/api/quiz/${quizId.value}/save`, { method: 'POST', headers: {'Content-Type': 'application/json'}})
+    
+    //check if it is a student
+    if(!studentId.value){
+      console.error('Student ID is missing. Cannot save answer.')
+      error.value = 'Student ID is missing. Cannot save answer.'
+      return
+    }
+
+    //send answer to API 
+    await $fetch(`/api/quiz/answers`, {
+      method: 'POST', 
+      headers: {'Content-Type': 'application/json'}, 
+      body: {
+        quizId: quizId.value,
+        questionId: questionId,
+        responseText: answer,
+        studentProfileId: studentId.value
+      }
+    })
   }
   catch (error) {
     console.error('Error saving answer:', error)
@@ -77,13 +106,21 @@ async function saveAnswer(questionIndex){
 async function submitAnswers(){
   try {
     await saveAnswer(currentIndex.value) //save answer before submission
-    //send all answers to API
-    await $fetch(`/api/quiz/${quizId.value}/submit`, { method: 'POST', headers: {'Content-Type': 'application/json'}})
+    //send all answers to API(NOTE: quizId may need to be adjusted based on the name used)
+    await $fetch(`/api/quiz/submit`, { 
+        method: 'POST',
+        headers: {'Content-Type': 'application/json' },
+        body: {
+          quizId: quizId.value,
+          studentProfileId: studentId.value,
+        }
+    })
     //redirect to course homepage after submission
     await navigateTo('/course_pages/coursehomepage') 
   } 
   catch (error) {
     console.error('Error submitting answers:', error)
+    error.value = 'Failed to submit quiz. Try again.'
   }
 }
 
