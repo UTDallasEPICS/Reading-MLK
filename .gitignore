@@ -24,3 +24,5 @@ prisma/defaultCredentials.js
 .env
 .env.*
 !.env.example
+
+prisma/dev.db
