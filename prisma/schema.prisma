@@ -265,6 +265,7 @@ model QuizResponse {
   quiz             Quiz           @relation(fields: [quizId], references: [id])
   MCAnswer         MCAnswer[]
   FRAnswer         FRAnswer[]
+  submittedAt      DateTime       @default(now())
 
   @@map("quiz_responses")
 }
