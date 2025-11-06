@@ -83,6 +83,8 @@ model StudentProfile {
   pref_lang   String? /// drop down option for either english, spanish(espanol), or other (only temporary until we can get more info on what languages they speak)
   first_name  String
   last_name   String
+
+  AssignmentToStudent AssignmentToStudent[]
   // pref_name   String
 
   // user_id Int  @unique
@@ -109,10 +111,11 @@ model AdminProfile {
 // class model to create relation between teacher and student (should be one-to-many)
 model Class {
   id         Int              @id @default(autoincrement())
-  class_name String /// example: Bayard class
+  class_name String           @default("Untitled Class")
   class_year Int
   Teacher    TeacherToClass[]
   Student    StudentToClass[]
+  Assignment AssignmentToClass[]
 
   @@map("classes")
 }
@@ -134,7 +137,7 @@ model StudentToClass {
   student_id Int
   Class      Class          @relation(fields: [class_id], references: [id])
   Student    StudentProfile @relation(fields: [student_id], references: [id])
-
+  
   @@id([class_id, student_id])
   @@map("student_to_classes")
 }
@@ -148,6 +151,27 @@ model ParentToChild {
 
   @@id([parent_id, child_id])
   @@map("parent_to_kids")
+}
+
+//Maps Assignment to Classes
+model AssignmentToClass {
+  assignment_id Int
+  class_id      Int
+  Assignment    Quiz           @relation(fields: [assignment_id], references: [id])
+  Class         Class          @relation(fields: [class_id], references: [id])
+
+  @@id([assignment_id, class_id])
+  @@map("assignment_to_classes")
+}
+
+model AssignmentToStudent {
+  assignment_id Int
+  student_id    Int
+  Assignment    Quiz           @relation(fields: [assignment_id], references: [id])
+  Student       StudentProfile @relation(fields: [student_id], references: [id])
+
+  @@id([assignment_id, student_id])
+  @@map("assignment_to_students")
 }
 
 // Models for reading quiz related things
@@ -175,8 +199,14 @@ model Video {
 
 model Quiz {
   id        Int            @id @default(autoincrement())
+  name      String         @default("Untitled Quiz")
+  submitted Boolean        @default(false)
+  grade     Int            @default(100) // default grade is 100
   questions Question[]
   responses QuizResponse[]
+
+  AssignmentToStudent AssignmentToStudent[]
+  AssignmentToClass  AssignmentToClass[]
 
   @@map("quizzes")
 }

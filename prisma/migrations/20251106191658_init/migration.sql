@@ -63,7 +63,7 @@ CREATE TABLE "admin_profile" (
 -- CreateTable
 CREATE TABLE "classes" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    "class_name" TEXT NOT NULL,
+    "class_name" TEXT NOT NULL DEFAULT 'Untitled Class',
     "class_year" INTEGER NOT NULL
 );
 
@@ -98,6 +98,26 @@ CREATE TABLE "parent_to_kids" (
 );
 
 -- CreateTable
+CREATE TABLE "assignment_to_classes" (
+    "assignment_id" INTEGER NOT NULL,
+    "class_id" INTEGER NOT NULL,
+
+    PRIMARY KEY ("assignment_id", "class_id"),
+    CONSTRAINT "assignment_to_classes_assignment_id_fkey" FOREIGN KEY ("assignment_id") REFERENCES "quizzes" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "assignment_to_classes_class_id_fkey" FOREIGN KEY ("class_id") REFERENCES "classes" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "assignment_to_students" (
+    "assignment_id" INTEGER NOT NULL,
+    "student_id" INTEGER NOT NULL,
+
+    PRIMARY KEY ("assignment_id", "student_id"),
+    CONSTRAINT "assignment_to_students_assignment_id_fkey" FOREIGN KEY ("assignment_id") REFERENCES "quizzes" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "assignment_to_students_student_id_fkey" FOREIGN KEY ("student_id") REFERENCES "student_profile" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
 CREATE TABLE "books" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "book_title" TEXT NOT NULL,
@@ -117,7 +137,10 @@ CREATE TABLE "video_form" (
 
 -- CreateTable
 CREATE TABLE "quizzes" (
-    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "name" TEXT NOT NULL DEFAULT 'Untitled Quiz',
+    "submitted" BOOLEAN NOT NULL DEFAULT false,
+    "grade" INTEGER NOT NULL DEFAULT 100
 );
 
 -- CreateTable
