@@ -151,6 +151,22 @@
     Assignments.value = [];
   }
 
+  async function removeAssignments(id: number) {
+  try {
+    if (!confirm("Are you sure you want to delete this assignment?")) 
+      return;
+    await $fetch('/api/assignments/delete', {
+      method: 'POST',
+      body: { id },
+    });
+    // Remove from local state to update the table without reload
+    Assignments.value = Assignments.value.filter(a => a.id !== id);
+  } catch (err) {
+    console.error("Failed to delete assignment:", err);
+    alert("Delete failed");
+  }
+ }
+
   const rhuser = useCookie<User>('rhuser')
   const userRole = (rhuser.value?.role)
   console.log(rhuser.value.role)
