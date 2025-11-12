@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
 
     if (!to) {
       setResponseStatus(event, 400);
-      return event, { message: "'to' field is required" };
+      return [event, { message: "'to' field is required" }];
     }
 
     const otp = crypto.randomInt(100000, 999999).toString();
@@ -85,11 +85,11 @@ export default defineEventHandler(async (event) => {
       `,
     });
 
-    return event, { message: "OTP sent" };
-  } catch (err) {
+    return [event, { message: "OTP sent" }];
+  } catch (err:any) {
     console.error("Mailer error:", err);
     setResponseStatus(event, 500);
 
-    return event, { message: "Server error: " + err.message };
+    return [event, { message: "Server error: " + err.message }];
   }
 });
