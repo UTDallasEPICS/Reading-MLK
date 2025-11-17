@@ -1,6 +1,11 @@
 import { PrismaClient } from '@prisma/client';
+import type { Quiz, QuizResponse } from '@prisma/client';
 import { PrismaClientKnownRequestError, PrismaClientUnknownRequestError } from '@prisma/client/runtime/library';
 const prisma = new PrismaClient();
+
+type QuizWithResponses = Quiz & {
+    responses: QuizResponse[];
+};
 
 export default defineEventHandler(async (event) => {
     console.log("API /api/assignments/search called"); //Add this for debugging
@@ -99,6 +104,13 @@ export default defineEventHandler(async (event) => {
                 AssignmentToClass: { include: { Class: true } }
             }
         });
+
+        for (const assignment of pageResult) {
+            const responses = await prisma.quizResponse.findMany({
+                where: { quizId: assignment.id},
+            });
+            (assignment as QuizWithResponses).responses = responses;
+        }
 
         //Console log for debugging
         console.log("Assignments returned:", pageResult);

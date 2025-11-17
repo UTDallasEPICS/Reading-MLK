@@ -33,6 +33,7 @@
             td(class="table-cell p-3 border-b border-gray-200 text-center") {{ row.last_name }}
             td(class="table-cell p-3 border-b border-gray-200 text-center") {{ row.submitted }}
             td(class="table-cell p-3 border-b border-gray-200 text-center") {{ row.grade }}
+            td(class="table-cell p-3 border-b border-gray-200 text-center") {{ row.submittedAt }}
             td(class="table-cell p-3 border-b border-gray-200 text-center")
               button(v-if="!editButtonPressed" @click="goToEdit(row.id)" class="action-button edit-button rounded-md py-2 px-4 text-xs font-semibold text-white cursor-pointer bg-teal-500 hover:bg-teal-600 focus:outline-none transition-all") Edit
             td(class="table-cell p-3 border-b border-gray-200 text-center")
@@ -41,17 +42,37 @@
 
 
 <script setup lang="ts">
-  const Assignments = ref<Quiz[]>([]);
-  import type { Quiz, User } from "@prisma/client";
+  const Assignments = ref<QuizWithResponses[]>([]);
+  import type { Quiz, User, QuizResponse } from "@prisma/client";
   import { ref } from "vue";
+
+  type QuizWithResponses = Quiz & {
+    responses: QuizResponse[];
+    AssignmentToStudent: { Student: User | null }[];
+    AssignmentToClass: { Class: { class_name: string } | null }[];
+  };
+
+  type AssignmentFilters = {
+    first_name?: string;
+    last_name?: string;
+    class_name?: string;
+    assignment_name?: string;
+    submittedAt?: string;
+    submission_type?: boolean;
+  };
   
 
   const editButtonPressed = ref(false);
   const selectedOption = ref(false); // Initialize with a default value, e.g., 'no'
   const keyfield = ref("district");
   const searchTerm = ref("");
-  const filters = ref<Quiz & Partial<User>>({
-    id: 0,
+  const filters = ref<AssignmentFilters>({
+    first_name: '',
+    last_name: '',
+    class_name: '',
+    assignment_name: '',
+    submittedAt: '',
+    submission_type: false,
   });
 
   const tableHeaders = [
@@ -59,11 +80,12 @@
         { id: 'last_name', label: 'Last Name', placeholder: 'Last Name', type: 'text' },
         { id: 'class_name', label: 'Class Name', placeholder: 'Class Name', type: 'text' },
         { id: 'assignment_name', label: 'Assignment Name', placeholder: 'Assignment', type: 'text' },
-        { id: 'submission_type', label: 'Submitted', type: 'checkbox' }
+        { id: 'submission_type', label: 'Submitted', type: 'checkbox' },
+        { id: 'submittedAt', label: 'Date', placeholder: 'YYYY-MM-DD', type: 'text'}
       ];
 
   const h = [
-    "Quiz ID", "Class", "Assignments", "First Name", "Last Name", "Submitted", "Grade", "Edit", "Remove"
+    "Quiz ID", "Class", "Assignments", "First Name", "Last Name", "Submitted", "Grade", "Date", "Edit", "Remove"
   ];
   
   //await getAssignments()
@@ -101,6 +123,25 @@
       //Pushes the filtered results into the rows array
       for (const ac of classes) {
         for (const as of students) {
+
+          const response = assignment.responses?.find(
+          r => Number(r.studentProfileId) === Number(as?.Student?.id)
+          );
+
+          // const submittedDate = response?.submittedAt
+          //  ? response.submittedAt.toISOString().split("T")[0]
+          //  : null;
+
+          const submittedDate = response?.submittedAt
+            ? new Date(response.submittedAt).toISOString().split("T")[0]
+            : assignment.submitted ? '(submitted)' : 'N/A';
+
+          if (filters.value.submittedAt && (!submittedDate || !submittedDate.startsWith(filters.value.submittedAt)))
+            continue;
+          
+          // debugging
+          console.log("Responses array:", assignment.responses);
+
           rows.push({
             id: assignment.id,
             class_name: ac?.Class?.class_name || 'N/A',
@@ -109,6 +150,7 @@
             last_name: as?.Student?.last_name || 'N/A',
             submitted: assignment.submitted ? 'Yes' : 'No',
             grade: assignment.grade || 100,
+            submittedAt: submittedDate,
           })
         }
       }
@@ -128,7 +170,8 @@
     if (filters.value.first_name) searchQuery.first_name = filters.value.first_name;
     if (filters.value.last_name) searchQuery.last_name = filters.value.last_name;
     if (filters.value.class_name) searchQuery.class_name = filters.value.class_name;
-    if (filters.value.assignment_name) searchQuery.name = filters.value.name;
+    if (filters.value.assignment_name) searchQuery.assignment_name = filters.value.assignment_name;
+    if (filters.value.submittedAt) searchQuery.submittedAt = filters.value.submittedAt;
 
     //If no fields are filled, fetch all
     if (Object.keys(searchQuery).length === 0) {
@@ -149,23 +192,45 @@
 
   const clearSearch = () => {
     Assignments.value = [];
+    filters.value = {
+      first_name: '',
+      last_name: '',
+      class_name: '',
+      assignment_name: '',
+      submittedAt: '',
+      submission_type: false,
+    };
   }
 
   async function removeAssignments(id: number) {
   try {
-    if (!confirm("Are you sure you want to delete this assignment?")) 
-      return;
+    if (!confirm("Are you sure you want to delete this assignment?")) return;
+
+    // Call delete API
     await $fetch('/api/assignments/delete', {
       method: 'POST',
       body: { id },
     });
-    // Remove from local state to update the table without reload
+
+    // Remove deleted assignment locally
     Assignments.value = Assignments.value.filter(a => a.id !== id);
+
+    // If any filters are active, re-run the search so results include `responses`
+    const hasFilters = Object.keys(filters.value).some((k) => {
+      const v = (filters.value as any)[k];
+      return v !== undefined && v !== null && v !== '' && v !== false;
+    });
+
+    if (hasFilters) {
+      await performSearch(); // reapply filters and fetch from /api/assignments/search
+    } else {
+      await getAssignments(); // fetch all via the same endpoint that includes responses
+    }
   } catch (err) {
     console.error("Failed to delete assignment:", err);
     alert("Delete failed");
   }
- }
+}
 
   const rhuser = useCookie<User>('rhuser')
   const userRole = (rhuser.value?.role)
@@ -173,3 +238,4 @@
   const currid = (rhuser.value?.id)
 
 </script>
+
