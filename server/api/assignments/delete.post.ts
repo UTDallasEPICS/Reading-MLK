@@ -5,35 +5,53 @@ const prisma = new PrismaClient();
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event);
-    let quizResponse = null;
-    let error = null;
+    const { id: quizId } = body;
 
-    const {id} = body
+    console.log("Delete request received for Quiz ID:", quizId);
 
-    if (id) {
-        try {
-            // first delete related MC and FR answers
+    if (!quizId) {
+        throw createError({
+            statusCode: 400,
+            statusMessage: "Missing quiz ID"
+        });
+    }
+
+    try {
+        // Get all QuizResponses for this quiz
+        const responses = await prisma.quizResponse.findMany({
+            where: { quizId }
+        });
+
+        console.log("Found QuizResponses:", responses);
+
+        // If nothing to delete, just return success
+        if (responses.length === 0) {
+            return { success: true, message: "No QuizResponses to delete." };
+        }
+
+        // Delete answers for each response
+        for (const resp of responses) {
             await prisma.mCAnswer.deleteMany({
-                where: { quizResponseId: id},
+                where: { quizResponseId: resp.id }
             });
+
             await prisma.fRAnswer.deleteMany({
-                where: { quizResponseId: id},
+                where: { quizResponseId: resp.id }
             });
-            // now delete QuizResponse
-            quizResponse = await prisma.quizResponse.delete({
-                where: {
-                    id,
-                },
-            });
-        } catch(e) {
-            error = e;
-        };
-    }
+        }
 
-    // Check if an error occurred during the deletion
-    if (error) {
-        return createError({ statusCode: 500, statusMessage: "Server Delete Error" });
-    }
+        // Delete all QuizResponses
+        await prisma.quizResponse.deleteMany({
+            where: { quizId }
+        });
 
-    return quizResponse;
+        return { success: true };
+
+    } catch (err) {
+        console.error("Delete failed:", err);
+        throw createError({
+            statusCode: 500,
+            statusMessage: "Server delete error"
+        });
+    }
 });

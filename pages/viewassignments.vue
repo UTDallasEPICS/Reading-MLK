@@ -120,40 +120,37 @@
         classes = classes.filter(ac => ac?.Class?.class_name?.toLowerCase().startsWith(filters.value.class_name.toLowerCase()));
       }
 
-      //Pushes the filtered results into the rows array
       for (const ac of classes) {
         for (const as of students) {
 
-          const response = assignment.responses?.find(
+        // Match the response for this student
+        const response = assignment.responses?.find(
           r => Number(r.studentProfileId) === Number(as?.Student?.id)
-          );
+        );
 
-          // const submittedDate = response?.submittedAt
-          //  ? response.submittedAt.toISOString().split("T")[0]
-          //  : null;
+        // Only show rows for responses that actually exist
+        if (!response && assignment.submitted) continue;
 
-          const submittedDate = response?.submittedAt
-            ? new Date(response.submittedAt).toISOString().split("T")[0]
-            : assignment.submitted ? '(submitted)' : 'N/A';
+        const submittedDate = response?.submittedAt
+          ? new Date(response.submittedAt).toISOString().split("T")[0]
+          : assignment.submitted ? '(submitted)' : 'N/A';
 
-          if (filters.value.submittedAt && (!submittedDate || !submittedDate.startsWith(filters.value.submittedAt)))
-            continue;
-          
-          // debugging
-          console.log("Responses array:", assignment.responses);
+        // Apply submittedAt filter
+        if (filters.value.submittedAt && (!submittedDate || !submittedDate.startsWith(filters.value.submittedAt)))
+          continue;
 
-          rows.push({
-            id: assignment.id,
-            class_name: ac?.Class?.class_name || 'N/A',
-            assignment_name: assignment.name,
-            first_name: as?.Student?.first_name || 'N/A',
-            last_name: as?.Student?.last_name || 'N/A',
-            submitted: assignment.submitted ? 'Yes' : 'No',
-            grade: assignment.grade || 100,
-            submittedAt: submittedDate,
-          })
-        }
+        rows.push({
+          id: assignment.id,
+          class_name: ac?.Class?.class_name || 'N/A',
+          assignment_name: assignment.name,
+          first_name: as?.Student?.first_name || 'N/A',
+          last_name: as?.Student?.last_name || 'N/A',
+          submitted: assignment.submitted ? 'Yes' : 'No',
+          grade: assignment.grade ?? 100,
+          submittedAt: submittedDate,
+        });
       }
+    }
     }
     return rows;
   });
@@ -204,28 +201,28 @@
 
   async function removeAssignments(id: number) {
   try {
-    if (!confirm("Are you sure you want to delete this assignment?")) return;
+    if (!confirm("Are you sure you want to delete this assignment's responses?"))
+      return;
 
     // Call delete API
-    await $fetch('/api/assignments/delete', {
+    const result = await $fetch('/api/assignments/delete', {
       method: 'POST',
-      body: { id },
+      body: { id }
     });
 
-    // Remove deleted assignment locally
-    Assignments.value = Assignments.value.filter(a => a.id !== id);
+    console.log("Delete result:", result);
 
-    // If any filters are active, re-run the search so results include `responses`
-    const hasFilters = Object.keys(filters.value).some((k) => {
-      const v = (filters.value as any)[k];
-      return v !== undefined && v !== null && v !== '' && v !== false;
-    });
+    // After successful deletion, refresh UI
+    const hasFilters = Object.values(filters.value).some(v =>
+      v !== undefined && v !== null && v !== '' && v !== false
+    );
 
     if (hasFilters) {
-      await performSearch(); // reapply filters and fetch from /api/assignments/search
+      await performSearch(); // rebuild with filters
     } else {
-      await getAssignments(); // fetch all via the same endpoint that includes responses
+      await getAssignments(); // rebuild all
     }
+
   } catch (err) {
     console.error("Failed to delete assignment:", err);
     alert("Delete failed");
