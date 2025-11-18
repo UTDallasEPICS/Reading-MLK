@@ -64,6 +64,10 @@
             to="/viewassignments"
             class="text-black py-3 px-4 no-underline block hover:bg-gray-200 rounded-md"
           ) Assignments
+          nuxt-link.navbar-item(
+            to="/viewstudents"
+            class="text-black py-3 px-4 no-underline block hover:bg-gray-200 rounded-md"
+          ) Students
       .log
         a#logoutbtn(
           href="/api/logout"
