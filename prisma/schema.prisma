@@ -64,7 +64,7 @@ model FacultyProfile {
   grade         String // multi to indicate that they teach multiple 
 
   user_id        Int              @unique
-  Faculty        User             @relation(fields: [user_id], references: [id])
+  User           User             @relation(fields: [user_id], references: [id])
   TeacherToClass TeacherToClass[]
 
   @@map("faculty_profile")
@@ -90,18 +90,18 @@ model StudentProfile {
 
   ParentToChild ParentToChild[]
   Classes       StudentToClass[]
-  QuizResponse  QuizResponse[]
+  QuizResponses QuizResponse[]
 
   @@map("student_profile")
 }
 
 // model to hold the administrators from Friends of MLK
 model AdminProfile {
-  id          Int    @id @default(autoincrement())
+  id Int @id @default(autoincrement())
   //admin_email String @unique // TODO: we dont need this field kill it
 
   admin_id Int  @unique
-  Admin    User @relation(fields: [admin_id], references: [id])
+  User     User @relation(fields: [admin_id], references: [id])
 
   @@map("admin_profile")
 }
@@ -119,34 +119,37 @@ model Class {
 
 // join table for teacher to class relationship
 model TeacherToClass {
+  id         Int            @id @default(autoincrement())
   class_id   Int
   teacher_id Int
   Class      Class          @relation(fields: [class_id], references: [id])
   Teacher    FacultyProfile @relation(fields: [teacher_id], references: [id])
 
-  @@id([class_id, teacher_id])
+  @@unique([class_id, teacher_id])
   @@map("teacher_to_classes")
 }
 
 // join table for student to class relationship
 model StudentToClass {
+  id         Int            @id @default(autoincrement())
   class_id   Int
   student_id Int
   Class      Class          @relation(fields: [class_id], references: [id])
   Student    StudentProfile @relation(fields: [student_id], references: [id])
 
-  @@id([class_id, student_id])
+  @@unique([class_id, student_id])
   @@map("student_to_classes")
 }
 
 // join table for relationship between parents and child (student) (should be one-to-many)
 model ParentToChild {
+  id        Int            @id @default(autoincrement())
   parent_id Int
   child_id  Int
   Parent    ParentProfile  @relation(fields: [parent_id], references: [id])
   Child     StudentProfile @relation(fields: [child_id], references: [id])
 
-  @@id([parent_id, child_id])
+  @@unique([parent_id, child_id])
   @@map("parent_to_kids")
 }
 
@@ -160,6 +163,7 @@ model Book {
   page_count Int
 
   Videos Video[]
+
   @@map("books")
 }
 
@@ -167,7 +171,7 @@ model Video {
   id         Int    @id @default(autoincrement())
   vid_length Int
   url        String
-  book_id    Int    
+  book_id    Int
   Book       Book   @relation(fields: [book_id], references: [id])
 
   @@map("video_form")
@@ -175,8 +179,8 @@ model Video {
 
 model Quiz {
   id        Int            @id @default(autoincrement())
-  questions Question[]
-  responses QuizResponse[]
+  Questions Question[]
+  Responses QuizResponse[]
 
   @@map("quizzes")
 }
@@ -186,7 +190,7 @@ model Question {
   quiz_id  Int
   text     String
   feedback String
-  quiz     Quiz   @relation(fields: [quiz_id], references: [id])
+  Quiz     Quiz   @relation(fields: [quiz_id], references: [id])
   score    Int
 
   // Question types
@@ -194,8 +198,8 @@ model Question {
   FreeResponse   FRQuestion?
 
   // Responses
-  mcAnswers MCAnswer[]
-  frAnswers FRAnswer[]
+  MCAnswers MCAnswer[]
+  FRAnswers FRAnswer[]
 
   @@map("questions")
 }
@@ -203,7 +207,7 @@ model Question {
 model MCQuestion {
   id          Int        @id @default(autoincrement())
   question_id Int        @unique
-  options     MCOption[]
+  Options     MCOption[]
   Question    Question   @relation(fields: [question_id], references: [id])
 
   @@map("multiple_choice_question")
@@ -214,7 +218,7 @@ model MCOption {
   questionId Int
   text       String
   isCorrect  Boolean // @default(false)
-  mcQuestion MCQuestion @relation(fields: [questionId], references: [id])
+  MCQuestion MCQuestion @relation(fields: [questionId], references: [id])
 
   @@map("multiple_choice_options")
 }
@@ -232,9 +236,9 @@ model QuizResponse {
   studentProfileId Int
   quizId           Int
   StudentProfile   StudentProfile @relation(fields: [studentProfileId], references: [id])
-  quiz             Quiz           @relation(fields: [quizId], references: [id])
-  MCAnswer         MCAnswer[]
-  FRAnswer         FRAnswer[]
+  Quiz             Quiz           @relation(fields: [quizId], references: [id])
+  MCAnswers        MCAnswer[]
+  FRAnswers        FRAnswer[]
 
   @@map("quiz_responses")
 }
@@ -244,8 +248,8 @@ model MCAnswer {
   quizResponseId Int
   questionId     Int
   selectedOption String
-  quizResponse   QuizResponse @relation(fields: [quizResponseId], references: [id])
-  question       Question     @relation(fields: [questionId], references: [id])
+  QuizResponse   QuizResponse @relation(fields: [quizResponseId], references: [id])
+  Question       Question     @relation(fields: [questionId], references: [id])
 
   @@map("multiple_choice_answers")
 }
@@ -255,8 +259,8 @@ model FRAnswer {
   quizResponseId Int
   questionId     Int
   responseText   String
-  quizResponse   QuizResponse @relation(fields: [quizResponseId], references: [id])
-  question       Question     @relation(fields: [questionId], references: [id])
+  QuizResponse   QuizResponse @relation(fields: [quizResponseId], references: [id])
+  Question       Question     @relation(fields: [questionId], references: [id])
 
   @@map("free_response_answers")
 }
