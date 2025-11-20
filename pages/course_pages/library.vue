@@ -8,44 +8,50 @@ definePageMeta({
 const searchQuery = ref('')
 const books = ref([
   {
-    title: 'All The Light We Cannot See',
-    author: 'Anthony Doerr',
-    image: '/allthelightwecannotsee.svg',
+    id: 0,
+    title: 'A Bad Case of Stripes',
+    author: 'David Shannon',
+    image: 'https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1388199847i/31456.jpg',
     bookmarked: true,
     favorited: false,
   },
   {
-    title: 'Rich People Problems',
-    author: 'Kevin Kwan',
-    image: '/richpeopleproblems.svg',
+    id: 1,
+    title: 'Brave Irene',
+    author: 'William Steig',
+    image: 'https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1431980916i/595868.jpg',
     bookmarked: false,
     favorited: true,
   },
   {
-    title: 'Where the Crawdads Sing',
-    author: 'Delia Owens',
-    image: '/wherecrawdadssing.svg',
+    id: 2,
+    title: 'The Rainbow Fish',
+    author: 'Marcus Pfister',
+    image: 'https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1568664149i/293584.jpg',
     bookmarked: true,
     favorited: true,
   },
   {
-    title: 'Crazy Rich Asians',
-    author: 'Kevin Kwan',
-    image: '/crazyrichasians.svg',
+    id: 3,
+    title: 'Chester\'s Way',
+    author: 'Kevin Henkes',
+    image: 'https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1388277024i/527586.jpg',
     bookmarked: false,
     favorited: false,
   },
   {
-    title: 'Rich People Problems',
-    author: 'Kevin Kwan',
-    image: '/richpeopleproblems.svg',
+    id: 4,
+    title: 'Carla\'s Sandwich',
+    author: 'Debbie Herman',
+    image: 'https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1348085691i/8228652.jpg',
     bookmarked: false,
     favorited: false,
   },
   {
-    title: 'Crazy Rich Asians',
-    author: 'Kevin Kwan',
-    image: '/crazyrichasians.svg',
+    id: 5,
+    title: 'Turkey Trouble',
+    author: 'Wendi Silvano',
+    image: 'https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1386924677i/6469675.jpg',
     bookmarked: true,
     favorited: true,
   },
@@ -70,12 +76,12 @@ const books = ref([
 
       .grid(class="grid grid-cols-1 md:grid-cols-2 gap-6")
         div(
-          v-for="(book, index) in books"
-          :key="index"
+          v-for="book in books"
+          :key="book.id"
           class="bg-white p-4 shadow-md rounded-lg flex items-start gap-4 hover:shadow-lg transition-all duration-200"
         )
           NuxtLink(
-            :to="`/books/${index}`"
+            :to="`/books/${book.id}`"
             class="flex flex-1 gap-4"
           )
             img(:src="book.image" alt="cover" class="w-20 h-28 object-cover rounded")
