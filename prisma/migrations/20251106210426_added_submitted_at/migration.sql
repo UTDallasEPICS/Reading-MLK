@@ -1,9 +1,3 @@
-/*
-  Warnings:
-
-  - You are about to drop the column `createdAt` on the `quiz_responses` table. All the data in the column will be lost.
-
-*/
 -- RedefineTables
 PRAGMA defer_foreign_keys=ON;
 PRAGMA foreign_keys=OFF;
@@ -11,6 +5,7 @@ CREATE TABLE "new_quiz_responses" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "studentProfileId" INTEGER NOT NULL,
     "quizId" INTEGER NOT NULL,
+    "submittedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "quiz_responses_studentProfileId_fkey" FOREIGN KEY ("studentProfileId") REFERENCES "student_profile" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT "quiz_responses_quizId_fkey" FOREIGN KEY ("quizId") REFERENCES "quizzes" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
