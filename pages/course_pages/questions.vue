@@ -46,16 +46,35 @@ async function loadQuestions() {
       const loadExistingAnswers = await $fetch(`/api/quiz/responses`, {
         method: 'GET',
         params: { 
-          quizId: quizId.value,
-          studentProfileId: studentId.value
+          quiz_id: quizId.value,
+          student_profile_id: studentId.value
         }
       })
-      loadExistingAnswers.forEach(answer => {
+      //fetching based off array
+      /*loadExistingAnswers.forEach(answer => {
         const questionIndex = questions.value.findIndex(q => q.id === answer.questionId)
         if (questionIndex !== -1) {
           userAnswers.value[questionIndex] = answer.responseText
         }
-      })
+      })*/
+      //pulling responses based off a response object (done in responses.get.ts)
+      if(loadExistingAnswers && loadExistingAnswers.FRAnswer) {
+        loadExistingAnswers.FRAnswer.forEach(answer => {
+          const questionIndex = questions.value.findIndex(q => q.id === answer.questionId)
+          if (questionIndex !== -1) {
+            userAnswers.value[questionIndex] = answer.responseText
+          }
+        })
+      }
+      //MCQ portion 
+      if(loadExistingAnswers && loadExistingAnswers.MCAnswer) {
+        loadExistingAnswers.MCAnswer.forEach(answer => {
+          const questionIndex = questions.value.findIndex(q => q.id === answer.questionId)
+          if (questionIndex !== -1) {
+            userAnswers.value[questionIndex] = answer.selectedOption
+          }
+        })
+      }
     }
     catch (error) {
       console.error('Error loading existing answers:', error)
