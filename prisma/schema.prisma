@@ -1,5 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
+// removed OTP model as it is not needed
 
 generator client {
   provider        = "prisma-client-js"
@@ -17,21 +18,76 @@ datasource db {
 
 // standard user profile 
 model User {
-  id             Int     @id @default(autoincrement())
-  user_name      String  @unique // should have one upper case and lower case alongside a number
-  first_name     String
-  last_name      String
+  id             String  @id @default(cuid())
+  user_name      String? @unique // should have one upper case and lower case alongside a number
+  first_name     String?
+  last_name      String?
   preferred_name String?
-  email          String  @unique // should hold the email of the private account @map("email")
-  // client_cuid    String  @map("client_cuid")
-  role           String
+  email          String  
+  name           String? // BetterAuth uses 'name' field
+  image          String? // BetterAuth optional field
+  // new fields added for betterauth integration
+  emailVerified Boolean @default(false) // determines if the user's email has been verified, added for auth purposes
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now()) @updatedAt
+  sessions      Session[]
+  accounts      Account[]
 
+  role           String?
   Parents ParentProfile?
   // Children StudentProfile?
   Faculty FacultyProfile?
   Admin   AdminProfile?
 
-  @@map("users")
+  @@unique([email])
+  @@map("user")
+}
+
+// necessary model for betterauth integration
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+// necessary model for betterauth integration
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+
+  @@unique([identifier])
+  @@map("verification")
 }
 
 // parent profile
@@ -45,7 +101,7 @@ model ParentProfile {
   gender               String
   marital_stat         String? /// martial status of the parent (will be optional choice)
   social_media         String?         @unique /// could be other social media handle but should ask for twitter(X) handle (most likely social media handle they have)
-  user_id              Int             @unique
+  user_id              String          @unique
   User                 User            @relation(fields: [user_id], references: [id])
   ParentToChild        ParentToChild[]
 
@@ -63,7 +119,7 @@ model FacultyProfile {
   department    String
   grade         String // multi to indicate that they teach multiple 
 
-  user_id        Int              @unique
+  user_id        String           @unique
   Faculty        User             @relation(fields: [user_id], references: [id])
   TeacherToClass TeacherToClass[]
 
@@ -102,8 +158,8 @@ model AdminProfile {
   id          Int    @id @default(autoincrement())
   //admin_email String @unique // TODO: we dont need this field kill it
 
-  admin_id Int  @unique
-  Admin    User @relation(fields: [admin_id], references: [id])
+  admin_id String @unique
+  Admin    User   @relation(fields: [admin_id], references: [id])
 
   @@map("admin_profile")
 }
@@ -290,12 +346,4 @@ model FRAnswer {
   question       Question     @relation(fields: [questionId], references: [id])
 
   @@map("free_response_answers")
-}
-
-model OTP {
-  id    Int    @id @default(autoincrement())
-  email String @unique
-  code  String
-
-  @@map("otp_codes")
 }

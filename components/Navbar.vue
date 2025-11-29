@@ -19,8 +19,9 @@
         class="text-white font-bold no-underline font-sans text-base lg:text-lg px-2 lg:px-4 hover:scale-110 transform transition-all duration-700 inline-flex items-center justify-center"
       ) About Us
 
-      // Register dropdown
+      // Register dropdown (only show when authenticated)
       .dropdown.relative.inline-block.gap-4(
+        v-if="isAuthenticated"
         onmouseenter="this.querySelector('.dropdown-content').style.display = 'block'"
         onmouseleave="this.querySelector('.dropdown-content').style.display = 'none'"
       )
@@ -42,8 +43,9 @@
             class="text-black py-3 px-4 no-underline block hover:bg-gray-200 rounded-md"
           ) Parent
 
-      // View dropdown
+      // View dropdown (only show when authenticated)
       .dropdown.relative.inline-block.gap-4(
+        v-if="isAuthenticated"
         onmouseenter="this.querySelector('.dropdown-content').style.display = 'block'"
         onmouseleave="this.querySelector('.dropdown-content').style.display = 'none'"
       )
@@ -68,17 +70,72 @@
             to="/viewstudents"
             class="text-black py-3 px-4 no-underline block hover:bg-gray-200 rounded-md"
           ) Students
-      .log
-        a#logoutbtn(
-          href="/api/logout"
-          @click="logout"
+      
+      // User info and auth buttons
+      .auth-section(class="ml-auto flex items-center gap-4")
+        // Show user info with link to profile when authenticated
+        nuxt-link(
+          v-if="isAuthenticated && user"
+          to="/profile"
+          class="flex items-center gap-2 hover:opacity-80 transition-opacity"
+        )
+          i(class="fa fa-user-circle text-white text-2xl")
+          span(class="text-white text-sm") {{ user.email }}
+        
+        // Login button (show when not authenticated)
+        nuxt-link(
+          v-if="!isAuthenticated"
+          to="/login"
           class="text-white font-bold no-underline font-sans text-base lg:text-lg px-2 lg:px-4 hover:scale-110 transform transition-all duration-700 inline-flex items-center justify-center"
-        ) Logout
+        )
+          i(class="fa fa-sign-in-alt mr-2")
+          | Login
+        
+        // Logout button (show when authenticated)
+        button(
+          v-else
+          @click="handleLogout"
+          class="text-white font-bold font-sans text-base lg:text-lg px-2 lg:px-4 hover:scale-110 transform transition-all duration-700 inline-flex items-center justify-center bg-transparent border-none cursor-pointer"
+        )
+          i(class="fa fa-sign-out-alt mr-2")
+          | Logout
 </template>
 
 <script lang="ts" setup>
-const props = defineProps<{ userRole: string }>(); 
+const props = defineProps<{ userRole?: string }>(); 
 
-const showViewDropdown = ref<boolean>(false);
-const showRegisterDropdown = ref<boolean>(false);
+const { getSession, signOut } = useAuth()
+const router = useRouter()
+
+const isAuthenticated = ref(false)
+const user = ref(null)
+
+// Check authentication status on mount
+onMounted(async () => {
+  await checkAuth()
+})
+
+const checkAuth = async () => {
+  try {
+    const session = await getSession()
+    const userData = session?.data?.user || session?.user
+    isAuthenticated.value = !!userData
+    user.value = userData || null
+  } catch (error) {
+    console.error('Error checking auth:', error)
+    isAuthenticated.value = false
+    user.value = null
+  }
+}
+
+const handleLogout = async () => {
+  try {
+    await signOut()
+    isAuthenticated.value = false
+    user.value = null
+    router.push('/')
+  } catch (error) {
+    console.error('Logout error:', error)
+  }
+}
 </script>

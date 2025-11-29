@@ -5,8 +5,6 @@ export default defineNuxtConfig({
   components: true,
 
   runtimeConfig:{
-    AUTH0_CLIENTID: '',
-    AUTH0_SECRET: '',
     BASEURL: '',
     ISSUER: '',
   },
@@ -23,5 +21,4 @@ export default defineNuxtConfig({
   ],
 
   compatibilityDate: "2024-04-03",
-  modules: ['@sidebase/nuxt-auth']
 })
