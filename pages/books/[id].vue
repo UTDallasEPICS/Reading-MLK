@@ -12,108 +12,135 @@ const bookId = computed(() => route.params.id)
 // Viewing mode: 'read', 'watch', or 'both'
 const viewingMode = ref(null)
 
-// Sample book data - later this should come from your database
-const books = [
+// Sample book data - replaced with the five Gutenberg books; lazy-load full HTML on demand
+const books = ref([
   {
     id: 0,
-    title: 'A Bad Case of Stripes',
-    author: 'David Shannon',
-    image: 'https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1388199847i/31456.jpg',
-    description: 'Camilla Cream loves lima beans, but she never eats them. Why? Because the other kids at her school don\'t like them. And Camilla is very worried about what other people think of her.',
+    title: 'Winnie-the-Pooh',
+    author: 'A. A. Milne',
+  image: '/gutenberg/67098-illus4.jpg',
+    description: 'Classic stories of Winnie-the-Pooh and his friends in the Hundred Acre Wood.',
     readContent: `
-      <h2>A Bad Case of Stripes</h2>
-      <p>Camilla Cream loved lima beans. But she never ate them. Why? Because the other kids in her school didn't like them. And Camilla Cream was very, very worried about what other people thought of her.</p>
-      <p>Camilla had a closet full of gorgeous clothes. But she couldn't decide what to wear on the first day of school. She looked fabulous in everything she tried on. She was even wearing a cool new outfit she'd picked out the night before...</p>
-      <p>But when she looked in the mirror that morning, Camilla screamed. She was covered from head to toe with bright, colorful stripes!</p>
+      <h2>Winnie-the-Pooh — Chapter I</h2>
+      <p>One day when he was out walking, he came to an open place in the middle of the forest, and in the middle of this place was a large oak-tree, and, from the top of the tree, there came a loud buzzing-noise.</p>
+      <p>Winnie-the-Pooh sat down at the foot of the tree, put his head between his paws and began to think.</p>
     `,
-    videoUrl: 'https://storylineonline.net/books/a-bad-case-of-stripes',
-    youtubeId: 'lSm4EV05pXI',
+    gutenbergUrl: 'https://www.gutenberg.org/cache/epub/67098/pg67098-images.html',
+    youtubeId: '',
+    loading: false,
+    fullLoaded: false,
   },
   {
     id: 1,
-    title: 'Brave Irene',
-    author: 'William Steig',
-    image: 'https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1431980916i/595868.jpg',
-    description: 'Brave Irene is a dressmaker\'s daughter. One day, Irene volunteers to deliver a beautiful ball gown to the duchess in spite of a fierce snowstorm.',
+    title: 'The Tale of Peter Rabbit',
+    author: 'Beatrix Potter',
+  image: '/gutenberg/14838-peter04.jpg',
+    description: 'The classic story of Peter Rabbit and his misadventures in Mr. McGregor\'s garden.',
     readContent: `
-      <h2>Brave Irene</h2>
-      <p>Mrs. Bobbin, the dressmaker, was tired and had a bad headache, but she still managed to sew the last stitches in the gown she was making.</p>
-      <p>"It's the most beautiful dress in the world!" her daughter Irene said.</p>
-      <p>Mrs. Bobbin had to deliver the gown to the duchess before the evening ball, but she felt too sick to go out in the cold...</p>
+      <h2>The Tale of Peter Rabbit — Opening</h2>
+      <p>Once upon a time there were four little Rabbits, and their names were—Flopsy, Mopsy, Cotton-tail, and Peter.</p>
     `,
-    videoUrl: 'https://storylineonline.net/books/brave-irene',
-    youtubeId: 'D3QjTM5d0OU',
+    gutenbergUrl: 'https://www.gutenberg.org/cache/epub/14838/pg14838-images.html',
+    youtubeId: '',
+    loading: false,
+    fullLoaded: false,
   },
   {
     id: 2,
-    title: 'The Rainbow Fish',
-    author: 'Marcus Pfister',
-    image: 'https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1568664149i/293584.jpg',
-    description: 'The Rainbow Fish is an international best-seller and a modern classic. Eye-catching foil stamping, glittering on every page, offers instant child-appeal.',
+    title: "Humpty Dumpty (Denslow)",
+    author: 'W. W. Denslow',
+  image: '/gutenberg/25883-cover.jpg',
+    description: 'Denslow\'s illustrated Humpty Dumpty and related picture-book tales.',
     readContent: `
-      <h2>The Rainbow Fish</h2>
-      <p>A long way out in the deep blue sea there lived a fish. Not just an ordinary fish, but the most beautiful fish in the entire ocean.</p>
-      <p>His scales were every shade of blue and green and purple, with sparkling silver scales among them. The other fish were amazed at his beauty.</p>
-      <p>They called him Rainbow Fish. "Come on, Rainbow Fish," they would call. "Come and play with us!" But the Rainbow Fish would just glide past, proud and silent...</p>
+      <h2>Humpty Dumpty — Opening</h2>
+      <p>Humpty-Dumpty was a smooth, round little chap, with a winning smile, and a great golden heart in his broad breast.</p>
     `,
-    videoUrl: 'https://storylineonline.net/books/the-rainbow-fish',
-    youtubeId: 'r9mXkBwdIxQ',
+    gutenbergUrl: 'https://www.gutenberg.org/cache/epub/25883/pg25883-images.html',
+    youtubeId: '',
+    loading: false,
+    fullLoaded: false,
   },
   {
     id: 3,
-    title: 'Chester\'s Way',
-    author: 'Kevin Henkes',
-    image: 'https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1388277024i/527586.jpg',
-    description: 'Chester has his own way of doing things. His best friend Wilson does things just the same way. Then Lilly moves into the neighborhood.',
+    title: 'The Little Red Hen',
+    author: 'Florence White Williams',
+  image: '/gutenberg/18735-cover.jpg',
+    description: 'An illustrated retelling of the Little Red Hen and her determination to do the work herself.',
     readContent: `
-      <h2>Chester's Way</h2>
-      <p>Chester had his own way of doing things. He always cut his sandwiches diagonally. He always got out of bed on the same side. And he never left the house without double-knotting his shoes.</p>
-      <p>"Chester has his own way of doing things," said Chester's mother.</p>
-      <p>"That's one way to put it," said Chester's father. Chester's best friend Wilson was exactly the same...</p>
+      <h2>The Little Red Hen — Opening</h2>
+      <p>Little Red Hen lived in a barnyard. She spent almost all of her time walking about the barnyard in her picketty-pecketty fashion, scratching everywhere for worms.</p>
     `,
-    videoUrl: 'https://storylineonline.net/books/chesters-way',
-    youtubeId: 'HZE1M7VwHHU',
+    gutenbergUrl: 'https://www.gutenberg.org/cache/epub/18735/pg18735-images.html',
+    youtubeId: '',
+    loading: false,
+    fullLoaded: false,
   },
   {
     id: 4,
-    title: 'Carla\'s Sandwich',
-    author: 'Debbie Herman',
-    image: 'https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1348085691i/8228652.jpg',
-    description: 'When her classmates make fun of Carla\'s unusual sandwiches, it takes a special teacher to show her that being different is something to celebrate.',
+    title: 'The Aesop for Children',
+    author: 'Aesop (retold / illustrated)',
+  image: '/gutenberg/19994-frontis.jpg',
+    description: 'A collection of short fables with morals.',
     readContent: `
-      <h2>Carla's Sandwich</h2>
-      <p>Carla liked lots of different things for lunch. But it wasn't a peanut butter and jelly sandwich. And it wasn't a bologna sandwich either.</p>
-      <p>Carla's sandwiches were different. Very different. On Monday, Carla brought a sandwich with Swiss cheese, pineapple slices, and sliced pickles...</p>
+      <h2>The Aesop for Children — Selected Fables</h2>
+      <p>Selected opening fables and summaries.</p>
     `,
-    videoUrl: 'https://storylineonline.net/books/carlas-sandwich',
-    youtubeId: 'wKBSVk2IJKw',
+    gutenbergUrl: 'https://www.gutenberg.org/cache/epub/19994/pg19994-images.html',
+    youtubeId: '',
+    loading: false,
+    fullLoaded: false,
   },
-  {
-    id: 5,
-    title: 'Turkey Trouble',
-    author: 'Wendi Silvano',
-    image: 'https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1386924677i/6469675.jpg',
-    description: 'Turkey is in trouble. Bad trouble. The kind of trouble where it\'s almost Thanksgiving...and you\'re the main course.',
-    readContent: `
-      <h2>Turkey Trouble</h2>
-      <p>Turkey was worried. Very worried. You see, it was almost Thanksgiving. And Turkey knew what that meant...</p>
-      <p>"I have to get out of here!" said Turkey. "I need to find a disguise!" So Turkey went looking for ideas...</p>
-    `,
-    videoUrl: 'https://storylineonline.net/books/turkey-trouble',
-    youtubeId: 'cBCmV9FAHug',
-  },
-]
+])
 
 const currentBook = computed(() => {
-  return books.find(book => book.id === parseInt(bookId.value)) || books[0]
+  return books.value.find(book => book.id === parseInt(bookId.value)) || books.value[0]
 })
 
-const selectMode = (mode) => {
+// Select viewing mode; when entering Read or Both, lazy-load the full Gutenberg HTML
+const selectMode = async (mode) => {
   viewingMode.value = mode
+  if ((mode === 'read' || mode === 'both') && currentBook.value && !currentBook.value.fullLoaded && !currentBook.value.loading) {
+    await loadFullText(currentBook.value)
+  }
 }
 
 const goBack = () => {
   window.history.back()
+}
+
+// Fetch full HTML from our server endpoint and sanitize it before inserting.
+// Uses dynamic import of DOMPurify so import happens only in the browser.
+const loadFullText = async (book) => {
+  if (!book || book.fullLoaded) return
+  try {
+    book.loading = true
+    const src = encodeURIComponent(book.gutenbergUrl)
+    const res = await fetch(`/api/gutenberg?src=${src}`)
+    if (!res.ok) throw new Error('Failed to fetch full text')
+    const data = await res.json()
+    const raw = data && data.html ? data.html : ''
+
+    // dynamic import DOMPurify on client only
+    let clean = raw
+    try {
+      const DOMPurifyModule = await import('dompurify')
+      const DOMPurify = DOMPurifyModule && (DOMPurifyModule.default || DOMPurifyModule)
+      if (DOMPurify && typeof DOMPurify.sanitize === 'function') {
+        clean = DOMPurify.sanitize(raw)
+      }
+    } catch (e) {
+      // if sanitization fails for any reason, fall back to raw (not ideal)
+      console.warn('DOMPurify import failed, inserting raw HTML', e)
+    }
+
+    const footer = `<p class="pg-license text-xs text-gray-600 mt-6">Full text from <a href="${book.gutenbergUrl}" target="_blank" rel="noopener">Project Gutenberg</a>. See their terms on the source page.</p>`
+    book.readContent = clean + footer
+    book.fullLoaded = true
+  } catch (err) {
+    book.readContent = (book.readContent || '') + `<p class="text-sm text-red-600 mt-4">Could not load full text: ${err.message}</p>`
+  } finally {
+    book.loading = false
+  }
 }
 </script>
 
@@ -165,15 +192,18 @@ const goBack = () => {
       .watch-content.bg-gray-50.p-8.rounded-lg.shadow(v-if="viewingMode === 'watch'")
         h2.text-3xl.font-bold.mb-6 Watching: {{ currentBook.title }}
         .video-container.aspect-video
-          iframe.w-full.h-full.rounded(
-            :src="`https://www.youtube-nocookie.com/embed/${currentBook.youtubeId}?autoplay=1&rel=0`"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowfullscreen
-          )
-        .mt-4.text-center
-          p.text-sm.text-gray-600 Video not loading? 
-            a.text-blue-600.hover_underline(:href="currentBook.videoUrl" target="_blank") Watch on Storyline Online
+            template(v-if="currentBook.youtubeId")
+              iframe.w-full.h-full.rounded(
+                :src="`https://www.youtube-nocookie.com/embed/${currentBook.youtubeId}?autoplay=1&rel=0`"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+              )
+            template(v-else)
+              .no-video.p-6.text-center
+                p.text-lg No video available for this book.
+                p.mt-2
+                  a.text-blue-600.hover_underline(:href="currentBook.gutenbergUrl" target="_blank") Open the book on Gutenberg
 
       //- Read and Watch mode (both)
       .both-content(v-if="viewingMode === 'both'")
@@ -184,12 +214,18 @@ const goBack = () => {
           .video-section.bg-gray-50.p-6.rounded-lg.shadow
             h3.text-xl.font-semibold.mb-4 📺 Video
             .video-container
-              iframe.w-full.h-full.rounded(
-                :src="`https://www.youtube-nocookie.com/embed/${currentBook.youtubeId}?rel=0`"
-                frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen
-              )
+              template(v-if="currentBook.youtubeId")
+                iframe.w-full.h-full.rounded(
+                  :src="`https://www.youtube-nocookie.com/embed/${currentBook.youtubeId}?rel=0`"
+                  frameborder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowfullscreen
+                )
+              template(v-else)
+                .no-video.p-6.text-center
+                  p.text-lg No video available for this book.
+                  p.mt-2
+                    a.text-blue-600.hover_underline(:href="currentBook.gutenbergUrl" target="_blank") Open the book on Gutenberg
             .mt-2.text-center
               p.text-xs.text-gray-600 Not loading? 
                 a.text-blue-600.hover_underline(:href="currentBook.videoUrl" target="_blank") Watch here

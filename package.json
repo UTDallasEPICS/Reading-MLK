@@ -18,6 +18,7 @@
     "@vuepic/vue-datepicker": "^8.8.1",
     "consola": "^3.4.0",
     "defu": "^6.1.4",
+    "dompurify": "^3.3.0",
     "express": "^5.1.0",
     "fs-extra": "^11.3.0",
     "i": "^0.3.7",
