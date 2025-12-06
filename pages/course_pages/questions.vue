@@ -130,8 +130,8 @@ async function submitAnswers(){
         method: 'POST',
         headers: {'Content-Type': 'application/json' },
         body: {
-          quizId: quizId.value,
-          studentProfileId: studentId.value,
+          quiz_id: quizId.value,
+          student_id: studentId.value,
         }
     })
     //redirect to course homepage after submission

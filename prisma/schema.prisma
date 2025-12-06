@@ -265,7 +265,9 @@ model QuizResponse {
   quiz             Quiz           @relation(fields: [quizId], references: [id])
   MCAnswer         MCAnswer[]
   FRAnswer         FRAnswer[]
-  submittedAt      DateTime       @default(now())
+  submittedAt      DateTime?       //@default(now())
+  score            Int?           //can start as a NULL value
+  status           String         @default("IN_PROGRESS") 
 
   @@map("quiz_responses")
 }

@@ -12,7 +12,7 @@ if (process.env.NODE_ENV !== 'production') {
 export default defineEventHandler(async (event) => {
     try {
         const { quiz_id, student_profile_id } = getQuery(event);
-        //get the user (through auth middleware)
+        //get the user (through auth MagicLinks
         const user = event.context.user;
 
         //check if they are valid ID's
@@ -25,11 +25,11 @@ export default defineEventHandler(async (event) => {
         //check what type of user is trying to access the responses
         // if it is a faculty member of admin, allow access to all responses
         if(!student_profile_id){
-            /* Uncomment this when the auth middleware is fully active
+            //using MagicLinks to check access
             if (!user || (user.role !== 'Faculty' && user.role !== 'Admin')) {
                  throw createError({ statusCode: 403, statusMessage: 'Faculty or admin access only' });
             }
-            */
+            //get responses
             const allResponses = await prisma.quizResponse.findMany({
                 where: {
                     quizId: Number(quiz_id)
