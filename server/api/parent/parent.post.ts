@@ -1,17 +1,30 @@
 import { PrismaClient } from '@prisma/client'
 import { PrismaClientKnownRequestError, PrismaClientUnknownRequestError } from '@prisma/client/runtime/library';
-import { read } from 'fs'
+
 const prisma = new PrismaClient();
 
 export default defineEventHandler(async (event) => {
     const body = await readBody(event);
 
-    const {age, grade, birth_date, gender, school_dist, school_name, pref_lang, first_name, last_name, email, reading_lvl, preferred_name} = body
+    const {
+        age,
+        grade,
+        birth_date,
+        gender,
+        school_dist,
+        school_name,
+        pref_lang,
+        first_name,
+        last_name,
+        email,
+        reading_lvl,
+        preferred_name
+    } = body;
 
-    // Check if all required fields are present in the request body
+    // Check if all required fields are present
     if (
         age &&
-        grade &&       
+        grade &&
         reading_lvl &&
         birth_date &&
         gender &&
@@ -20,11 +33,11 @@ export default defineEventHandler(async (event) => {
         pref_lang &&
         first_name &&
         last_name &&
-        preferred_name && 
+        preferred_name &&
         email
     ) {
-        // Create a new student record
         try {
+            // Create new student record
             const studentProfile = await prisma.studentProfile.create({
                 data: {
                     age: parseInt(age),
@@ -38,22 +51,38 @@ export default defineEventHandler(async (event) => {
                     first_name,
                     last_name,
                     preferred_name,
+                    email,
                 },
             });
 
             return {
                 student: studentProfile
-            }
+            };
+
         } catch (error) {
-            if (error instanceof PrismaClientKnownRequestError){
-                console.log('You exeperienced this error code: ' + error.code, error.meta, error.message, ' If you would like to find what this error message means please refer to this link: https://www.prisma.io/docs/orm/reference/error-reference  ')
+
+            if (error instanceof PrismaClientKnownRequestError) {
+                console.log(
+                    'You experienced this error code: ' +
+                        error.code,
+                    error.meta,
+                    error.message,
+                    ' See: https://www.prisma.io/docs/orm/reference/error-reference'
+                );
+            } else if (error instanceof PrismaClientUnknownRequestError) {
+                console.log('Unknown error: ', error.message);
             }
-            else if (error instanceof PrismaClientUnknownRequestError){
-                console.log('Unknown error: ' , error.message)
-            }
-            return createError({ statusCode: 500, statusMessage: "Server Post Error" });
+
+            return createError({
+                statusCode: 500,
+                statusMessage: "Server Post Error"
+            });
         }
+
     } else {
-        return createError({ statusCode: 400, statusMessage: "Bad Request: Missing Required Fields" });
+        return createError({
+            statusCode: 400,
+            statusMessage: "Bad Request: Missing Required Fields"
+        });
     }
 });

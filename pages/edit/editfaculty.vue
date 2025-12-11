@@ -1,52 +1,53 @@
-<template lang = "pug">
+<template lang="pug">
   div(class="content-center")
-      <!-- Submission form for editing faculty profile -->
-      .flex.flex-col.gap-5(class="content-center px-10")
-        h2.text-center.text-3xl.font-bold.mt-6 Edit Faculty Profile
-        hr.rounded.center-text(style="border-top: 7px solid #122C4F; width: 65%; margin: 0 auto; margin-top: 7px")
+    <!-- Submission form for editing faculty profile -->
+    .flex.flex-col.gap-5(class="content-center px-10")
+      h2.text-center.text-3xl.font-bold.mt-6 Edit Faculty Profile
+      hr.rounded.center-text(style="border-top: 7px solid #122C4F; width: 65%; margin: 0 auto; margin-top: 7px")
 
-        <!-- Form fields -->
-        div(class="mt-10 w-3/5 mx-auto grid grid-cols-1 gap-y-8")
-            div(class="")
-                .py-4.grid(class="" )
-                    Label First Name
-                        Input(v-model='faculty.first_name' name="first_name" id="first_name" placeholder="(user defined)" required)
-                .py-4.grid(class="" )
-                    Label Last Name
-                        Input(v-model='faculty.last_name' name="last_name" id="last_name" placeholder="(user defined)" required)
-                .py-4.grid(class="" )
-                    Label School District currently working in
-                        Input(v-model='faculty.district' name="district_teach" id="district_teach" placeholder="(Ex: DISD)" required)
-                .py-4.grid(class="" )
-                    Label Faculty Email
-                        Input(v-model='faculty.faculty_email' name="faculty_email" id="faculty_email" placeholder="(user defined)" required)
-                .py-4.grid(class="" )
-                    Label Do you teach a dual language class?
-                        select(v-model="faculty.dual_lang" name="dual_lang" id="dual_lang" class="block w-full rounded-md border border-gray-700 focus:ring-indigo-500"  placeholder = "(Do you Teach a Bilingual Class)")
-                            option(:value="false") Do you Teach a Bilingual Class
-                            option(:value="true") Yes
-                            option(:value="false") No
-                .py-4.grid(class="" )
-                    Label School Name
-                        Input(v-model='faculty.school_name' name="school_name" id="school_name" placeholder="(user defined)" required)
-                .py-4.grid(class="" )
-                    Label Department
-                        Input(v-model='faculty.department' name="department" id="department" placeholder="(Ex: English, Science, or Math)" required)
-                .py-4.grid(class="" )
-                    Label Phone number
-                        Input(v-model='faculty.phone_number' name="phone_number" id="phone_number" placeholder="(Ex: 1234567891)" required)
-                .py-4.grid(class="" )
-                    Label Grade you teach
-                        Input(v-model='faculty.grade' name="grade" id="grade" placeholder="(Ex: First, Second, or Pre-K)" required)
-      .flex
-           button(type="button" class="rounded mb-4 bg-indigo-600 px-3 py-2 text-lg font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 w-60 mx-auto" @click="editFaculty(faculty)") Apply Edits
+      <!-- Form fields -->
+      div(class="mt-10 w-3/5 mx-auto grid grid-cols-1 gap-y-8")
+        div(class="")
+          .py-4.grid(class="" )
+            Label First Name
+            Input(v-model='faculty.first_name' name="first_name" id="first_name" placeholder="(user defined)" required)
+          .py-4.grid(class="" )
+            Label Last Name
+            Input(v-model='faculty.last_name' name="last_name" id="last_name" placeholder="(user defined)" required)
+          .py-4.grid(class="" )
+            Label School District currently working in
+            Input(v-model='faculty.district' name="district_teach" id="district_teach" placeholder="(Ex: DISD)" required)
+          .py-4.grid(class="" )
+            Label Faculty Email
+            Input(v-model='faculty.faculty_email' name="faculty_email" id="faculty_email" placeholder="(user defined)" required)
+          .py-4.grid(class="" )
+            Label Do you teach a dual language class?
+            select(v-model="faculty.dual_lang" name="dual_lang" id="dual_lang" class="block w-full rounded-md border border-gray-700 focus:ring-indigo-500" placeholder = "(Do you Teach a Bilingual Class)")
+              option(:value="false") Do you Teach a Bilingual Class
+              option(:value="true") Yes
+              option(:value="false") No
+          .py-4.grid(class="" )
+            Label School Name
+            Input(v-model='faculty.school_name' name="school_name" id="school_name" placeholder="(user defined)" required)
+          .py-4.grid(class="" )
+            Label Department
+            Input(v-model='faculty.department' name="department" id="department" placeholder="(Ex: English, Science, or Math)" required)
+          .py-4.grid(class="" )
+            Label Phone number
+            Input(v-model='faculty.phone_number' name="phone_number" id="phone_number" placeholder="(Ex: 1234567891)" required)
+          .py-4.grid(class="" )
+            Label Grade you teach
+            Input(v-model='faculty.grade' name="grade" id="grade" placeholder="(Ex: First, Second, or Pre-K)" required)
+    .flex
+      button(type="button" class="rounded mb-4 bg-indigo-600 px-3 py-2 text-lg font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 w-60 mx-auto" @click="editFaculty(faculty)") Apply Edits
 </template>
-    
-<script setup lang='ts'>
-import { ref, onMounted } from 'vue';
-const rhuser = useCookie<any>('rhuser')
-const userRole = rhuser.value.role
-const faculties = ref(null)
+
+<script setup lang="ts">
+import { ref, onMounted } from "vue";
+
+const rhuser = useCookie<any>("rhuser");
+const userRole = rhuser.value.role;
+const faculties = ref(null);
 const id = rhuser.value?.id;
 
 interface FacultyProfile {
@@ -64,21 +65,21 @@ interface FacultyProfile {
 
 var faculty = ref<FacultyProfile>({
   id: null,
-  district: "",     
-  dual_lang: false, 
-  faculty_email: "",  
-  first_name: "",   
-  last_name: "",    
-  school_name: "",   
-  phone_number: "",  
-  department: "",    
+  district: "",
+  dual_lang: false,
+  faculty_email: "",
+  first_name: "",
+  last_name: "",
+  school_name: "",
+  phone_number: "",
+  department: "",
   grade: "",
 });
 
-const uri = new URL(window.location.href)
-const facultyId = (new URLSearchParams(uri.search)).get('id');
+const uri = new URL(window.location.href);
+const facultyId = new URLSearchParams(uri.search).get("id");
 
-onMounted(async()=>{
+onMounted(async () => {
   if (facultyId) {
     try {
       const fetchedFaculty = await getFaculty();
@@ -102,13 +103,13 @@ async function getFaculty(): Promise<FacultyProfile> {
 
 const editFaculty = async (editedFaculty: FacultyProfile) => {
   console.log("Edited Faculty Profile", editFaculty);
-  console.log(editedFaculty)
+  console.log(editedFaculty);
   let faculty = null;
-  try{
-    faculty = await $fetch('/api/faculty/faculty', {
-      method: 'PUT',
+  try {
+    faculty = await $fetch("/api/faculty/faculty", {
+      method: "PUT",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: {
         //JSON.stringify(editedFaculty)
@@ -125,22 +126,22 @@ const editFaculty = async (editedFaculty: FacultyProfile) => {
       },
     });
     console.log("Faculty profile edited successfully");
-  }catch(error){
-    console.log('Error editing Faculty profile');
+  } catch (error) {
+    console.log("Error editing Faculty profile");
   }
-  navigateTo('/viewfaculty')
-}
+  navigateTo("/viewfaculty");
+};
 
-const save = async() =>{
-const data = await $fetch<FacultyProfile>('/api/faculty/', {
-  method: 'PUT',
-  body: ({...faculty.value, id: id.value as string})
-}).catch((error)=>{
-  console.log("Error: ",error.data.message);
-});
-console.log(data);
-if (data && (data as any).success){
-  await navigateTo('/parent');
-}
-}
+const save = async () => {
+  const data = await $fetch<FacultyProfile>("/api/faculty/", {
+    method: "PUT",
+    body: { ...faculty.value, id: id.value as string },
+  }).catch((error) => {
+    console.log("Error: ", error.data.message);
+  });
+  console.log(data);
+  if (data && (data as any).success) {
+    await navigateTo("/parent");
+  }
+};
 </script>

@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import { read } from 'fs'
 const prisma = new PrismaClient();
 
 export default defineEventHandler(async (event) => {
@@ -7,22 +6,27 @@ export default defineEventHandler(async (event) => {
     let parent = null;
     let error = null;
 
-    const {id} = body
+    const { id } = body;
 
     if (id) {
-        // Delete the parent record
-        parent = await prisma.parentProfile.delete({
-            where: {
-                id,
-            },
-        }).catch(async (e) => {
+        // Attempt to delete the parent record
+        try {
+            parent = await prisma.parentProfile.delete({
+                where: {
+                    id,
+                },
+            });
+        } catch (e) {
             error = e;
-        });
+        }
     }
 
-    // Check if an error occurred during the deletion
+    // Check if an error occurred during deletion
     if (error) {
-        return createError({ statusCode: 500, statusMessage: "Server Delete Error" });
+        return createError({
+            statusCode: 500,
+            statusMessage: "Server Delete Error"
+        });
     }
 
     return parent;
