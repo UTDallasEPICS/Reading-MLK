@@ -249,7 +249,7 @@ Page for students to track reading and learning progress.
 
 ### Prerequisites
 
-- **IDE (VS Code for EPICS)**, **Node.js**, **Docker**, **Git**, and **Postman** (optional).
+- **IDE (VS Code for EPICS)**, **Node.js**, **Git**, and **Postman** (optional).
 
 ### Steps
 
@@ -267,7 +267,6 @@ Page for students to track reading and learning progress.
 3. **Configure environment variables**
    - If you are working with Auth0, contact the project mentor for the NUXT_AUTH0_SECRET. Set that in the .env file.
    ```bash
-   docker-compose up
    cp .env.example .env
    ```
 
