@@ -264,9 +264,11 @@ Page for students to track reading and learning progress.
    npm install
    ```
 
-3. **Build Docker Environment**
+3. **Configure environment variables**
+   - If you are working with Auth0, contact the project mentor for the NUXT_AUTH0_SECRET. Set that in the .env file.
    ```bash
    docker-compose up
+   cp .env.example .env
    ```
 
 4. **Execute Prisma Migrations**
@@ -275,15 +277,7 @@ Page for students to track reading and learning progress.
    ```
 
 5. **Seed the Database**
-   - Create defultCredentials.js with emails team members can login with and place into `./prisma`
-   - Navigate to `./prisma/` directory and add starter credentials.
-   - Navigate and Run seed script:
-     ```bash
-     cd prisma
-     node ./generateSeed.js
-     ```
-
-   - Or at top level, run 
+   - Run 
    ```bash
    npx prisma db seed
    ```
