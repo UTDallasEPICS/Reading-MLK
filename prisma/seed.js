@@ -65,9 +65,9 @@ async function main() {
         "email": process.env.DEV_EMAIL,
         "role": "admin",
         Admin:{
-            create: {
-            admin_email: process.env.DEV_EMAIL,
-            }
+            // create: {
+            // admin_email: process.env.DEV_EMAIL,
+            // }
         }
     }
     const parentUser =   {
@@ -107,31 +107,31 @@ async function main() {
             "grade": "5th"
         }}
     }
-    const studentUser =   {
-        "user_name": "StudentTest",
-        "first_name": "Student",
-        "last_name": "Test",
-        "preferred_name": "student",
-        "email": "student@gmail.com",
-        "role": "student",
-        Student:{
-            create: {
-            "grade": "5th",
-            "student_email": "student@gmail.com",
-            "school_name": "Lemke - Lemke",
-            "phone_number": "(583) 601-7432 x403",
-            "birth_date": "2024-08-31T06:09:42.427Z",
-            "gender": "Female",
-            "social_media": "hnicolas253",
-        }}
-    }
+    // const studentUser =   {
+    //     "user_name": "StudentTest",
+    //     "first_name": "Student",
+    //     "last_name": "Test",
+    //     "preferred_name": "student",
+    //     "email": "student@gmail.com",
+    //     "role": "student",
+    //     Student:{
+    //         create: {
+    //         "grade": "5th",
+    //         "student_email": "student@gmail.com",
+    //         "school_name": "Lemke - Lemke",
+    //         "phone_number": "(583) 601-7432 x403",
+    //         "birth_date": "2024-08-31T06:09:42.427Z",
+    //         "gender": "Female",
+    //         "social_media": "hnicolas253",
+    //     }}
+    // }
 
     // Seeding users
     // TODO: parent/faculty/student/admin data gets seeded as part of the user data, see https://www.prisma.io/docs/orm/prisma-client/queries/relation-queries#nested-writes
     await prisma.user.create({ data: facultyUser });
     await prisma.user.create({ data: adminUser });
     await prisma.user.create({ data: parentUser });
-    await prisma.user.create({ data: studentUser });
+    // await prisma.user.create({ data: studentUser });
     // Seeding classes
     //await prisma.class.createMany({ data: JSON.parse(fs.readFileSync(path.resolve('./prisma/classData.json'), 'utf8')), skipDuplicates: true });
 
