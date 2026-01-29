@@ -1,6 +1,7 @@
 {
   "recommendations": [
     "alexcvzz.vscode-sqlite",
-    "prisma.prisma"
+    "prisma.prisma",
+    "vue.volar"
   ]
 }
