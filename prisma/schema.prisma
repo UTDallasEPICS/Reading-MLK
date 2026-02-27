@@ -1,301 +1,71 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["driverAdapters"]
+  provider = "prisma-client"
+  output   = "./generated"
 }
 
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
 }
 
-//generator erd {
-//  provider = "prisma-erd-generator"
-//}
-
-// standard user profile 
 model User {
-  id             Int     @id @default(autoincrement())
-  user_name      String  @unique // should have one upper case and lower case alongside a number
-  first_name     String
-  last_name      String
-  preferred_name String?
-  email          String  @unique // should hold the email of the private account @map("email")
-  // client_cuid    String  @map("client_cuid")
-  role           String
+  id            String    @id
+  name          String
+  email         String
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  accounts      Account[]
 
-  Parents ParentProfile?
-  // Children StudentProfile?
-  Faculty FacultyProfile?
-  Admin   AdminProfile?
-
-  @@map("users")
+  @@unique([email])
+  @@map("user")
 }
 
-// parent profile
-model ParentProfile {
-  id                   Int             @id @default(autoincrement())
-  zipcode              String
-  yearly_income        String? /// must be optional to give the parent income for sensitivity issues // changed to string to allow for more dynamic input
-  birth_date           DateTime?       @default(now())
-  average_number_books Int /// average number of books read to child (before they registered with program/school and this will not be changed)
-  phone_number         String          @unique /// parent should provide their mobile for easy contact their extension is not required (we are assuming they have a US extension)
-  gender               String
-  marital_stat         String? /// martial status of the parent (will be optional choice)
-  social_media         String?         @unique /// could be other social media handle but should ask for twitter(X) handle (most likely social media handle they have)
-  user_id              Int             @unique
-  User                 User            @relation(fields: [user_id], references: [id])
-  ParentToChild        ParentToChild[]
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@map("parent_profile")
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
 }
 
-// teacher profile (principle will also have a faculty profile)
-model FacultyProfile {
-  id            Int     @id @default(autoincrement())
-  district      String
-  dual_lang     Boolean /// True if they are spanish or other language teacher with non-english kids, otherwise false to indicate they are english speaking teachers      
-  faculty_email String  @unique
-  school_name   String
-  phone_number  String
-  department    String
-  grade         String // multi to indicate that they teach multiple 
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
-  user_id        Int              @unique
-  Faculty        User             @relation(fields: [user_id], references: [id])
-  TeacherToClass TeacherToClass[]
-
-  @@map("faculty_profile")
+  @@index([userId])
+  @@map("account")
 }
 
-// registered students profile 
-model StudentProfile {
-  id          Int       @id @default(autoincrement())
-  age         Int
-  grade       Int /// preschool should be given 0 to denote their grade level
-  reading_lvl Int /// should reference AR level to indicate reading level
-  birth_date  DateTime? @default(now())
-  gender      String
-  school_name String /// asssume that all the school names will be elementary schools so we should ask them to give the name of the school 
-  school_dist String /// example format should be GISD (garland independent school district)
-  pref_lang   String? /// drop down option for either english, spanish(espanol), or other (only temporary until we can get more info on what languages they speak)
-  first_name  String
-  last_name   String
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  AssignmentToStudent AssignmentToStudent[]
-  // pref_name   String
-
-  // user_id Int  @unique
-  // Student User @relation(fields: [user_id], references: [id])
-
-  ParentToChild ParentToChild[]
-  Classes       StudentToClass[]
-  QuizResponse  QuizResponse[]
-
-  @@map("student_profile")
-}
-
-// model to hold the administrators from Friends of MLK
-model AdminProfile {
-  id          Int    @id @default(autoincrement())
-  //admin_email String @unique // TODO: we dont need this field kill it
-
-  admin_id Int  @unique
-  Admin    User @relation(fields: [admin_id], references: [id])
-
-  @@map("admin_profile")
-}
-
-// class model to create relation between teacher and student (should be one-to-many)
-model Class {
-  id         Int              @id @default(autoincrement())
-  class_name String           @default("Untitled Class")
-  class_year Int
-  Teacher    TeacherToClass[]
-  Student    StudentToClass[]
-  Assignment AssignmentToClass[]
-
-  @@map("classes")
-}
-
-// join table for teacher to class relationship
-model TeacherToClass {
-  class_id   Int
-  teacher_id Int
-  Class      Class          @relation(fields: [class_id], references: [id])
-  Teacher    FacultyProfile @relation(fields: [teacher_id], references: [id])
-
-  @@id([class_id, teacher_id])
-  @@map("teacher_to_classes")
-}
-
-// join table for student to class relationship
-model StudentToClass {
-  class_id   Int
-  student_id Int
-  Class      Class          @relation(fields: [class_id], references: [id])
-  Student    StudentProfile @relation(fields: [student_id], references: [id])
-  
-  @@id([class_id, student_id])
-  @@map("student_to_classes")
-}
-
-// join table for relationship between parents and child (student) (should be one-to-many)
-model ParentToChild {
-  parent_id Int
-  child_id  Int
-  Parent    ParentProfile  @relation(fields: [parent_id], references: [id])
-  Child     StudentProfile @relation(fields: [child_id], references: [id])
-
-  @@id([parent_id, child_id])
-  @@map("parent_to_kids")
-}
-
-//Maps Assignment to Classes
-model AssignmentToClass {
-  assignment_id Int
-  class_id      Int
-  Assignment    Quiz           @relation(fields: [assignment_id], references: [id])
-  Class         Class          @relation(fields: [class_id], references: [id])
-
-  @@id([assignment_id, class_id])
-  @@map("assignment_to_classes")
-}
-
-model AssignmentToStudent {
-  assignment_id Int
-  student_id    Int
-  Assignment    Quiz           @relation(fields: [assignment_id], references: [id])
-  Student       StudentProfile @relation(fields: [student_id], references: [id])
-
-  @@id([assignment_id, student_id])
-  @@map("assignment_to_students")
-}
-
-// Models for reading quiz related things
-
-model Book {
-  id         Int    @id @default(autoincrement())
-  book_title String
-  author     String
-  isbn       String @unique
-  page_count Int
-
-  Videos Video[]
-  @@map("books")
-}
-
-model Video {
-  id         Int    @id @default(autoincrement())
-  vid_length Int
-  url        String
-  book_id    Int    
-  Book       Book   @relation(fields: [book_id], references: [id])
-
-  @@map("video_form")
-}
-
-model Quiz {
-  id        Int            @id @default(autoincrement())
-  name      String         @default("Untitled Quiz")
-  submitted Boolean        @default(false)
-  grade     Int            @default(100) // default grade is 100
-  questions Question[]
-  responses QuizResponse[]
-
-  AssignmentToStudent AssignmentToStudent[]
-  AssignmentToClass  AssignmentToClass[]
-
-  @@map("quizzes")
-}
-
-model Question {
-  id       Int    @id @default(autoincrement())
-  quiz_id  Int
-  text     String
-  feedback String
-  quiz     Quiz   @relation(fields: [quiz_id], references: [id])
-  score    Int
-
-  // Question types
-  MultipleChoice MCQuestion?
-  FreeResponse   FRQuestion?
-
-  // Responses
-  mcAnswers MCAnswer[]
-  frAnswers FRAnswer[]
-
-  @@map("questions")
-}
-
-model MCQuestion {
-  id          Int        @id @default(autoincrement())
-  question_id Int        @unique
-  options     MCOption[]
-  Question    Question   @relation(fields: [question_id], references: [id])
-
-  @@map("multiple_choice_question")
-}
-
-model MCOption {
-  id         Int        @id @default(autoincrement())
-  questionId Int
-  text       String
-  isCorrect  Boolean // @default(false)
-  mcQuestion MCQuestion @relation(fields: [questionId], references: [id])
-
-  @@map("multiple_choice_options")
-}
-
-model FRQuestion {
-  id          Int      @id @default(autoincrement())
-  question_id Int      @unique
-  Question    Question @relation(fields: [question_id], references: [id])
-
-  @@map("free_response_question")
-}
-
-model QuizResponse {
-  id               Int            @id @default(autoincrement())
-  studentProfileId Int
-  quizId           Int
-  StudentProfile   StudentProfile @relation(fields: [studentProfileId], references: [id])
-  quiz             Quiz           @relation(fields: [quizId], references: [id])
-  MCAnswer         MCAnswer[]
-  FRAnswer         FRAnswer[]
-  submittedAt      DateTime       @default(now())
-
-  @@map("quiz_responses")
-}
-
-model MCAnswer {
-  id             Int          @id @default(autoincrement())
-  quizResponseId Int
-  questionId     Int
-  selectedOption String
-  quizResponse   QuizResponse @relation(fields: [quizResponseId], references: [id])
-  question       Question     @relation(fields: [questionId], references: [id])
-
-  @@map("multiple_choice_answers")
-}
-
-model FRAnswer {
-  id             Int          @id @default(autoincrement())
-  quizResponseId Int
-  questionId     Int
-  responseText   String
-  quizResponse   QuizResponse @relation(fields: [quizResponseId], references: [id])
-  question       Question     @relation(fields: [questionId], references: [id])
-
-  @@map("free_response_answers")
-}
-
-model OTP {
-  id    Int    @id @default(autoincrement())
-  email String @unique
-  code  String
-
-  @@map("otp_codes")
+  @@index([identifier])
+  @@map("verification")
 }

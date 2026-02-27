@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "nuxt-remote": {
+      "httpUrl": "https://nuxt.com/mcp"
+    },
+    "nuxt-ui-remote": {
+      "httpUrl": "https://ui.nuxt.com/mcp"
+    },
+    "better-auth": {
+      "httpUrl": "https://mcp.chonkie.ai/better-auth/better-auth-builder/mcp"
+    }
+  }
+}

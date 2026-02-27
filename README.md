@@ -34,269 +34,96 @@ The project’s goal is to create a web application that delivers:
 - Easy-to-access educational resources.
 - Structured courses for parents to aid their children's learning.
 
-### Features Requested by the Partner (to be completed by future semesters):
-1. **Question of the Day** videos.
-2. **Daily Reminders** to users.
-3. **Progress Tracking**.
-4. **Daily Challenges**.
-5. **Periodic Quizzes**.
-
-## 🏠 **Home Page**
-
-### 📝 **Overview Home Page**
-
-The **Home Page** serves as the application’s entry point, featuring:
-
-- The mission statement.
-- Registration prompts.
-- Interactions with modules and resources.
-
-**Technologies Used**: Vue.js, Tailwind CSS
-
-### ⚙️ **Functional Requirements Home Page**
-
-1. **Display Informative Sections**
-   - Clear sections about the mission, registration, and available modules.
-
-2. **Interactive Registration**
-   - Opens a modal for account selection.
-
-3. **Responsive Layout**
-   - Adaptable to various screen sizes.
-
-4. **Animations**
-   - Smooth transitions for an enhanced user experience.
-
-5. **Module Interaction**
-   - Clickable modules directing users to additional reading resources.
-
-
-
-### ✅ **Progress So Far Home Page**
-
-- **Hero Section**: Completed with animations.
-- **Account Selection Modal**: Functional.
-- **Mission Section**: Implemented with text, images, and animations.
-- **Modules Section**: Interactive with hover effects.
-- **Scroll Indicator**: Bounce animation pointer added.
-
-
-
-### 🚀 **Future Enhancements**
-
-- Enhanced **Account Selection Modal** with detailed forms.
-- **Navigation Bar** for improved usability.
-- **Accessibility Features** like ARIA labels.
-- Optimized performance for animations and image loading.
-
-## 👩‍💼 **About Us Page**
-
-### 📝 **Overview About Us**
-
-The **About Us Page** introduces visitors to the organization’s:
-
-- Mission and Vision
-- Core Values
-- Team Members
-- Contact Information
-
-
-### ⚙️ **Functional Requirements About Us**
-
-1. **Page Header**
-   - Full-width background image with title overlay.
-
-2. **Vision Section**
-   - Descriptive text in a card-style container.
-
-3. **Core Values Section**
-   - Grid layout for values with icons and hover effects.
-
-4. **Team Section**
-   - Profile images, names, and short bios.
-
-5. **Feedback Section**
-   - Form for users to submit feedback.
-
-6. **Location Section**
-   - Address and embedded Google Map.
-
-7. **Contact Us Section**
-   - Contact form with validation.
-
-
-
-### 🔧 **Technologies Used**
-
-- Framework: Vue.js
-- Styling: Tailwind CSS
-- Icons: Font Awesome
-- Maps: Google Maps Embed API
-
-## 📝 **Faculty Form Page**
-
-Designed to collect and securely submit faculty member details.
-
-### Features:
-
-- Fields: Email, Phone, School Name, Department, Grade, and Dual Language support checkbox.
-- Form validation to ensure required fields are filled.
-- Responsive design with real-time feedback.
-- Submit button to post data securely to the backend.
-
-
-
-## ✉️ **New User Invite Page**
-
-**Admin-exclusive** interface for inviting new users.
-
-### Features:
-
-- Fields for personal and demographic data.
-- Dynamic form for adding multiple students.
-- Role-based access for secure admin actions.
-- Submit button with confirmation prompts.
-
-
-
-## 🧾 **Parent Form Page**
-
-Form for administrators to input parent and student details.
-
-### Highlights:
-
-- Fields for personal, demographic, and contact information.
-- Dynamic student form allowing multiple entries.
-- Validation and error handling for form submission.
-- Integration with backend API for data processing.
-
-
-
-## 👨‍🎓 **Student Form Page**
-
-Reusable form for inputting multiple students’ details:
-
-- Fields include: Name, Gender, Birth Date, Grade, Reading Level, and Zipcode.
-- Add/Remove dynamic student forms.
-- Fully responsive design with error handling.
-
-
-
-## 📋 **Faculty View Page**
-
-Page for viewing and managing faculty records.
-
-### Key Features:
-
-- Search and filter functionality.
-- Editable table with hover effects.
-- Role-based access control.
-- Responsive and real-time data updates.
-
-
-
-## 👪 **Parents View Page**
-
-Interface for managing parent records.
-
-### Features:
-
-- Searchable, sortable table.
-- Edit and Remove actions for each parent.
-- Responsive layout with error handling.
-- Pagination for large datasets.
-
-
-
-## 🧒 **Course Home Page**
-Interface for students to view and access their reading statistics.
-
-### Features:
-
-- Library page for student to keep track of books read.
-- Log page for individual books that have been read.
-- Progress page with intuitive graphs for child to understand their progress, access teacher feedback, and see class goals (also accessible to teacher and parent).
-- Wishlist page for student to add books for future reading.
-- Favorites page to encourage students to keep track of their favorite books.
-
-## 📚 **Student Dashboard**
-Page for students to track reading and learning progress.
-
-### Features:
-- Page accessible from homepage.
-- Free-response and multiple choice question forms created.
-- Sidebar navigation links to other pages.
-- Working Wishlist, Favorites, and Library Pages.
-
-
-
-## 🔌 **Third-Party Integrations**
-
-| Integration | Purpose                   | Role in Project                          |
-|-------------|---------------------------|------------------------------------------|
-| **Auth0**   | Authentication           | Secure user login and role management.   |
-
-## 🛠️ **Tech Stack**
-
-| Category         | Technology            |
-|------------------|-----------------------|
-| **Frontend**     | Vue.js, Tailwind CSS  |
-| **Backend**      | Nuxt.js               |
-| **Database**     | PostgreSQL, Prisma    |
-| **Auth**         | Auth0                 |
-
 ## ⚙️ **Setting Up the Development Environment**
 
 ### Prerequisites
 
 - **IDE (VS Code for EPICS)**, **Node.js**, **Git**, and **Postman** (optional).
+- **pnpm**: https://pnpm.io/installation
 
-### Steps
+### Getting Started
 
-1. **Clone the Repository**
-   ```bash
-   git clone https://github.com/UTDallasEPICS/Reading-MLK/
-   cd Reading-MLK
-   ```
+### 1. Clone the repository
 
-2. **Install Dependencies**
-   ```bash
-   npm install
-   ```
+```bash
+git clone https://github.com/UTDallasEPICS/Reading-MLK.git
+cd Reading-MLK
+```
 
-3. **Configure environment variables**
-   - If you are working with Auth0, contact the project mentor for the NUXT_AUTH0_SECRET. Set that in the .env file.
-   ```bash
-   cp .env.example .env
-   ```
+### 2. Install dependencies
 
-4. **Execute Prisma Migrations**
-   ```bash
-   npx prisma migrate dev
-   ```
+This project uses `pnpm`, but you can use `npm` as well.
 
-5. **Seed the Database**
-   - Run 
-   ```bash
-   npx prisma db seed
-   ```
+```bash
+pnpm install
+```
 
-6. **Start the Project**
-   ```bash
-   npm run dev
-   ```
+### 3. Setup Environment Variables
 
-7. **Access the Application**
-   - Open your browser at `http://localhost:3000` and login with the loaded Auth0 page.
+Copy the example environment file and fill in your details.
 
+```bash
+cp .env.example .env
+```
 
+Open `.env` and configure the following:
 
-For further details, refer to the official [Nuxt 3 Documentation](https://nuxt.com/docs/getting-started/introduction).
+- `DATABASE_URL`: The SQLite connection string (default: `file:./dev.db`).
+- `BETTER_AUTH_SECRET`: A secure random string for encryption. You can generate one using `openssl rand -hex 32`.
+- `BETTER_AUTH_URL`: The base URL of your application (default: `http://localhost:3000`).
+- `EMAIL_USER`: Your Gmail address (for OTP delivery).
+- `EMAIL_PASS`: Your Gmail App Password. [How to generate an App Password](https://support.google.com/accounts/answer/185833).
 
-### Figma
-- See Figma Mockups in `./figma`
+### 4. Database Setup
 
-### Migration-Scripts
-- N/A
-### Deployment
-- This project will be deployed in the future on AWS EC2
+Initialize your SQLite database and run migrations.
+
+```bash
+pnpm dlx prisma migrate dev --name init
+```
+
+Generate the Prisma client
+
+```bash
+pnpm dlx prisma generate
+```
+
+To reset the database and run the seed script:
+
+```bash
+pnpm prisma:reset
+```
+
+### 5. Start the development server
+
+```bash
+pnpm dev
+```
+
+Your application will be available at `http://localhost:3000`. This command also starts **Prisma Studio** automatically.
+
+### 6. How to Login
+
+Login requires an email address that already exists in the database.
+
+- **Option A: Use the seeded user**
+  Go to `/auth` and log in with `alice@a.com`.
+- **Option B: Use your own email**
+  Update `prisma/seed.ts` with your email, then run `pnpm prisma:reset` to re-seed.
+
+**To get your OTP:**
+
+- Check your configured email inbox.
+- **Or**, check the **Prisma Studio** tab in your browser and look in the `Verification` table.
+
+## Project Structure
+
+- `app/`: Frontend code (pages, components, assets, composables).
+- `server/`: Backend code (API routes, authentication logic, database utilities).
+- `prisma/`: Database schema, migrations, and seed scripts.
+- `public/`: Static assets.
+
+## License
+
+MIT
+
