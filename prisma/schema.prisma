@@ -8,7 +8,7 @@ datasource db {
 }
 
 model User {
-  id            String    @id
+  id            Int    @id
   name          String
   email         String
   emailVerified Boolean   @default(false)
@@ -23,14 +23,14 @@ model User {
 }
 
 model Session {
-  id        String   @id
+  id        Int   @id
   expiresAt DateTime
   token     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   ipAddress String?
   userAgent String?
-  userId    String
+  userId    Int
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([token])
@@ -39,10 +39,10 @@ model Session {
 }
 
 model Account {
-  id                    String    @id
+  id                    Int    @id
   accountId             String
   providerId            String
-  userId                String
+  userId                Int
   user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessToken           String?
   refreshToken          String?
@@ -53,6 +53,8 @@ model Account {
   password              String?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
+  admin                 Admin?
+  students              Student[]
 
   @@index([userId])
   @@map("account")
@@ -68,4 +70,116 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+model Admin {
+  id                    Int       @id
+  account               Account   @relation(fields: [id], references: [id], onDelete: Cascade)
+  settings              String    //JSON stringified array of options for settings
+  authoredAnnouncements Announcement[]
+  authoredForms         Form[]
+}
+
+model Student {
+  id                    Int    
+  sname                 String
+  parent                Account       @relation(fields: [id], references: [id], onDelete: Cascade)
+  settings              String        //JSON stringified array of options for settings
+  exp                   Int           @default(0)
+  streak                Int
+  submissions           Submission[]
+  responses             Response[]
+  winnerOf              FormGroup[]   @relation("RaffleWinner")
+  @@id([id, sname])
+}
+
+model Announcement {
+  id          Int     @id @default(autoincrement())
+  authorid    Int?
+  author      Admin?  @relation(fields: [authorid], references: [id], onDelete: SetNull)
+  postDate    DateTime
+  expiryDate  DateTime?
+  content     String
+}
+
+model FormGroup {
+  fid           Int       @id @default(autoincrement())
+  startDate     DateTime
+  endDate       DateTime?
+  rwinid        Int?
+  rwinname      String?
+  raffleWinner  Student?  @relation(name: "RaffleWinner", fields: [rwinid, rwinname], references: [id, sname], onDelete: SetNull)
+  forms         Form[]
+}
+
+model Form {
+  fgid          Int       
+  order         Int       @default(0)
+  startDate     DateTime
+  endDate       DateTime?
+  group         FormGroup @relation(fields: [fgid], references: [fid], onDelete: Cascade)
+  components    Component[]
+  published     Boolean   @default(false)
+  authorid      Int?
+  author        Admin?    @relation(fields: [authorid], references: [id], onDelete: SetNull)
+  submissions   Submission[]
+  @@id([fgid, order])
+}
+
+model Component {
+  fgid          Int
+  forder        Int
+  form          Form      @relation(fields: [forder, fgid], references: [order, fgid], onDelete: Cascade)
+  corder        Int       @default(0)
+  Qtype         String    @default("f")
+  Qtext         String
+  Qoptions      String?   //JSON stringified array of options for multiple choice questions
+  responses     Response[]
+  @@id([forder, fgid, corder])
+}
+
+model Submission {
+  sid             Int
+  sname           String
+  student         Student     @relation(fields: [sid, sname], references: [id, sname], onDelete: Cascade)
+  fgid            Int
+  forder          Int
+  form            Form        @relation(fields: [forder, fgid], references: [order, fgid], onDelete: Cascade)
+  submissionDate  DateTime    @default(now())
+  @@id([sid, sname, fgid, forder])
+}
+
+model Response {
+  sid             Int
+  sname           String
+  student         Student     @relation(fields: [sid, sname], references: [id, sname], onDelete: Cascade)
+  fgid            Int
+  forder          Int
+  corder          Int
+  component       Component   @relation(fields: [forder, fgid, corder], references: [forder, fgid, corder], onDelete: Cascade)
+  rtext           String
+  @@id([sid, sname, fgid, forder, corder])
+}
+
+model Unlockable {
+  uid             Int     @id @default(autoincrement()) 
+  utype           String
+  uname           String
+  firstAvailable  DateTime
+  theme           Theme?
+  animation       Animation?
+}
+
+model Theme {
+  uid             Int        @id @default(autoincrement())
+  unlockable      Unlockable @relation(fields: [uid], references: [uid], onDelete: Cascade)
+  Tcolor          String
+  Teffect         String  
+}
+
+model Animation {
+  uid             Int        @id @default(autoincrement())
+  unlockable      Unlockable @relation(fields: [uid], references: [uid], onDelete: Cascade)
+  Atype           String
+  Aeffect         String  
 }
