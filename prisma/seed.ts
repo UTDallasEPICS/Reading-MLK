@@ -7,13 +7,11 @@ async function main() {
   // 1. Create a User with a Password (Local Auth)
   const user1 = await prisma.user.create({
     data: {
-      id: 'user_01',
       name: 'Alice Developer',
       email: 'alice@a.com',
       emailVerified: true,
       accounts: {
         create: {
-          id: 'acc_01',
           accountId: 'alice_local_id',
           providerId: 'credential', // Common for email/password
           password: 'hashed_password_here', // In a real app, hash this!
@@ -25,13 +23,11 @@ async function main() {
   // 2. Create a User with an OAuth Account (e.g., Google)
   const user2 = await prisma.user.create({
     data: {
-      id: 'user_02',
       name: 'Bob Tester',
       email: 'bob@b.com',
       emailVerified: true,
       accounts: {
         create: {
-          id: 'acc_02',
           accountId: 'bob_google_id',
           providerId: 'google',
           accessToken: 'mock_access_token',

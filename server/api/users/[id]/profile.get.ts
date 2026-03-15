@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
 
   const record = await prisma.user.findUnique({
     where: {
-      id: userId,
+      id: Number(userId),
     },
     select: {
       image: true,
