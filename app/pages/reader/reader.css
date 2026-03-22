@@ -1,0 +1,272 @@
+/* ============================================================
+   ReadingHuddle — Reader Pages Shared CSS
+   Exact port of the HTML reference
+   Fonts: Fredoka (headings), Quicksand (body)
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&family=Quicksand:wght@300;400;500;600;700&display=swap');
+
+/* ---------- CSS Variables ---------- */
+:root {
+  --brand-indigo: #E0604D;
+  --brand-gold:   #F59E0B;
+  --brand-amber:  #D97706;
+  --brand-mint:   #2DD4BF;
+  --brand-pink:   #FB7185;
+  --brand-blue:   #38BDF8;
+  --brand-dark:   #0F172A;
+  --bg-gradient:
+    radial-gradient(at 0% 0%,   hsla(25, 95%, 75%, 0.3)  0px, transparent 50%),
+    radial-gradient(at 100% 0%, hsla(10, 90%, 70%, 0.25) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, hsla(40, 95%, 70%, 0.25) 0px, transparent 50%);
+}
+
+/* ---------- Body / Base ---------- */
+.reader-app {
+  font-family: 'Quicksand', sans-serif;
+  background-color: #f5ede3;
+  background-image: var(--bg-gradient);
+  background-attachment: fixed;
+  min-height: 100vh;
+  transition: background 0.5s ease, color 0.5s ease;
+}
+
+.reader-app h1, .reader-app h2, .reader-app h3,
+.reader-app h4, .reader-app h5, .reader-app h6,
+.reader-app .font-heading {
+  font-family: 'Fredoka', sans-serif;
+}
+
+/* ---------- Themes ---------- */
+.reader-app.theme-dark {
+  --brand-dark: #f8fafc;
+  --bg-gradient:
+    radial-gradient(at 0% 0%,   hsla(250, 20%, 20%, 0.5) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, hsla(280, 30%, 15%, 0.5) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, hsla(200, 30%, 10%, 0.5) 0px, transparent 50%);
+  background-color: #0f172a !important;
+  color: #f8fafc;
+}
+
+.reader-app.theme-sepia {
+  --brand-dark: #433422;
+  --bg-gradient: none;
+  background-color: #f4ecd8 !important;
+}
+
+.reader-app.theme-sunset {
+  background-color: #fff5f5 !important;
+  --bg-gradient:
+    radial-gradient(at 0% 0%,   hsla(10, 90%, 75%, 0.25) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, hsla(280, 90%, 70%, 0.25) 0px, transparent 50%);
+}
+
+.reader-app.theme-ocean {
+  background-color: #f0f9ff !important;
+  --bg-gradient:
+    radial-gradient(at 0% 0%,   hsla(200, 90%, 75%, 0.25) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, hsla(180, 90%, 70%, 0.25) 0px, transparent 50%);
+}
+
+.reader-app.theme-forest {
+  background-color: #f0fdf4 !important;
+  --bg-gradient:
+    radial-gradient(at 0% 0%,   hsla(140, 80%, 70%, 0.25) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, hsla(120, 70%, 60%, 0.25) 0px, transparent 50%);
+}
+
+.reader-app.theme-candy {
+  background-color: #fdf2f8 !important;
+  --bg-gradient:
+    radial-gradient(at 0% 0%,   hsla(330, 90%, 85%, 0.35) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, hsla(280, 80%, 85%, 0.35) 0px, transparent 50%);
+}
+
+.reader-app.theme-fire {
+  background-color: #fff7ed !important;
+  --bg-gradient:
+    radial-gradient(at 30% 40%, hsla(20, 95%, 65%, 0.3)  0px, transparent 50%),
+    radial-gradient(at 70% 60%, hsla(0,  90%, 60%, 0.2)  0px, transparent 50%);
+}
+
+.reader-app.theme-ice {
+  background-color: #f0f9ff !important;
+  --bg-gradient:
+    radial-gradient(at 0% 0%,   hsla(200, 100%, 95%, 0.4) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, hsla(190, 90%, 90%, 0.35) 0px, transparent 50%);
+}
+
+/* ---------- Dyslexia Font ---------- */
+.reader-app.dyslexia-font,
+.reader-app.dyslexia-font * {
+  font-family: 'OpenDyslexic', sans-serif !important;
+}
+
+/* ---------- Premium Card ---------- */
+.premium-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 2.5rem;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 10px 30px rgba(79, 70, 229, 0.1);
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.premium-card:hover {
+  transform: translateY(-8px) scale(1.01);
+  box-shadow: 0 20px 40px rgba(79, 70, 229, 0.1);
+  border-color: var(--brand-indigo);
+}
+
+/* ---------- Buttons ---------- */
+.btn-fun {
+  transition: all 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+}
+.btn-fun:hover  { transform: translateY(-2px) scale(1.02); }
+.btn-fun:active { transform: scale(0.95); }
+
+.btn-bounce:active { transform: scale(0.95); }
+
+/* ---------- Nav Bar ---------- */
+.nav-bar {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(44, 62, 80, 0.95);
+  backdrop-filter: blur(15px);
+  padding: 0.8rem 2rem;
+  border-radius: 2.5rem;
+  display: flex;
+  gap: 2.5rem;
+  z-index: 100;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nav-item {
+  padding: 0.7rem 1.5rem;
+  color: #94a3b8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 0.85rem;
+}
+
+.nav-item.active {
+  color: white;
+  transform: translateY(-5px);
+}
+
+/* ---------- Animations ---------- */
+@keyframes pop {
+  0%   { transform: scale(0.9); opacity: 0; }
+  100% { transform: scale(1);   opacity: 1; }
+}
+.animate-pop { animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+@keyframes popBounce {
+  0%, 100% { transform: translateY(0); }
+  20%       { transform: translateY(-8px); }
+  40%       { transform: translateY(0); }
+  60%       { transform: translateY(-4px); }
+  80%       { transform: translateY(0); }
+}
+.animate-pop-bounce { animation: popBounce 1.5s ease-in-out; }
+
+/* ── Click-triggered XP badge: star spins ── */
+@keyframes starSpin {
+  0%   { transform: rotate(0deg) scale(1); }
+  30%  { transform: rotate(200deg) scale(1.5); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+.animate-star-spin { animation: starSpin 0.55s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+/* ── Click-triggered XP badge: 3 coins burst outward ── */
+@keyframes coinBurst {
+  0%   { opacity: 1; transform: translateX(-50%) translateY(-50%) scale(1.2); }
+  60%  { opacity: 1; }
+  100% { opacity: 0; transform: translateX(calc(-50% + var(--tx, 0px))) translateY(calc(-50% + var(--ty, -40px))) scale(0.4); }
+}
+.animate-coin-burst {
+  animation: coinBurst 0.65s ease-out forwards;
+  pointer-events: none;
+}
+
+/* ── Click-triggered Ticket badge: wobble ── */
+@keyframes ticketWobble {
+  0%   { transform: rotate(0deg) scale(1); }
+  20%  { transform: rotate(-22deg) scale(1.25); }
+  50%  { transform: rotate(16deg) scale(1.1); }
+  80%  { transform: rotate(-8deg) scale(1.05); }
+  100% { transform: rotate(0deg) scale(1); }
+}
+.animate-ticket-wobble { animation: ticketWobble 0.5s ease-in-out; }
+
+/* ── Click-triggered Ticket badge: ticket flies up into box ── */
+@keyframes ticketFly {
+  0%   { opacity: 1; transform: translateX(-50%) translateY(-50%) scale(1); }
+  40%  { opacity: 1; transform: translateX(-50%) translateY(-280%) scale(0.9); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-400%) scale(0.3); }
+}
+.animate-ticket-fly {
+  animation: ticketFly 0.85s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+  pointer-events: none;
+}
+
+/* ── Box pops above ticket badge ── */
+@keyframes boxShake {
+  0%, 100% { transform: translateX(-50%) rotate(0deg); }
+  20%       { transform: translateX(-50%) rotate(-10deg); }
+  50%       { transform: translateX(-50%) rotate(10deg); }
+  80%       { transform: translateX(-50%) rotate(-5deg); }
+}
+.animate-box-shake { animation: boxShake 0.5s ease-in-out 0.3s; }
+
+/* ── Raffle ticket drag overlay ── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Shop purchase celebration ── */
+@keyframes shopPop {
+  0%   { transform: scale(0.5); opacity: 0; }
+  70%  { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); }
+}
+.animate-shop-pop { animation: shopPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+/* ── Slow spin for decorative elements ── */
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.animate-spin-slow { animation: spinSlow 8s linear infinite; }
+
+/* ── Fade transition ── */
+.fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
+.fade-enter-from,  .fade-leave-to     { opacity: 0; }
+
+/* ── Slide-up (settings panel) ── */
+.slide-up-enter-active { transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.slide-up-leave-active { transition: transform 0.25s ease-in; }
+.slide-up-enter-from   { transform: translateY(100%); }
+.slide-up-leave-to     { transform: translateY(100%); }
+
+/* ── Box pop transition ── */
+.box-pop-enter-active { animation: boxPopIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.box-pop-leave-active { transition: opacity 0.15s; }
+.box-pop-leave-to     { opacity: 0; }
+@keyframes boxPopIn {
+  from { opacity: 0; transform: translateX(-50%) scale(0.3); }
+  to   { opacity: 1; transform: translateX(-50%) scale(1); }
+}
+
+/* ── Question step fade ── */
+.step-fade-enter-active, .step-fade-leave-active { transition: opacity 0.25s ease; }
+.step-fade-enter-from,  .step-fade-leave-to     { opacity: 0; }
