@@ -21,8 +21,7 @@ async function main() {
           },
         },
       },
-    },
-  })
+    })
 
   // 2. Create a Parent with an OAuth Account (e.g., Google) and multiple children
   const user2 = await prisma.user.create({
@@ -78,8 +77,7 @@ async function main() {
           admin: { create: { settings: { dyslexiaFont: true, fontSize: 1, language: 'en' } } } },
         },
       },
-    },
-  })
+    })
 
   console.log({ user1, user2, admin1, admin2 })
   console.log('Seeding finished.')
