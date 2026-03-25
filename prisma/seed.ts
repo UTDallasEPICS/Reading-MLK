@@ -17,7 +17,7 @@ async function main() {
           providerId: 'credential', // Common for email/password
           password: 'hashed_password_here', // In a real app, hash this!
           students: {
-            create: { name: 'Crota' },
+            create: { name: 'Crota', exp: 5000, settings: { dyslexiaFont: true, fontSize: 1, language: 'en'}},
           },
         },
       },
@@ -75,7 +75,7 @@ async function main() {
           accountId: 'admin2_local_id',
           providerId: 'credential',
           password: 'hashed_password_here',
-          admin: { create: { settings: {} } },
+          admin: { create: { settings: { dyslexiaFont: true, fontSize: 1, language: 'en' } } },
         },
       },
     },
