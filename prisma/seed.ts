@@ -9,7 +9,7 @@ async function main() {
   const user1 = await prisma.user.create({
     data: {
       name: 'Oryx',
-      email: 'oryx@example.com',
+      email: 'parent1@example.com',
       emailVerified: true,
       accounts: {
         create: {
@@ -17,7 +17,7 @@ async function main() {
           providerId: 'credential', // Common for email/password
           password: 'hashed_password_here', // In a real app, hash this!
           students: {
-            create: { name: 'Crota', exp: 5000, settings: { dyslexiaFont: true, fontSize: 1, language: 'en'}},
+            create: { name: 'Crota', exp: 5000, settings: { dyslexiaFont: true, fontSize: 1, language: 'en'}} },
           },
         },
       },
@@ -28,7 +28,7 @@ async function main() {
   const user2 = await prisma.user.create({
     data: {
       name: 'Richard Watterson',
-      email: 'RW123456789@gmail.com',
+      email: 'parent2@gmail.com',
       emailVerified: true,
       accounts: {
         create: {
@@ -51,7 +51,7 @@ async function main() {
   const admin1 = await prisma.user.create({
     data: {
       name: 'Gary Admin',
-      email: 'admin@gary.com',
+      email: 'admin1@example.com',
       emailVerified: true,
       accounts: {
         create: {
@@ -75,7 +75,7 @@ async function main() {
           accountId: 'admin2_local_id',
           providerId: 'credential',
           password: 'hashed_password_here',
-          admin: { create: { settings: { dyslexiaFont: true, fontSize: 1, language: 'en' } } },
+          admin: { create: { settings: { dyslexiaFont: true, fontSize: 1, language: 'en' } } } },
         },
       },
     },
