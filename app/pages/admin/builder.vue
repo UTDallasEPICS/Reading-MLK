@@ -36,7 +36,7 @@ const {
 
           <div class="modal-body">
             <div v-for="(q, idx) in selectedFormDetails.questions" :key="q.id" class="modal-step">
-              <span class="step-badge">Step {{ idx + 1 }} · {{ q.type }}</span>
+              <span class="step-badge">Step {{ Number(idx) + 1 }} · {{ q.type }}</span>
               <p class="step-text">{{ q.text }}</p>
               <p v-if="q.textEs" class="step-text-es">{{ q.textEs }}</p>
               <div v-if="q.reference" class="step-ref">
@@ -128,7 +128,7 @@ const {
           <div class="preview-date-box">
             <span class="field-hint">Preview Date</span>
             <span class="preview-date-val">
-              {{ formDays.length > 0 ? getCalculatedDate(formWeekStart, formDays[0]) : 'Select a day' }}{{ formDays.length > 1 ? ' ...' : '' }}
+              {{ formDays.length > 0 ? getCalculatedDate(formWeekStart || 'Monday', formDays[0] || 'Monday') : 'Select a day' }}{{ formDays.length > 1 ? ' ...' : '' }}
             </span>
           </div>
         </div>
