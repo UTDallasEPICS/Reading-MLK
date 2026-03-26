@@ -1,10 +1,8 @@
 import { Param } from '@prisma/client/runtime/client'
 import { prisma } from '../server/utils/prisma'
-import { faker } from '@faker-js/faker'
 
 async function main() {
   console.log('Start seeding...')
-
   // 1. Create a Parent with a Password (Local Auth) and one child
   const user1 = await prisma.user.create({
     data: {
@@ -12,16 +10,16 @@ async function main() {
       email: 'parent1@example.com',
       emailVerified: true,
       accounts: {
-        create: {
+        create: [{
           accountId: 'oryx_local_id',
           providerId: 'credential', // Common for email/password
           password: 'hashed_password_here', // In a real app, hash this!
           students: {
-            create: { name: 'Crota', exp: 5000, settings: { dyslexiaFont: true, fontSize: 1, language: 'en'}} },
+            create: [{ name: 'Crota', exp: 5000, settings: { dyslexiaFont: true, fontSize: 1, language: 'en'}} ],
           },
-        },
+        }],
       },
-    })
+    } } )
 
   // 2. Create a Parent with an OAuth Account (e.g., Google) and multiple children
   const user2 = await prisma.user.create({
@@ -30,7 +28,7 @@ async function main() {
       email: 'parent2@gmail.com',
       emailVerified: true,
       accounts: {
-        create: {
+        create: [{
           accountId: 'rich_google_id',
           providerId: 'google',
           accessToken: 'mock_access_token',
@@ -41,7 +39,7 @@ async function main() {
               { name: 'Anais' },
             ],
           },
-        },
+        }],
       },
     },
   })
@@ -53,12 +51,12 @@ async function main() {
       email: 'admin1@example.com',
       emailVerified: true,
       accounts: {
-        create: {
+        create: [{
           accountId: 'gary_admin_id',
           providerId: 'credential',
           password: 'hashed_password_here',
           admin: { create: {} },
-        },
+        }],
       },
     },
   })
@@ -70,11 +68,11 @@ async function main() {
       email: 'admin2@example.com',
       emailVerified: true,
       accounts: {
-        create: {
+        create: [{
           accountId: 'admin2_local_id',
           providerId: 'credential',
           password: 'hashed_password_here',
-          admin: { create: { settings: { dyslexiaFont: true, fontSize: 1, language: 'en' } } } },
+          admin: { create: { settings: { dyslexiaFont: true, fontSize: 1, language: 'en' } } } }],
         },
       },
     })

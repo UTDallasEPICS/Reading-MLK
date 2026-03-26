@@ -9,9 +9,12 @@ definePageMeta({ ssr: false })
     -- streak    (decide between daily and weekly)
     -- tickets    (raffle entries, number of forms completed during the current form group))
     -- completed forms in form group
+    ✓✓ settings
+      --move student settings type to a shared location and import here and into settings page
 
   3 Announcements
-    -- get active announcements
+    ✓✓ get active announcements 
+    -- default display for no announcements
     -- change display to be larger
     -- change display to show the most recent announcement with a dropdown to show all
  
@@ -20,16 +23,29 @@ definePageMeta({ ssr: false })
   5 find and apply unlocked shop items from selected student
 
   6 make progress bar dynamic based on form group size and completed forms.
+
+  7 change settings to it's own page, with settings button as a redirect
 */
 
 //TODO 4 retrieve active student
 const {data: student} = await useFetch<Student | null>('/api/student/1')
  
-//TODO 2 parse settings from student
+//define type for student settings
+type StudentSettings = {
+  dyslexiaFont?: boolean
+  language?: string
+  fontSize?: number
+}
+//cast raw student settings JSON from api call to type
+const parsedSettings = computed(() => {
+  return (student.value?.settings || {}) as StudentSettings
+})
+
+//load parsed student settings
 const settings = reactive({
-  dyslexiaFont: false,
-  language:    'en',
-  fontSize:    1,
+  dyslexiaFont: computed(() => Boolean(parsedSettings.value.dyslexiaFont) || false),
+  language:    computed(() => parsedSettings.value.language || 'en'),
+  fontSize:    computed(() => Number(parsedSettings.value.fontSize) || 1),
 })
 
 //TODO 2 calculate stats from student data
@@ -71,11 +87,8 @@ function triggerTicketClick() {
 }
 
 //TODO 3
-// Announcements 
-const announcements = ref([
-  { id: 1, title: 'New Book Added!', content: student.value?.name ?? 'Student' },
-  { id: 2, title: 'Raffle Winners Announced!', content: 'Congrats to our latest raffle winners! 🎉', icon: '🎟️' },
-])
+// Announcement
+const { data: announcements } = await useFetch<Announcement[] | null>('/api/announcement?active=true')
 
 //TODO 2
 //  Weekly forms progress 
@@ -137,12 +150,12 @@ const completionMessage = computed(() => {
           >🪙</span>
         </div>
 
-        <!-- Settings button -->
-        <button
-          @click="showSettings = true"
+        <!-- Settings button TODO 7-->
+        <NuxtLink
+          to="/reader/settings"
           class="w-14 h-14 bg-white/90 backdrop-blur-md rounded-xl flex items-center justify-center text-2xl transition-all border-2 border-white shadow-xl hover:scale-110 active:scale-95"
           style="hover:color: var(--brand-indigo)"
-        >⚙️</button>
+        >⚙️</NuxtLink>
       </div>
     </header>
 
@@ -157,16 +170,15 @@ const completionMessage = computed(() => {
         </div>
 
         <!-- Announcements Ticker TODO 3-->
-        <div v-if="announcements.length > 0" class="premium-card px-5 py-3" style="background: rgba(245,158,11,0.05); border-color: rgba(245,158,11,0.2)">
+        <div v-if="announcements && announcements.length > 0" class="premium-card px-5 py-3" style="background: rgba(245,158,11,0.05); border-color: rgba(245,158,11,0.2)">
           <div class="flex items-center gap-3">
             <span class="text-xl">📢</span>
             <div class="flex-grow overflow-hidden">
               <p class="text-sm font-bold truncate" style="color: var(--brand-dark)">
                 <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase mr-2 text-gray-900" style="background: var(--brand-gold)">New</span>
-                {{ announcements[0].title }} — {{ announcements[0].content }}
+                {{announcements[0]?.content}}
               </p>
             </div>
-            <span class="text-lg">{{ announcements[0].icon }}</span>
           </div>
         </div>
 
@@ -262,7 +274,7 @@ const completionMessage = computed(() => {
       </svg>
     </NuxtLink>
 
-    <!-- ── SETTINGS PANEL (slide-up) ── -->
+    <!-- ── SETTINGS PANEL (slide-up) TODO 2 ── -->
     <Transition name="slide-up">
       <div v-if="showSettings" class="fixed inset-0 z-50 flex flex-col justify-end">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="showSettings = false" />
