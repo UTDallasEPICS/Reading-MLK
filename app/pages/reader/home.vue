@@ -1,34 +1,65 @@
 <script setup lang="ts">
+import type { Student, Announcement, Form, FormGroup } from '~~/prisma/generated/client'
+
 definePageMeta({ ssr: false })
+/* TODO:
+  1 change settings option to switch profiles into a redirect to teh profile selection page
 
-// ── Shared reader state ──
+  2 calculations/parsing for selected student
+    -- streak    (decide between daily and weekly)
+    -- tickets    (raffle entries, number of forms completed during the current form group))
+    -- completed forms in form group
+    ✓✓ settings
+      --move student settings type to a shared location and import here and into settings page
+
+  3 Announcements
+    ✓✓ get active announcements 
+    -- default display for no announcements
+    -- change display to be larger
+    -- change display to show the most recent announcement with a dropdown to show all
+ 
+  4 get student selected from previous page
+    -- should come from session, nuxt store, or be passed as a param from previous page, could also use a tool like pinia or may also be a function of auth
+  5 find and apply unlocked shop items from selected student
+
+  6 make progress bar dynamic based on form group size and completed forms.
+
+  7 change settings to it's own page, with settings button as a redirect
+*/
+
+//TODO 4 retrieve active student
+const {data: student} = await useFetch<Student | null>('/api/student/1')
+ 
+//define type for student settings
+type StudentSettings = {
+  dyslexiaFont?: boolean
+  language?: string
+  fontSize?: number
+}
+//cast raw student settings JSON from api call to type
+const parsedSettings = computed(() => {
+  return (student.value?.settings || {}) as StudentSettings
+})
+
+//load parsed student settings
 const settings = reactive({
-  theme:       'light',  // 'light' | 'dark' | 'sepia' | 'sunset' | 'ocean' | 'forest' | 'candy' | 'fire' | 'ice'
-  dyslexiaFont: false,
-  language:    'en',
-  fontSize:    1,
+  dyslexiaFont: computed(() => Boolean(parsedSettings.value.dyslexiaFont) || false),
+  language:    computed(() => parsedSettings.value.language || 'en'),
+  fontSize:    computed(() => Number(parsedSettings.value.fontSize) || 1),
 })
 
-const stats = reactive({
-  xp:       1250,
-  booksRead: 14,
-  streak:    5,
-  tickets:   3,
-})
-
-const kidProfiles = ref([
-  { name: 'Emma',   avatar: '🦊', color: 'bg-orange-400' },
-  { name: 'Jayden', avatar: '🐸', color: 'bg-green-400'  },
-  { name: 'Sofia',  avatar: '🦋', color: 'bg-purple-400' },
-])
-const activeProfileIdx = ref(0)
-const activeProfile = computed(() => kidProfiles.value[activeProfileIdx.value])
+//TODO 2 calculate stats from student data
+const stats = {
+  xp: computed(() => Number(student.value?.exp ?? 0)),
+  streak: 5,
+  tickets: 3,
+}
 
 const showSettings = ref(false)
 
 // ── Theme class ──
 const themeClass = computed(() => {
-  const t = settings.theme !== 'light' ? `theme-${settings.theme}` : ''
+  const t = 'light'
   const d = settings.dyslexiaFont ? 'dyslexia-font' : ''
   return `reader-app ${t} ${d}`.trim()
 })
@@ -55,13 +86,12 @@ function triggerTicketClick() {
   setTimeout(() => { ticketClicked.value = false; flyTickets.value = [] }, 1000)
 }
 
-// ── Announcements ──
-const announcements = ref([
-  { id: 1, title: 'Summer Reading Challenge!', content: 'Log 20 books this month to win a special Super Sage badge!', icon: '🌟' },
-  { id: 2, title: 'New Badges Available',       content: 'Check out the shop for new limited edition themes.',        icon: '🎉' },
-])
+//TODO 3
+// Announcement
+const { data: announcements } = await useFetch<Announcement[] | null>('/api/announcement?active=true')
 
-// ── Weekly forms progress ──
+//TODO 2
+//  Weekly forms progress 
 const thisWeekForms = ref([
   { id: 201, day: 'Monday',    dayNum: 1, missed: true  },
   { id: 202, day: 'Tuesday',   dayNum: 2, missed: true  },
@@ -126,12 +156,12 @@ const completionMessage = computed(() => {
 
         </div>
 
-        <!-- Settings button -->
-        <button
-          @click="showSettings = true"
+        <!-- Settings button TODO 7-->
+        <NuxtLink
+          to="/reader/settings"
           class="w-14 h-14 bg-white/90 backdrop-blur-md rounded-xl flex items-center justify-center text-2xl transition-all border-2 border-white shadow-xl hover:scale-110 active:scale-95"
           style="hover:color: var(--brand-indigo)"
-        >⚙️</button>
+        >⚙️</NuxtLink>
       </div>
     </header>
 
@@ -145,44 +175,20 @@ const completionMessage = computed(() => {
           <p class="text-lg text-gray-500 font-medium">Ready for today's reading adventure?</p>
         </div>
 
-        <!-- Stats strip -->
-        <div class="premium-card px-6 py-4 flex items-center justify-around gap-4 bg-white/60">
-          <div class="text-center">
-            <p class="font-heading text-2xl font-bold" style="color: var(--brand-dark)">🔥 {{ stats.streak }}</p>
-            <p class="text-xs text-gray-400 font-bold uppercase tracking-widest">Day Streak</p>
-          </div>
-          <div class="w-px h-10 bg-gray-200" />
-          <div class="text-center">
-            <p class="font-heading text-2xl font-bold" style="color: var(--brand-dark)">📚 {{ stats.booksRead }}</p>
-            <p class="text-xs text-gray-400 font-bold uppercase tracking-widest">Books Read</p>
-          </div>
-          <div class="w-px h-10 bg-gray-200" />
-          <div class="text-center">
-            <p class="font-heading text-2xl font-bold" style="color: var(--brand-dark)">⭐ {{ stats.xp }}</p>
-            <p class="text-xs text-gray-400 font-bold uppercase tracking-widest">XP</p>
-          </div>
-          <div class="w-px h-10 bg-gray-200" />
-          <div class="text-center">
-            <p class="font-heading text-2xl font-bold" style="color: var(--brand-dark)">🎟️ {{ stats.tickets }}</p>
-            <p class="text-xs text-gray-400 font-bold uppercase tracking-widest">Tickets</p>
-          </div>
-        </div>
-
-        <!-- Announcements Ticker -->
-        <div v-if="announcements.length > 0" class="premium-card px-5 py-3" style="background: rgba(245,158,11,0.05); border-color: rgba(245,158,11,0.2)">
+        <!-- Announcements Ticker TODO 3-->
+        <div v-if="announcements && announcements.length > 0" class="premium-card px-5 py-3" style="background: rgba(245,158,11,0.05); border-color: rgba(245,158,11,0.2)">
           <div class="flex items-center gap-3">
             <span class="text-xl">📢</span>
             <div class="flex-grow overflow-hidden">
               <p class="text-sm font-bold truncate" style="color: var(--brand-dark)">
                 <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase mr-2 text-gray-900" style="background: var(--brand-gold)">New</span>
-                {{ announcements[0].title }} — {{ announcements[0].content }}
+                {{announcements[0]?.content}}
               </p>
             </div>
-            <span class="text-lg">{{ announcements[0].icon }}</span>
           </div>
         </div>
 
-        <!-- Daily Form CTA -->
+        <!-- Daily Form CTA TODO 2-->
         <NuxtLink
           to="/reader/forms"
           class="w-full rounded-3xl p-6 text-white text-left group cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shadow-lg block"
@@ -200,7 +206,7 @@ const completionMessage = computed(() => {
             <span class="text-5xl group-hover:translate-x-2 transition-transform duration-300">➜</span>
           </div>
         </NuxtLink>
-
+        <!-- TODO 6-->>
         <!-- 7-Day Raffle Progress -->
         <div class="premium-card p-5 bg-white/80" style="border: 2px solid rgba(224,96,77,0.1)">
           <div class="flex items-center justify-between mb-3">
@@ -274,7 +280,7 @@ const completionMessage = computed(() => {
       </svg>
     </NuxtLink>
 
-    <!-- ── SETTINGS PANEL (slide-up) ── -->
+    <!-- ── SETTINGS PANEL (slide-up) TODO 2 ── -->
     <Transition name="slide-up">
       <div v-if="showSettings" class="fixed inset-0 z-50 flex flex-col justify-end">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="showSettings = false" />
@@ -285,7 +291,7 @@ const completionMessage = computed(() => {
             <h2 class="font-heading text-3xl font-bold" style="color: var(--brand-dark)">Settings</h2>
           </div>
 
-          <!-- Kid profiles -->
+          <!-- Kid profiles TODO 1-->
           <div>
             <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Who's Reading?</label>
             <div class="flex gap-4 justify-center flex-wrap">
@@ -301,21 +307,6 @@ const completionMessage = computed(() => {
                 </div>
                 <span class="text-xs font-bold" style="color: var(--brand-dark)">{{ profile.name }}</span>
               </div>
-            </div>
-          </div>
-
-          <!-- Theme -->
-          <div>
-            <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Theme</label>
-            <div class="grid grid-cols-3 gap-2">
-              <button v-for="t in ['light','dark','sepia','sunset','ocean','forest','candy','fire','ice']" :key="t"
-                @click="settings.theme = t"
-                class="py-2 rounded-xl font-bold text-sm transition-all capitalize"
-                :class="settings.theme === t ? 'text-white shadow-lg' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
-                :style="settings.theme === t ? `background: var(--brand-indigo)` : ''"
-              >
-                {{ { light:'☀️', dark:'🌙', sepia:'📜', sunset:'🌅', ocean:'🌊', forest:'🌲', candy:'🍬', fire:'🔥', ice:'❄️' }[t] }} {{ t }}
-              </button>
             </div>
           </div>
 
