@@ -31,7 +31,21 @@ export default defineEventHandler(async (event) => {
     return student
   }
 
-  if (method === 'PUT') {}
+  if (method === 'PUT') {
+    const body = await readBody(event)
+
+    const updatedStudent = await prisma.student.update({
+      where: {
+        id: studentId,
+      },
+      data: {
+        name: body.name,
+        settings: body.settings,
+        exp: body.exp
+      },
+    })
+    return updatedStudent
+  }
 
   if (method === 'DELETE') {}
 
