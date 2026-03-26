@@ -2,6 +2,8 @@
    ReadingHuddle — Reader Pages Shared CSS
    Exact port of the HTML reference
    Fonts: Fredoka (headings), Quicksand (body)
+
+   Imported in home.vue, forms.vue, decor.vue, index.vue
    ============================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&family=Quicksand:wght@300;400;500;600;700&display=swap');
