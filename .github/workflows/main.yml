@@ -32,7 +32,7 @@ jobs:
       - name: Build and Push Docker image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: "friendsofmlk"
+          REPOSITORY: ${{ vars.REPOSITORY }}
           IMAGE_TAG: ${{ github.sha }}
           DATABASE_URL: 'file:./dev.db'
         run: |
