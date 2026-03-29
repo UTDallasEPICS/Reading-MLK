@@ -200,7 +200,7 @@ const completionMessage = computed(() => {
             <span class="text-5xl group-hover:translate-x-2 transition-transform duration-300">➜</span>
           </div>
         </NuxtLink>
-        <!-- TODO 6-->>
+        <!-- TODO 6-->
         <!-- 7-Day Raffle Progress -->
         <div class="premium-card p-5 bg-white/80" style="border: 2px solid rgba(224,96,77,0.1)">
           <div class="flex items-center justify-between mb-3">
