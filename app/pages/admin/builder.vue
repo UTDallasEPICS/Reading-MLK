@@ -146,13 +146,11 @@ onBeforeUnmount(() => {
     <div v-if="builderSubTab === 'creation'" class="creation-wrap">
 
       <!-- Top bar -->
-      <div class="creation-topbar">
-        <h3 class="creation-title">{{ editingFormId ? 'Editing Form' : 'Build New Form' }}</h3>
-       <div>
-        <button class="btn-indigo preview-cancel-btn" @click="builderSubTab = 'history';">
+      <div class="history-header">
+        <h3 class="history-title">{{ editingFormId ? 'Editing Form' : 'Build New Form' }}</h3>
+        <button class="btn-indigo" @click="builderSubTab = 'history';">
             {{ "Published Forms History" }}
           </button>
-      </div>
       </div>
 
       <div class="creation-content">
