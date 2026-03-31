@@ -26,20 +26,20 @@ export const useAdmin = () => {
     const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
     const idx  = days.indexOf(dayName)
     if (idx === -1) return ''
-    const d = new Date(weekStartStr)
+    const d = new Date(`${weekStartStr}T00:00:00Z`)
     d.setDate(d.getDate() + idx)
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
   
   }
   const getLastMonday = (dateStr: string) => {
-    const d = new Date(`${dateStr}T00:00:00`)
+    const d = new Date(`${dateStr}T00:00:00Z`)
     const daysSinceMonday = (d.getDay() + 6) % 7
     d.setDate(d.getDate() - daysSinceMonday)
     return d.toISOString().slice(0, 10)
   }
   const formatDate = (dateStr: string): string => {
     if (!dateStr) return ''
-    return new Date(dateStr).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+    return new Date(`${dateStr}T00:00:00Z`).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
   }
 
   const defaultQuestions = (): any[] => [
