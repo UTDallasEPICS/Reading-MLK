@@ -66,11 +66,45 @@
   cursor: move;
   user-select: none;
   -webkit-user-select: none;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .preview-item:hover {
   border-color: #c7d2fe;
   background: #eef2ff;
+}
+
+.preview-item-delete {
+  background: transparent;
+  border: none;
+  color: #ef7e7e;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.25rem;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.preview-item-delete:hover {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.preview-item-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex-grow: 1;
 }
 
 .preview-index {

@@ -70,6 +70,10 @@ const endDayDrag = () => {
   visitedInThisDrag.value.clear()
 }
 
+const removeQuestion = (index: number) => {
+  questions.value.splice(index, 1)
+}
+
 onMounted(() => {
   window.addEventListener('pointerup', endDayDrag)
   window.addEventListener('pointercancel', endDayDrag)
@@ -144,7 +148,11 @@ onBeforeUnmount(() => {
       <!-- Top bar -->
       <div class="creation-topbar">
         <h3 class="creation-title">{{ editingFormId ? 'Editing Form' : 'Build New Form' }}</h3>
-       
+       <div>
+        <button class="btn-indigo preview-cancel-btn" @click="builderSubTab = 'history';">
+            {{ "Published Forms History" }}
+          </button>
+      </div>
       </div>
 
       <div class="creation-content">
@@ -323,8 +331,11 @@ onBeforeUnmount(() => {
               @dragover.prevent
               @drop="onDrop($event, index)"
             >
-              <span class="preview-index">Question {{ Number(index) + 1 }}</span>
-              <span class="preview-type">{{ questionTypeLabel(q.type) }}</span>
+              <div class="preview-item-content">
+                <span class="preview-index">Question {{ Number(index) + 1 }}</span>
+                <span class="preview-type">{{ questionTypeLabel(q.type) }}</span>
+              </div>
+              <button class="preview-item-delete" @click.stop="removeQuestion(index)">✕</button>
             </div>
           </div>
         </aside>
