@@ -1,5 +1,5 @@
 <script setup lang="ts">
-definePageMeta({ ssr: false })
+definePageMeta({ ssr: false, layout: "admin" })
 
 const { raffleWinner, isSpinning, raffleWeek, raffleSubmissions, spinRaffle } = useAdmin()
 </script>

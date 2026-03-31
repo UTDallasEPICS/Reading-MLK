@@ -1,14 +1,88 @@
 <script setup lang="ts">
-definePageMeta({ ssr: false })
+definePageMeta({ ssr: false, layout: "admin" })
 
 const {
   builderSubTab, formTitle, editingFormId, questions,
-  formWeekStart, formDays, historyWeekStart,
+  formWeekStart, formDays, historyWeekStart, getLastMonday,
   getCalculatedDate, formatDate, defaultQuestions,
   filteredPublishedForms, selectedFormDetails, viewFormDetails,
   draggedIdx, dragStart, onDrop,
   addQuestion, publishForm, editPublishedForm, toggleFormPublish,
 } = useAdmin()
+
+const previewDates = computed(() => {
+  if (!formDays.value.length) return []
+  const weekStart = getLastMonday(formWeekStart.value || '')
+  if (!weekStart) return []
+  return formDays.value.map(day => `${day}: ${getCalculatedDate(weekStart, day)}`)
+})
+
+const questionTypeLabel = (type: string) => {
+  if (type === 'text') return 'Discussion'
+  if (type === 'mcq') return 'Multiple Choice'
+  if (type === 'video') return 'Video'
+  if (type === 'context') return 'Context'
+  return type
+}
+
+const isPointerDown = ref(false)
+const dragMode = ref<'add' | 'remove' | null>(null)
+const visitedInThisDrag = ref<Set<string>>(new Set())
+
+const addDay = (day: string) => {
+  if (!formDays.value.includes(day)) formDays.value.push(day)
+}
+
+const removeDay = (day: string) => {
+  if (formDays.value.includes(day)) {
+    formDays.value = formDays.value.filter((d: string) => d !== day)
+  }
+}
+
+const toggleDaySingle = (day: string) => {
+  if (formDays.value.includes(day)) removeDay(day)
+  else addDay(day)
+}
+
+const applyDayByMode = (day: string) => {
+  if (dragMode.value === 'add') addDay(day)
+  if (dragMode.value === 'remove') removeDay(day)
+}
+
+const startDayDrag = (day: string) => {
+  isPointerDown.value = true
+  dragMode.value = formDays.value.includes(day) ? 'remove' : 'add'
+  visitedInThisDrag.value.clear()
+  applyDayByMode(day)
+  visitedInThisDrag.value.add(day)
+}
+
+const continueDayDrag = (day: string) => {
+  if (!isPointerDown.value || !dragMode.value) return
+  if (visitedInThisDrag.value.has(day)) return
+  applyDayByMode(day)
+  visitedInThisDrag.value.add(day)
+}
+
+const endDayDrag = () => {
+  isPointerDown.value = false
+  dragMode.value = null
+  visitedInThisDrag.value.clear()
+}
+
+onMounted(() => {
+  window.addEventListener('pointerup', endDayDrag)
+  window.addEventListener('pointercancel', endDayDrag)
+  window.addEventListener('blur', endDayDrag)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('pointerup', endDayDrag)
+  window.removeEventListener('pointercancel', endDayDrag)
+  window.removeEventListener('blur', endDayDrag)
+})
+
+
 </script>
 
 <template>
@@ -70,23 +144,11 @@ const {
       <!-- Top bar -->
       <div class="creation-topbar">
         <h3 class="creation-title">{{ editingFormId ? 'Editing Form' : 'Build New Form' }}</h3>
-        <div class="flex gap-2">
-          <button
-            v-if="editingFormId"
-            class="btn-ghost"
-            @click="editingFormId = null; formTitle = ''; formDays = ['Monday']; questions = defaultQuestions(); builderSubTab = 'history'"
-          >Cancel</button>
-          <button
-            v-else
-            class="btn-ghost"
-            @click="formTitle = ''; formDays = ['Monday']; questions = defaultQuestions(); builderSubTab = 'history'"
-          >Discard</button>
-          <button class="btn-indigo" @click="publishForm">
-            {{ editingFormId ? 'Update Form' : 'Publish Form' }}
-          </button>
-        </div>
+       
       </div>
 
+      <div class="creation-content">
+        <div class="creation-main">
       <!-- Week & Day card -->
       <div class="section-card">
 
@@ -94,7 +156,7 @@ const {
         <div class="week-row">
           <div>
             <p class="field-hint">Selected Week</p>
-            <h4 class="week-label">{{ formWeekStart ? 'Week of ' + formatDate(formWeekStart) : 'Select a week' }}</h4>
+            <h4 class="week-label">{{ formWeekStart ? 'Week of ' + formatDate(getLastMonday(formWeekStart)) : 'Select a week' }}</h4>
           </div>
           <div>
             <label class="field-label">Change Week Starting (Mon)</label>
@@ -111,9 +173,10 @@ const {
               :key="day"
               class="day-pill"
               :class="formDays.includes(day) ? 'active' : ''"
-              @click="formDays.includes(day)
-                ? formDays = formDays.filter((d: string) => d !== day)
-                : formDays.push(day)"
+              @pointerdown.prevent="startDayDrag(day)"
+              @pointerenter="continueDayDrag(day)"
+              @keydown.enter.prevent="toggleDaySingle(day)"
+              @keydown.space.prevent="toggleDaySingle(day)"
             >{{ day }}</button>
           </div>
           <p class="field-note">* Selecting multiple days will publish a copy of this form for each selected day.</p>
@@ -127,9 +190,10 @@ const {
           </div>
           <div class="preview-date-box">
             <span class="field-hint">Preview Date</span>
-            <span class="preview-date-val">
-              {{ formDays.length > 0 ? getCalculatedDate(formWeekStart || 'Monday', formDays[0] || 'Monday') : 'Select a day' }}{{ formDays.length > 1 ? ' ...' : '' }}
-            </span>
+            <span v-if="previewDates.length === 0" class="preview-date-val">Select a day</span>
+            <div v-else class="preview-date-list">
+              <span v-for="item in previewDates" :key="item" class="preview-date-val">{{ item }}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -150,18 +214,7 @@ const {
           v-for="(q, index) in questions"
           :key="q.id"
           class="q-card"
-          draggable="true"
-          @dragstart="dragStart($event, index)"
-          @dragover.prevent
-          @drop="onDrop($event, index)"
         >
-          <!-- Drag handle -->
-          <div class="drag-handle">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
-            </svg>
-          </div>
-
           <button class="q-remove" @click.stop="questions.splice(index, 1)">✕</button>
 
           <!-- Type badge -->
@@ -237,6 +290,44 @@ const {
             </div>
           </div>
         </div>
+      </div>
+        </div>
+
+        <aside class="preview-panel">
+          <h4 class="preview-title">Form Structure Preview</h4>
+          <p class="preview-subtitle">Drag items here to reorder questions in the form.</p>
+
+          <button
+            v-if="editingFormId"
+            class="btn-ghost preview-cancel-btn"
+            @click="editingFormId = null; formTitle = ''; formDays = ['Monday']; questions = defaultQuestions(); builderSubTab = 'history'"
+          >Cancel</button>
+          <button
+            v-else
+            class="btn-ghost preview-cancel-btn"
+            @click="formTitle = ''; formDays = ['Monday']; questions = defaultQuestions(); builderSubTab = 'history'"
+          >Discard</button>
+          <button class="btn-indigo preview-cancel-btn" @click="publishForm">
+            {{ editingFormId ? 'Update Form' : 'Publish Form' }}
+          </button>
+
+          <div class="preview-list">
+            <div v-if="questions.length === 0" class="preview-empty">No questions to preview yet.</div>
+
+            <div
+              v-for="(q, index) in questions"
+              :key="`preview-${q.id}`"
+              class="preview-item"
+              draggable="true"
+              @dragstart="dragStart($event, index)"
+              @dragover.prevent
+              @drop="onDrop($event, index)"
+            >
+              <span class="preview-index">Question {{ Number(index) + 1 }}</span>
+              <span class="preview-type">{{ questionTypeLabel(q.type) }}</span>
+            </div>
+          </div>
+        </aside>
       </div>
     </div>
 

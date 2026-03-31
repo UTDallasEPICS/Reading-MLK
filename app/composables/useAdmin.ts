@@ -29,8 +29,14 @@ export const useAdmin = () => {
     const d = new Date(weekStartStr)
     d.setDate(d.getDate() + idx)
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  
   }
-
+  const getLastMonday = (dateStr: string) => {
+    const d = new Date(`${dateStr}T00:00:00`)
+    const daysSinceMonday = (d.getDay() + 6) % 7
+    d.setDate(d.getDate() - daysSinceMonday)
+    return d.toISOString().slice(0, 10)
+  }
   const formatDate = (dateStr: string): string => {
     if (!dateStr) return ''
     return new Date(dateStr).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
@@ -108,7 +114,7 @@ export const useAdmin = () => {
     if (!formDays.value.length) { alert('Please select at least one day!'); return }
 
     formDays.value.forEach(day => {
-      const calcDate   = getCalculatedDate(formWeekStart.value, day)
+      const calcDate   = getCalculatedDate(getLastMonday(formWeekStart.value || ''), day)
       const existingIdx = publishedForms.value.findIndex(
         f => f.weekStart === formWeekStart.value && f.day === day
       )
@@ -212,6 +218,7 @@ export const useAdmin = () => {
 
   const isAnnouncementActive = (ann: any): boolean => {
     const now = new Date().toISOString().split('T')[0]
+    if(!now) return false // in case of invalid date
     if (ann.startDate > now) return false
     if (ann.endDate && ann.endDate < now) return false
     return true
@@ -235,7 +242,7 @@ export const useAdmin = () => {
   return {
     // builder
     builderSubTab, formTitle, editingFormId, questions,
-    formWeekStart, formDays, historyWeekStart,
+    formWeekStart, formDays, historyWeekStart, getLastMonday,
     getCalculatedDate, formatDate, defaultQuestions,
     publishedForms, filteredPublishedForms,
     selectedFormDetails, viewFormDetails,
