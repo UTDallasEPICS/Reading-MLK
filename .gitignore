@@ -27,5 +27,4 @@ prisma/generated
 !.env.example
 
 /prisma/generated
-/prisma/migrations
-/dev.db
+*.db
