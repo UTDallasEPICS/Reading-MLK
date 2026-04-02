@@ -1,41 +1,105 @@
 <script setup lang="ts">
 definePageMeta({ ssr: false })
+
+// Profiles — matches the HTML kidProfiles array exactly
+const kidProfiles = ref([
+  { name: 'Emma',   avatar: '🦊', color: 'bg-orange-400' },
+  { name: 'Jayden', avatar: '🐸', color: 'bg-green-400'  },
+  { name: 'Sofia',  avatar: '🦋', color: 'bg-purple-400' },
+])
+
+const settings = reactive({
+  theme:       'light',
+  dyslexiaFont: false,
+  fontSize:    1,
+})
+
+const themeClass = computed(() => {
+  const t = settings.theme !== 'light' ? `theme-${settings.theme}` : ''
+  const d = settings.dyslexiaFont ? 'dyslexia-font' : ''
+  return `reader-app ${t} ${d}`.trim()
+})
+
+function selectProfile(idx: number) {
+  // Store chosen profile index so home.vue and other pages can read it
+  // (In a real app this would go into a composable / pinia store)
+  localStorage.setItem('activeProfileIdx', String(idx))
+  navigateTo('/reader/home')
+}
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#f5ede3] flex flex-col items-center justify-center gap-12 p-8">
-    
-    <div class="text-8xl animate-bounce animation-duration: 2">🚀</div>
-    
-    <div class="text-center space-y-3">
-      <h1 class="text-6xl font-black text-gray-900">ReadingHuddle</h1>
-      <p class="text-xl text-gray-400">Where are you heading today?</p>
-    </div>
-
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-2xl">
-      
-      <!-- Admin -->
-      <NuxtLink to="/admin"
-        class="group bg-white rounded-3xl border-2 border-gray-100 p-10 text-center shadow-sm hover:border-indigo-400 hover:shadow-lg transition-all duration-200"
-      >
-        <div class="w-20 h-20 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center text-5xl mb-5 mx-auto group-hover:rotate-12 transition-transform duration-300">
-          🏫
+  <div
+    :class="themeClass"
+    :style="`font-size:${settings.fontSize * 16}px`"
+    class="min-h-screen pb-32 px-4 pt-4"
+  >
+    <!-- ── TOP BAR ── -->
+    <header class="max-w-4xl mx-auto flex justify-between items-center mb-8 px-2 relative z-[200]">
+      <div class="flex items-center gap-3">
+        <div
+          class="w-12 h-12 rounded-xl flex items-center justify-center text-white font-heading font-bold text-2xl shadow-lg"
+          style="background: var(--brand-indigo)"
+        >L</div>
+        <div class="flex flex-col">
+          <span class="font-heading font-bold text-2xl tracking-tight leading-none" style="color: var(--brand-dark)">
+            Reading<span style="color: var(--brand-indigo)">Huddle</span>
+          </span>
+          <span class="text-[10px] font-bold uppercase tracking-widest" style="color: var(--brand-mint)">
+            Reading Buddy
+          </span>
         </div>
-        <h3 class="text-2xl font-bold text-gray-900 mb-2">Faculty & Admin</h3>
-        <p class="text-gray-400 font-medium">Manage students, curriculum & raffles.</p>
-      </NuxtLink>
+      </div>
+    </header>
 
-      <!-- Reader -->
-      <NuxtLink to="/reader/home"
-        class="group bg-white rounded-3xl border-2 border-gray-100 p-10 text-center shadow-sm hover:border-amber-400 hover:shadow-lg transition-all duration-200"
-      >
-        <div class="w-20 h-20 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center text-5xl mb-5 mx-auto group-hover:rotate-12 transition-transform duration-300">
-          ✨
+    <!-- ── PROFILES VIEW ── -->
+    <main class="max-w-4xl mx-auto min-h-[60vh] flex flex-col items-center justify-center py-20 text-center space-y-12">
+
+      <div class="animate-bounce text-7xl">👋</div>
+
+      <div class="space-y-4">
+        <h2 class="text-5xl font-heading font-black" style="color: var(--brand-dark)">Who's Reading?</h2>
+        <p class="text-xl text-gray-400 font-bold uppercase tracking-widest">
+          Select your profile to start your adventure!
+        </p>
+      </div>
+
+      <!-- Profile cards -->
+      <div class="flex gap-8 justify-center max-w-4xl flex-wrap">
+
+        <div
+          v-for="(profile, idx) in kidProfiles"
+          :key="idx"
+          @click="selectProfile(idx)"
+          class="flex flex-col items-center gap-4 cursor-pointer group transition-all"
+        >
+          <div
+            class="w-32 h-32 rounded-[2.5rem] flex items-center justify-center text-5xl font-black text-white shadow-xl transition-all group-hover:scale-110 group-hover:rotate-6"
+            :class="profile.color"
+          >
+            {{ profile.avatar }}
+          </div>
+          <span
+            class="text-xl font-bold transition-colors group-hover:text-[color:var(--brand-indigo)]"
+            style="color: var(--brand-dark)"
+          >{{ profile.name }}</span>
         </div>
-        <h3 class="text-2xl font-bold text-gray-900 mb-2">Reading Buddy</h3>
-        <p class="text-gray-400 font-medium">Complete challenges, log books & win prizes!</p>
-      </NuxtLink>
 
-    </div>
+        <!-- Add New profile slot -->
+        <div class="flex flex-col items-center gap-4 cursor-pointer group transition-all opacity-50 hover:opacity-100">
+          <div
+            class="w-32 h-32 rounded-[2.5rem] border-4 border-dashed border-gray-300 flex items-center justify-center text-4xl text-gray-400 transition-all group-hover:scale-110 group-hover:border-[color:var(--brand-indigo)] group-hover:text-[color:var(--brand-indigo)]"
+          >➕</div>
+          <span
+            class="text-xl font-bold text-gray-400 transition-colors group-hover:text-[color:var(--brand-indigo)]"
+          >Add New</span>
+        </div>
+
+      </div>
+    </main>
   </div>
 </template>
+
+<style>
+@import './reader.css';
+</style>

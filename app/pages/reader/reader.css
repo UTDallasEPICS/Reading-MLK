@@ -2,6 +2,8 @@
    ReadingHuddle — Reader Pages Shared CSS
    Exact port of the HTML reference
    Fonts: Fredoka (headings), Quicksand (body)
+
+   Imported in home.vue, forms.vue, decor.vue, index.vue
    ============================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&family=Quicksand:wght@300;400;500;600;700&display=swap');
@@ -209,21 +211,23 @@
 
 /* ── Click-triggered Ticket badge: ticket flies up into box ── */
 @keyframes ticketFly {
-  0%   { opacity: 1; transform: translateX(-50%) translateY(-50%) scale(1); }
-  40%  { opacity: 1; transform: translateX(-50%) translateY(-280%) scale(0.9); }
-  100% { opacity: 0; transform: translateX(-50%) translateY(-400%) scale(0.3); }
+  0% {opacity: 1; transform: translateX(-50%) translateY(-50%) scale(1);}
+  40% {opacity: 1; transform: translateX(-50%) translateY(40%) scale(0.95);}
+  100% {opacity: 0; transform: translateX(-50%) translateY(200%) scale(0.6);}
 }
+
 .animate-ticket-fly {
-  animation: ticketFly 0.85s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+  animation: ticketFly 0.85s cubic-bezier(0.3, 0.7, 0.4, 1) forwards;
   pointer-events: none;
 }
 
 /* ── Box pops above ticket badge ── */
 @keyframes boxShake {
-  0%, 100% { transform: translateX(-50%) rotate(0deg); }
+  0%        { transform: translateX(-50%) rotate(0deg); }
   20%       { transform: translateX(-50%) rotate(-10deg); }
   50%       { transform: translateX(-50%) rotate(10deg); }
   80%       { transform: translateX(-50%) rotate(-5deg); }
+  100%      { transform: translateX(-50%) rotate(0deg); }
 }
 .animate-box-shake { animation: boxShake 0.5s ease-in-out 0.3s; }
 

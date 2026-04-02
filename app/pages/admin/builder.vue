@@ -1,185 +1,407 @@
 <script setup lang="ts">
-definePageMeta({ ssr: false })
+definePageMeta({ ssr: false, layout: "admin" })
 
-const { formTitle, editingFormId, questions, publishedForms, addQuestion, publishForm, editPublishedForm, toggleFormPublish } = useAdmin()
+const {
+  builderSubTab, formTitle, editingFormId, questions,
+  formWeekStart, formDays, historyWeekStart, getLastMonday,
+  getCalculatedDate, formatDate, defaultQuestions,
+  filteredPublishedForms, selectedFormDetails, viewFormDetails,
+  draggedIdx, dragStart, onDrop,
+  addQuestion, publishForm, editPublishedForm, toggleFormPublish,
+} = useAdmin()
+
+const previewDates = computed(() => {
+  if (!formDays.value.length) return []
+  const weekStart = getLastMonday(formWeekStart.value || '')
+  if (!weekStart) return []
+  return formDays.value.map(day => `${day}: ${getCalculatedDate(weekStart, day)}`)
+})
+
+const questionTypeLabel = (type: string) => {
+  if (type === 'text') return 'Discussion'
+  if (type === 'mcq') return 'Multiple Choice'
+  if (type === 'video') return 'Video'
+  if (type === 'context') return 'Context'
+  return type
+}
+
+const isPointerDown = ref(false)
+const dragMode = ref<'add' | 'remove' | null>(null)
+const visitedInThisDrag = ref<Set<string>>(new Set())
+
+const addDay = (day: string) => {
+  if (!formDays.value.includes(day)) formDays.value.push(day)
+}
+
+const removeDay = (day: string) => {
+  if (formDays.value.includes(day)) {
+    formDays.value = formDays.value.filter((d: string) => d !== day)
+  }
+}
+
+const toggleDaySingle = (day: string) => {
+  if (formDays.value.includes(day)) removeDay(day)
+  else addDay(day)
+}
+
+const applyDayByMode = (day: string) => {
+  if (dragMode.value === 'add') addDay(day)
+  if (dragMode.value === 'remove') removeDay(day)
+}
+
+const startDayDrag = (day: string) => {
+  isPointerDown.value = true
+  dragMode.value = formDays.value.includes(day) ? 'remove' : 'add'
+  visitedInThisDrag.value.clear()
+  applyDayByMode(day)
+  visitedInThisDrag.value.add(day)
+}
+
+const continueDayDrag = (day: string) => {
+  if (!isPointerDown.value || !dragMode.value) return
+  if (visitedInThisDrag.value.has(day)) return
+  applyDayByMode(day)
+  visitedInThisDrag.value.add(day)
+}
+
+const endDayDrag = () => {
+  isPointerDown.value = false
+  dragMode.value = null
+  visitedInThisDrag.value.clear()
+}
+
+const removeQuestion = (index: number) => {
+  questions.value.splice(index, 1)
+}
+
+onMounted(() => {
+  window.addEventListener('pointerup', endDayDrag)
+  window.addEventListener('pointercancel', endDayDrag)
+  window.addEventListener('blur', endDayDrag)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('pointerup', endDayDrag)
+  window.removeEventListener('pointercancel', endDayDrag)
+  window.removeEventListener('blur', endDayDrag)
+})
+
+
 </script>
 
 <template>
-  <div class="max-w-4xl mx-auto space-y-8">
+  <div class="builder-wrap">
 
-    <!-- Header -->
-    <div class="flex justify-between items-center">
-      <div>
-        <h2 class="text-4xl font-bold text-gray-900">Daily Form Builder</h2>
-        <p class="text-gray-500 mt-1">Create custom curriculum for your students.</p>
-      </div>
-      <div class="flex gap-2">
-        <button
-          v-if="editingFormId"
-          @click="editingFormId = null; formTitle = ''; questions = []"
-          class="px-6 py-3 rounded-xl font-bold border-2 border-gray-200 text-gray-500 hover:bg-gray-50 transition"
-        >
-          Cancel
-        </button>
-        <button
-          @click="publishForm"
-          class="bg-purple-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-purple-700 shadow-lg transition active:scale-95"
-        >
-          {{ editingFormId ? '✅ Update Form' : '🚀 Publish Week' }}
-        </button>
-      </div>
-    </div>
+    <!-- ══════════════════════════════════════════ -->
+    <!--  FORM DETAILS MODAL                        -->
+    <!-- ══════════════════════════════════════════ -->
+    <Transition name="fade">
+      <div v-if="selectedFormDetails" class="modal-backdrop">
+        <div class="modal-overlay" @click="selectedFormDetails = null" />
+        <div class="modal-box">
 
-    <!-- Title Input -->
-    <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-      <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Form Title</label>
-      <input
-        v-model="formTitle"
-        type="text"
-        placeholder="e.g. Week 4: Kindness & Math"
-        class="w-full text-2xl font-bold text-gray-800 border-b-2 border-gray-100 focus:border-purple-400 focus:outline-none transition py-2"
-      />
-    </div>
-
-    <!-- Add Question Buttons -->
-    <div class="flex gap-3 flex-wrap">
-      <button @click="addQuestion('text')"    class="flex-1 bg-blue-50 text-blue-600 font-bold py-4 rounded-2xl hover:bg-blue-100 transition border border-dashed border-blue-200 min-w-[130px]">+ Discussion</button>
-      <button @click="addQuestion('mcq')"     class="flex-1 bg-emerald-50 text-emerald-600 font-bold py-4 rounded-2xl hover:bg-emerald-100 transition border border-dashed border-emerald-200 min-w-[130px]">+ Multiple Choice</button>
-      <button @click="addQuestion('video')"   class="flex-1 bg-red-50 text-red-600 font-bold py-4 rounded-2xl hover:bg-red-100 transition border border-dashed border-red-200 min-w-[130px]">+ Video Embed</button>
-      <button @click="addQuestion('context')" class="flex-1 bg-gray-50 text-gray-600 font-bold py-4 rounded-2xl hover:bg-gray-100 transition border border-dashed border-gray-200 min-w-[130px]">+ Context Block</button>
-    </div>
-
-    <!-- Questions List -->
-    <div class="space-y-4">
-      <div
-        v-if="questions.length === 0"
-        class="text-center py-12 text-gray-400 border-4 border-dashed border-gray-100 rounded-3xl"
-      >
-        No questions yet. Add one above!
-      </div>
-
-      <div
-        v-for="(q, index) in questions"
-        :key="q.id"
-        class="bg-white border-2 border-gray-100 rounded-2xl p-6 relative hover:border-purple-100 transition shadow-sm"
-      >
-        <button @click="questions.splice(index, 1)" class="absolute top-4 right-4 text-gray-300 hover:text-red-500 transition text-lg">✕</button>
-
-        <!-- Type badge -->
-        <span class="text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full mb-4 inline-block"
-          :class="{
-            'bg-blue-100 text-blue-700': q.type === 'text',
-            'bg-emerald-100 text-emerald-700': q.type === 'mcq',
-            'bg-red-100 text-red-700': q.type === 'video',
-            'bg-gray-100 text-gray-700': q.type === 'context'
-          }">
-          {{ q.type === 'text' ? '🗣️ Discussion' : q.type === 'mcq' ? '📋 Multiple Choice' : q.type === 'video' ? '📺 Video' : '📄 Context' }}
-        </span>
-
-        <!-- Text  / MCQ fields -->
-        <div v-if="['text', 'mcq'].includes(q.type)" class="space-y-4">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="modal-header">
             <div>
-              <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Question (English)</label>
-              <input v-model="q.text" type="text" placeholder="Enter question in English..."
-                class="w-full font-bold text-gray-800 border-2 border-gray-50 bg-gray-50 rounded-xl px-4 py-3 focus:bg-white focus:border-purple-200 focus:outline-none transition" />
+              <h3 class="modal-title">{{ selectedFormDetails.title }}</h3>
+              <p class="modal-meta">{{ selectedFormDetails.day }} · {{ selectedFormDetails.date }}</p>
             </div>
-            <div>
-              <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Question (Spanish)</label>
-              <input v-model="q.textEs" type="text" placeholder="Ingrese pregunta en Español..."
-                class="w-full font-bold text-gray-800 border-2 border-gray-50 bg-gray-50 rounded-xl px-4 py-3 focus:bg-white focus:border-purple-200 focus:outline-none transition" />
-            </div>
-          </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Reference (English)</label>
-              <textarea v-model="q.reference" rows="2" placeholder="Correct answer..."
-                class="w-full text-sm text-gray-600 border-2 border-gray-50 bg-gray-50 rounded-xl px-4 py-3 focus:bg-white focus:border-purple-200 focus:outline-none transition" />
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Reference (Spanish)</label>
-              <textarea v-model="q.referenceEs" rows="2" placeholder="Respuesta correcta..."
-                class="w-full text-sm text-gray-600 border-2 border-gray-50 bg-gray-50 rounded-xl px-4 py-3 focus:bg-white focus:border-purple-200 focus:outline-none transition" />
-            </div>
-          </div>
-        </div>
-
-        <!-- MCQ Choices -->
-        <div v-if="q.type === 'mcq'" class="mt-4 space-y-3">
-          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Answer Choices</label>
-          <div v-for="(choice, ci) in q.choices" :key="ci" class="flex items-center gap-3">
-            <span class="w-8 h-8 rounded-full flex items-center justify-center font-black text-sm"
-              :class="choice.correct ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-500'">
-              {{ String.fromCharCode(65 + ci) }}
-            </span>
-            <input v-model="choice.text" type="text" :placeholder="'Choice ' + String.fromCharCode(65 + ci) + '...'"
-              class="flex-grow font-bold text-gray-800 border-2 border-gray-50 bg-gray-50 rounded-xl px-4 py-3 focus:bg-white focus:border-purple-200 focus:outline-none transition" />
-            <button
-              @click="q.choices.forEach((c: any) => c.correct = false); choice.correct = true"
-              :class="['px-3 py-2 rounded-lg font-bold text-xs transition', choice.correct ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-400 hover:bg-emerald-100 hover:text-emerald-600']">
-              {{ choice.correct ? '✓ Correct' : 'Set Correct' }}
+            <button class="modal-close" @click="selectedFormDetails = null">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </button>
-            <button @click="q.choices.splice(ci, 1)" class="text-gray-300 hover:text-red-500 transition text-lg">✕</button>
           </div>
-          <button @click="q.choices.push({ text: '', correct: false })"
-            class="w-full py-3 border-2 border-dashed border-emerald-200 text-emerald-500 font-bold rounded-xl hover:bg-emerald-50 transition">
-            + Add Choice
-          </button>
-        </div>
 
-        <!-- Video URL -->
-        <div v-if="q.type === 'video'">
-          <label class="block text-xs font-bold text-gray-400 uppercase mb-1">YouTube URL</label>
-          <input v-model="q.url" type="text" placeholder="https://youtu.be/..."
-            class="w-full font-bold text-gray-800 border-2 border-gray-50 bg-gray-50 rounded-xl px-4 py-3 focus:bg-white focus:border-purple-200 focus:outline-none transition" />
-        </div>
-
-        <!-- Context Block -->
-        <div v-if="q.type === 'context'" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Context (English)</label>
-            <textarea v-model="q.text" rows="3" placeholder="Read this paragraph first..."
-              class="w-full text-gray-800 border-2 border-gray-50 bg-gray-50 rounded-xl px-4 py-3 focus:bg-white focus:border-purple-200 focus:outline-none transition" />
+          <div class="modal-body">
+            <div v-for="(q, idx) in selectedFormDetails.questions" :key="q.id" class="modal-step">
+              <span class="step-badge">Step {{ Number(idx) + 1 }} · {{ q.type }}</span>
+              <p class="step-text">{{ q.text }}</p>
+              <p v-if="q.textEs" class="step-text-es">{{ q.textEs }}</p>
+              <div v-if="q.reference" class="step-ref">
+                <p class="step-ref-label">Answer / Reference</p>
+                <p class="step-ref-val">{{ q.reference }}</p>
+              </div>
+              <div v-if="q.choices" class="step-choices">
+                <div v-for="c in q.choices" :key="c.text"
+                  class="step-choice"
+                  :class="c.correct ? 'correct' : ''">{{ c.text }}</div>
+              </div>
+              <div v-if="q.url" class="step-url">
+                <p class="step-ref-label">Video URL</p>
+                <code class="step-code">{{ q.url }}</code>
+              </div>
+            </div>
           </div>
-          <div>
-            <label class="block text-xs font-bold text-gray-400 uppercase mb-1">Context (Spanish)</label>
-            <textarea v-model="q.textEs" rows="3" placeholder="Lea este párrafo primero..."
-              class="w-full text-gray-800 border-2 border-gray-50 bg-gray-50 rounded-xl px-4 py-3 focus:bg-white focus:border-purple-200 focus:outline-none transition" />
+
+          <div class="modal-footer">
+            <button class="btn-dark" @click="selectedFormDetails = null">Close Details</button>
           </div>
         </div>
       </div>
+    </Transition>
+
+    <!-- ══════════════════════════════════════════ -->
+    <!--  CREATION SUB-TAB                          -->
+    <!-- ══════════════════════════════════════════ -->
+    <div v-if="builderSubTab === 'creation'" class="creation-wrap">
+
+      <!-- Top bar -->
+      <div class="history-header">
+        <h3 class="history-title">{{ editingFormId ? 'Editing Form' : 'Build New Form' }}</h3>
+        <button class="btn-indigo" @click="builderSubTab = 'history';">
+            {{ "Published Forms History" }}
+          </button>
+      </div>
+
+      <div class="creation-content">
+        <div class="creation-main">
+      <!-- Week & Day card -->
+      <div class="section-card">
+
+        <!-- Week row -->
+        <div class="week-row">
+          <div>
+            <p class="field-hint">Selected Week</p>
+            <h4 class="week-label">{{ formWeekStart ? 'Week of ' + formatDate(getLastMonday(formWeekStart)) : 'Select a week' }}</h4>
+          </div>
+          <div>
+            <label class="field-label">Change Week Starting (Mon)</label>
+            <input v-model="formWeekStart" type="date" class="input-base" />
+          </div>
+        </div>
+
+        <!-- Day multi-select -->
+        <div>
+          <label class="field-label">Day(s) of Week (Multi-select)</label>
+          <div class="day-pills">
+            <button
+              v-for="day in ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']"
+              :key="day"
+              class="day-pill"
+              :class="formDays.includes(day) ? 'active' : ''"
+              @pointerdown.prevent="startDayDrag(day)"
+              @pointerenter="continueDayDrag(day)"
+              @keydown.enter.prevent="toggleDaySingle(day)"
+              @keydown.space.prevent="toggleDaySingle(day)"
+            >{{ day }}</button>
+          </div>
+          <p class="field-note">* Selecting multiple days will publish a copy of this form for each selected day.</p>
+        </div>
+
+        <!-- Title + preview date -->
+        <div class="title-row">
+          <div class="flex-grow">
+            <label class="field-label">Form Title</label>
+            <input v-model="formTitle" type="text" placeholder="e.g. Kindness & Math Challenge" class="input-title" />
+          </div>
+          <div class="preview-date-box">
+            <span class="field-hint">Preview Date</span>
+            <span v-if="previewDates.length === 0" class="preview-date-val">Select a day</span>
+            <div v-else class="preview-date-list">
+              <span v-for="item in previewDates" :key="item" class="preview-date-val">{{ item }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add question buttons -->
+      <div class="q-type-btns">
+        <button @click="addQuestion('text')"    class="q-type-btn blue">+ Discussion</button>
+        <button @click="addQuestion('mcq')"     class="q-type-btn green">+ Multiple Choice</button>
+        <button @click="addQuestion('video')"   class="q-type-btn red">+ Video Embed</button>
+        <button @click="addQuestion('context')" class="q-type-btn gray">+ Context Block</button>
+      </div>
+
+      <!-- Question list -->
+      <div class="q-list">
+        <div v-if="questions.length === 0" class="q-empty">No questions yet. Add one above!</div>
+
+        <div
+          v-for="(q, index) in questions"
+          :key="q.id"
+          class="q-card"
+        >
+          <button class="q-remove" @click.stop="questions.splice(index, 1)">✕</button>
+
+          <!-- Type badge -->
+          <span class="q-badge ml-6 mb-4 inline-block"
+            :class="{
+              'blue':  q.type === 'text',
+              'green': q.type === 'mcq',
+              'red':   q.type === 'video',
+              'gray':  q.type === 'context',
+            }">
+            {{ q.type === 'text' ? 'Discussion' : q.type === 'mcq' ? 'Multiple Choice' : q.type === 'video' ? 'Video' : 'Context' }}
+          </span>
+
+          <div class="ml-6 space-y-4">
+            <!-- Text / MCQ fields -->
+            <div v-if="['text','mcq'].includes(q.type)">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="field-label">Question (English)</label>
+                  <input v-model="q.text" type="text" placeholder="Enter question in English..." class="input-field" />
+                </div>
+                <div>
+                  <label class="field-label">Question (Spanish)</label>
+                  <input v-model="q.textEs" type="text" placeholder="Ingrese pregunta en Español..." class="input-field" />
+                </div>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div>
+                  <label class="field-label">Reference (English)</label>
+                  <textarea v-model="q.reference" rows="2" placeholder="Correct answer..." class="textarea-field" />
+                </div>
+                <div>
+                  <label class="field-label">Reference (Spanish)</label>
+                  <textarea v-model="q.referenceEs" rows="2" placeholder="Respuesta correcta..." class="textarea-field" />
+                </div>
+              </div>
+            </div>
+
+            <!-- MCQ Choices -->
+            <div v-if="q.type === 'mcq'" class="space-y-3">
+              <label class="field-label">Answer Choices</label>
+              <div v-for="(choice, ci) in q.choices" :key="ci" class="flex items-center gap-3">
+                <span class="choice-letter" :class="choice.correct ? 'correct' : ''">
+                  {{ String.fromCharCode(65 + Number(ci)) }}
+                </span>
+                <input v-model="choice.text" type="text" :placeholder="'Choice ' + String.fromCharCode(65 + Number(ci)) + '...'" class="input-field flex-grow" />
+                <button
+                  class="btn-correct"
+                  :class="choice.correct ? 'active' : ''"
+                  @click="q.choices.forEach((c: any) => c.correct = false); choice.correct = true"
+                >{{ choice.correct ? '✓ Correct' : 'Set Correct' }}</button>
+                <button class="q-remove-inline" @click="q.choices.splice(ci, 1)">✕</button>
+              </div>
+              <button class="btn-add-choice" @click="q.choices.push({ text: '', correct: false })">+ Add Choice</button>
+            </div>
+
+            <!-- Video URL -->
+            <div v-if="q.type === 'video'">
+              <label class="field-label">YouTube URL</label>
+              <input v-model="q.url" type="text" placeholder="https://youtu.be/..." class="input-field" />
+            </div>
+
+            <!-- Context block -->
+            <div v-if="q.type === 'context'" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="field-label">Context (English)</label>
+                <textarea v-model="q.text" rows="3" placeholder="Read this paragraph first..." class="textarea-field" />
+              </div>
+              <div>
+                <label class="field-label">Context (Spanish)</label>
+                <textarea v-model="q.textEs" rows="3" placeholder="Lea este párrafo primero..." class="textarea-field" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+        </div>
+
+        <aside class="preview-panel">
+          <h4 class="preview-title">Form Structure Preview</h4>
+          <p class="preview-subtitle">Drag items here to reorder questions in the form.</p>
+
+          <button
+            v-if="editingFormId"
+            class="btn-ghost preview-cancel-btn"
+            @click="editingFormId = null; formTitle = ''; formDays = ['Monday']; questions = defaultQuestions(); builderSubTab = 'history'"
+          >Cancel</button>
+          <button
+            v-else
+            class="btn-ghost preview-cancel-btn"
+            @click="formTitle = ''; formDays = ['Monday']; questions = defaultQuestions(); builderSubTab = 'history'"
+          >Discard</button>
+          <button class="btn-indigo preview-cancel-btn" @click="publishForm">
+            {{ editingFormId ? 'Update Form' : 'Publish Form' }}
+          </button>
+
+          <div class="preview-list">
+            <div v-if="questions.length === 0" class="preview-empty">No questions to preview yet.</div>
+
+            <div
+              v-for="(q, index) in questions"
+              :key="`preview-${q.id}`"
+              class="preview-item"
+              draggable="true"
+              @dragstart="dragStart($event, index)"
+              @dragover.prevent
+              @drop="onDrop($event, index)"
+            >
+              <div class="preview-item-content">
+                <span class="preview-index">Question {{ Number(index) + 1 }}</span>
+                <span class="preview-type">{{ questionTypeLabel(q.type) }}</span>
+              </div>
+              <button class="preview-item-delete" @click.stop="removeQuestion(index)">✕</button>
+            </div>
+          </div>
+        </aside>
+      </div>
     </div>
 
-    <!-- Published Forms -->
-    <div class="mt-12">
-      <h3 class="text-2xl font-bold text-gray-900 mb-4">Published Curriculums</h3>
+    <!-- ══════════════════════════════════════════ -->
+    <!--  HISTORY SUB-TAB                           -->
+    <!-- ══════════════════════════════════════════ -->
+    <div v-if="builderSubTab === 'history'" class="history-wrap">
+
+      <div class="history-header">
+        <h3 class="history-title">Published Curriculums History</h3>
+        <button
+          class="btn-indigo"
+          @click="builderSubTab = 'creation'; editingFormId = null; formTitle = ''; questions = defaultQuestions()"
+        >+ Create New Form</button>
+      </div>
+
+      <!-- Week filter -->
+      <div class="section-card">
+        <label class="field-label">Filter by Week Starting</label>
+        <input v-model="historyWeekStart" type="date" class="input-base max-w-xs" />
+      </div>
+
+      <!-- Form rows -->
       <div class="space-y-3">
         <div
-          v-for="form in publishedForms"
-          :key="form.id"
-          class="bg-white p-6 rounded-2xl border border-gray-200 flex justify-between items-center hover:border-purple-200 transition"
-          :class="{ 'opacity-60': form.status === 'Unpublished' }"
+          v-for="form in filteredPublishedForms" :key="form.id"
+          class="form-row"
+          :class="form.status === 'Unpublished' ? 'opacity-60' : ''"
         >
-          <div>
-            <h4 class="font-bold text-lg text-gray-800">{{ form.title }}</h4>
-            <p class="text-sm text-gray-400">Published: {{ form.date }} · {{ form.questions.length }} questions</p>
+          <!-- Week/day badge -->
+          <div class="week-badge">
+            <span class="week-badge-label">Week Of</span>
+            <span v-if="form.weekStart" class="week-badge-date">{{ form.weekStart }}</span>
+            <span class="week-badge-day">{{ form.day || 'Daily' }}</span>
           </div>
-          <div class="flex gap-2 items-center">
-            <span class="text-sm font-bold px-3 py-1 rounded-full"
-              :class="form.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'">
-              {{ form.status }}
-            </span>
-            <button @click="editPublishedForm(form)"
-              class="text-sm font-bold px-4 py-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition">
-              ✏️ Edit
-            </button>
-            <button @click="toggleFormPublish(form)"
-              :class="['text-sm font-bold px-4 py-2 rounded-xl transition', form.status === 'Active' ? 'bg-red-50 text-red-600 hover:bg-red-100' : 'bg-green-50 text-green-600 hover:bg-green-100']">
-              {{ form.status === 'Active' ? '⏸ Unpublish' : '▶ Republish' }}
-            </button>
+
+          <div class="flex-grow">
+            <h4 class="form-row-title">{{ form.title }}</h4>
+            <p class="form-row-meta">
+              Calculated Date: <span class="text-gray-600">{{ form.date }}</span>
+              · {{ form.questions.length }} steps
+            </p>
           </div>
+
+          <div class="form-row-actions">
+            <span class="status-pill" :class="form.status === 'Active' ? 'active' : 'inactive'">{{ form.status }}</span>
+            <button class="btn-sm-indigo" @click="viewFormDetails(form)">Details</button>
+            <button class="btn-sm-indigo" @click="editPublishedForm(form)">Edit</button>
+            <button
+              class="btn-sm"
+              :class="form.status === 'Active' ? 'danger' : 'success'"
+              @click="toggleFormPublish(form)"
+            >{{ form.status === 'Active' ? 'Unpublish' : 'Republish' }}</button>
+          </div>
+        </div>
+
+        <div v-if="filteredPublishedForms.length === 0" class="q-empty">
+          No published forms found for this week/day.
         </div>
       </div>
     </div>
+
   </div>
 </template>
+
+<style scoped>
+@import './styles/builder.css';
+</style>
