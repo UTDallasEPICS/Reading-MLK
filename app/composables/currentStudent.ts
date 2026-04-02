@@ -1,5 +1,5 @@
-import type { Student, Form, FormGroup } from '~~/prisma/generated/client'
-
+import type { Student, Form, FormGroup, FormSubmission } from '~~/prisma/generated/client'
+import { useCurrentFormGroup } from './useCurrentFormGroup'
 export type StudentSettings = {
   dyslexiaFont: boolean
   language: string
@@ -25,15 +25,12 @@ export const useCurrentStudent = () => {
     }
   })
 
-
-  const tickets = computed<number>(() => {
-    
-  })
+  //ticket calculation
 
   const stats = computed<StudentStats>(() => {
     return {
       exp: student.value?.exp || 0,
-      tickets: tickets.value
+      tickets: 0 //ticket
     }
   })
 
@@ -64,7 +61,7 @@ export const useCurrentStudent = () => {
           settings: updatedSettings
         }
       })
-      
+
       // Update the global state with the response, automatically passing it to pages like Home.vue
       student.value = updatedStudent
     } catch (error) {
