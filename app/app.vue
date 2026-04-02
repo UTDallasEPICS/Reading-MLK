@@ -38,7 +38,9 @@
       </header>
 
       <main class="flex-1">
-        <NuxtPage />
+        <NuxtLayout>
+          <NuxtPage />
+        </NuxtLayout>
       </main>
     </div>
   </UApp>
