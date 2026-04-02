@@ -1,55 +1,30 @@
 <script setup lang="ts">
-import type { Student } from '~~/prisma/generated/client'
 
-//retrieve from proper place (auth store, nuxt store, etc.)
-const {data: student} = await useFetch<Student | null>('/api/student/1')
+const { student, settings: globalSettings, saveSettings: pushSettings, loadStudent } = useCurrentStudent()
 
-
-//define type for student settings
-type StudentSettings = {
-  dyslexiaFont?: boolean
-  language?: string
-  fontSize?: number
+// Fallback: If no student is currently loaded into global state, load student 1
+//this is stupid and funny, remove
+if (!student.value) {
+  await loadStudent(1) 
 }
-//cast raw student settings JSON from api call to type
-const parsedSettings = computed(() => {
-  return (student.value?.settings || {}) as StudentSettings
+
+// Map the global settings to a local reactive object so our sliders/toggles can mutate them
+const settings = reactive({ 
+  dyslexiaFont: globalSettings.value.dyslexiaFont,
+  language: globalSettings.value.language,
+  fontSize: globalSettings.value.fontSize
 })
 
-//load parsed student settings
-const settings = reactive({
-  dyslexiaFont: Boolean(parsedSettings.value.dyslexiaFont),
-  language: parsedSettings.value.language || 'en',
-  fontSize: Number(parsedSettings.value.fontSize) || 1,
-})
-
-// ── Theme class ── change later to exported and load it in
+// ── Theme class ── 
 const themeClass = computed(() => {
   const t = 'light'
   const d = settings.dyslexiaFont ? 'dyslexia-font' : ''
   return `reader-app ${t} ${d}`.trim()
 })
 
-const saveSettings = async () => {
-  const id = student.value?.id
-  try {
-    await $fetch(`/api/student/${id}`, {
-      method: 'PUT',
-      body: {
-        settings: {
-          dyslexiaFont: settings.dyslexiaFont,
-          fontSize: settings.fontSize,
-          language: settings.language
-        }
-    }})
-  } catch (error) {
-    console.error('Error saving settings:', error)
-  }
-}
-
-// Watch for any changes to settings and automatically save
-watch(settings, () => {
-  saveSettings()
+// Watch for any changes to settings and automatically save using the composable
+watch(settings, (newSettings) => {
+  pushSettings(newSettings)
 }, { deep: true })
 
 </script>
