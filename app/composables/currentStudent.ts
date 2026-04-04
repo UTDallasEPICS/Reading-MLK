@@ -1,14 +1,8 @@
 import type { Student, Form, FormGroup, FormSubmission } from '~~/prisma/generated/client'
-import { useCurrentFormGroup } from './useCurrentFormGroup'
 export type StudentSettings = {
   dyslexiaFont: boolean
   language: string
   fontSize: number
-}
-
-export type StudentStats = {
-  exp: number
-  tickets: number
 }
 
 export const useCurrentStudent = () => {
@@ -24,21 +18,7 @@ export const useCurrentStudent = () => {
       fontSize: Number(raw.fontSize) || 1,
     }
   })
-
-  //ticket calculation
-
-  const stats = computed<StudentStats>(() => {
-    return {
-      exp: student.value?.exp || 0,
-      tickets: 0 //ticket
-    }
-  })
-
-  // Call this from StudentSelect.vue when a profile is picked
-  const setStudent = (newStudent: Student) => {
-    student.value = newStudent
-  }
-
+  
   // Fetch a student directly from the DB by ID
   const loadStudent = async (id: number) => {
     try {
@@ -69,20 +49,10 @@ export const useCurrentStudent = () => {
     }
   }
 
-  const saveProgress = async () => {
-  }
-
-  const saveStats = async () => {
-  }
-
   return {
     student,
     settings,
-    stats,
-    setStudent,
     loadStudent,
-    saveSettings,
-    saveProgress,
-    saveStats
+    saveSettings
   }
 }

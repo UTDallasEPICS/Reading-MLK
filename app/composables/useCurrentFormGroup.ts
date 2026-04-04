@@ -1,12 +1,12 @@
 import type { FormGroup, Form } from '~~/prisma/generated/client'
 
-export interface CurrentFormGroupState {
+export type CurrentFormGroupState = {
   activeFormGroup: FormGroup | null
   forms: Form[]
 }
 
 export const useCurrentFormGroup = () => {
-  const state = useState<CurrentFormGroupState>('currentFormGroupState', () => ({
+  const FormGroup = useState<CurrentFormGroupState>('currentFormGroupState', () => ({
     activeFormGroup: null,
     forms: []
   }))
@@ -19,31 +19,34 @@ export const useCurrentFormGroup = () => {
       const activeFg = Array.isArray(formGroupAPIResponse) ? formGroupAPIResponse[0] : formGroupAPIResponse
 
       if (activeFg) {
-        state.value.activeFormGroup = activeFg
+        FormGroup.value.activeFormGroup = activeFg
 
         try {
           const formsAPIResponse = await $fetch<Form[]>('/api/form', {
             query: { formGroup: activeFg.id }
           })
 
-          state.value.forms = Array.isArray(formsAPIResponse) ? formsAPIResponse : []
+          FormGroup.value.forms = Array.isArray(formsAPIResponse) ? formsAPIResponse : []
         } catch (error) {
           console.error('Failed to load forms for active form group:', error)
-          state.value.forms = []
+          FormGroup.value.forms = []
         }
       } else {
-        state.value.activeFormGroup = null
-        state.value.forms = []
+        FormGroup.value.activeFormGroup = null
+        FormGroup.value.forms = []
       }
     } catch (error) {
       console.error('Failed to load active form group:', error)
-      state.value.activeFormGroup = null
-      state.value.forms = []
+      FormGroup.value.activeFormGroup = null
+      FormGroup.value.forms = []
     }
   }
 
+  const totalFormsInGroup = computed(() => FormGroup.value.forms.length)
+
   return {
-    state,
-    loadActiveFormGroup
+    FormGroup,
+    loadActiveFormGroup,
+    totalFormsInGroup
   }
 }
