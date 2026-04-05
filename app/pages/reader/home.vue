@@ -16,8 +16,9 @@ definePageMeta({ ssr: false })
 const { student, settings: globalSettings, loadStudent } = useCurrentStudent()
 const { totalFormsInGroup: totalForms, loadActiveFormGroup} = useCurrentFormGroup()
 const { tickets: tickets, loadProgress} = useCurrentStudentProgress()
-//await loadActiveFormGroup()
-//await loadProgress()
+await loadStudent(2)
+await loadActiveFormGroup()
+await loadProgress()
 
 // ── Theme class ──
 const themeClass = computed(() => {

@@ -1,4 +1,4 @@
-import type { FormGroup, Form } from '~~/prisma/generated/client'
+import type { FormGroup, Form, FormComponent } from '~~/prisma/generated/client'
 
 export type CurrentFormGroupState = {
   activeFormGroup: FormGroup | null
@@ -13,7 +13,7 @@ export const useCurrentFormGroup = () => {
 
   const loadActiveFormGroup = async () => {
     try {
-      const formGroupAPIResponse = await $fetch<FormGroup | FormGroup[]>('/api/formgroup?active=true')
+      const formGroupAPIResponse = await $fetch<FormGroup | FormGroup[]>('/api/formGroup?active=true')
 
       // Handle if the API returns an array or single item
       const activeFg = Array.isArray(formGroupAPIResponse) ? formGroupAPIResponse[0] : formGroupAPIResponse
@@ -23,7 +23,7 @@ export const useCurrentFormGroup = () => {
 
         try {
           const formsAPIResponse = await $fetch<Form[]>('/api/form', {
-            query: { formGroup: activeFg.id }
+            query: { formGroup: activeFg.id, published: true }
           })
 
           FormGroup.value.forms = Array.isArray(formsAPIResponse) ? formsAPIResponse : []

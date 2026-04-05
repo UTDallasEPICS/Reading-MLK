@@ -1,14 +1,18 @@
 <script setup lang="ts">
 definePageMeta({ ssr: false })
 
-const settings = reactive({ theme: 'light', dyslexiaFont: false, language: 'en', fontSize: 1 })
+const { student, settings } = useCurrentStudent()
+const { FormGroup, totalFormsInGroup } = useCurrentFormGroup()
+const { tickets } = useCurrentStudentProgress()
 
-const stats = reactive({ xp: 1250, booksRead: 14, streak: 5, tickets: 3 })
+const stats = computed(() => ({
+  xp: student.value ? student.value.exp : 0,
+  tickets: tickets.value? tickets.value : 0,
+}))
 
 const themeClass = computed(() => {
-  const t = settings.theme !== 'light' ? `theme-${settings.theme}` : ''
-  const d = settings.dyslexiaFont ? 'dyslexia-font' : ''
-  return `reader-app ${t} ${d}`.trim()
+  const d = settings.value.dyslexiaFont ? 'dyslexia-font' : ''
+  return `reader-app ${d}`.trim()
 })
 
 // ── Click badge animations ──
