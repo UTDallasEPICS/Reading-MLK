@@ -1,6 +1,8 @@
 <script setup lang="ts">
 definePageMeta({ ssr: false, layout: "admin" })
 
+const builderSectionRef = ref<HTMLElement | null>(null)
+
 const {
   builderSubTab, formTitle, editingFormId, questions,
   formWeekStart, formDays, historyWeekStart, getLastMonday,
@@ -74,6 +76,35 @@ const removeQuestion = (index: number) => {
   questions.value.splice(index, 1)
 }
 
+const handleBuilderEnter = (event: KeyboardEvent) => {
+  const currentTarget = event.target as HTMLElement | null
+
+  if (!currentTarget || !builderSectionRef.value) {
+    return
+  }
+
+  const focusables = Array.from(
+    builderSectionRef.value.querySelectorAll<HTMLElement>('[data-builder-field="true"]')
+  )
+  const currentIndex = focusables.indexOf(currentTarget)
+
+  if (currentIndex === -1) {
+    return
+  }
+
+  const nextField = focusables[currentIndex + 1]
+
+  if (nextField) {
+    nextField.focus()
+    if ('select' in nextField && typeof nextField.select === 'function') {
+      nextField.select()
+    }
+    return
+  }
+
+  publishForm()
+}
+
 onMounted(() => {
   loadPublishedForms()
   window.addEventListener('pointerup', endDayDrag)
@@ -144,7 +175,7 @@ onBeforeUnmount(() => {
     <!-- ══════════════════════════════════════════ -->
     <!--  CREATION SUB-TAB                          -->
     <!-- ══════════════════════════════════════════ -->
-    <div v-if="builderSubTab === 'creation'" class="creation-wrap">
+    <div v-if="builderSubTab === 'creation'" ref="builderSectionRef" class="creation-wrap">
 
       <!-- Top bar -->
       <div class="history-header">
@@ -163,11 +194,11 @@ onBeforeUnmount(() => {
         <div class="week-row">
           <div>
             <p class="field-hint">Selected Week</p>
-            <h4 class="week-label">{{ formWeekStart ? 'Week of ' + formatDate(getLastMonday(formWeekStart)) : 'Select a week' }}</h4>
+            <h4 class="week-label">{{ formWeekStart ? 'Week of ' + getLastMonday(formWeekStart) : 'Select a week' }}</h4>
           </div>
           <div>
             <label class="field-label">Change Week Starting (Mon)</label>
-            <input v-model="formWeekStart" type="date" class="input-base" />
+            <input v-model="formWeekStart" type="date" class="input-base" data-builder-field="true"  @keydown.enter.prevent="handleBuilderEnter" />
           </div>
         </div>
 
@@ -193,7 +224,7 @@ onBeforeUnmount(() => {
         <div class="title-row">
           <div class="flex-grow">
             <label class="field-label">Form Title</label>
-            <input v-model="formTitle" type="text" placeholder="e.g. Kindness & Math Challenge" class="input-title" />
+            <input v-model="formTitle" type="text" placeholder="e.g. Kindness & Math Challenge" class="input-title" data-builder-field="true" @keydown.enter.prevent="handleBuilderEnter" />
           </div>
           <div class="preview-date-box">
             <span class="field-hint">Preview Date</span>
@@ -241,21 +272,21 @@ onBeforeUnmount(() => {
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label class="field-label">Question (English)</label>
-                  <input v-model="q.text" type="text" placeholder="Enter question in English..." class="input-field" />
+                  <input v-model="q.text" type="text" placeholder="Enter question in English..." class="input-field" data-builder-field="true" @keydown.enter.prevent="handleBuilderEnter" />
                 </div>
                 <div>
                   <label class="field-label">Question (Spanish)</label>
-                  <input v-model="q.textEs" type="text" placeholder="Ingrese pregunta en Español..." class="input-field" />
+                  <input v-model="q.textEs" type="text" placeholder="Ingrese pregunta en Español..." class="input-field" data-builder-field="true" @keydown.enter.prevent="handleBuilderEnter" />
                 </div>
               </div>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                 <div>
                   <label class="field-label">Reference (English)</label>
-                  <textarea v-model="q.reference" rows="2" placeholder="Correct answer..." class="textarea-field" />
+                  <textarea v-model="q.reference" rows="2" placeholder="Correct answer..." class="textarea-field" data-builder-field="true" @keydown.enter.prevent="handleBuilderEnter" />
                 </div>
                 <div>
                   <label class="field-label">Reference (Spanish)</label>
-                  <textarea v-model="q.referenceEs" rows="2" placeholder="Respuesta correcta..." class="textarea-field" />
+                  <textarea v-model="q.referenceEs" rows="2" placeholder="Respuesta correcta..." class="textarea-field" data-builder-field="true" @keydown.enter.prevent="handleBuilderEnter" />
                 </div>
               </div>
             </div>
@@ -267,7 +298,7 @@ onBeforeUnmount(() => {
                 <span class="choice-letter" :class="choice.correct ? 'correct' : ''">
                   {{ String.fromCharCode(65 + Number(ci)) }}
                 </span>
-                <input v-model="choice.text" type="text" :placeholder="'Choice ' + String.fromCharCode(65 + Number(ci)) + '...'" class="input-field flex-grow" />
+                <input v-model="choice.text" type="text" :placeholder="'Choice ' + String.fromCharCode(65 + Number(ci)) + '...'" class="input-field flex-grow" data-builder-field="true" @keydown.enter.prevent="handleBuilderEnter" />
                 <button
                   class="btn-correct"
                   :class="choice.correct ? 'active' : ''"
@@ -281,18 +312,18 @@ onBeforeUnmount(() => {
             <!-- Video URL -->
             <div v-if="q.type === 'video'">
               <label class="field-label">YouTube URL</label>
-              <input v-model="q.url" type="text" placeholder="https://youtu.be/..." class="input-field" />
+              <input v-model="q.url" type="text" placeholder="https://youtu.be/..." class="input-field" data-builder-field="true" @keydown.enter.prevent="handleBuilderEnter" />
             </div>
 
             <!-- Context block -->
             <div v-if="q.type === 'context'" class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label class="field-label">Context (English)</label>
-                <textarea v-model="q.text" rows="3" placeholder="Read this paragraph first..." class="textarea-field" />
+                <textarea v-model="q.text" rows="3" placeholder="Read this paragraph first..." class="textarea-field" data-builder-field="true" @keydown.enter.prevent="handleBuilderEnter" />
               </div>
               <div>
                 <label class="field-label">Context (Spanish)</label>
-                <textarea v-model="q.textEs" rows="3" placeholder="Lea este párrafo primero..." class="textarea-field" />
+                <textarea v-model="q.textEs" rows="3" placeholder="Lea este párrafo primero..." class="textarea-field" data-builder-field="true" @keydown.enter.prevent="handleBuilderEnter" />
               </div>
             </div>
           </div>

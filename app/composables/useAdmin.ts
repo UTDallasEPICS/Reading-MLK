@@ -111,7 +111,8 @@ export const useAdmin = () => {
   }
   const getLastMonday = (dateStr: string) => {
     const d = new Date(`${dateStr}T00:00:00Z`)
-    const daysSinceMonday = (d.getDay() + 6) % 7
+    const daysSinceMonday = (d.getDay()) % 7
+    console.log ("get day:", d.getDay(), "daysSinceMonday:", daysSinceMonday)
     d.setDate(d.getDate() - daysSinceMonday)
     return d.toISOString().slice(0, 10)
   }
