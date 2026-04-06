@@ -7,7 +7,7 @@ const {
   getCalculatedDate, formatDate, defaultQuestions,
   filteredPublishedForms, selectedFormDetails, viewFormDetails,
   draggedIdx, dragStart, onDrop,
-  addQuestion, publishForm, editPublishedForm, toggleFormPublish,
+  addQuestion, publishForm, editPublishedForm, toggleFormPublish, loadPublishedForms,
 } = useAdmin()
 
 const previewDates = computed(() => {
@@ -75,6 +75,7 @@ const removeQuestion = (index: number) => {
 }
 
 onMounted(() => {
+  loadPublishedForms()
   window.addEventListener('pointerup', endDayDrag)
   window.addEventListener('pointercancel', endDayDrag)
   window.addEventListener('blur', endDayDrag)
