@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { Student, Announcement, Form, FormGroup } from '~~/prisma/generated/client'
+import { onMounted } from 'vue'
+import { authClient } from '~/utils/auth-client'
 
 definePageMeta({ ssr: false })
 /* TODO:
@@ -23,20 +24,53 @@ definePageMeta({ ssr: false })
 */
 
 //TODO 4 retrieve active student
-const {data: student} = await useFetch<Student | null>('/api/student/1')
+const { student, restoreStudent } = useCurrentStudent()
+const checkingStudent = ref(true)
+
+onMounted(async () => {
+  if (!student.value) {
+    await restoreStudent()
+  }
+
+  if (!student.value) {
+    await navigateTo('/reader/profile')
+    return
+  }
+
+  checkingStudent.value = false
+})
+
+//Logout
+const { clearStudent } = useCurrentStudent()
+
+async function logout() {
+  try {
+    clearStudent()
+
+    await authClient.signOut()
+
+    await navigateTo('/')
+  } catch (error) {
+    console.error('Logout failed:', error)
+  }
+}
  
 //TODO 2 parse settings from student
-const settings = reactive({
-  dyslexiaFont: false,
-  language:    'en',
-  fontSize:    1,
+const settings = computed(() => {
+  const raw = student.value?.settings as any || {}
+
+  return {
+    dyslexiaFont: !!raw.dyslexiaFont,
+    language: raw.language || 'en',
+    fontSize: Number(raw.fontSize) || 1,
+  }
 })
 
 //TODO 2 calculate stats from student data
 const stats = {
-  xp: computed(() => Number(student.value?.exp ?? 0)),
-  streak: 5,
-  tickets: 3,
+  xp: computed(() => student.value?.exp ?? 0),
+  streak: 0,   // we'll implement later
+  tickets: 0,  // will come from submissions later
 }
 
 const showSettings = ref(false)
@@ -44,7 +78,7 @@ const showSettings = ref(false)
 // ── Theme class ──
 const themeClass = computed(() => {
   const t = 'light'
-  const d = settings.dyslexiaFont ? 'dyslexia-font' : ''
+  const d = settings.value.dyslexiaFont ? 'dyslexia-font' : ''
   return `reader-app ${t} ${d}`.trim()
 })
 
@@ -72,9 +106,19 @@ function triggerTicketClick() {
 
 //TODO 3
 // Announcements 
-const announcements = ref([
-  { id: 1, title: 'New Book Added!', content: student.value?.name ?? 'Student' },
-  { id: 2, title: 'Raffle Winners Announced!', content: 'Congrats to our latest raffle winners! 🎉', icon: '🎟️' },
+const announcements = computed(() => [
+  {
+    id: 1,
+    title: 'New Book Added!',
+    content: student.value?.name ?? 'Student',
+    icon: '📚',
+  },
+  {
+    id: 2,
+    title: 'Raffle Winners Announced!',
+    content: 'Congrats to our latest raffle winners! 🎉',
+    icon: '🎟️',
+  },
 ])
 
 //TODO 2
@@ -99,8 +143,16 @@ const completionMessage = computed(() => {
 </script>
 
 <template>
-  <div :class="themeClass" :style="`font-size: ${settings.fontSize * 16}px`" class="pb-32 px-4 pt-4 min-h-screen">
+  <div v-if="checkingStudent" class="min-h-screen flex items-center justify-center bg-[#f8f7f4]">
+    <p class="text-gray-500 font-semibold text-lg">Loading reader...</p>
+  </div>
 
+  <div
+    v-else
+    :class="themeClass"
+    :style="`font-size: ${settings.fontSize * 16}px`"
+    class="pb-32 px-4 pt-4 min-h-screen"
+  >
     <!-- ── TOP BAR ── -->
     <header class="max-w-4xl mx-auto flex justify-between items-center mb-8 px-2 relative z-[200]">
       <div class="flex items-center gap-3">
@@ -139,10 +191,11 @@ const completionMessage = computed(() => {
 
         <!-- Settings button -->
         <button
-          @click="showSettings = true"
+          @click="showSettings = !showSettings"
           class="w-14 h-14 bg-white/90 backdrop-blur-md rounded-xl flex items-center justify-center text-2xl transition-all border-2 border-white shadow-xl hover:scale-110 active:scale-95"
-          style="hover:color: var(--brand-indigo)"
-        >⚙️</button>
+        >
+          ⚙️
+        </button>
       </div>
     </header>
 
@@ -152,21 +205,32 @@ const completionMessage = computed(() => {
 
         <!-- Welcome heading -->
         <div class="text-center py-4">
-          <h1 class="font-heading text-5xl font-bold mb-1" style="color: var(--brand-dark)">Welcome Back! 👋</h1>
+          <h1 class="font-heading text-5xl font-bold mb-1" style="color: var(--brand-dark)">Welcome Back, {{ student?.name }}! 👋</h1>
           <p class="text-lg text-gray-500 font-medium">Ready for today's reading adventure?</p>
         </div>
 
         <!-- Announcements Ticker TODO 3-->
-        <div v-if="announcements.length > 0" class="premium-card px-5 py-3" style="background: rgba(245,158,11,0.05); border-color: rgba(245,158,11,0.2)">
+        <div
+          v-if="announcements.length > 0"
+          class="premium-card px-5 py-3"
+          style="background: rgba(245,158,11,0.05); border-color: rgba(245,158,11,0.2)"
+        >
           <div class="flex items-center gap-3">
             <span class="text-xl">📢</span>
+
             <div class="flex-grow overflow-hidden">
               <p class="text-sm font-bold truncate" style="color: var(--brand-dark)">
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase mr-2 text-gray-900" style="background: var(--brand-gold)">New</span>
-                {{ announcements[0].title }} — {{ announcements[0].content }}
+                <span
+                  class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase mr-2 text-gray-900"
+                  style="background: var(--brand-gold)"
+                >
+                  New
+                </span>
+                {{ announcements[0]?.title }} — {{ announcements[0]?.content }}
               </p>
             </div>
-            <span class="text-lg">{{ announcements[0].icon }}</span>
+
+            <span class="text-lg">{{ announcements[0]?.icon }}</span>
           </div>
         </div>
 
@@ -275,21 +339,25 @@ const completionMessage = computed(() => {
 
           <!-- Kid profiles TODO 1-->
           <div>
-            <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Who's Reading?</label>
-            <div class="flex gap-4 justify-center flex-wrap">
-              <div
-                v-for="(profile, idx) in kidProfiles" :key="idx"
-                @click="activeProfileIdx = idx"
-                class="flex flex-col items-center gap-2 cursor-pointer transition-all p-3 rounded-xl"
-                :class="activeProfileIdx === idx ? 'scale-105 shadow-md' : 'opacity-70 hover:opacity-100'"
-                :style="activeProfileIdx === idx ? 'background: rgba(224,96,77,0.1)' : ''"
-              >
-                <div class="w-16 h-16 rounded-xl flex items-center justify-center text-2xl font-black text-white shadow-md" :class="profile.color">
-                  {{ profile.avatar }}
+            <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">
+              Profile
+            </label>
+
+            <button
+              @click="navigateTo('/reader/profile')"
+              class="w-full flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition"
+            >
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-indigo-500 text-white flex items-center justify-center font-bold">
+                  {{ student?.name?.charAt(0).toUpperCase() }}
                 </div>
-                <span class="text-xs font-bold" style="color: var(--brand-dark)">{{ profile.name }}</span>
+                <span class="font-bold text-gray-800">
+                  {{ student?.name }}
+                </span>
               </div>
-            </div>
+
+              <span class="text-gray-400 font-bold">Switch</span>
+            </button>
           </div>
 
           <!-- Font size -->
@@ -336,6 +404,12 @@ const completionMessage = computed(() => {
               {{ settings.language === 'en' ? '🇪🇸 Español' : '🇺🇸 English' }}
             </button>
           </div>
+          <button
+            @click="logout"
+            class="w-full py-4 rounded-2xl font-heading font-bold text-lg border-2 border-red-200 text-red-600 bg-red-50 hover:bg-red-100 transition active:scale-95"
+          >
+            Log Out
+          </button>
 
           <button @click="showSettings = false"
             class="w-full py-4 rounded-2xl font-heading font-bold text-lg text-white transition transform active:scale-95 shadow-lg hover:bg-black"

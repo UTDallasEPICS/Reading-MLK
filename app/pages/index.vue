@@ -11,7 +11,7 @@ definePageMeta({ ssr: false })
     </div>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-2xl">
       <button
-        @click="navigateTo('/admin')"
+        @click="navigateTo('/auth?role=admin')"
         class="group bg-white rounded-3xl border-2 border-gray-100 p-10 text-center shadow-sm hover:border-indigo-400 hover:shadow-lg transition-all duration-200"
       >
         <div class="w-20 h-20 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center text-5xl mb-5 mx-auto group-hover:rotate-12 transition-transform duration-300">🏫</div>
@@ -19,7 +19,7 @@ definePageMeta({ ssr: false })
         <p class="text-gray-400 font-medium">Manage students, curriculum & raffles.</p>
       </button>
       <button
-        @click="navigateTo('/reader')"
+        @click="navigateTo('/auth?role=reader')"
         class="group bg-white rounded-3xl border-2 border-gray-100 p-10 text-center shadow-sm hover:border-amber-400 hover:shadow-lg transition-all duration-200"
       >
         <div class="w-20 h-20 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center text-5xl mb-5 mx-auto group-hover:rotate-12 transition-transform duration-300">✨</div>

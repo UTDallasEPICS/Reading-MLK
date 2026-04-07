@@ -8,40 +8,41 @@ datasource db {
 }
 
 model User {
-  id            Int    @id @default(autoincrement())
+  id            String    @id
   name          String
-  email         String
+  email         String    @unique
   emailVerified Boolean   @default(false)
+  role          String    @default("reader")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
   accounts      Account[]
+  admin                 Admin?
+  students              Student[]
 
-  @@unique([email])
   @@map("user")
 }
 
 model Session {
-  id        Int   @id @default(autoincrement())
+  id        String   @id
   expiresAt DateTime
-  token     String
+  token     String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   ipAddress String?
   userAgent String?
-  userId    Int
+  userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([token])
   @@index([userId])
   @@map("session")
 }
 
 model Account {
-  id                    Int       @id @default(autoincrement())
+  id                    String       @id
   accountId             String
   providerId            String
-  userId                Int
+  userId                String
   user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessToken           String?
   refreshToken          String?
@@ -52,8 +53,7 @@ model Account {
   password              String?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
-  admin                 Admin?
-  students              Student[]
+
 
   @@index([userId])
   @@map("account")
@@ -61,22 +61,21 @@ model Account {
 
 model Verification {
   id         String   @id 
-  identifier String
+  identifier String   @unique
   value      String
   expiresAt  DateTime
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  @@index([identifier])
   @@map("verification")
 }
 
 model Admin {
   id                    Int       @id @default(autoincrement())
   settings              Json?
-  account               Int       @unique
+  userId                  String       @unique
 
-  Account               Account   @relation(fields: [account], references: [id], onDelete: Cascade)
+  User                   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   authoredAnnouncements Announcement[]
   authoredForms         Form[]
 }
@@ -86,9 +85,9 @@ model Student {
   name                  String
   settings              Json?
   exp                   Int           @default(0)
-  parent                Int           
+  parentUserId                String           
 
-  Parent                Account       @relation(fields: [parent], references: [id], onDelete: Cascade)
+  Parent                User       @relation(fields: [parentUserId], references: [id], onDelete: Cascade)
   Submissions           FormSubmission[]
   WinnerOf              FormGroup[]   @relation("RaffleWinner")
 }

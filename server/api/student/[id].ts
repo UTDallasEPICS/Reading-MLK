@@ -1,23 +1,35 @@
 import { prisma } from '../../utils/prisma'
+import { auth } from '../../utils/auth'
 
 export default defineEventHandler(async (event) => {
   const method = event.node.req.method
   const id = event.context.params?.id
-  
-  //validate id path parameter
+
   if (!id || isNaN(Number(id))) {
     throw createError({
       statusCode: 400,
       statusMessage: 'Invalid ID',
     })
   }
+
   const studentId = Number(id)
 
-  if (method === 'GET') {
+  const session = await auth.api.getSession({
+    headers: event.headers,
+  })
 
-    const student = await prisma.student.findUnique({
+  if (!session?.user) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: 'Unauthorized',
+    })
+  }
+
+  if (method === 'GET') {
+    const student = await prisma.student.findFirst({
       where: {
         id: studentId,
+        parentUserId: session.user.id,
       },
     })
 
@@ -31,8 +43,63 @@ export default defineEventHandler(async (event) => {
     return student
   }
 
-  if (method === 'PUT') {}
+  if (method === 'PUT') {
+    const body = await readBody(event)
 
-  if (method === 'DELETE') {}
+    const student = await prisma.student.findFirst({
+      where: {
+        id: studentId,
+        parentUserId: session.user.id,
+      },
+    })
 
+    if (!student) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'Student not found',
+      })
+    }
+
+    const updatedStudent = await prisma.student.update({
+      where: {
+        id: studentId,
+      },
+      data: {
+        name: body.name ?? student.name,
+        settings: body.settings ?? student.settings,
+        exp: body.exp ?? student.exp,
+      },
+    })
+
+    return updatedStudent
+  }
+
+  if (method === 'DELETE') {
+    const student = await prisma.student.findFirst({
+      where: {
+        id: studentId,
+        parentUserId: session.user.id,
+      },
+    })
+
+    if (!student) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'Student not found',
+      })
+    }
+
+    await prisma.student.delete({
+      where: {
+        id: studentId,
+      },
+    })
+
+    return { message: 'Student deleted successfully' }
+  }
+
+  throw createError({
+    statusCode: 405,
+    statusMessage: 'Method not allowed',
+  })
 })
