@@ -409,7 +409,7 @@ onBeforeUnmount(() => {
             <h4 class="form-row-title">{{ form.title }}</h4>
             <p class="form-row-meta">
               Calculated Date: <span class="text-gray-600">{{ form.date }}</span>
-              · {{ form.questions.length }} steps
+              · {{ form.questions.length }} questions
             </p>
           </div>
 

@@ -111,8 +111,7 @@ export const useAdmin = () => {
   }
   const getLastMonday = (dateStr: string) => {
     const d = new Date(`${dateStr}T00:00:00Z`)
-    const daysSinceMonday = (d.getDay()) % 7
-    console.log ("get day:", d.getDay(), "daysSinceMonday:", daysSinceMonday)
+    const daysSinceMonday = (d.getDay() + 6) % 7
     d.setDate(d.getDate() - daysSinceMonday)
     return d.toISOString().slice(0, 10)
   }
@@ -187,6 +186,73 @@ export const useAdmin = () => {
     try {
       const weekStart = getLastMonday(formWeekStart.value || '')
       const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
+
+      if (editingFormId.value) {
+        const targetDay = formDays.value[0] || 'Monday'
+        const dayIndex = days.indexOf(targetDay)
+
+        if (dayIndex === -1) {
+          throw new Error('Invalid day selected for update')
+        }
+
+        const startDate = new Date(`${weekStart}T00:00:00Z`)
+        startDate.setUTCDate(startDate.getUTCDate() + dayIndex)
+
+        await callFormApi('PUT', {}, {
+          action: 'updateForm',
+          id: editingFormId.value,
+          startDate: startDate.toISOString(),
+          published: true,
+        })
+
+        const existingForm = publishedForms.value.find((form) => Number(form.id) === Number(editingFormId.value))
+        const existingComponentIds = new Set<number>(
+          (existingForm?.questions ?? [])
+            .map((question: any) => Number(question.id))
+            .filter((questionId: number) => Number.isInteger(questionId) && questionId > 0)
+        )
+
+        for (let index = 0; index < questions.value.length; index++) {
+          const question = questions.value[index]
+          const numericQuestionId = Number(question.id)
+          const isExistingComponent = Number.isInteger(numericQuestionId) && existingComponentIds.has(numericQuestionId)
+
+          if (isExistingComponent) {
+            await callFormApi('PUT', {}, {
+              action: 'updateComponent',
+              id: numericQuestionId,
+              order: index,
+              questionType: question.type,
+              questionText: toApiQuestionText(question, formTitle.value),
+              questionOptions: buildQuestionOptions(question),
+            })
+
+            existingComponentIds.delete(numericQuestionId)
+          } else {
+            await callFormApi('POST', {}, {
+              action: 'createComponent',
+              form: editingFormId.value,
+              order: index,
+              questionType: question.type,
+              questionText: toApiQuestionText(question, formTitle.value),
+              questionOptions: buildQuestionOptions(question),
+            })
+          }
+        }
+
+        for (const removedId of existingComponentIds) {
+          await callFormApi('DELETE', {}, {
+            action: 'deleteComponent',
+            id: removedId,
+          })
+        }
+
+        await loadPublishedForms()
+        editingFormId.value = null
+        builderSubTab.value = 'history'
+        alert('Form updated successfully')
+        return
+      }
 
       for (const day of formDays.value) {
         const dayIndex = days.indexOf(day)
