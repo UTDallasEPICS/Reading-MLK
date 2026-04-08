@@ -9,7 +9,7 @@ export default defineEventHandler(async (event) => {
   //GET /api/form?formGroup=1&published=true to get published forms for a specific form group
   if (method === 'GET') {
     return await prisma.form.findMany({
-      where: query.formGroup ? { formGroup: Number(query.formGroup), published: Boolean(query.published) } : {}
+      where: query.formGroup ? { formGroup: Number(query.formGroup), published: query.published === 'true' } : {}
     })
   }
 })

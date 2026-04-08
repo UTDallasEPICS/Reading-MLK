@@ -49,10 +49,30 @@ export const useCurrentStudent = () => {
     }
   }
 
+  // Update student XP and persist to DB
+  const updateExp = async (amount: number) => {
+    if (!student.value?.id) return
+
+    const newExp = (student.value.exp || 0) + amount
+
+    try {
+      const updatedStudent = await $fetch<Student>(`/api/student/${student.value.id}`, {
+        method: 'PUT',
+        body: {
+          exp: newExp
+        }
+      })
+      student.value = updatedStudent
+    } catch (error) {
+      console.error('Failed to update student XP:', error)
+    }
+  }
+
   return {
     student,
     settings,
     loadStudent,
-    saveSettings
+    saveSettings,
+    updateExp
   }
 }
