@@ -1,5 +1,4 @@
 import { prisma } from '../../utils/prisma'
-import { randomUUID } from 'crypto'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -33,7 +32,6 @@ export default defineEventHandler(async (event) => {
 
   const user = await prisma.user.create({
     data: {
-      id: randomUUID(),
       email,
       name,
       role: 'reader',

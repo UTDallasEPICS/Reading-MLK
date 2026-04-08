@@ -10,6 +10,12 @@ export default defineNuxtRouteMiddleware(async (to) => {
   }
 
   if (session.value && to.path === '/auth') {
-    return navigateTo('/')
+    const role = to.query.role
+
+    if (role === 'admin') {
+      return navigateTo('/admin')
+    }
+
+    return navigateTo('/reader/profile')
   }
 })

@@ -23,9 +23,7 @@ export default defineEventHandler(async (event) => {
     })
 
     return students
-  }
-
-  if (method === 'POST') {
+  } else if (method === 'POST') {
     const body = await readBody(event)
 
     if (!body.name || typeof body.name !== 'string') {
