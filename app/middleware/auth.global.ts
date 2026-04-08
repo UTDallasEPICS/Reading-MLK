@@ -1,19 +1,15 @@
-// import { authClient } from '../utils/auth-client'
+import { authClient } from '../utils/auth-client'
 
-export default defineNuxtRouteMiddleware(() => {
-  // auth disabled for now
+export default defineNuxtRouteMiddleware(async (to) => {
+  const { data: session } = await authClient.useSession(useFetch)
+
+  const publicRoutes = ['/', '/auth']
+
+  if (!session.value && !publicRoutes.includes(to.path)) {
+    return navigateTo('/auth')
+  }
+
+  if (session.value && to.path === '/auth') {
+    return navigateTo('/')
+  }
 })
-
-// export default defineNuxtRouteMiddleware(async (to) => {
-//   const { data: session } = await authClient.useSession(useFetch)
-
-//   if (session.value) {
-//     if (to.path === '/auth') {
-//       return navigateTo('/')
-//     }
-//   } else {
-//     if (to.path !== '/auth') {
-//       return navigateTo('/')
-//     }
-//   }
-// })
