@@ -161,56 +161,65 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#f8f7f4] font-sans">
-    <div class="h-1.5 w-full bg-gradient-to-r from-indigo-600 via-amber-400 to-amber-500" />
+  <div class="min-h-screen bg-[#f8efe5] relative overflow-hidden font-sans">
+    <div class="absolute inset-0 bg-gradient-to-br from-[#faefe5] via-[#f7eee6] to-[#f5eadf]" />
+    <div class="absolute inset-0 pointer-events-none opacity-70">
+      <div class="absolute top-16 left-16 h-36 w-36 rounded-full bg-orange-100 blur-3xl" />
+      <div class="absolute bottom-20 right-20 h-44 w-44 rounded-full bg-yellow-100 blur-3xl" />
+      <div class="absolute top-1/3 right-1/4 h-28 w-28 rounded-full bg-pink-100 blur-2xl" />
+    </div>
 
-    <main class="max-w-4xl mx-auto min-h-[calc(100vh-6px)] flex flex-col">
-      <div class="flex items-center justify-center flex-1 py-20 px-4">
-        <div
-          class="relative bg-white/80 backdrop-blur rounded-3xl border border-gray-100 shadow-xl p-12 w-full max-w-md text-center space-y-8 overflow-hidden"
-        >
-          <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-indigo-600 via-amber-400 to-amber-500" />
+    <main class="relative z-10 min-h-screen flex items-center justify-center px-4 py-6">
+      <div class="w-full max-w-lg rounded-[2.25rem] bg-white/80 backdrop-blur border border-white shadow-[0_20px_60px_rgba(0,0,0,0.10)] overflow-hidden">
+        <div class="h-2 w-full bg-gradient-to-r from-[#6b6ee8] via-[#f0a446] to-[#ffb400]" />
 
-          <div
-            class="w-24 h-24 bg-indigo-50 rounded-full flex items-center justify-center text-6xl mx-auto shadow-inner select-none"
-          >
+        <div class="px-8 sm:px-12 py-8 text-center">
+          <div class="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-[#eef0fb] text-5xl shadow-inner">
             🪄
           </div>
 
-          <div>
-            <h2 class="text-4xl font-black text-gray-900 mb-1">Magic Login</h2>
+          <h1 class="text-4xl sm:text-5xl font-black text-[#0f1730] mb-3 tracking-tight">
+            Magic Login
+          </h1>
 
-            <p class="text-sm font-semibold text-gray-500 mb-2">
-              Signing in as: {{ loginRole === 'admin' ? 'Faculty & Admin' : 'Reading Buddy' }}
-            </p>
-
-            <p class="text-gray-400 font-medium">
-              {{
-                isNewUser && loginRole === 'reader'
-                  ? 'New user? Enter your name to create your account.'
-                  : 'Enter your email to continue.'
-              }}
-            </p>
-          </div>
+          <p class="text-lg font-bold text-[#70798c] mb-8">
+            Signing in as:
+            {{ loginRole === 'admin' ? 'Faculty & Admin' : 'Reading Buddy' }}
+          </p>
 
           <UForm :schema="schema" :state="state" @submit="handleSubmit" class="space-y-5 text-left">
-            <UFormField name="email" label="Email Address">
+            <UFormField
+              name="email"
+              label="Email Address"
+              :ui="{ label: 'text-[#5c6475] font-bold text-sm tracking-wide' }"
+            >
               <UInput
                 v-model="state.email"
                 type="email"
                 placeholder="name@school.edu"
                 size="xl"
                 class="w-full"
+                :ui="{
+                  base: 'rounded-2xl h-14 px-4 text-lg bg-white border border-gray-200 text-gray-900 placeholder:text-gray-300 shadow-sm'
+                }"
               />
             </UFormField>
 
-            <UFormField v-if="isNewUser && loginRole === 'reader'" name="name" label="Your Name">
+            <UFormField
+              v-if="isNewUser && loginRole === 'reader'"
+              name="name"
+              label="Your Name"
+              :ui="{ label: 'text-[#5c6475] font-bold text-sm tracking-wide' }"
+            >
               <UInput
                 v-model="state.name"
                 type="text"
                 placeholder="Enter your name"
                 size="xl"
                 class="w-full"
+                :ui="{
+                  base: 'rounded-2xl h-14 px-4 text-lg bg-white border border-gray-200 text-gray-900 placeholder:text-gray-300 shadow-sm'
+                }"
               />
             </UFormField>
 
@@ -219,15 +228,15 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
               loading-auto
               type="submit"
               size="xl"
-              class="w-full justify-center font-bold rounded-2xl bg-gray-900 hover:bg-black text-white transition active:scale-95"
+              class="w-full justify-center rounded-2xl h-14 text-xl font-black bg-[#0d1735] hover:bg-[#132149] text-white shadow-xl"
             >
-              {{ isNewUser && loginRole === 'reader' ? 'Create Account' : 'Continue' }}
+              {{ isNewUser && loginRole === 'reader' ? 'Create Account ✨' : 'Send Magic Link 🪄' }}
             </UButton>
           </UForm>
 
           <button
             @click="navigateTo('/')"
-            class="text-xs font-bold text-gray-400 hover:text-gray-700 uppercase tracking-widest transition-colors"
+            class="mt-6 text-sm font-black uppercase tracking-[0.25em] text-[#9aa3b4] hover:text-[#6c7486] transition-colors"
           >
             ← Back to Portal
           </button>
