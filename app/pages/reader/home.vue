@@ -1,26 +1,17 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { authClient } from '~/utils/auth-client'
+import StatsBar from '~/components/StatsBar.vue'
+import type { Student, Announcement} from '~~/prisma/generated/client'
 
 definePageMeta({ ssr: false })
 /* TODO:
-  1 change settings option to switch profiles into a redirect to teh profile selection page
-
-  2 calculations/parsing for selected student
-    -- streak    (decide between daily and weekly)
-    -- tickets    (raffle entries, number of forms completed during the current form group))
-    -- completed forms in form group
-
   3 Announcements
-    -- get active announcements
+    -- default display for no announcements
     -- change display to be larger
     -- change display to show the most recent announcement with a dropdown to show all
  
-  4 get student selected from previous page
-    -- should come from session, nuxt store, or be passed as a param from previous page, could also use a tool like pinia or may also be a function of auth
   5 find and apply unlocked shop items from selected student
-
-  6 make progress bar dynamic based on form group size and completed forms.
 */
 
 //TODO 4 retrieve active student
@@ -137,8 +128,7 @@ const completedThisWeek = computed(() =>
 )
 
 const completionMessage = computed(() => {
-  const n = completedThisWeek.value.length
-  return ['', 'Nice!', 'Good Job!', 'Great Job!', 'Wow!', 'Awesome!', 'Amazing!'][n] ?? 'Spectacular!'
+  return ['', 'Nice!', 'Good Job!', 'Great Job!', 'Wow!', 'Awesome!', 'Amazing!'][stats.tickets] ?? 'Spectacular!'
 })
 </script>
 
@@ -172,21 +162,27 @@ const completionMessage = computed(() => {
         <div
           class="relative bg-white/90 backdrop-blur-md px-4 py-2 rounded-xl shadow-xl border-2 flex items-center gap-3 cursor-pointer select-none transition-all"
           style="border-color: rgba(245,158,11,0.3)"
-          :class="xpClicked ? 'scale-90' : ''"
+          :class="(xpClicked || ticketClicked) ? 'scale-90 transition-transform duration-100' : 'transition-transform duration-100'"
           @click="triggerXpClick"
         >
-          <span class="text-lg" :class="xpClicked ? 'animate-star-spin' : ''">⭐</span>
-          <span class="font-heading font-bold text-amber-600">{{ stats.xp }}</span>
+        <span class="text-lg" :class="xpClicked ? 'animate-star-spin' : ''">🪙</span>
+          <span class="font-heading font-bold text-amber-600">{{ student?.exp }}</span>
           <span class="text-gray-300">|</span>
-          <span class="text-lg" :class="ticketClicked ? 'animate-ticket-wobble' : ''">🎟️</span>
-          <span class="font-heading font-bold" style="color: var(--brand-mint)">{{ stats.tickets }}</span>
+          <span class="text-lg" :class="ticketClicked ? 'animate-ticket-wobble' : ''" @click.stop="triggerTicketClick">🎟️</span>
+          <span class="font-heading font-bold" style="color:var(--brand-mint)">{{ stats.tickets }}</span>
+          <span v-for="c in burstCoins" :key="c.id" class="absolute text-sm animate-coin-burst"
+                :style="`--tx:${c.tx}px;--ty:${c.ty}px;left:50%;top:50%;`">🪙</span>
+          <Transition name="box-pop">
+            <span 
+              v-if="ticketClicked"
+              class="absolute -bottom-15 left-1/2 text-2xl animate-box-shake pointer-events-none">
+              📦
+            </span>
+          </Transition>
+          <span v-for="id in flyTickets" :key="id" class="absolute text-lg animate-ticket-fly pointer-events-none"
+                style="left:50%;top:50%;transform:translateX(-50%) translateY(-50%)">🎟️</span>
 
-          <!-- Burst coins on XP click -->
-          <span
-            v-for="c in burstCoins" :key="c.id"
-            class="absolute text-sm animate-coin-burst"
-            :style="`--tx:${c.tx}px; --ty:${c.ty}px; left:50%; top:50%;`"
-          >🪙</span>
+
         </div>
 
         <!-- Settings button -->
@@ -245,59 +241,13 @@ const completionMessage = computed(() => {
               <p class="text-sm font-bold uppercase tracking-widest opacity-80 mb-1">Today's Challenge</p>
               <h3 class="font-heading text-3xl font-black">Start Your Daily Form 📝</h3>
               <p class="text-base opacity-80 mt-1 font-medium">
-                {{ completedThisWeek.length }} out of {{ thisWeekForms.length }} completed this week.
+                {{ stats.tickets }} out of {{ thisWeekForms.length }} completed this week.
                 {{ completionMessage }}
               </p>
             </div>
             <span class="text-5xl group-hover:translate-x-2 transition-transform duration-300">➜</span>
           </div>
         </NuxtLink>
-        <!-- TODO 6-->>
-        <!-- 7-Day Raffle Progress -->
-        <div class="premium-card p-5 bg-white/80" style="border: 2px solid rgba(224,96,77,0.1)">
-          <div class="flex items-center justify-between mb-3">
-            <h3 class="font-heading font-black text-base flex items-center gap-2" style="color: var(--brand-dark)">
-              🎟️ Weekly Raffle Progress
-            </h3>
-            <span class="text-sm font-bold text-gray-400">
-              {{ completedThisWeek.length }} / {{ thisWeekForms.length }} days
-            </span>
-          </div>
-
-          <div class="flex items-center justify-between gap-2">
-            <div v-for="form in thisWeekForms" :key="form.id" class="flex-1 flex flex-col items-center gap-1">
-              <div
-                class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-all shadow-sm"
-                :class="
-                  completedWeeks.includes(form.id)
-                    ? 'text-white scale-110'
-                    : form.missed
-                      ? 'text-amber-500 border-2 border-amber-300 border-dashed bg-amber-100'
-                      : 'text-gray-300 border-2 border-gray-200 bg-gray-100'
-                "
-                :style="completedWeeks.includes(form.id) ? `background: var(--brand-mint)` : ''"
-              >
-                <span v-if="completedWeeks.includes(form.id)">✓</span>
-                <span v-else>{{ form.dayNum }}</span>
-              </div>
-              <span class="text-[10px] font-bold text-gray-400 uppercase">{{ form.day.substring(0,3) }}</span>
-            </div>
-          </div>
-
-          <div class="mt-3 h-2 bg-gray-100 rounded-full overflow-hidden">
-            <div
-              class="h-full rounded-full transition-all duration-500"
-              style="background: linear-gradient(to right, var(--brand-mint), var(--brand-indigo))"
-              :style="`width: ${(completedThisWeek.length / thisWeekForms.length) * 100}%`"
-            />
-          </div>
-          <p v-if="completedThisWeek.length === thisWeekForms.length"
-             class="text-center font-bold mt-2 text-sm animate-pop"
-             style="color: var(--brand-mint)">
-            🎉 All done this week! Your raffle ticket is in!
-          </p>
-        </div>
-
       </section>
     </main>
 

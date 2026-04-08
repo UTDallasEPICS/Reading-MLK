@@ -43,7 +43,7 @@ async function main() {
             fontSize: 1,
             language: 'en',
           },
-        },
+        }],
       },
     },
   })
@@ -116,7 +116,7 @@ async function main() {
             fontSize: 1,
             language: 'en',
           },
-        },
+        }],
       },
     },
   })

@@ -1,0 +1,39 @@
+<script setup lang="ts">
+definePageMeta({ ssr: false, layout: 'admin' })
+</script>
+
+<template>
+  <section class="legacy-admin-page">
+    <h1>Legacy Admin Page</h1>
+    <p>This route is kept for compatibility. Use the main dashboard page instead.</p>
+    <NuxtLink to="/admin" class="go-home">Go to Admin Home</NuxtLink>
+  </section>
+</template>
+
+<style scoped>
+.legacy-admin-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+h1 {
+  margin: 0 0 0.5rem;
+  color: #0f172a;
+}
+
+p {
+  color: #475569;
+  margin: 0 0 1rem;
+}
+
+.go-home {
+  color: #1d4ed8;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.go-home:hover {
+  text-decoration: underline;
+}
+</style>
