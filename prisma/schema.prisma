@@ -71,7 +71,7 @@ model Verification {
 }
 
 model Admin {
-  id                    Int       @id @default(autoincrement())
+  id                    String           @id @default(cuid())
   settings              Json?
   userId                  String       @unique
 
@@ -94,7 +94,7 @@ model Student {
 
 model Announcement {
   id          Int     @id @default(autoincrement())
-  author      Int?
+  author      String?
   postDate    DateTime
   expiryDate  DateTime?
   content     String
@@ -118,7 +118,7 @@ model Form {
   startDate             DateTime
   endDate               DateTime?
   published             Boolean   @default(false)
-  author                Int?
+  author                String?
   formGroup             Int
 
   Author        Admin?    @relation(fields: [author], references: [id], onDelete: SetNull)
