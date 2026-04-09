@@ -117,6 +117,7 @@ model Form {
   order                 Int       @default(0)
   startDate             DateTime
   endDate               DateTime?
+  formTitle             String
   published             Boolean   @default(false)
   author                String?
   formGroup             Int
