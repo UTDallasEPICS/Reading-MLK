@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { authClient } from '~/utils/auth-client'
-import StatsBar from '~/components/StatsBar.vue'
 import type { Student, Announcement} from '~~/prisma/generated/client'
 
 definePageMeta({ ssr: false })
