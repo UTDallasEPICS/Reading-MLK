@@ -17,6 +17,9 @@ logs
 .DS_Store
 .fleet
 .idea
+prisma/*.json
+prisma/defaultCredentials.js
+prisma/generated
 
 # Local env files
 .env
@@ -25,3 +28,6 @@ logs
 
 /prisma/generated
 *.db
+
+prisma/dev.db
+prisma/dev.db-journal

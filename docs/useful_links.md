@@ -6,4 +6,4 @@
 * [BetterAuth MagicLinks](https://better-auth.com/docs/plugins/magic-link)
 * [Bruno Docs](https://docs.usebruno.com/introduction/what-is-bruno)
 * [Previous Form Example](https://docs.google.com/forms/d/e/1FAIpQLSdALlePXxx2Ckgax4R0-wbpRy-Q1TBVQqpySWhT4WOvmHvQ8w/viewform)
-* [Example API from past EPICS Project](https://github.com/UTDallasEPICS/xuchil/tree/102e94c99e7c052a84839e2523e3fee0034ed69a/src/app/api)
+* [Example API from past EPICS Project (next)](https://github.com/UTDallasEPICS/xuchil/tree/102e94c99e7c052a84839e2523e3fee0034ed69a/src/app/api)

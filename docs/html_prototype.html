@@ -1,0 +1,2728 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduTrack - Reading Buddy Adventure!</title>
+
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&family=Quicksand:wght@300;400;500;600;700&family=Outfit:wght@300;400;600;800&display=swap"
+        rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/open-dyslexic.min.css" rel="stylesheet">
+
+    <!-- Scripts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            indigo: '#E0604D',
+                            gold: '#F59E0B',
+                            amber: '#D97706',
+                            mint: '#2DD4BF',
+                            pink: '#FB7185',
+                            blue: '#38BDF8',
+                            dark: '#0F172A',
+                            light: '#F8FAFC'
+                        },
+                        funPurple: { 100: '#f3e8ff', 500: '#a855f7', 600: '#9333ea' },
+                        funOrange: { 100: '#ffedd5', 500: '#f97316', 600: '#ea580c' },
+                        funGreen: { 100: '#dcfce7', 500: '#22c55e', 600: '#16a34a' },
+                        funYellow: { 100: '#fef9c3', 400: '#facc15', 500: '#eab308' },
+                    },
+                    fontFamily: {
+                        sans: ['Quicksand', 'sans-serif'],
+                        heading: ['Fredoka', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        '3xl': '1.5rem',
+                        '4xl': '2rem'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --brand-indigo: #E0604D;
+            --brand-gold: #F59E0B;
+            --brand-amber: #D97706;
+            --brand-mint: #2DD4BF;
+            --brand-pink: #FB7185;
+            --brand-blue: #38BDF8;
+            --brand-dark: #0F172A;
+            --bg-gradient: radial-gradient(at 0% 0%, hsla(25, 95%, 75%, 0.3) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(10, 90%, 70%, 0.25) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, hsla(40, 95%, 70%, 0.25) 0px, transparent 50%);
+        }
+
+        .theme-dark {
+            --brand-dark: #f8fafc;
+            --bg-gradient: radial-gradient(at 0% 0%, hsla(250, 20%, 20%, 0.5) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(280, 30%, 15%, 0.5) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, hsla(200, 30%, 10%, 0.5) 0px, transparent 50%);
+            background: #0f172a !important;
+        }
+
+        .theme-blue {
+            --brand-dark: #f8fafc;
+            --bg-gradient: radial-gradient(at 0% 0%, hsla(250, 25%, 29%, 0.5) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(280, 30%, 15%, 0.5) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, hsla(200, 30%, 10%, 0.5) 0px, transparent 50%);
+            background: #1f3b7c !important;
+        }
+
+        .theme-sepia {
+            --brand-dark: #433422;
+            --bg-gradient: none;
+            background: #f4ecd8 !important;
+        }
+
+        .theme-sunset {
+            --bg-gradient: radial-gradient(at 0% 0%, hsla(10, 90%, 75%, 0.25) 0px, transparent 50%), radial-gradient(at 100% 100%, hsla(280, 90%, 70%, 0.25) 0px, transparent 50%);
+            background-color: #fff5f5 !important;
+        }
+
+        .theme-ocean {
+            --bg-gradient: radial-gradient(at 0% 0%, hsla(200, 90%, 75%, 0.25) 0px, transparent 50%), radial-gradient(at 100% 100%, hsla(180, 90%, 70%, 0.25) 0px, transparent 50%);
+            background-color: #f0f9ff !important;
+        }
+
+        .theme-forest {
+            --bg-gradient: radial-gradient(at 0% 0%, hsla(140, 80%, 70%, 0.25) 0px, transparent 50%), radial-gradient(at 100% 100%, hsla(120, 70%, 60%, 0.25) 0px, transparent 50%);
+            background-color: #f0fdf4 !important;
+        }
+
+        .theme-candy {
+            --bg-gradient: radial-gradient(at 0% 0%, hsla(330, 90%, 85%, 0.35) 0px, transparent 50%), radial-gradient(at 100% 100%, hsla(280, 80%, 85%, 0.35) 0px, transparent 50%);
+            background-color: #fdf2f8 !important;
+        }
+
+        .theme-fire {
+            --bg-gradient: radial-gradient(at 30% 40%, hsla(20, 95%, 65%, 0.3) 0px, transparent 50%), radial-gradient(at 70% 60%, hsla(0, 90%, 60%, 0.2) 0px, transparent 50%);
+            background-color: #fff7ed !important;
+        }
+
+        .theme-ice {
+            --bg-gradient: radial-gradient(at 0% 0%, hsla(200, 100%, 95%, 0.4) 0px, transparent 50%), radial-gradient(at 100% 100%, hsla(190, 90%, 90%, 0.35) 0px, transparent 50%);
+            background-color: #f0f9ff !important;
+        }
+
+        .dyslexia-font {
+            font-family: 'OpenDyslexic', sans-serif !important;
+        }
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background-color: #f5ede3;
+            /* Warm Peach/Amber Default */
+            background-image: var(--bg-gradient);
+            background-attachment: fixed;
+            transition: all 0.5s ease;
+            min-height: 100vh;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        .font-heading {
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        .pattern-bg {
+            background-color: #fdf2f8;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23fbcfe8' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        .premium-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            border-radius: 2.5rem;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 10px 30px rgba(79, 70, 229, 0.1);
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .premium-card:hover {
+            transform: translateY(-8px) scale(1.01);
+            box-shadow: 0 20px 40px rgba(79, 70, 229, 0.1);
+            border-color: var(--brand-indigo);
+        }
+
+        .btn-bounce:active {
+            transform: scale(0.95);
+        }
+
+        .nav-bar {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(44, 62, 80, 0.95);
+            backdrop-filter: blur(15px);
+            padding: 0.8rem 2rem;
+            border-radius: 2.5rem;
+            display: flex;
+            gap: 2.5rem;
+            z-index: 100;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-item {
+            padding: 0.7rem 1.5rem;
+            color: #94a3b8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.3rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.85rem;
+        }
+
+        .nav-item.active {
+            color: white;
+            transform: translateY(-5px);
+        }
+
+        .nav-icon {
+            font-size: 2.2rem;
+        }
+
+        .fade-enter-active,
+        .fade-leave-active {
+            transition: opacity 0.3s ease;
+        }
+
+        .fade-enter-from,
+        .fade-leave-to {
+            opacity: 0;
+        }
+
+        @keyframes pop {
+            0% {
+                transform: scale(0.9) translate(-50%, -50%);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1) translate(-50%, -50%);
+                opacity: 1;
+            }
+        }
+
+
+        .animate-pop {
+            animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes popBounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            20% {
+                transform: translateY(-8px);
+            }
+
+            40% {
+                transform: translateY(0);
+            }
+
+            60% {
+                transform: translateY(-4px);
+            }
+
+            80% {
+                transform: translateY(0);
+            }
+        }
+
+        .animate-pop-bounce {
+            animation: popBounce 1.5s ease-in-out;
+        }
+
+        .add-book-btn {
+            width: 40px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            transition: all 0.3s;
+        }
+
+        .add-book-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--text-light);
+            transform: scale(1.05);
+            transform: translateY(-20px) scale(1.1);
+        }
+    </style>
+</head>
+
+<body
+    :class="[settings.theme === 'dark' ? 'theme-dark' : settings.theme === 'sepia' ? 'theme-sepia' : '', settings.dyslexiaFont ? 'dyslexia-font' : '']">
+    <div id="app" class="pb-32 px-4 pt-4">
+        <!-- FORM DETAILS MODAL -->
+        <transition name="fade">
+            <div v-if="selectedFormDetails" class="fixed inset-0 z-[300] flex items-center justify-center p-6">
+                <div class="absolute inset-0 bg-brand-dark/40 backdrop-blur-sm" @click="selectedFormDetails = null">
+                </div>
+                <div class="bg-white w-full max-w-2xl rounded-lg shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh] animate-pop"
+                    style="border-bottom: 8px solid var(--brand-indigo);">
+                    <!-- Header -->
+                    <div class="p-6 bg-funPurple-50 border-b border-funPurple-100 flex justify-between items-center">
+                        <div>
+                            <h3 class="text-2xl font-black text-brand-dark">{{ selectedFormDetails.title }}</h3>
+                            <p class="text-sm text-gray-400 font-bold uppercase tracking-widest mt-1">
+                                {{ selectedFormDetails.day }} · {{ selectedFormDetails.date }}
+                            </p>
+                        </div>
+                        <button @click="selectedFormDetails = null"
+                            class="w-12 h-12 rounded-lg bg-white text-gray-400 hover:text-brand-dark flex items-center justify-center shadow-sm transition-all hover:scale-110">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="p-6 overflow-y-auto space-y-6 text-left">
+                        <div v-for="(q, index) in selectedFormDetails.questions" :key="q.id"
+                            class="p-6 rounded-lg border-2 border-gray-50 bg-gray-50/50 space-y-3">
+                            <div class="flex justify-between items-start gap-4">
+                                <span
+                                    class="bg-white px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest text-brand-indigo shadow-sm border border-brand-indigo/10">Step
+                                    {{ index + 1 }} · {{ q.type }}</span>
+                            </div>
+                            <p class="text-lg font-bold text-brand-dark leading-snug">{{ q.text }}</p>
+                            <p v-if="q.textEs" class="text-base text-gray-500 font-medium italic">{{ q.textEs }}</p>
+
+                            <!-- Context/Reference Info -->
+                            <div v-if="q.reference" class="mt-4 p-4 bg-white rounded-lg border border-gray-100">
+                                <p class="text-xs font-black text-gray-300 uppercase tracking-widest mb-1">Answer /
+                                    Reference</p>
+                                <p class="text-sm font-bold text-brand-indigo">{{ q.reference }}</p>
+                            </div>
+
+                            <!-- MCQ Choices -->
+                            <div v-if="q.choices" class="grid grid-cols-2 gap-2 mt-3">
+                                <div v-for="choice in q.choices"
+                                    :class="['p-3 rounded-lg border-2 text-sm font-bold transition-all', choice.correct ? 'bg-green-50 border-green-200 text-green-700' : 'bg-white border-gray-100 text-gray-400 opacity-60']">
+                                    {{ choice.text }}
+                                </div>
+                            </div>
+
+                            <!-- Video Link -->
+                            <div v-if="q.url" class="mt-3">
+                                <p class="text-[10px] font-black text-gray-300 uppercase tracking-widest mb-1">Video
+                                    URL</p>
+                                <code class="text-xs bg-gray-100 px-2 py-1 rounded-md text-gray-500 break-all">{{
+                                    q.url }}</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="p-6 bg-gray-50 border-t border-gray-100 flex justify-end">
+                        <button @click="selectedFormDetails = null"
+                            class="px-8 py-4 rounded-lg font-heading font-bold text-lg bg-brand-dark text-white hover:bg-black transition shadow-xl active:scale-95">
+                            Close Details
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </transition>
+
+        <!-- Top Bar (Only after login) -->
+        <header v-if="isLoggedIn && view !== 'landing' && view !== 'login'"
+            class="max-w-4xl mx-auto flex justify-between items-center mb-8 px-2 relative z-[200]">
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-12 h-12 bg-brand-indigo rounded-lg flex items-center justify-center text-white font-heading font-bold text-2xl shadow-fun">
+                    L</div>
+                <div class="flex flex-col">
+                    <span
+                        class="font-heading font-bold text-2xl text-brand-dark tracking-tight leading-none">Reading<span
+                            class="text-brand-indigo">Huddle</span></span>
+                    <span class="text-[10px] font-bold text-brand-mint uppercase tracking-widest pl-0.5">{{ userRole ===
+                        'admin' ? 'Admin Portal' : 'Reading Buddy' }}</span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+            </div>
+        </header>
+
+        <!-- Global Top-Right Controls (Fixed) -->
+        <div v-if="isLoggedIn && view !== 'landing' && view !== 'login'"
+            class="fixed top-6 right-6 flex items-center gap-3 z-[999]">
+            <!-- XP Badge (Reader only) -->
+            <div v-if="userRole === 'reader'"
+                class="bg-white/90 backdrop-blur-md px-4 py-2 rounded-lg shadow-xl border-2 border-brand-gold/30 flex items-center gap-3">
+                <span class="text-lg">⭐</span>
+                <span class="font-heading font-bold text-amber-600">{{ stats.xp }}</span>
+                <span class="text-gray-300">|</span>
+                <span class="text-lg">🎟️</span>
+                <span class="font-heading font-bold text-brand-mint">{{ stats.tickets }}</span>
+            </div>
+            <!-- Settings Button -->
+            <button @click="view = (view === 'settings' ? 'home' : 'settings')"
+                class="w-14 h-14 bg-white/90 backdrop-blur-md rounded-lg flex items-center justify-center text-2xl transition-all border-2 border-white shadow-xl hover:scale-110 active:scale-95 hover:text-brand-indigo active:bg-brand-indigo active:text-white">
+                ⚙️
+            </button>
+        </div>
+
+        <!-- Main View Portal -->
+        <main class="max-w-4xl mx-auto min-h-[60vh]">
+
+            <!-- LANDING VIEW -->
+            <transition name="fade" mode="out-in">
+                <div v-if="view === 'landing'"
+                    class="h-full flex flex-col items-center justify-center py-20 text-center space-y-12">
+                    <div class="animate-bounce text-8xl">🚀</div>
+                    <div class="space-y-4">
+                        <h1
+                            class="text-6xl font-black leading-[1.1] text-transparent bg-clip-text bg-gradient-to-r from-brand-indigo via-brand-gold to-brand-amber pb-4 mb-2 drop-shadow-sm">
+                            {{ t('welcome') }}
+                        </h1>
+                        <p class="text-2xl font-medium text-gray-500 max-w-2xl mx-auto">{{ t('subtitle') }}</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl w-full">
+                        <div @click="goToLogin('admin')"
+                            class="group premium-card p-10 hover:border-brand-indigo transition-all cursor-pointer">
+                            <div
+                                class="w-24 h-24 bg-indigo-50 text-brand-indigo rounded-lg flex items-center justify-center text-5xl mb-6 mx-auto group-hover:rotate-12 transition">
+                                🏫</div>
+                            <h3 class="text-3xl font-heading font-bold mb-3 text-brand-dark">Faculty & Admin</h3>
+                            <p class="text-lg text-gray-500 font-medium">Manage students, curriculum & raffles.</p>
+                        </div>
+                        <div @click="goToLogin('reader')"
+                            class="group premium-card p-10 hover:border-brand-gold transition-all cursor-pointer">
+                            <div
+                                class="w-24 h-24 bg-amber-50 text-brand-gold rounded-lg flex items-center justify-center text-5xl mb-6 mx-auto group-hover:rotate-12 transition">
+                                ✨</div>
+                            <h3 class="text-3xl font-heading font-bold mb-3 text-brand-dark">Reading Buddy</h3>
+                            <p class="text-lg text-gray-500 font-medium">Complete challenges, log books & win prizes!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LOGIN VIEW -->
+                <div v-else-if="view === 'login'" class="h-full flex items-center justify-center py-20">
+                    <div
+                        class="premium-card p-6 max-w-lg w-full text-center space-y-6 relative overflow-hidden bg-white/80">
+                        <div
+                            class="absolute top-0 left-0 w-full h-3 bg-gradient-to-r from-brand-indigo via-brand-gold to-brand-amber">
+                        </div>
+                        <div
+                            class="text-7xl mb-4 bg-indigo-50 w-28 h-28 rounded-full flex items-center justify-center mx-auto shadow-inner">
+                            🪄</div>
+                        <div>
+                            <h2 class="text-4xl font-heading font-bold text-brand-dark mb-2">Magic Login</h2>
+                            <p class="text-lg text-gray-500 font-medium">Enter your email to get a magic link!</p>
+                        </div>
+                        <div class="text-left space-y-3">
+                            <label class="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Email
+                                Address</label>
+                            <input v-model="loginEmail" type="email" placeholder="name@school.edu"
+                                class="w-full bg-light border-2 border-gray-100 rounded-lg px-6 py-4 text-lg focus:border-brand-indigo focus:ring-0 focus:outline-none transition font-bold" />
+                        </div>
+                        <button @click="simulateLogin"
+                            class="w-full bg-brand-dark hover:bg-black text-white font-heading font-bold text-xl py-5 rounded-lg shadow-xl hover:shadow-2xl transition transform active:scale-95 btn-bounce">
+                            Send Magic Link 🪄
+                        </button>
+                        <button @click="view = 'landing'"
+                            class="text-gray-400 font-bold hover:text-brand-dark transition-colors uppercase tracking-widest text-xs">←
+                            Back to Portal</button>
+                    </div>
+                </div>
+
+                <!-- PROFILES VIEW -->
+                <div v-else-if="view === 'profiles'"
+                    class="h-full flex flex-col items-center justify-center py-20 text-center space-y-12">
+                    <div class="animate-bounce text-7xl">👋</div>
+                    <div class="space-y-4">
+                        <h2 class="text-5xl font-heading font-black text-brand-dark">Who's Reading?</h2>
+                        <p class="text-xl text-gray-400 font-bold uppercase tracking-widest">Select your profile to
+                            start
+                            your adventure!</p>
+                    </div>
+                    <div class="flex gap-8 justify-center max-w-4xl flex-wrap">
+                        <div v-for="(profile, idx) in kidProfiles" :key="idx"
+                            @click="activeProfileIdx = idx; view = 'home'"
+                            class="flex flex-col items-center gap-4 cursor-pointer group transition-all">
+                            <div :class="['w-32 h-32 rounded-[2.5rem] flex items-center justify-center text-5xl font-black text-white shadow-xl transition-all group-hover:scale-110 group-hover:rotate-6',
+                                profile.color]">
+                                {{ profile.avatar }}
+                            </div>
+                            <span
+                                class="text-xl font-bold text-brand-dark group-hover:text-brand-indigo transition-colors">{{
+                                profile.name }}</span>
+                        </div>
+                        <!-- Add New Profile Option -->
+                        <div
+                            class="flex flex-col items-center gap-4 cursor-pointer group transition-all opacity-50 hover:opacity-100">
+                            <div
+                                class="w-32 h-32 rounded-[2.5rem] border-4 border-dashed border-gray-300 flex items-center justify-center text-4xl text-gray-400 transition-all group-hover:scale-110 group-hover:border-brand-indigo group-hover:text-brand-indigo">
+                                ➕
+                            </div>
+                            <span
+                                class="text-xl font-bold text-gray-400 group-hover:text-brand-indigo transition-colors">Add
+                                New</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SETTINGS VIEW -->
+                <div v-else-if="view === 'settings'" key="settings">
+                    <div class="premium-card p-10 max-w-lg mx-auto space-y-6 bg-white/80">
+                        <div class="text-center mb-2">
+                            <div class="text-6xl mb-4">⚙️</div>
+                            <h2 class="font-heading text-3xl font-bold text-brand-dark">Settings</h2>
+                        </div>
+
+                        <!-- Netflix-style Kid Profiles -->
+                        <div>
+                            <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Who's
+                                Reading?</label>
+                            <button @click="view = 'profiles'"
+                                class="w-full bg-brand-indigo/10 text-brand-indigo font-bold py-3 rounded-lg transition hover:bg-brand-indigo/20 flex items-center justify-center gap-2">
+                                👥 Switch Profile
+                            </button>
+                        </div>
+
+
+
+                        <!-- Font Size Slider -->
+                        <div>
+                            <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Text
+                                Size</label>
+                            <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                                <span class="text-sm font-bold text-gray-400">A</span>
+                                <input type="range" min="1" max="1.5" step="0.1" v-model.number="settings.fontSize"
+                                    class="flex-grow h-2 bg-gray-200 rounded-full appearance-none cursor-pointer accent-brand-indigo">
+                                <span class="text-xl font-bold text-gray-400">A</span>
+                                <span
+                                    class="text-xs font-bold text-brand-indigo bg-brand-indigo/10 px-2 py-1 rounded-lg">{{
+                                    Math.round(settings.fontSize * 100) }}%</span>
+                            </div>
+                        </div>
+
+                        <!-- Dyslexia Font Toggle -->
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <div>
+                                <h4 class="font-bold text-brand-dark">Dyslexia-Friendly Font</h4>
+                                <p class="text-xs text-gray-400">Uses OpenDyslexic typeface</p>
+                            </div>
+                            <button @click="settings.dyslexiaFont = !settings.dyslexiaFont"
+                                :class="['w-14 h-8 rounded-full transition-all relative', settings.dyslexiaFont ? 'bg-brand-mint' : 'bg-gray-300']">
+                                <div
+                                    :class="['w-6 h-6 bg-white rounded-full shadow-md absolute top-1 transition-all', settings.dyslexiaFont ? 'right-1' : 'left-1']">
+                                </div>
+                            </button>
+                        </div>
+
+                        <!-- Language Toggle -->
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <div>
+                                <h4 class="font-bold text-brand-dark">Language / Idioma</h4>
+                                <p class="text-xs text-gray-400">{{ locale === 'en' ? 'English' : 'Español' }}</p>
+                            </div>
+                            <button @click="toggleLanguage"
+                                class="bg-brand-indigo/10 text-brand-indigo px-4 py-2 rounded-lg font-bold text-sm hover:bg-brand-indigo/20 transition">
+                                {{ locale === 'en' ? '🇪🇸 Español' : '🇺🇸 English' }}
+                            </button>
+                        </div>
+
+
+
+                        <!-- Logout Button -->
+                        <button @click="logout"
+                            class="w-full bg-red-500 hover:bg-red-600 text-white font-heading font-bold text-lg py-4 rounded-lg shadow-lg hover:shadow-xl transition transform active:scale-95 mt-4">
+                            Logout 👋
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ADMIN VIEWS -->
+                <div v-else-if="userRole === 'admin'" key="admin"
+                    class="h-full flex bg-slate-50 absolute inset-0 pt-24 text-slate-800">
+                    <aside class="w-72 bg-white border-r border-slate-200 flex flex-col pt-6">
+                        <div class="px-6 mb-8">
+                            <h2 class="text-xs font-medium text-gray-400 uppercase tracking-widest mb-4">Admin
+                                Tools
+                            </h2>
+                            <nav class="space-y-2">
+                                <a @click="adminTab = 'builder'"
+                                    :class="{'bg-indigo-50 text-indigo-700 border-l-4 border-indigo-500': adminTab === 'builder', 'text-gray-600 hover:bg-gray-50 border-l-4 border-transparent': adminTab !== 'builder'}"
+                                    class="flex items-center gap-3 px-4 py-3 cursor-pointer font-medium rounded-r-xl transition-all">
+                                    Form Builder
+                                </a>
+                                <a @click="adminTab = 'progress'"
+                                    :class="{'bg-indigo-50 text-indigo-700 border-l-4 border-indigo-500': adminTab === 'progress', 'text-gray-600 hover:bg-gray-50 border-l-4 border-transparent': adminTab !== 'progress'}"
+                                    class="flex items-center gap-3 px-4 py-3 cursor-pointer font-medium rounded-r-xl transition-all">
+                                    Class Progress
+                                </a>
+                                <a @click="adminTab = 'raffle'"
+                                    :class="{'bg-indigo-50 text-indigo-700 border-l-4 border-indigo-500': adminTab === 'raffle', 'text-gray-600 hover:bg-gray-50 border-l-4 border-transparent': adminTab !== 'raffle'}"
+                                    class="flex items-center gap-3 px-4 py-3 cursor-pointer font-medium rounded-r-xl transition-all">
+                                    Raffle System
+                                </a>
+                                <a @click="adminTab = 'announcements'"
+                                    :class="{'bg-indigo-50 text-indigo-700 border-l-4 border-indigo-500': adminTab === 'announcements', 'text-gray-600 hover:bg-gray-50 border-l-4 border-transparent': adminTab !== 'announcements'}"
+                                    class="flex items-center gap-3 px-4 py-3 cursor-pointer font-medium rounded-r-xl transition-all">
+                                    Announcements
+                                </a>
+                            </nav>
+                        </div>
+                    </aside>
+
+                    <div class="flex-1 overflow-y-auto p-4 md:p-6">
+                        <!-- TAB: FORM BUILDER -->
+                        <div v-if="adminTab === 'builder'" class="max-w-4xl mx-auto space-y-4">
+                            <!-- Form Builder Content -->
+
+                            <!-- VIEW: CREATOR -->
+                            <div v-if="builderSubTab === 'creation'" class="space-y-6 animate-fade-in">
+                                <div
+                                    class="flex justify-between items-center bg-indigo-50 p-6 rounded-lg border border-indigo-100 italic">
+                                    <h3 class="text-xl font-medium text-indigo-800">{{ editingFormId ? ' Editing Form'
+                                        : ' Build New Form' }}</h3>
+                                    <div class="flex gap-2">
+                                        <button v-if="editingFormId"
+                                            @click="editingFormId = null; formTitle = ''; formDueDate = ''; questions = defaultQuestions(); builderSubTab = 'history'"
+                                            class="px-6 py-3 rounded-lg font-medium bg-white border-2 border-gray-200 text-gray-500 hover:bg-gray-50 transition">Cancel</button>
+                                        <button v-else
+                                            @click="formTitle = ''; formDueDate = ''; questions = defaultQuestions(); builderSubTab = 'history'"
+                                            class="px-6 py-3 rounded-lg font-medium bg-white border-2 border-gray-200 text-gray-500 hover:bg-gray-50 transition">Discard</button>
+                                        <button @click="publishForm"
+                                            class="bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-indigo-700 shadow-lg shadow-indigo-200 transition btn-bounce">
+                                            {{ editingFormId ? ' Update Form' : ' Publish Form' }}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Week & Day Selection -->
+                                <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm space-y-4">
+                                    <div
+                                        class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-indigo-50/50 p-4 rounded-lg border border-indigo-100/50">
+                                        <div class="flex items-center gap-3">
+                                            <span class="text-3xl"></span>
+                                            <div>
+                                                <p
+                                                    class="text-[10px] font-medium text-indigo-400 uppercase tracking-widest">
+                                                    Selected Week</p>
+                                                <h4 class="text-lg font-medium text-indigo-900">{{ formWeekStart ?
+                                                    'Week of ' + formatDate(formWeekStart) : 'Select a week' }}</h4>
+                                            </div>
+                                        </div>
+                                        <div class="w-full md:w-auto">
+                                            <label
+                                                class="block text-[10px] font-medium text-gray-400 uppercase tracking-widest mb-1 ml-1">Change
+                                                Week Starting (Mon)</label>
+                                            <input v-model="formWeekStart" type="date"
+                                                class="w-full text-base font-medium text-gray-800 border-2 border-gray-100 rounded-lg px-4 py-2 focus:border-indigo-500 focus:outline-none transition bg-white" />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label
+                                            class="block text-xs font-medium text-gray-400 uppercase tracking-widest mb-3">
+                                            Day(s) of Week (Multi-select)</label>
+                                        <div class="flex flex-wrap gap-2">
+                                            <button
+                                                v-for="day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']"
+                                                :key="day"
+                                                @click="formDays.includes(day) ? formDays = formDays.filter(d => d !== day) : formDays.push(day)"
+                                                :class="['px-4 py-2 rounded-lg font-medium text-sm transition-all border-2', formDays.includes(day) ? 'bg-indigo-100 text-indigo-700 border-indigo-300 shadow-inner' : 'bg-gray-50 text-gray-400 border-transparent hover:bg-gray-100']">
+                                                {{ day }}
+                                            </button>
+                                        </div>
+                                        <p class="text-[10px] text-gray-400 mt-2 italic">* Selecting multiple days will
+                                            publish a copy of this form for each selected day.</p>
+                                    </div>
+
+                                    <div
+                                        class="flex flex-col md:flex-row gap-6 md:items-center justify-between pt-4 border-t border-gray-50">
+                                        <div class="flex-grow">
+                                            <label
+                                                class="block text-xs font-medium text-gray-400 uppercase tracking-widest mb-2">Form
+                                                Title</label>
+                                            <input v-model="formTitle" type="text"
+                                                placeholder="e.g. Kindness & Math Challenge"
+                                                class="w-full text-2xl font-medium text-gray-800 border-b-2 border-gray-100 focus:border-indigo-500 focus:outline-none transition py-2" />
+                                        </div>
+                                        <div class="bg-indigo-50 px-6 py-4 rounded-lg text-center min-w-[200px]">
+                                            <span
+                                                class="block text-[10px] font-medium text-indigo-400 uppercase tracking-widest mb-1">Preview
+                                                Date</span>
+                                            <span class="text-lg font-medium text-indigo-700">{{ formDays.length > 0 ?
+                                                getCalculatedDate(formWeekStart, formDays[0]) : 'Select a day' }}{{
+                                                formDays.length > 1 ? ' ...' : '' }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Controls -->
+                                <div class="flex gap-4 flex-wrap">
+                                    <button @click="addQuestion('text')"
+                                        class="flex-1 bg-indigo-50 text-indigo-600 font-medium py-4 rounded-lg hover:bg-blue-100 transition border border-blue-100 border-dashed min-w-[150px]">+
+                                        Discussion</button>
+                                    <button @click="addQuestion('mcq')"
+                                        class="flex-1 bg-white text-gray-500 font-medium py-4 rounded-lg hover:bg-emerald-100 transition border border-gray-200 border-dashed min-w-[150px]">+
+                                        Multiple Choice</button>
+                                    <button @click="addQuestion('video')"
+                                        class="flex-1 bg-white text-gray-500 font-medium py-4 rounded-lg hover:bg-red-100 transition border border-gray-200 border-dashed min-w-[150px]">+
+                                        Video Embed</button>
+                                    <button @click="addQuestion('context')"
+                                        class="flex-1 bg-gray-50 text-gray-600 font-medium py-4 rounded-lg hover:bg-gray-100 transition border border-gray-200 border-dashed min-w-[150px]">+
+                                        Context Block</button>
+                                </div>
+
+                                <!-- Editable Question List -->
+                                <div class="space-y-6">
+                                    <div v-if="questions.length === 0"
+                                        class="text-center py-12 text-gray-400 border-4 border-dashed border-gray-100 rounded-lg">
+                                        No questions yet. Add one above!
+                                    </div>
+
+                                    <div v-for="(q, index) in questions" :key="q.id" draggable="true"
+                                        @dragstart="dragStart($event, index)" @dragover.prevent
+                                        @drop="onDrop($event, index)"
+                                        class="bg-white border-2 border-gray-100 rounded-lg p-6 relative group hover:border-indigo-100 transition shadow-sm cursor-move">
+
+                                        <!-- Drag Handle -->
+                                        <div class="absolute top-4 left-4 text-gray-300 group-hover:text-indigo-400">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M4 8h16M4 16h16"></path>
+                                            </svg>
+                                        </div>
+
+                                        <button @click.stop="questions.splice(index, 1)"
+                                            class="absolute top-4 right-4 text-gray-300 hover:text-red-500 transition">✕</button>
+
+                                        <div class="mb-4 ml-6">
+                                            <span
+                                                class="text-xs font-medium uppercase tracking-widest px-3 py-1 rounded-full"
+                                                :class="{
+                                                'bg-blue-100 text-indigo-700': q.type === 'text',
+                                                'bg-emerald-100 text-emerald-700': q.type === 'mcq',
+                                                'bg-red-100 text-red-700': q.type === 'video',
+                                                'bg-gray-100 text-gray-700': q.type === 'context'
+                                            }">
+                                                {{ q.type === 'text' ? ' Discussion' :
+                                                q.type === 'mcq' ? ' Multiple Choice' :
+                                                q.type === 'video' ? ' Video' : ' Context' }}
+                                            </span>
+                                        </div>
+
+                                        <div class="space-y-4 ml-6">
+                                            <div v-if="['text', 'mcq'].includes(q.type)">
+                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label
+                                                            class="block text-xs font-medium text-gray-400 uppercase mb-1">Question
+                                                            (English)</label>
+                                                        <input v-model="q.text" type="text"
+                                                            class="w-full font-medium text-lg text-gray-800 border-2 border-gray-50 bg-gray-50 rounded-lg px-4 py-3 focus:bg-white focus:border-indigo-200 focus:outline-none transition"
+                                                            placeholder="Enter question in English..." />
+                                                    </div>
+                                                    <div>
+                                                        <label
+                                                            class="block text-xs font-medium text-gray-400 uppercase mb-1">Question
+                                                            (Spanish)</label>
+                                                        <input v-model="q.textEs" type="text"
+                                                            class="w-full font-medium text-lg text-gray-800 border-2 border-gray-50 bg-gray-50 rounded-lg px-4 py-3 focus:bg-white focus:border-indigo-200 focus:outline-none transition"
+                                                            placeholder="Ingrese pregunta en Español..." />
+                                                    </div>
+                                                </div>
+
+                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label
+                                                            class="block text-xs font-medium text-gray-400 uppercase mb-1">Reference
+                                                            (English)</label>
+                                                        <textarea v-model="q.reference" rows="2"
+                                                            class="w-full text-sm font-medium text-gray-600 border-2 border-gray-50 bg-gray-50 rounded-lg px-4 py-3 focus:bg-white focus:border-indigo-200 focus:outline-none transition"
+                                                            placeholder="Correct answer..."></textarea>
+                                                    </div>
+                                                    <div>
+                                                        <label
+                                                            class="block text-xs font-medium text-gray-400 uppercase mb-1">Reference
+                                                            (Spanish)</label>
+                                                        <textarea v-model="q.referenceEs" rows="2"
+                                                            class="w-full text-sm font-medium text-gray-600 border-2 border-gray-50 bg-gray-50 rounded-lg px-4 py-3 focus:bg-white focus:border-indigo-200 focus:outline-none transition"
+                                                            placeholder="Respuesta correcta..."></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- MCQ Choices Editor -->
+                                            <div v-if="q.type === 'mcq'" class="mt-4 space-y-3">
+                                                <label
+                                                    class="block text-xs font-medium text-gray-400 uppercase mb-1">Answer
+                                                    Choices</label>
+                                                <div v-for="(choice, ci) in q.choices" :key="ci"
+                                                    class="flex items-center gap-3">
+                                                    <span
+                                                        class="w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm"
+                                                        :class="choice.correct ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-500'">
+                                                        {{ String.fromCharCode(65 + ci) }}
+                                                    </span>
+                                                    <input v-model="choice.text" type="text"
+                                                        :placeholder="'Choice ' + String.fromCharCode(65 + ci) + '...'"
+                                                        class="flex-grow font-medium text-gray-800 border-2 border-gray-50 bg-gray-50 rounded-lg px-4 py-3 focus:bg-white focus:border-indigo-200 focus:outline-none transition" />
+                                                    <button
+                                                        @click="q.choices.forEach(c => c.correct = false); choice.correct = true"
+                                                        :class="['px-3 py-2 rounded-lg font-medium text-xs transition', choice.correct ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-400 hover:bg-emerald-100 hover:text-gray-500']">
+                                                        {{ choice.correct ? '✓ Correct' : 'Set Correct' }}
+                                                    </button>
+                                                    <button @click="q.choices.splice(ci, 1)"
+                                                        class="text-gray-300 hover:text-red-500 transition text-lg">✕</button>
+                                                </div>
+                                                <button @click="q.choices.push({ text: '', correct: false })"
+                                                    class="w-full py-3 border-2 border-dashed border-emerald-200 text-emerald-500 font-medium rounded-lg hover:bg-white transition">+
+                                                    Add Choice</button>
+                                            </div>
+
+                                            <div v-if="q.type === 'video'">
+                                                <label
+                                                    class="block text-xs font-medium text-gray-400 uppercase mb-1">YouTube
+                                                    URL</label>
+                                                <input v-model="q.url" type="text"
+                                                    class="w-full font-medium text-lg text-gray-800 border-2 border-gray-50 bg-gray-50 rounded-lg px-4 py-3 focus:bg-white focus:border-indigo-200 focus:outline-none transition"
+                                                    placeholder="https://youtu.be/..." />
+                                            </div>
+
+                                            <div v-if="q.type === 'context'">
+                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label
+                                                            class="block text-xs font-medium text-gray-400 uppercase mb-1">Context
+                                                            (English)</label>
+                                                        <textarea v-model="q.text" rows="3"
+                                                            class="w-full text-lg text-gray-800 border-2 border-gray-50 bg-gray-50 rounded-lg px-4 py-3 focus:bg-white focus:border-indigo-200 focus:outline-none transition"
+                                                            placeholder="Read this paragraph first..."></textarea>
+                                                    </div>
+                                                    <div>
+                                                        <label
+                                                            class="block text-xs font-medium text-gray-400 uppercase mb-1">Context
+                                                            (Spanish)</label>
+                                                        <textarea v-model="q.textEs" rows="3"
+                                                            class="w-full text-lg text-gray-800 border-2 border-gray-50 bg-gray-50 rounded-lg px-4 py-3 focus:bg-white focus:border-indigo-200 focus:outline-none transition"
+                                                            placeholder="Lea este párrafo primero..."></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Published Curriculum History -->
+                            <div v-if="builderSubTab === 'history'" class="space-y-4 animate-fade-in">
+                                <div class="flex justify-between items-center">
+                                    <h3 class="text-4xl font-medium text-gray-900 flex items-center gap-3">
+                                        Published Curriculums History
+                                    </h3>
+                                    <button
+                                        @click="builderSubTab = 'creation'; editingFormId = null; formTitle = ''; questions = defaultQuestions();"
+                                        class="bg-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-indigo-700 shadow-md transition flex items-center gap-2">
+                                        + Create New Form
+                                    </button>
+                                </div>
+
+                                <!-- Week Selection for History -->
+                                <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm space-y-4">
+                                    <div class="max-w-md">
+                                        <label
+                                            class="block text-xs font-medium text-gray-400 uppercase tracking-widest mb-3">
+                                            Filter by Week Starting</label>
+                                        <input v-model="historyWeekStart" type="date"
+                                            class="w-full text-lg font-medium text-gray-800 border-2 border-gray-100 rounded-lg px-5 py-3 focus:border-indigo-500 focus:outline-none transition" />
+                                    </div>
+                                </div>
+
+                                <div class="space-y-3">
+                                    <div v-for="form in filteredPublishedForms" :key="form.id"
+                                        class="bg-white p-5 md:px-6 rounded-3xl border border-slate-200 flex justify-between items-center hover:border-indigo-300 transition-all hover:shadow-md"
+                                        :class="{ 'opacity-60': form.status === 'Unpublished' }">
+                                        <div class="flex items-center gap-5">
+                                            <!-- Timing Badge -->
+                                            <div
+                                                class="bg-indigo-50 text-indigo-700 p-3 rounded-lg flex flex-col items-center justify-center min-w-[90px] border border-indigo-100">
+                                                <span class="text-[9px] font-medium uppercase leading-none mb-1">Week
+                                                    Of</span>
+                                                <span class="text-xs font-medium text-center leading-tight mb-1"
+                                                    v-if="form.weekStart">{{ form.weekStart }}</span>
+                                                <span
+                                                    class="text-xs font-medium uppercase bg-indigo-600 text-white px-2 py-0.5 rounded-lg mt-1">{{
+                                                    form.day || 'Daily' }}</span>
+                                            </div>
+                                            <div>
+                                                <h4 class="font-medium text-xl text-gray-800">{{ form.title }}</h4>
+                                                <p class="text-sm text-gray-400 font-medium">Calculated Date: <span
+                                                        class="text-gray-600 font-medium">{{ form.date }}</span> · {{
+                                                    form.questions.length }} steps</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex gap-2 items-center">
+                                            <span
+                                                class="text-[10px] font-medium uppercase tracking-widest px-3 py-1.5 rounded-full"
+                                                :class="form.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'">
+                                                {{ form.status }}
+                                            </span>
+                                            <button @click="viewFormDetails(form)"
+                                                class="text-sm font-medium px-5 py-3 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition shadow-sm">
+                                                Details</button>
+                                            <button @click="editPublishedForm(form)"
+                                                class="text-sm font-medium px-5 py-3 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-blue-100 transition shadow-sm">
+                                                Edit</button>
+                                            <button @click="toggleFormPublish(form)" :class="['text-sm font-medium px-5 py-3 rounded-lg transition shadow-sm',
+                                                    form.status === 'Active'
+                                                    ? 'bg-white text-gray-500 hover:bg-red-100'
+                                                    : 'bg-green-50 text-green-600 hover:bg-green-100']">
+                                                {{ form.status === 'Active' ? '' : '' }}
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div v-if="filteredPublishedForms.length === 0"
+                                        class="text-center py-20 bg-white rounded-lg border-4 border-dashed border-gray-100 text-gray-400">
+                                        No published forms found for this week/day.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB: CLASS PROGRESS -->
+                        <div v-if="adminTab === 'progress'" class="max-w-5xl mx-auto">
+                            <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
+                                <h2 class="text-4xl  font-medium text-gray-900">Class Progress</h2>
+                                <div class="flex gap-4 w-full md:w-auto">
+                                    <div class="relative flex-grow md:flex-grow-0">
+                                        <div
+                                            class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 text-sm">
+                                            🔍</div>
+                                        <input v-model="searchStudent" type="text" placeholder="Search student..."
+                                            class="w-full md:w-64 pl-9 pr-4 py-2 border-2 border-gray-100 rounded-lg text-sm font-medium focus:border-indigo-300 focus:outline-none transition">
+                                    </div>
+                                    <select v-model="sortStudent"
+                                        class="py-2 px-4 border-2 border-gray-100 rounded-lg text-sm font-medium text-gray-600 focus:border-indigo-300 focus:outline-none transition bg-white">
+                                        <option value="tickets">Sort by Tickets</option>
+                                        <option value="streak">Sort by Streak</option>
+                                        <option value="name">Sort by Name</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div
+                                class="bg-white rounded-lg shadow-xl shadow-gray-200/50 border border-gray-200 overflow-hidden">
+                                <table class="w-full text-left">
+                                    <thead class="bg-gray-50 border-b border-gray-200">
+                                        <tr>
+                                            <th class="p-4 text-xs font-medium text-gray-400 uppercase tracking-widest">
+                                                Student</th>
+                                            <th class="p-4 text-xs font-medium text-gray-400 uppercase tracking-widest">
+                                                Tickets</th>
+                                            <th class="p-4 text-xs font-medium text-gray-400 uppercase tracking-widest">
+                                                Weekly Streak</th>
+                                            <th class="p-4 text-xs font-medium text-gray-400 uppercase tracking-widest">
+                                                Last Active</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-100">
+                                        <tr v-for="student in filteredAndSortedStudents" :key="student.id"
+                                            class="hover:bg-indigo-50/50 transition">
+                                            <td class="p-4 font-medium text-gray-800 flex items-center gap-3">
+                                                <div
+                                                    class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 text-white flex items-center justify-center text-xs shadow-md">
+                                                    {{ student.initials }}
+                                                </div>
+                                                {{ student.name }}
+                                            </td>
+                                            <td class="p-4">
+                                                <span
+                                                    class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-gray-100 text-gray-700 font-medium">
+                                                    {{ student.tickets }}
+                                                </span>
+                                            </td>
+                                            <td class="p-4">
+                                                <span
+                                                    class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-gray-100 text-gray-700 font-medium">
+                                                    🔥 {{ student.streak }}
+                                                </span>
+                                            </td>
+                                            <td class="p-4 text-gray-500 font-medium text-sm">{{
+                                                student.lastActive
+                                                }}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- TAB: RAFFLE -->
+                        <div v-if="adminTab === 'raffle'" class="max-w-4xl mx-auto text-center">
+                            <h2 class="text-5xl  font-medium mb-1 text-gray-900">Weekly Raffle</h2>
+                            <p class="text-xl font-medium text-indigo-600 mb-6 ">Spinning for: {{
+                                raffleWeek }}</p>
+
+                            <div
+                                class="bg-white rounded-lg shadow-2xl p-10 lg:p-12 max-w-xl mx-auto border-b-8 border-indigo-400 relative overflow-hidden">
+                                <div v-if="!raffleWinner && !isSpinning">
+                                    <div class="text-9xl mb-8 transform hover:rotate-12 transition cursor-pointer"
+                                        @click="spinRaffle"></div>
+                                    <div class="mb-8">
+                                        <p class="text-gray-400 font-medium uppercase tracking-widest text-sm mb-1">
+                                            Total
+                                            Entries</p>
+                                        <p class="text-4xl font-medium text-gray-900">{{ raffleSubmissions }}</p>
+                                    </div>
+                                    <button @click="spinRaffle"
+                                        class="bg-indigo-500 hover:bg-indigo-600 text-white text-2xl  font-medium py-5 px-16 rounded-full shadow-xl shadow-indigo-200 transform transition active:scale-95 btn-bounce">
+                                        SPIN IT!
+                                    </button>
+                                </div>
+                                <div v-else-if="isSpinning" class="py-10">
+                                    <div class="text-9xl animate-spin mb-6"></div>
+                                    <h3 class="text-3xl font-medium text-indigo-600">Spinning...</h3>
+                                </div>
+                                <div v-else class="py-6">
+                                    <div class="text-9xl mb-6 animate-pop-bounce"></div>
+                                    <h2 class="text-4xl  font-medium text-gray-900 mb-2">Winner!</h2>
+                                    <p class="text-3xl font-medium text-indigo-600">{{ raffleWinner.name }}</p>
+                                    <p class="text-lg font-medium text-gray-400 mb-6 italic">{{ raffleWinner.email }}
+                                    </p>
+                                    <button @click="raffleWinner = null"
+                                        class="text-gray-400 hover:text-gray-600 font-medium underline">Start
+                                        Over</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB: ANNOUNCEMENTS -->
+                        <div v-if="adminTab === 'announcements'" class="space-y-4 animate-fade-in">
+                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                <div>
+                                    <h2 class="text-3xl font-medium text-gray-900 flex items-center gap-3">
+                                        Announcements
+                                    </h2>
+                                    <p class="text-gray-500 font-medium mt-1">Direct communication with your students
+                                    </p>
+                                </div>
+                                <div class="flex bg-indigo-50 p-1.5 rounded-lg border border-indigo-100 shadow-inner">
+                                    <button @click="announcementSubTab = 'creation'"
+                                        :class="['px-6 py-2.5 rounded-lg font-medium transition-all duration-300', announcementSubTab === 'creation' ? 'bg-white text-indigo-800 shadow-md' : 'text-indigo-400 hover:text-indigo-600']">
+                                        Post Announcement
+                                    </button>
+                                    <button @click="announcementSubTab = 'history'"
+                                        :class="['px-6 py-2.5 rounded-lg font-medium transition-all duration-300', announcementSubTab === 'history' ? 'bg-white text-indigo-800 shadow-md' : 'text-indigo-400 hover:text-indigo-600']">
+                                        Announcement History
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- VIEW: ANNOUNCEMENT POST -->
+                            <div v-if="announcementSubTab === 'creation'" class="space-y-4 animate-fade-in">
+                                <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                                    <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm space-y-5">
+                                        <div class="grid grid-cols-1 gap-5">
+                                            <!-- Title -->
+                                            <div>
+                                                <label
+                                                    class="block text-xs font-medium text-gray-400 uppercase tracking-widest mb-3">Announcement
+                                                    Title</label>
+                                                <div class="flex gap-2">
+                                                    <input v-model="newAnnouncement.title" type="text"
+                                                        placeholder="e.g., Book Fair Next Week!"
+                                                        class="flex-grow text-lg font-medium text-gray-800 border-2 border-gray-50 rounded-lg px-5 py-3 focus:border-indigo-500 focus:outline-none transition" />
+                                                    <select v-model="newAnnouncement.icon"
+                                                        class="w-24 text-sm font-medium border-2 border-gray-50 rounded-lg px-2 focus:border-indigo-500 focus:outline-none transition text-gray-700">
+                                                        <option value="⚠️">Alert</option>
+                                                        <option value="🌟">Star</option>
+                                                        <option value="🎉">Party</option>
+                                                        <option value="🔔">Bell</option>
+                                                        <option value="📅">Date</option>
+                                                        <option value="🍎">Apple</option>
+                                                        <option value="📖">Book</option>
+                                                        <option value="🏆">Trophy</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <!-- Dates -->
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <label
+                                                        class="block text-xs font-medium text-gray-400 uppercase tracking-widest mb-3 italic">Publish
+                                                        From</label>
+                                                    <input v-model="newAnnouncement.startDate" type="date"
+                                                        class="w-full text-sm font-medium text-gray-800 border-2 border-gray-50 rounded-lg px-5 py-3 focus:border-indigo-500 focus:outline-none transition" />
+                                                </div>
+                                                <div>
+                                                    <label
+                                                        class="block text-xs font-medium text-gray-400 uppercase tracking-widest mb-3">Till
+                                                        Date (Optional)</label>
+                                                    <div class="relative">
+                                                        <input v-model="newAnnouncement.endDate" type="date"
+                                                            class="w-full text-sm font-medium text-gray-800 border-2 border-gray-50 rounded-lg px-5 py-3 focus:border-indigo-500 focus:outline-none transition" />
+                                                        <button v-if="newAnnouncement.endDate"
+                                                            @click="newAnnouncement.endDate = ''"
+                                                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-red-400">✕</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label
+                                                class="block text-xs font-medium text-gray-400 uppercase tracking-widest mb-3">Message
+                                                Content</label>
+                                            <textarea v-model="newAnnouncement.content" rows="4"
+                                                placeholder="What would you like to share with your students?"
+                                                class="w-full text-lg font-medium text-gray-800 border-2 border-gray-50 rounded-lg px-5 py-4 focus:border-indigo-500 focus:outline-none transition resize-none"></textarea>
+                                        </div>
+
+                                        <div class="flex justify-center pt-4">
+                                            <button @click="addAnnouncement"
+                                                class="w-full py-4 bg-indigo-600 text-white rounded-lg font-medium text-xl hover:bg-indigo-700 transition shadow-xl shadow-indigo-200">
+                                                Post Announcement
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Live Preview Card -->
+                                    <div
+                                        class="bg-indigo-50/30 p-8 rounded-lg border-2 border-dashed border-indigo-100 flex flex-col justify-center">
+                                        <h4
+                                            class="text-xs font-medium text-indigo-400 uppercase tracking-widest mb-6 text-center">
+                                            Live Student Preview</h4>
+                                        <div
+                                            class="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-xl flex gap-6 items-start">
+                                            <div
+                                                class="p-4 bg-indigo-50 rounded-2xl text-4xl shrink-0 border border-indigo-100 shadow-sm flex items-center justify-center min-w-[80px] min-h-[80px]">
+                                                {{ newAnnouncement.icon }}
+                                            </div>
+                                            <div class="flex-grow mt-1">
+                                                <div class="flex flex-col gap-1 mb-3">
+                                                    <h4 class="text-xl font-bold text-gray-800">{{ newAnnouncement.title
+                                                        || 'Your Title Here' }}</h4>
+                                                    <div class="flex gap-2 items-center">
+                                                        <span
+                                                            class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-[10px] font-bold uppercase tracking-widest">{{
+                                                            newAnnouncement.startDate || 'Start Date' }} {{
+                                                            newAnnouncement.endDate ? 'to ' + newAnnouncement.endDate :
+                                                            '(Ongoing)' }}</span>
+                                                    </div>
+                                                </div>
+                                                <p class="text-gray-500 font-medium leading-relaxed">{{
+                                                    newAnnouncement.content || 'Your message will appear here...' }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- VIEW: ANNOUNCEMENT HISTORY -->
+                            <div v-if="announcementSubTab === 'history'" class="space-y-4 animate-fade-in">
+                                <!-- Filter Bar -->
+                                <div
+                                    class="bg-indigo-50/50 p-5 rounded-lg border border-indigo-100 flex flex-wrap gap-4 items-end justify-center text-center">
+                                    <div>
+                                        <label
+                                            class="block text-[10px] font-medium text-indigo-400 uppercase tracking-widest mb-2">View
+                                            Week Starting</label>
+                                        <input v-model="announcementFilterWeek" type="date"
+                                            class="w-full text-sm font-medium text-indigo-800 border-2 border-indigo-200 rounded-lg px-4 py-2 focus:border-indigo-400 focus:outline-none transition bg-white" />
+                                    </div>
+                                </div>
+
+                                <!-- Current Announcements List -->
+                                <div class="space-y-3">
+                                    <div v-for="ann in filteredAnnouncements" :key="ann.id"
+                                        :class="['p-5 rounded-xl border-2 shadow-sm flex gap-5 items-start transition group relative overflow-hidden', isAnnouncementActive(ann) ? 'bg-white border-indigo-200 shadow-indigo-100 hover:border-indigo-400 opacity-100' : 'bg-gray-50 border-gray-100 opacity-70 hover:opacity-100 grayscale-[0.3]']">
+                                        <div
+                                            :class="['p-4 rounded-xl text-3xl shrink-0 border shadow-sm transition group-hover:scale-110 flex items-center justify-center min-w-[80px] min-h-[80px]', isAnnouncementActive(ann) ? 'bg-indigo-50 border-indigo-100' : 'bg-gray-100 border-gray-200']">
+                                            {{ ann.icon }}
+                                        </div>
+                                        <div class="flex-grow mt-1">
+                                            <div class="flex justify-between items-start mb-2">
+                                                <h4
+                                                    :class="['text-xl font-bold', isAnnouncementActive(ann) ? 'text-gray-800' : 'text-gray-500']">
+                                                    {{ ann.title }}</h4>
+                                                <div class="flex gap-2 items-center">
+                                                    <span v-if="isAnnouncementActive(ann)"
+                                                        class="px-2 py-0.5 bg-green-100 text-green-700 rounded text-[9px] font-bold uppercase tracking-wider border border-green-200 shadow-sm">Active</span>
+                                                    <span v-else
+                                                        class="px-2 py-0.5 bg-gray-200 text-gray-500 rounded text-[9px] font-bold uppercase tracking-wider border border-gray-300">Expired</span>
+                                                    <span
+                                                        class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-[10px] font-bold uppercase">{{
+                                                        ann.day }}</span>
+                                                    <span
+                                                        class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-[10px] font-bold uppercase tracking-widest">{{
+                                                        ann.startDate }} {{ ann.endDate ? 'to ' + ann.endDate :
+                                                        '(Ongoing)' }}</span>
+                                                    <button @click="deleteAnnouncement(ann.id)"
+                                                        class="text-red-300 hover:text-red-500 transition ml-2">✕</button>
+                                                </div>
+                                            </div>
+                                            <p class="font-medium leading-relaxed"
+                                                :class="isAnnouncementActive(ann) ? 'text-gray-600' : 'text-gray-400'">
+                                                {{ ann.content }}</p>
+                                        </div>
+                                    </div>
+                                    <div v-if="filteredAnnouncements.length === 0"
+                                        class="text-center py-20 bg-white rounded-lg border-4 border-dashed border-gray-100">
+                                        <span class="text-5xl block mb-4 italic">🏜️</span>
+                                        <p class="text-gray-400 font-medium">No announcements found for this filter.</p>
+                                        <button @click="announcementFilterWeek = ''"
+                                            class="mt-4 text-indigo-500 font-medium uppercase text-xs hover:underline">Clear
+                                            all filters</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- READER VIEWS -->
+                <div v-else :key="view">
+                    <!-- HOME VIEW -->
+                    <section v-if="view === 'home'" class="h-full flex flex-col justify-between gap-4 pb-4">
+                        <div class="text-center py-4">
+                            <h1 class="font-heading text-5xl font-bold text-brand-dark mb-1">Welcome Back! 👋</h1>
+                            <p class="text-lg text-gray-500 font-medium">Ready for today's reading adventure?</p>
+                        </div>
+
+                        <!-- Announcements Ticker -->
+                        <div v-if="announcements.length > 0"
+                            class="premium-card px-5 py-3 bg-brand-gold/5 border border-brand-gold/20">
+                            <div class="flex items-center gap-3">
+                                <span class="text-xl">📢</span>
+                                <div class="flex-grow overflow-hidden">
+                                    <p class="text-sm font-bold text-brand-dark truncate">
+                                        <span
+                                            class="bg-brand-gold text-brand-dark px-2 py-0.5 rounded-full text-[10px] font-black uppercase mr-2">New</span>
+                                        {{ announcements[0].title }} — {{ announcements[0].content }}
+                                    </p>
+                                </div>
+                                <span class="text-lg">{{ announcements[0].icon }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Daily Form CTA -->
+                        <button @click="view = 'forms'"
+                            class="w-full rounded-lg p-6 text-white text-left group cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 shadow-lg"
+                            style="background: linear-gradient(135deg, #E0604D 0%, #c94a38 100%); border-bottom: 6px solid #a83d2e;">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm font-bold uppercase tracking-widest opacity-80 mb-1">Today's
+                                        Challenge</p>
+                                    <h3 class="font-heading text-3xl font-black">Start Your Daily Form 📝</h3>
+                                    <p class="text-base opacity-80 mt-1 font-medium">
+                                        {{completedFormsThisWeek.length}}
+                                        out of {{thisWeekForms.length}} completed this week. {{ completionMessage }}
+                                    </p>
+                                </div>
+                                <span
+                                    class="text-5xl group-hover:translate-x-2 transition-transform duration-300">➜</span>
+                            </div>
+                        </button>
+
+                        <!-- 7-Day Raffle Progress Bar -->
+                        <div class="premium-card p-5 bg-white/80 border-2 border-brand-indigo/10">
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="font-heading font-black text-brand-dark text-base flex items-center gap-2">
+                                    🎟️ Weekly Raffle Progress
+                                </h3>
+                                <span class="text-sm font-bold text-gray-400">{{ completedWeeks.filter(id =>
+                                    thisWeekForms.some(f => f.id === id)).length }} / {{ thisWeekForms.length }}
+                                    days</span>
+                            </div>
+                            <div class="flex items-center justify-between gap-2">
+                                <div v-for="form in thisWeekForms" :key="form.id"
+                                    class="flex-1 flex flex-col items-center gap-1">
+                                    <div :class="['w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-all shadow-sm',
+                                        completedWeeks.includes(form.id) ? 'bg-brand-mint text-white shadow-brand-mint/30 scale-110' :
+                                        form.missed ? 'bg-amber-100 text-amber-500 border-2 border-amber-300 border-dashed' :
+                                        'bg-gray-100 text-gray-300 border-2 border-gray-200']">
+                                        <span v-if="completedWeeks.includes(form.id)">✓</span>
+                                        <span v-else>{{ form.dayNum }}</span>
+                                    </div>
+                                    <span class="text-[10px] font-bold text-gray-400 uppercase">{{
+                                        form.day.substring(0,3) }}</span>
+                                </div>
+                            </div>
+                            <div class="mt-3 h-2 bg-gray-100 rounded-full overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-brand-mint to-brand-indigo rounded-full transition-all duration-500"
+                                    :style="{ width: (completedWeeks.filter(id => thisWeekForms.some(f => f.id === id)).length / thisWeekForms.length * 100) + '%' }">
+                                </div>
+                            </div>
+                            <p v-if="completedWeeks.filter(id => thisWeekForms.some(f => f.id === id)).length === thisWeekForms.length"
+                                class="text-center text-brand-mint font-bold mt-2 text-sm animate-pop">🎉 All done
+                                this
+                                week! Your raffle ticket is in!</p>
+                        </div>
+                    </section>
+
+                    <!-- FORMS VIEW -->
+                    <section v-else-if="view === 'forms'" class="space-y-6">
+                        <div class="mb-2">
+                            <h2 class="font-heading text-4xl font-bold text-brand-dark mb-4">Daily Forms 📝</h2>
+                        </div>
+
+
+
+                        <!-- Daily Forms List -->
+                        <div v-if="!activeForm" class="grid gap-3">
+                            <div v-for="form in thisWeekForms" :key="form.id"
+                                @click="(form.locked && form.status !== 'Completed') ? null : startChallenge(form)"
+                                :class="['premium-card p-5 flex items-center justify-between group transition-all', 
+                                    (form.locked && form.status !== 'Completed') ? 'opacity-50 cursor-default grayscale' : 
+                                    (completedWeeks.includes(form.id) || form.status === 'Completed') ? 'border-brand-mint/40 bg-brand-mint/5 cursor-pointer hover:border-brand-mint' :
+                                    form.missed ? 'border-amber-300 bg-amber-50/50 cursor-pointer hover:border-amber-400 hover:scale-[1.01]' :
+                                    'cursor-pointer hover:border-brand-indigo hover:scale-[1.01]']">
+                                <div class="flex items-center gap-5">
+                                    <div
+                                        :class="['w-14 h-14 rounded-lg flex flex-col items-center justify-center font-heading font-bold transition text-sm',
+                                        (form.locked && form.status !== 'Completed') ? 'bg-gray-200 text-gray-400' :
+                                        (completedWeeks.includes(form.id) || form.status === 'Completed') ? 'bg-brand-mint text-white' :
+                                        form.missed ? 'bg-amber-400 text-white' :
+                                        'bg-brand-indigo/10 text-brand-indigo group-hover:bg-brand-indigo group-hover:text-white']">
+                                        <span class="text-[9px] uppercase leading-none">{{ form.day.substring(0,3)
+                                            }}</span>
+                                        <span class="text-lg font-black leading-tight">{{ form.dayNum }}</span>
+                                    </div>
+                                    <div>
+                                        <h4
+                                            :class="['font-heading text-lg font-bold', (form.locked && form.status !== 'Completed') ? 'text-gray-400' : 'text-brand-dark']">
+                                            {{ form.title }}</h4>
+                                        <div class="flex items-center gap-2 mt-0.5">
+                                            <p
+                                                :class="['text-xs font-bold', (form.locked && form.status !== 'Completed') ? 'text-gray-300' : 'text-gray-400']">
+                                                {{ form.day }} • {{ form.questions.length }} Steps</p>
+                                            <span v-if="completedWeeks.includes(form.id) || form.status === 'Completed'"
+                                                class="text-xs font-black text-brand-mint bg-brand-mint/15 px-2 py-0.5 rounded-full">✓
+                                                {{ form.status === 'Completed' ? 'Completed' : 'Done' }}</span>
+
+                                            <span v-else-if="form.locked"
+                                                class="text-xs font-black text-gray-400 bg-gray-200 px-2 py-0.5 rounded-full">🔒
+                                                Locked</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div v-if="!form.locked && !completedWeeks.includes(form.id)">
+                                    <button
+                                        :class="['btn-fun text-white px-5 py-2 rounded-lg font-bold text-sm', form.missed ? 'bg-amber-500' : 'bg-brand-indigo']">Start
+                                        🚀</button>
+                                </div>
+                                <div v-else-if="completedWeeks.includes(form.id) || form.status === 'Completed'">
+                                    <span class="text-2xl">✅</span>
+                                </div>
+                                <div v-else>
+                                    <span class="text-2xl opacity-30">🔒</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PRE-FORM: Do you have a book? -->
+                        <div v-else-if="formsMode === 'list' && activeForm && preFormStep"
+                            class="space-y-6 animate-fade-in">
+                            <!-- Step: Ask -->
+                            <div v-if="preFormStep === 'ask'"
+                                class="premium-card p-10 bg-white/60 text-center space-y-6">
+                                <div class="text-8xl animate-bounce">📚</div>
+                                <h3 class="font-heading text-3xl font-bold text-brand-dark">Before we start...</h3>
+                                <p class="text-xl text-gray-500 font-medium">Do you already have a book you've been
+                                    reading?</p>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md mx-auto">
+                                    <button @click="preFormStep = 'has-book'"
+                                        class="btn-fun bg-brand-indigo text-white py-5 rounded-lg font-bold text-xl shadow-lg hover:scale-105 transition">
+                                        Yes, I have a book! 📖
+                                    </button>
+                                    <button @click="preFormStep = 'no-book'"
+                                        class="btn-fun bg-brand-gold text-brand-dark py-5 rounded-lg font-bold text-xl shadow-lg hover:scale-105 transition">
+                                        No, I need one 📺
+                                    </button>
+                                </div>
+                                <button @click="activeForm = null; preFormStep = null"
+                                    class="text-gray-400 font-bold hover:text-brand-dark transition text-sm">← Back
+                                    to
+                                    Forms</button>
+                            </div>
+
+                            <!-- Step: Has Book (type title) -->
+                            <div v-else-if="preFormStep === 'has-book'"
+                                class="premium-card p-10 bg-white/60 text-center space-y-6">
+                                <div class="text-8xl">📖</div>
+                                <h3 class="font-heading text-3xl font-bold text-brand-dark">Awesome! What book are
+                                    you
+                                    reading?</h3>
+                                <div class="max-w-md mx-auto">
+                                    <input v-model="preFormBookTitle" type="text" placeholder="Type your book title..."
+                                        class="w-full p-5 bg-gray-50 border-2 border-transparent focus:border-brand-indigo rounded-lg font-bold text-xl outline-none text-center" />
+                                </div>
+                                <button @click="preFormAddBook" :disabled="!preFormBookTitle.trim()"
+                                    class="btn-fun bg-brand-indigo text-white py-4 px-12 rounded-lg font-bold text-xl shadow-lg disabled:opacity-40 hover:scale-105 transition">
+                                    Add to Library & Start Form ✨
+                                </button>
+                                <button @click="preFormStep = 'ask'"
+                                    class="block mx-auto text-gray-400 font-bold hover:text-brand-dark transition text-sm">←
+                                    Go Back</button>
+                            </div>
+
+                            <!-- Step: No Book (watch video) -->
+                            <div v-else-if="preFormStep === 'no-book'"
+                                class="premium-card p-5 bg-white/60 text-center space-y-3">
+                                <h3 class="font-heading text-xl font-bold text-brand-dark">📺 Let's read a story
+                                    together!</h3>
+                                <p class="text-gray-500 font-medium text-sm">Watch this book being read aloud, then
+                                    we'll do the form.</p>
+                                <div
+                                    class="max-w-2xl mx-auto aspect-video w-full rounded-lg overflow-hidden shadow-lg border-4 border-white">
+                                    <iframe class="w-full h-full" src="https://www.youtube.com/embed/1Evwgu369Jw"
+                                        frameborder="0" allowfullscreen></iframe>
+                                </div>
+                                <div class="flex items-center justify-center gap-4 pt-1">
+                                    <button @click="preFormStep = 'ask'"
+                                        class="text-gray-400 font-bold hover:text-brand-dark transition text-sm">←
+                                        Back</button>
+                                    <button @click="preFormSkipToForm"
+                                        class="btn-fun bg-brand-indigo text-white py-3 px-10 rounded-lg font-bold text-lg shadow-lg hover:scale-105 transition">
+                                        Continue to Form ➡️
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Active Form Challenge -->
+                        <div v-else-if="formsMode === 'list' && activeForm && !preFormStep"
+                            class="space-y-6 animate-fade-in">
+                            <div class="premium-card p-5 bg-white/60 relative overflow-hidden">
+                                <div class="absolute top-0 left-0 w-full h-2 bg-gray-100">
+                                    <div v-if="activeForm && activeForm.questions"
+                                        class="h-full bg-brand-indigo transition-all duration-500"
+                                        :style="{ width: ((currentQuestionIndex + 1) / activeForm.questions.length) * 100 + '%' }">
+                                    </div>
+                                </div>
+                                <div class="flex justify-between items-center mb-4">
+                                    <div>
+                                        <h3 class="font-heading text-2xl font-bold text-brand-dark">{{
+                                            activeForm.title
+                                            }}</h3>
+                                        <p class="text-gray-400 font-bold">Step {{ currentQuestionIndex + 1 }}
+                                            of {{
+                                            activeForm.questions.length }}</p>
+                                    </div>
+                                    <button @click="activeForm = null; preFormStep = null"
+                                        class="text-gray-400 hover:text-red-500 font-bold">Cancel</button>
+                                </div>
+
+                                <transition name="fade" mode="out-in">
+                                    <div :key="currentQuestionIndex">
+                                        <div v-if="activeForm.questions[currentQuestionIndex]" class="space-y-3">
+                                            <!-- Type Badge -->
+                                            <span v-if="activeForm.questions[currentQuestionIndex].type !== 'video'"
+                                                :class="['inline-block px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest', getBadgeClass(activeForm.questions[currentQuestionIndex].type)]">
+                                                {{ activeForm.questions[currentQuestionIndex].type }}
+                                            </span>
+
+                                            <!-- Question Text -->
+                                            <div class="space-y-1">
+                                                <h4 class="text-xl font-heading font-bold text-brand-dark">"{{
+                                                    activeForm.questions[currentQuestionIndex].text }}"</h4>
+                                                <p v-if="activeForm.questions[currentQuestionIndex].textEs"
+                                                    class="text-sm font-heading font-medium text-gray-400 italic">
+                                                    "{{
+                                                    activeForm.questions[currentQuestionIndex].textEs }}"</p>
+                                            </div>
+
+                                            <!-- Video Embed -->
+                                            <div v-if="activeForm.questions[currentQuestionIndex].type === 'video'"
+                                                class="max-w-2xl mx-auto aspect-video w-full rounded-lg overflow-hidden shadow-lg border-4 border-white">
+                                                <iframe class="w-full h-full"
+                                                    :src="activeForm.questions[currentQuestionIndex].url"
+                                                    frameborder="0" allowfullscreen></iframe>
+                                            </div>
+
+                                            <!-- Input Area -->
+                                            <div v-if="['text', 'mcq'].includes(activeForm.questions[currentQuestionIndex].type)"
+                                                class="mt-8">
+                                                <div
+                                                    v-if="!feedbackVisible[activeForm.questions[currentQuestionIndex].id]">
+                                                    <textarea
+                                                        v-if="activeForm.questions[currentQuestionIndex].type === 'text'"
+                                                        v-model="answers[activeForm.questions[currentQuestionIndex].id]"
+                                                        placeholder="Type your answer here..."
+                                                        class="w-full premium-card bg-white p-6 text-lg focus:border-brand-indigo focus:ring-0 focus:outline-none min-h-[120px] shadow-inner"></textarea>
+
+                                                    <!-- MCQ Options -->
+                                                    <div v-else-if="activeForm.questions[currentQuestionIndex].type === 'mcq'"
+                                                        class="space-y-3">
+                                                        <button
+                                                            v-for="(choice, ci) in activeForm.questions[currentQuestionIndex].choices"
+                                                            :key="ci"
+                                                            @click="answers[activeForm.questions[currentQuestionIndex].id] = choice.text"
+                                                            :class="['w-full text-left p-5 rounded-lg font-bold text-lg border-2 transition-all',
+                                                                answers[activeForm.questions[currentQuestionIndex].id] === choice.text
+                                                                ? 'border-brand-indigo bg-brand-indigo/10 text-brand-indigo scale-[1.02] shadow-lg'
+                                                                : 'border-gray-100 bg-white text-gray-700 hover:border-brand-indigo/40 hover:bg-brand-indigo/5']">
+                                                            <span
+                                                                class="inline-flex items-center justify-center w-8 h-8 rounded-full mr-3 text-sm font-black"
+                                                                :class="answers[activeForm.questions[currentQuestionIndex].id] === choice.text ? 'bg-brand-indigo text-white' : 'bg-gray-100 text-gray-500'">{{
+                                                                String.fromCharCode(65 + ci) }}</span>
+                                                            {{ choice.text }}
+                                                        </button>
+                                                    </div>
+
+                                                    <button @click="checkAnswer"
+                                                        :disabled="!answers[activeForm.questions[currentQuestionIndex].id]"
+                                                        class="mt-6 btn-fun w-full bg-brand-indigo text-white py-4 rounded-lg font-bold text-xl disabled:opacity-50">Check
+                                                        Answer ✨</button>
+                                                </div>
+                                                <!-- Feedback State -->
+                                                <div v-else
+                                                    class="p-6 bg-brand-mint/10 border-2 border-brand-mint/30 rounded-[2rem] animate-pop-bounce">
+                                                    <div
+                                                        class="text-brand-mint font-black mb-2 uppercase tracking-widest flex items-center gap-2">
+                                                        <span>✨ Great job!</span>
+                                                    </div>
+                                                    <p class="text-gray-700 font-medium">Reference: "{{
+                                                        activeForm.questions[currentQuestionIndex].reference }}"
+                                                    </p>
+                                                    <p class="text-gray-500 italic text-sm">"{{
+                                                        activeForm.questions[currentQuestionIndex].referenceEs
+                                                        }}"
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <!-- Navigation (always visible) -->
+                                            <div class="flex justify-between items-center mt-4">
+                                                <button @click="currentQuestionIndex--" v-if="currentQuestionIndex > 0"
+                                                    class="text-gray-400 font-bold hover:text-brand-dark transition text-lg">←
+                                                    Back</button>
+                                                <div v-else></div>
+                                                <div class="flex-grow"></div>
+                                                <!-- Continue for context/video -->
+                                                <button
+                                                    v-if="['context', 'video'].includes(activeForm.questions[currentQuestionIndex].type)"
+                                                    @click="nextStep"
+                                                    class="btn-fun bg-brand-dark text-white px-10 py-3 rounded-lg font-bold text-lg shadow-lg hover:bg-brand-indigo transition-colors">
+                                                    {{ currentQuestionIndex < activeForm.questions.length - 1
+                                                        ? 'Continue ➡️' : 'Finish Challenge! 🎉' }} </button>
+                                                        <!-- Next for answered quiz questions -->
+                                                        <button
+                                                            v-else-if="feedbackVisible[activeForm.questions[currentQuestionIndex].id]"
+                                                            @click="nextStep"
+                                                            class="btn-fun bg-brand-dark text-white px-10 py-3 rounded-lg font-bold text-lg">
+                                                            {{ currentQuestionIndex < activeForm.questions.length - 1
+                                                                ? 'Next Step' : 'Finish Challenge! 🎉' }} </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </transition>
+                            </div>
+                        </div>
+
+                        <!-- History View -->
+                        <div v-else-if="formsMode === 'history'" class="text-center py-20 premium-card">
+                            <span class="text-6xl mb-4 block">📂</span>
+                            <h3 class="font-heading text-2xl font-bold text-gray-400 italic">No history yet...
+                            </h3>
+                        </div>
+                    </section>
+
+
+                    <!-- DECOR VIEW -->
+                    <section v-else-if="view === 'decor'" class="space-y-10">
+                        <div
+                            class="flex gap-4 p-1 bg-white/50 backdrop-blur rounded-lg border-2 border-white max-w-sm mx-auto">
+                            <button @click="decorTab = 'shop'"
+                                :class="['flex-1 py-2 rounded-lg font-bold transition-all', decorTab === 'shop' ? 'bg-brand-indigo text-white shadow-fun' : 'text-gray-400 hover:text-brand-indigo']">Shop</button>
+                            <button @click="decorTab = 'badges'"
+                                :class="['flex-1 py-2 rounded-lg font-bold transition-all', decorTab === 'badges' ? 'bg-brand-indigo text-white shadow-fun' : 'text-gray-400 hover:text-brand-indigo']">Badges</button>
+                        </div>
+
+                        <div v-if="decorTab === 'shop'" class="space-y-6">
+                            <!-- Shop Category: Themes -->
+                            <div class="shop-category">
+                                <h3
+                                    class="text-xl font-black text-brand-dark mb-4 pb-2 border-b-4 border-brand-indigo/20 flex items-center gap-2">
+                                    <span>🎨</span> THEMES
+                                </h3>
+                                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                                    <div v-for="item in shopItems.filter(i => i.type === 'theme')" :key="item.id"
+                                        @click="item.owned ? applyItem(item) : buyItem(item)"
+                                        class="premium-card p-4 bg-white/80 cursor-pointer overflow-hidden transition-all hover:scale-105 active:scale-95"
+                                        :class="[settings.theme === item.class.replace('theme-', '') ? 'border-brand-indigo border-4' : 'border-white']">
+                                        <div class="w-full aspect-square rounded-lg mb-3 shadow-inner border border-gray-100"
+                                            :style="{ backgroundColor: item.previewBg, backgroundImage: item.previewGrad }">
+                                        </div>
+                                        <div class="flex items-center justify-between px-1">
+                                            <span class="text-xs font-black text-brand-dark truncate">{{
+                                                item.name
+                                                }}</span>
+                                            <span v-if="!item.owned"
+                                                class="text-[9px] font-black p-1 bg-brand-gold/20 text-brand-gold-700 rounded-lg">{{
+                                                item.cost }} XP</span>
+                                            <span v-else-if="settings.theme === item.class.replace('theme-', '')"
+                                                class="text-[9px] font-black text-brand-indigo">EQUIPPED</span>
+                                            <span v-else class="text-[9px] font-black text-brand-mint">OWNED</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Shop Category: Decorations -->
+                            <div class="shop-category">
+                                <h3
+                                    class="text-xl font-black text-brand-dark mb-4 pb-2 border-b-4 border-brand-indigo/20 flex items-center gap-2">
+                                    <span>✨</span> ANIMATIONS
+                                </h3>
+                                <div class="space-y-3">
+                                    <div v-for="item in shopItems.filter(i => i.type === 'animation')" :key="item.id"
+                                        class="flex items-center justify-between p-4 bg-white/60 rounded-lg border-2 transition-all"
+                                        :class="[activeAnimations.includes(item.name) ? 'border-brand-mint bg-brand-mint/5' : 'border-white']">
+                                        <div class="flex items-center gap-3">
+                                            <div
+                                                class="w-12 h-12 bg-white rounded-lg flex items-center justify-center text-2xl shadow-sm">
+                                                ✨</div>
+                                            <div>
+                                                <h4 class="font-black text-brand-dark uppercase tracking-tight">
+                                                    {{
+                                                    item.name }}</h4>
+                                                <p class="text-[10px] text-gray-500 font-bold" v-if="!item.owned">
+                                                    Requires {{ item.cost }} XP</p>
+                                                <p class="text-[10px] text-brand-mint font-bold" v-else>Active
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <button v-if="!item.owned" @click="buyItem(item)"
+                                            :disabled="stats.xp < item.cost"
+                                            class="bg-brand-gold px-6 py-2 rounded-lg font-black text-xs text-brand-dark shadow-fun active:scale-95 disabled:opacity-50">BUY</button>
+                                        <button v-else @click="applyItem(item)"
+                                            class="px-6 py-2 rounded-lg font-black text-xs shadow-fun transition-colors"
+                                            :class="[activeAnimations.includes(item.name) ? 'bg-brand-dark text-white' : 'bg-white text-brand-dark']">
+                                            {{ activeAnimations.includes(item.name) ? 'REMOVE' : 'EQUIP' }}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Badges Section -->
+                        <div v-else class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div v-for="badge in badges" :key="badge.id"
+                                :class="['premium-card p-6 flex flex-col items-center text-center gap-2 group', badge.unlocked ? 'bg-white border-brand-gold' : 'opacity-40 grayscale']">
+                                <div class="text-5xl group-hover:scale-110 transition duration-500">{{
+                                    badge.icon }}
+                                </div>
+                                <h4 class="font-heading font-bold text-lg leading-tight">{{ badge.name }}</h4>
+                                <p class="text-[10px] font-bold text-gray-400">{{ badge.desc }}</p>
+                                <div v-if="badge.unlocked"
+                                    class="mt-2 bg-brand-gold/20 text-brand-dark px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">
+                                    Unlocked</div>
+                            </div>
+                        </div>
+                    </section>
+
+
+                </div>
+            </transition>
+        </main>
+
+        <!-- Side Arrow Navigation -->
+        <template v-if="userRole === 'reader' && !['settings', 'landing', 'login'].includes(view)">
+            <!-- Left Arrow (Store/Home) -->
+            <button v-if="['home', 'forms'].includes(view)" @click="view = view === 'home' ? 'decor' : 'home'"
+                class="fixed left-2 top-1/2 -translate-y-1/2 z-[100] p-2 flex items-center gap-1 text-brand-indigo/60 hover:text-brand-indigo active:scale-90 transition-all cursor-pointer group"
+                style="background: none; border: none;">
+                <svg class="w-12 h-16 group-hover:-translate-x-1 transition-transform drop-shadow-md" fill="none"
+                    stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+                <span class="text-sm font-bold uppercase tracking-wide">{{ view === 'home' ? 'Store' : 'Home' }}</span>
+            </button>
+
+            <!-- Right Arrow (Forms/Home) -->
+            <button v-if="['home', 'decor'].includes(view)" @click="view = view === 'home' ? 'forms' : 'home'"
+                class="fixed right-2 top-1/2 -translate-y-1/2 z-[100] p-2 flex items-center gap-1 text-brand-indigo/60 hover:text-brand-indigo active:scale-90 transition-all cursor-pointer group"
+                style="background: none; border: none;">
+                <span class="text-sm font-bold uppercase tracking-wide">{{ view === 'home' ? 'Forms' : 'Home' }}</span>
+                <svg class="w-12 h-16 group-hover:translate-x-1 transition-transform drop-shadow-md" fill="none"
+                    stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+            </button>
+        </template>
+
+        <!-- RAFFLE TICKET DRAG-AND-DROP OVERLAY -->
+        <transition name="fade">
+            <div v-if="showRaffleReward" class="fixed inset-0 z-[200]"
+                style="width: 100vw; height: 100vh; left: 0; top: 0;">
+                <div class="absolute inset-0 bg-brand-dark/60 backdrop-blur-md"></div>
+                <div class="p-6 bg-white max-w-md w-[90%] absolute z-10 animate-pop text-center space-y-5 border-b-8 border-brand-gold overflow-auto"
+                    style="border-radius: 2.5rem; box-shadow: 0 20px 60px rgba(0,0,0,0.3); left: 50%; top: 50%; transform: translate(-50%, -50%);">
+                    <!-- Drag Zone -->
+                    <div v-if="!ticketDropped" class="space-y-6">
+                        <h2 class="font-heading text-2xl font-black text-brand-dark">You earned a RAFFLE TICKET! 🎉</h2>
+                        <p class="text-gray-500 font-medium">Drag your ticket into the raffle box!</p>
+
+                        <!-- Draggable Ticket -->
+                        <div class="relative mx-auto" style="height: 200px;">
+                            <div id="raffle-ticket" draggable="true" @dragstart="onTicketDragStart($event)"
+                                @touchstart="onTicketTouchStart($event)" @touchmove="onTicketTouchMove($event)"
+                                @touchend="onTicketTouchEnd($event)"
+                                class="absolute left-1/2 -translate-x-1/2 cursor-grab active:cursor-grabbing transition-transform hover:scale-110 select-none"
+                                :style="ticketStyle" style="z-index: 10; touch-action: none;">
+                                <div class="text-[80px] leading-none drop-shadow-lg animate-bounce">🎟️</div>
+                                <p class="text-xs font-bold text-gray-400 mt-1">Drag me! ↑</p>
+                            </div>
+                        </div>
+
+                        <!-- Drop Target (Raffle Box) -->
+                        <div id="raffle-box" @dragover.prevent="ticketOverBox = true" @dragleave="ticketOverBox = false"
+                            @drop.prevent="onTicketDrop"
+                            :class="['mx-auto w-40 h-32 rounded-lg border-4 border-dashed flex flex-col items-center justify-center transition-all duration-300',
+                                ticketOverBox ? 'border-brand-gold bg-brand-gold/20 scale-110 shadow-xl' : 'border-gray-300 bg-gray-50']"
+                            style="z-index: 5;">
+                            <span class="text-4xl">📦</span>
+                            <span class="text-xs font-bold text-gray-400 uppercase mt-1">Raffle Box</span>
+                        </div>
+                    </div>
+
+                    <!-- After Drop Success -->
+                    <div v-else class="flex flex-col items-center justify-center text-center space-y-4 py-4">
+                        <div class="text-[72px] leading-none">🎉</div>
+                        <h2 class="font-heading text-2xl font-black text-brand-dark">Ticket Entered!</h2>
+                        <p class="text-base text-gray-500 font-medium">Great job completing today's form!</p>
+                        <div
+                            class="inline-flex items-center gap-2 px-5 py-2 bg-brand-gold/20 text-brand-dark rounded-full font-heading font-black text-lg">
+                            🎟️ You now have {{ stats.tickets }} tickets!
+                        </div>
+                        <div class="pt-1">
+                            <button @click="showRaffleReward = false; ticketDropped = false; view = 'home'"
+                                class="btn-fun bg-brand-indigo text-white py-3 px-10 rounded-lg font-bold text-lg shadow-lg hover:scale-105 transition">
+                                Back to Home 🏠
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </transition>
+
+        <!-- SHOP PURCHASE CELEBRATION -->
+        <transition name="fade">
+            <div v-if="showShopCelebration"
+                class="fixed inset-0 z-[200] flex items-center justify-center pointer-events-none">
+                <div class="text-center animate-pop">
+                    <div class="text-8xl mb-4">✨</div>
+                    <h2 class="font-heading text-4xl font-black text-white drop-shadow-lg">{{ showShopCelebration }}
+                    </h2>
+                    <p class="text-2xl text-white/80 font-bold drop-shadow-md mt-2">Unlocked! 🎉</p>
+                </div>
+            </div>
+        </transition>
+
+        <!-- LOG BOOK MODAL -->
+        <transition name="fade">
+            <div v-if="showLogBook" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                <div class="absolute inset-0 bg-brand-dark/40 backdrop-blur-sm" @click="showLogBook = false"></div>
+                <div class="premium-card p-10 bg-white max-w-md w-full relative animate-pop">
+                    <button @click="showLogBook = false"
+                        class="absolute top-6 right-6 text-gray-400 hover:text-red-500 font-bold">✕</button>
+                    <div class="text-center mb-8">
+                        <div class="text-6xl mb-4">📖</div>
+                        <h3 class="font-heading text-3xl font-bold text-brand-dark">Log a Book</h3>
+                        <p class="text-gray-500">Add a new book to your library!</p>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Book
+                                Title</label>
+                            <input v-model="logBookTitle" type="text" placeholder="The Magic Treehouse..."
+                                class="w-full p-4 bg-gray-50 border-2 border-transparent focus:border-brand-indigo rounded-lg font-bold outline-none" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Spine
+                                Color</label>
+                            <div class="flex gap-2">
+                                <button
+                                    v-for="color in ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500']"
+                                    :key="color" @click="logBookColor = color"
+                                    :class="[color, logBookColor === color ? 'ring-4 ring-brand-indigo ring-offset-2 scale-110' : '', 'w-10 h-10 rounded-lg transition-all hover:scale-110']"></button>
+                            </div>
+                        </div>
+                        <button @click="saveBook"
+                            class="w-full btn-fun bg-brand-mint text-white py-4 rounded-lg font-black text-xl">ADD TO
+                            SHELF ✨</button>
+                    </div>
+                </div>
+            </div>
+        </transition>
+
+    </div>
+
+    <script>
+        const { createApp, ref, computed, reactive, watchEffect } = Vue;
+
+        createApp({
+            setup() {
+                const view = ref('landing');
+                const isLoggedIn = ref(false);
+                const loginEmail = ref('');
+                const loginTarget = ref(null);
+                const formsMode = ref('list');
+                const decorTab = ref('shop');
+                const locale = ref('en');
+
+                const translations = {
+                    en: { welcome: 'Hello, Reading Buddy!', subtitle: 'Log books, help your sibling, and win prizes!' },
+                    es: { welcome: '¡Hola, Amigo Lector!', subtitle: '¡Registra libros, ayuda a tu hermano y gana premios!' }
+                };
+                const t = (key) => translations[locale.value][key] || key;
+                const toggleLanguage = () => locale.value = locale.value === 'en' ? 'es' : 'en';
+
+                const userRole = ref('reader'); // 'reader' or 'admin'
+                const adminTab = ref('builder');
+                const builderSubTab = ref('history');
+                const announcementSubTab = ref('creation');
+                const formWeekStart = ref('');
+                const formDays = ref(['Monday']);
+
+                // Initialize formWeekStart to the most recent Monday
+                const today = new Date();
+                const dayOffset = (today.getDay() + 6) % 7; // Monday = 0
+                const monday = new Date(today);
+                monday.setDate(today.getDate() - dayOffset);
+                formWeekStart.value = monday.toISOString().split('T')[0];
+
+                const getCalculatedDate = (weekStartStr, dayName) => {
+                    if (!weekStartStr) return '';
+                    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+                    const dayIdx = days.indexOf(dayName);
+                    if (dayIdx === -1) return '';
+
+                    const date = new Date(weekStartStr);
+                    date.setDate(date.getDate() + dayIdx);
+                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                };
+
+                const currentCalculatedDate = computed(() => {
+                    return getCalculatedDate(formWeekStart.value, formDays.value[0] || 'Monday');
+                });
+
+                const historyWeekStart = ref('');
+
+                const filteredPublishedForms = computed(() => {
+                    return publishedForms.value.filter(form => {
+                        const matchesWeek = !historyWeekStart.value || form.weekStart === historyWeekStart.value;
+                        return matchesWeek;
+                    });
+                });
+                const showLogBook = ref(false);
+                const logBookTitle = ref('');
+                const logBookColor = ref('bg-brand-indigo');
+                const formTitle = ref('');
+                const formDueDate = ref('');
+                const editingFormId = ref(null);
+                const defaultQuestions = () => [
+                    { id: Date.now(), type: 'video', text: '', textEs: '', reference: '', referenceEs: '', url: '' },
+                    { id: Date.now() + 1, type: 'text', text: '', textEs: '', reference: '', referenceEs: '', url: '' },
+                    {
+                        id: Date.now() + 2, type: 'mcq', text: '', textEs: '', reference: '', referenceEs: '', url: '', choices: [
+                            { text: '', correct: true },
+                            { text: '', correct: false },
+                            { text: '', correct: false },
+                            { text: '', correct: false }
+                        ]
+                    }
+                ];
+                const questions = ref(defaultQuestions());
+                const completedWeeks = ref([]);
+
+                const settings = reactive({
+                    dyslexiaFont: false,
+                    theme: 'light',
+                    language: 'en',
+                    fontSize: 1
+                });
+
+                const kidProfiles = ref([
+                    { name: 'Emma', avatar: '🦊', color: 'bg-orange-400' },
+                    { name: 'Jayden', avatar: '🐸', color: 'bg-green-400' },
+                    { name: 'Sofia', avatar: '🦋', color: 'bg-purple-400' }
+                ]);
+                const activeProfileIdx = ref(0);
+
+                // Reactively apply theme to body (outside Vue mount)
+                watchEffect(() => {
+                    document.body.classList.remove('theme-dark', 'theme-sepia', 'theme-sunset', 'theme-ocean', 'theme-forest', 'theme-candy', 'theme-fire', 'theme-ice', 'dyslexia-font');
+                    const themeClass = 'theme-' + settings.theme;
+                    if (settings.theme !== 'light') document.body.classList.add(themeClass);
+                    if (settings.dyslexiaFont) document.body.classList.add('dyslexia-font');
+                    document.documentElement.style.fontSize = (settings.fontSize * 16) + 'px';
+                });
+
+                const announcements = ref([
+                    { id: 1, title: 'Summer Reading Challenge!', content: 'Log 20 books this month to win a special Super Sage badge!', icon: '🌟', startDate: '2026-03-01', endDate: '2026-03-31', weekStart: '2026-03-02', day: 'Monday' },
+                    { id: 2, title: 'New Badges Available', content: 'Check out the shop for new limited edition themes.', icon: '🎉', startDate: '2026-03-05', endDate: '', weekStart: '2026-03-02', day: 'Thursday' },
+                    { id: 3, title: 'Friday Game Night', content: 'Join us in the library for board games and snacks!', icon: '🎲', startDate: '2026-03-06', endDate: '', weekStart: '2026-03-02', day: 'Friday' },
+                    { id: 4, title: 'Week 10 Progress', content: 'You are doing amazing! Keep up the reading streak.', icon: '📈', startDate: '2026-03-09', endDate: '', weekStart: '2026-03-09', day: 'Monday' },
+                    { id: 5, title: 'Author Visit: J.K. Rowling', content: 'Virtual session this Wednesday at 10 AM.', icon: '✍️', startDate: '2026-03-11', endDate: '', weekStart: '2026-03-09', day: 'Wednesday' }
+                ]);
+
+                const newAnnouncement = reactive({
+                    title: '',
+                    content: '',
+                    icon: '🌟',
+                    startDate: new Date().toISOString().split('T')[0],
+                    endDate: '',
+                    weekStart: monday.toISOString().split('T')[0],
+                    day: 'Monday'
+                });
+
+                const isAnnouncementActive = (ann) => {
+                    const now = currentCalculatedDate.value || new Date().toISOString().split('T')[0];
+                    if (ann.startDate > now) return false;
+                    if (ann.endDate && ann.endDate < now) return false;
+                    return true;
+                };
+
+                const announcementFilterWeek = ref(monday.toISOString().split('T')[0]);
+
+                const filteredAnnouncements = computed(() => {
+                    return announcements.value.filter(ann => {
+                        return !announcementFilterWeek.value || ann.weekStart === announcementFilterWeek.value;
+                    });
+                });
+
+                const addAnnouncement = () => {
+                    if (!newAnnouncement.title || !newAnnouncement.content) return alert('Please fill in title and message!');
+                    announcements.value.push({
+                        id: Date.now(),
+                        title: newAnnouncement.title,
+                        content: newAnnouncement.content,
+                        icon: newAnnouncement.icon,
+                        startDate: newAnnouncement.startDate,
+                        endDate: newAnnouncement.endDate,
+                        weekStart: newAnnouncement.weekStart,
+                        day: newAnnouncement.day
+                    });
+                    newAnnouncement.title = '';
+                    newAnnouncement.content = '';
+                    newAnnouncement.icon = '🌟';
+                    newAnnouncement.startDate = new Date().toISOString().split('T')[0];
+                    newAnnouncement.endDate = '';
+                };
+
+                const deleteAnnouncement = (id) => {
+                    announcements.value = announcements.value.filter(a => a.id !== id);
+                };
+
+                const stats = ref({
+                    xp: 1250,
+                    booksRead: 14,
+                    streak: 5,
+                    tickets: 3
+                });
+
+                const publishedForms = ref([
+                    {
+                        id: 1,
+                        weekStart: '2026-02-09',
+                        day: 'Monday',
+                        title: 'Kindness & Compassion',
+                        date: 'Feb 9, 2026',
+                        status: 'Active',
+                        questions: [
+                            { id: 101, type: 'context', text: 'Read the story of the Bell of Atri.', textEs: 'Lee la historia de la Campana de Atri.', reference: 'A story about justice and kindness to animals.', referenceEs: 'Una historia sobre la justicia y la bondad con los animales.' },
+                            { id: 102, type: 'video', text: 'Watch this video on empathy', textEs: 'Mira este video sobre la empatía', url: 'https://www.youtube.com/embed/1Evwgu369Jw' },
+                            { id: 103, type: 'text', text: 'What did the horse do in the story?', textEs: '¿Qué hizo el caballo en la historia?', reference: 'He rang the bell to ask for justice.', referenceEs: 'Tocó la campana para pedir justicia.' },
+                            { id: 104, type: 'mcq', text: 'If there are 5 bells and 3 horses, how many items in total?', textEs: 'Si hay 5 campanas y 3 caballos, ¿cuántos artículos en total?', reference: '8', referenceEs: '8', choices: [{ text: '6', correct: false }, { text: '8', correct: true }, { text: '10', correct: false }, { text: '15', correct: false }] }
+                        ]
+                    },
+                    {
+                        id: 2, weekStart: '2026-02-09', day: 'Tuesday', title: 'Honesty & Truth', date: 'Feb 10, 2026', status: 'Active',
+                        questions: [{ id: 201, type: 'text', text: 'Why tell the truth?', textEs: '¿Por qué decir la verdad?', reference: 'Truth builds trust.', referenceEs: 'La verdad genera confianza.' }]
+                    },
+                    {
+                        id: 3, weekStart: '2026-02-09', day: 'Wednesday', title: 'Courage & Bravery', date: 'Feb 11, 2026', status: 'Active',
+                        questions: [{ id: 301, type: 'text', text: 'Who is a brave person?', textEs: '¿Quién es una persona valiente?', reference: 'Someone who faces fear.', referenceEs: 'Alguien que enfrenta el miedo.' }]
+                    },
+                    {
+                        id: 7, weekStart: '2026-02-09', day: 'Thursday', title: 'Fairness & Justice', date: 'Feb 12, 2026', status: 'Active',
+                        questions: [{ id: 701, type: 'text', text: 'What does fairness mean?', textEs: '¿Qué significa la justicia?', reference: 'Treating everyone with respect.', referenceEs: 'Tratar a todos con respeto.' }]
+                    },
+                    {
+                        id: 8, weekStart: '2026-02-09', day: 'Friday', title: 'Community Spirit', date: 'Feb 13, 2026', status: 'Active',
+                        questions: [{ id: 801, type: 'text', text: 'How can you help your neighbors?', textEs: '¿Cómo puedes ayudar a tus vecinos?', reference: 'Working together.', referenceEs: 'Trabajando juntos.' }]
+                    },
+                    {
+                        id: 4, weekStart: '2026-02-16', day: 'Monday', title: 'Patience & Persistence', date: 'Feb 16, 2026', status: 'Active',
+                        questions: [{ id: 401, type: 'text', text: 'What is patience?', textEs: '¿Qué es la paciencia?', reference: 'Waiting without getting upset.', referenceEs: 'Esperar sin molestarse.' }]
+                    },
+                    {
+                        id: 9, weekStart: '2026-02-16', day: 'Tuesday', title: 'Self-Discipline', date: 'Feb 17, 2026', status: 'Active',
+                        questions: [{ id: 901, type: 'text', text: 'What is self-control?', textEs: '¿Qué es el autocontrol?', reference: 'Managing your impulses.', referenceEs: 'Controlar tus impulsos.' }]
+                    },
+                    {
+                        id: 10, weekStart: '2026-02-16', day: 'Wednesday', title: 'Generosity & Sharing', date: 'Feb 18, 2026', status: 'Active',
+                        questions: [{ id: 1001, type: 'text', text: 'Why share with others?', textEs: '¿Por qué compartir con los demás?', reference: 'It makes everyone happy.', referenceEs: 'Hace felices a todos.' }]
+                    },
+                    {
+                        id: 5, weekStart: '2026-02-16', day: 'Friday', title: 'Weekly Review', date: 'Feb 20, 2026', status: 'Unpublished',
+                        questions: [{ id: 501, type: 'text', text: 'What did you learn?', textEs: '¿Qué aprendiste?', reference: 'Review of the week.', referenceEs: 'Resumen de la semana.' }]
+                    },
+                    {
+                        id: 6, weekStart: '2026-03-02', day: 'Monday', title: 'Empathy in Action', date: 'Mar 2, 2026', status: 'Active',
+                        questions: [{ id: 601, type: 'text', text: 'Help a friend.', textEs: 'Ayuda a un amigo.', reference: 'Show kindness.', referenceEs: 'Muestra bondad.' }]
+                    },
+                    {
+                        id: 11, weekStart: '2026-03-02', day: 'Tuesday', title: 'Resourcefulness', date: 'Mar 3, 2026', status: 'Active',
+                        questions: [{ id: 1101, type: 'text', text: 'Using what you have.', textEs: 'Usando lo que tienes.', reference: 'Creativity in problem solving.', referenceEs: 'Creatividad en la resolución de problemas.' }]
+                    }
+                ]);
+
+
+
+                const thisWeekForms = ref([
+                    {
+                        id: 201, day: 'Monday', dayNum: 1, title: 'Kindness & Compassion', date: 'Feb 10, 2025', status: 'Active', missed: true,
+                        questions: [
+                            { id: 2011, type: 'context', text: 'Read the story of the Bell of Atri.', textEs: 'Lee la historia de la Campana de Atri.', reference: 'A story about justice and kindness to animals.', referenceEs: 'Una historia sobre la justicia y la bondad con los animales.' },
+                            { id: 2012, type: 'video', text: 'Watch this video on empathy', textEs: 'Mira este video sobre la empatía', url: 'https://www.youtube.com/embed/1Evwgu369Jw' },
+                            { id: 2013, type: 'text', text: 'What did the horse do in the story?', textEs: '¿Qué hizo el caballo en la historia?', reference: 'He rang the bell to ask for justice.', referenceEs: 'Tocó la campana para pedir justicia.' },
+                            { id: 2014, type: 'mcq', text: 'If there are 5 bells and 3 horses, how many items in total?', textEs: 'Si hay 5 campanas y 3 caballos, ¿cuántos artículos en total?', reference: '8', referenceEs: '8', choices: [{ text: '6', correct: false }, { text: '8', correct: true }, { text: '10', correct: false }, { text: '15', correct: false }] }
+                        ]
+                    },
+                    {
+                        id: 202, day: 'Tuesday', dayNum: 2, title: 'Honesty & Truth', date: 'Feb 11, 2025', status: 'Active', missed: true,
+                        questions: [
+                            { id: 2021, type: 'context', text: 'Read about George Washington and the cherry tree.', textEs: 'Lee sobre George Washington y el cerezo.', reference: 'A tale about the value of telling the truth.', referenceEs: 'Un cuento sobre el valor de decir la verdad.' },
+                            { id: 2022, type: 'text', text: 'Why is honesty important?', textEs: '¿Por qué es importante la honestidad?', reference: 'It builds trust and respect.', referenceEs: 'Genera confianza y respeto.' },
+                            { id: 2023, type: 'mcq', text: 'If George planted 12 trees and chopped 1, how many are left?', textEs: 'Si George plantó 12 árboles y cortó 1, ¿cuántos quedan?', reference: '11', referenceEs: '11', choices: [{ text: '10', correct: false }, { text: '11', correct: true }, { text: '12', correct: false }, { text: '13', correct: false }] }
+                        ]
+                    },
+                    {
+                        id: 203, day: 'Wednesday', dayNum: 3, title: 'Courage & Bravery', date: 'Feb 12, 2025', status: 'Active',
+                        questions: [
+                            { id: 2031, type: 'context', text: 'Read about Ruby Bridges walking to school.', textEs: 'Lee sobre Ruby Bridges caminando a la escuela.', reference: 'Ruby was the first Black child to attend an all-white school.', referenceEs: 'Ruby fue la primera niña negra en asistir a una escuela solo para blancos.' },
+                            { id: 2032, type: 'video', text: 'Watch this video about courage', textEs: 'Mira este video sobre el coraje', url: 'https://www.youtube.com/embed/1Evwgu369Jw' },
+                            { id: 2033, type: 'text', text: 'What made Ruby brave?', textEs: '¿Qué hizo valiente a Ruby?', reference: 'She kept going even when people tried to stop her.', referenceEs: 'Siguió adelante aunque intentaron detenerla.' }
+                        ]
+                    },
+                    {
+                        id: 204, day: 'Thursday', dayNum: 4, title: 'Friendship & Loyalty', date: 'Feb 13, 2025', status: 'Active',
+                        questions: [
+                            { id: 2041, type: 'context', text: 'Read the story of Charlotte\'s Web.', textEs: 'Lee la historia de La Telaraña de Charlotte.', reference: 'Charlotte saved Wilbur through her friendship.', referenceEs: 'Charlotte salvó a Wilbur con su amistad.' },
+                            { id: 2042, type: 'text', text: 'How did Charlotte show she was a true friend?', textEs: '¿Cómo demostró Charlotte que era una verdadera amiga?', reference: 'She used her web to write messages that saved Wilbur.', referenceEs: 'Usó su telaraña para escribir mensajes que salvaron a Wilbur.' },
+                            { id: 2043, type: 'mcq', text: 'Charlotte wrote 3 words. Each word has 5 letters. How many letters total?', textEs: 'Charlotte escribió 3 palabras. Cada palabra tiene 5 letras. ¿Cuántas letras en total?', reference: '15', referenceEs: '15', choices: [{ text: '8', correct: false }, { text: '10', correct: false }, { text: '15', correct: true }, { text: '20', correct: false }] }
+                        ]
+                    },
+                    {
+                        id: 205, day: 'Friday', dayNum: 5, title: 'Gratitude & Appreciation', date: 'Feb 14, 2025', status: 'Active',
+                        questions: [
+                            { id: 2051, type: 'context', text: 'Read about the meaning of gratitude.', textEs: 'Lee sobre el significado de la gratitud.', reference: 'Gratitude is being thankful for what you have.', referenceEs: 'La gratitud es estar agradecido por lo que tienes.' },
+                            { id: 2052, type: 'text', text: 'Name 3 things you are grateful for today.', textEs: 'Nombra 3 cosas por las que estás agradecido hoy.', reference: 'Open-ended — any thoughtful answer.', referenceEs: 'Abierta — cualquier respuesta reflexiva.' },
+                            { id: 2053, type: 'mcq', text: 'If you thanked 4 people today and 3 yesterday, how many total?', textEs: 'Si agradeciste a 4 personas hoy y 3 ayer, ¿cuántas en total?', reference: '7', referenceEs: '7', choices: [{ text: '5', correct: false }, { text: '6', correct: false }, { text: '7', correct: true }, { text: '8', correct: false }] }
+                        ]
+                    }
+                ]);
+
+
+
+                const completedFormsThisWeek = computed(() => {
+                    return thisWeekForms.value.filter(f => completedWeeks.value.includes(f.id));
+                });
+
+                const completionMessage = computed(() => {
+                    const count = completedFormsThisWeek.value.length;
+                    if (count === 0) return '';
+                    const messages = {
+                        1: "Nice!",
+                        2: "Good Job!",
+                        3: "Great Job",
+                        4: "Wow!",
+                        5: "Awesome!",
+                        6: "Amazing!"
+                    };
+                    return messages[count] || "Spectacular!";
+                });
+
+                const missedForms = computed(() => {
+                    return thisWeekForms.value.filter(f => f.missed && !completedWeeks.value.includes(f.id));
+                });
+
+                const activeForm = ref(null);
+                const currentQuestionIndex = ref(0);
+                const answers = ref({});
+                const feedbackVisible = ref({});
+                const preFormStep = ref(null);
+                const preFormBookTitle = ref('');
+                const showRaffleReward = ref(false);
+                const showShopCelebration = ref('');
+                const ticketDropped = ref(false);
+                const ticketOverBox = ref(false);
+                const hasOwnBook = ref(false);
+                const ticketStyle = ref({});
+
+                const challengeCompleted = computed(() => {
+                    if (!activeForm.value) return false;
+                    return completedWeeks.value.includes(activeForm.value.id);
+                });
+
+                // Admin Builder State
+                const students = ref([
+                    { id: 1, name: 'Aiden Smith', initials: 'AS', email: 'aiden@school.edu', tickets: 12, streak: 4, lastActive: '2 hours ago' },
+                    { id: 2, name: 'Nevin Kumar', initials: 'NK', email: 'nevin@school.edu', tickets: 14, streak: 5, lastActive: 'Just now' },
+                    { id: 3, name: 'Swarna Jay', initials: 'SJ', email: 'swarna@school.edu', tickets: 8, streak: 2, lastActive: 'Yesterday' }
+                ]);
+
+                const searchStudent = ref('');
+                const sortStudent = ref('tickets');
+
+                const filteredAndSortedStudents = computed(() => {
+                    let result = students.value;
+                    if (searchStudent.value) {
+                        const q = searchStudent.value.toLowerCase();
+                        result = result.filter(s => s.name.toLowerCase().includes(q));
+                    }
+                    return result.slice().sort((a, b) => {
+                        if (sortStudent.value === 'tickets') return b.tickets - a.tickets;
+                        if (sortStudent.value === 'streak') return b.streak - a.streak;
+                        if (sortStudent.value === 'name') return a.name.localeCompare(b.name);
+                        return 0;
+                    });
+                });
+                const raffleWinner = ref(null);
+                const isSpinning = ref(false);
+                const raffleWeek = ref('Feb 9 - Feb 15, 2025');
+                const raffleSubmissions = ref(42);
+
+                // Library Data
+                const library = ref([
+                    { id: 1, title: 'Peter Pan', color: 'bg-brand-pink', height: 80, date: 'Feb 1' },
+                    { id: 2, title: 'Wonder', color: 'bg-brand-blue', height: 70, date: 'Feb 3' },
+                    { id: 3, title: 'The Hobbit', color: 'bg-brand-indigo', height: 95, date: 'Feb 10' }
+                ]);
+
+                // Shop Data (Mateo's Style)
+                const shopItems = ref([
+                    { id: 1, type: 'theme', name: 'Light Bloom', cost: 0, class: 'theme-light', owned: true, previewBg: '#f5ede3', previewGrad: 'radial-gradient(at 0% 0%, hsla(25,95%,75%,0.3) 0px, transparent 50%), radial-gradient(at 100% 0%, hsla(10,90%,70%,0.25) 0px, transparent 50%)' },
+                    { id: 2, type: 'theme', name: 'Galaxy Night', cost: 500, class: 'theme-blue', owned: false, previewBg: '#1f3b7c', previewGrad: 'radial-gradient(at 0% 0%, hsla(250,20%,20%,0.5) 0px, transparent 50%), radial-gradient(at 100% 0%, hsla(280,30%,15%,0.5) 0px, transparent 50%)' },
+                    { id: 3, type: 'theme', name: 'Old Parchment', cost: 300, class: 'theme-sepia', owned: false, previewBg: '#f4ecd8', previewGrad: 'none' },
+                    { id: 10, type: 'theme', name: 'Sunset', cost: 100, class: 'theme-sunset', owned: false, previewBg: '#fff5f5', previewGrad: 'radial-gradient(at 0% 0%, hsla(10,90%,75%,0.25) 0px, transparent 50%), radial-gradient(at 100% 100%, hsla(280,90%,70%,0.25) 0px, transparent 50%)' },
+                    { id: 11, type: 'theme', name: 'Ocean', cost: 100, class: 'theme-ocean', owned: false, previewBg: '#f0f9ff', previewGrad: 'radial-gradient(at 0% 0%, hsla(200,90%,75%,0.25) 0px, transparent 50%), radial-gradient(at 100% 100%, hsla(180,90%,70%,0.25) 0px, transparent 50%)' },
+                    { id: 12, type: 'theme', name: 'Forest', cost: 150, class: 'theme-forest', owned: false, previewBg: '#f0fdf4', previewGrad: 'radial-gradient(at 0% 0%, hsla(140,80%,70%,0.25) 0px, transparent 50%), radial-gradient(at 100% 100%, hsla(120,70%,60%,0.25) 0px, transparent 50%)' },
+                    { id: 13, type: 'theme', name: 'Candy', cost: 150, class: 'theme-candy', owned: false, previewBg: '#fdf2f8', previewGrad: 'radial-gradient(at 0% 0%, hsla(330,90%,85%,0.35) 0px, transparent 50%), radial-gradient(at 100% 100%, hsla(280,80%,85%,0.35) 0px, transparent 50%)' },
+                    { id: 14, type: 'theme', name: 'Fire', cost: 150, class: 'theme-fire', owned: false, previewBg: '#fff7ed', previewGrad: 'radial-gradient(at 30% 40%, hsla(20,95%,65%,0.3) 0px, transparent 50%), radial-gradient(at 70% 60%, hsla(0,90%,60%,0.2) 0px, transparent 50%)' },
+                    { id: 15, type: 'theme', name: 'Ice', cost: 150, class: 'theme-ice', owned: false, previewBg: '#f0f9ff', previewGrad: 'radial-gradient(at 0% 0%, hsla(200,100%,95%,0.4) 0px, transparent 50%), radial-gradient(at 100% 100%, hsla(190,90%,90%,0.35) 0px, transparent 50%)' },
+                    { id: 4, type: 'animation', name: 'Twinkling Stars', cost: 200, owned: false },
+                    { id: 5, type: 'animation', name: 'Confetti Rain', cost: 1000, owned: false, tiedToBadge: 7 },
+                    { id: 6, type: 'animation', name: 'Magic Sparkles', cost: 400, owned: false },
+                    { id: 7, type: 'animation', name: 'Fireflies', cost: 400, owned: false },
+                    { id: 8, type: 'animation', name: 'Fluttering Butterflies', cost: 500, owned: false },
+                    { id: 9, type: 'animation', name: 'Falling Leaves', cost: 800, owned: false }
+
+                ]);
+
+                const activeBackground = ref('grid');
+                const activeShelf = ref('Classic Wood');
+                const activeAnimations = ref([]);
+
+                // Badges
+                const badges = ref([
+                    { id: 1, name: 'First Steps', icon: '🐣', desc: 'Read your first book', unlocked: true },
+                    { id: 2, name: 'Book Worm', icon: '🐛', desc: 'Read 10 books', unlocked: true },
+                    { id: 3, name: 'Form Master', icon: '📝', desc: 'Complete 5 weekly forms', unlocked: false },
+                    { id: 4, name: 'Early Bird', icon: '☀️', desc: 'Read before 8am', unlocked: true },
+                    { id: 5, name: 'Night Owl', icon: '🦉', desc: 'Read after 8pm', unlocked: false },
+                    { id: 6, name: 'Streak Star', icon: '⭐', desc: 'Get a 7 day streak', unlocked: false },
+                    { id: 7, name: 'Raffle Champ', icon: '🎫', desc: 'Enter 3 raffles', unlocked: true },
+                    { id: 8, name: 'Super Sage', icon: '🧙‍♂️', desc: 'Reach level 20', unlocked: false }
+                ]);
+
+                // Methods
+                const draggedItemIndex = ref(null);
+
+                const dragStart = (e, index) => {
+                    draggedItemIndex.value = index;
+                    e.dataTransfer.effectAllowed = 'move';
+                };
+
+                const onDrop = (e, index) => {
+                    if (draggedItemIndex.value === null) return;
+                    const draggedItem = questions.value[draggedItemIndex.value];
+                    questions.value.splice(draggedItemIndex.value, 1);
+                    questions.value.splice(index, 0, draggedItem);
+                    draggedItemIndex.value = null;
+                };
+                const addQuestion = (type) => {
+                    const q = {
+                        id: Date.now(),
+                        type: type,
+                        text: '',
+                        textEs: '',
+                        reference: '',
+                        referenceEs: '',
+                        url: ''
+                    };
+                    if (type === 'mcq') {
+                        q.choices = [
+                            { text: '', correct: true },
+                            { text: '', correct: false },
+                            { text: '', correct: false },
+                            { text: '', correct: false }
+                        ];
+                    }
+                    questions.value.push(q);
+                };
+
+                const publishForm = () => {
+                    if (!formTitle.value) return alert('Please enter a title!');
+                    if (formDays.value.length === 0) return alert('Please select at least one day!');
+
+                    formDays.value.forEach(day => {
+                        const calculatedDate = getCalculatedDate(formWeekStart.value, day);
+
+                        // Check if already published for this week+day
+                        const existingIdx = publishedForms.value.findIndex(f => f.weekStart === formWeekStart.value && f.day === day);
+
+                        const newForm = {
+                            id: existingIdx !== -1 ? publishedForms.value[existingIdx].id : Date.now() + Math.random(),
+                            weekStart: formWeekStart.value,
+                            day: day,
+                            title: formTitle.value,
+                            date: calculatedDate,
+                            status: 'Active',
+                            questions: JSON.parse(JSON.stringify(questions.value))
+                        };
+
+                        if (existingIdx !== -1) {
+                            publishedForms.value[existingIdx] = newForm;
+                        } else {
+                            publishedForms.value.unshift(newForm);
+                        }
+                    });
+
+                    alert(`Published for: ${formDays.value.join(', ')}`);
+                    // Form data deliberately persists here to allow rapid publishing to multiple days
+                };
+
+                const editPublishedForm = (form) => {
+                    formTitle.value = form.title;
+                    formDueDate.value = form.dueDate || '';
+                    formWeekStart.value = form.weekStart || formWeekStart.value;
+                    formDays.value = [form.day || 'Monday'];
+                    questions.value = JSON.parse(JSON.stringify(form.questions));
+                    editingFormId.value = form.id;
+                    builderSubTab.value = 'creation';
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                };
+
+                const toggleFormPublish = (form) => {
+                    form.status = form.status === 'Active' ? 'Unpublished' : 'Active';
+                };
+
+                const startChallenge = (form) => {
+                    activeForm.value = form;
+                    preFormStep.value = 'ask';
+                    preFormBookTitle.value = '';
+                    currentQuestionIndex.value = 0;
+                    feedbackVisible.value = {};
+                    answers.value = {};
+                    view.value = 'forms';
+                };
+
+                const preFormAddBook = () => {
+                    if (preFormBookTitle.value.trim()) {
+                        const colors = ['bg-red-400', 'bg-blue-400', 'bg-green-400', 'bg-yellow-400', 'bg-purple-400', 'bg-pink-400', 'bg-orange-400', 'bg-teal-400'];
+                        library.value.push({
+                            id: Date.now(),
+                            title: preFormBookTitle.value.trim(),
+                            color: colors[Math.floor(Math.random() * colors.length)],
+                            height: 60 + Math.floor(Math.random() * 35),
+                            date: new Date().toLocaleDateString()
+                        });
+                        stats.value.booksRead++;
+                    }
+                    hasOwnBook.value = true;
+                    preFormStep.value = null;
+                };
+
+                const preFormSkipToForm = () => {
+                    hasOwnBook.value = false;
+                    preFormStep.value = null;
+                };
+
+                const goToLogin = (role) => {
+                    loginTarget.value = role;
+                    view.value = 'login';
+                };
+
+                const simulateLogin = () => {
+                    if (!loginEmail.value) return alert("Please enter your email!");
+                    setTimeout(() => {
+                        isLoggedIn.value = true;
+                        userRole.value = loginTarget.value;
+                        if (userRole.value === 'reader') {
+                            view.value = 'profiles';
+                        } else {
+                            view.value = 'home';
+                        }
+                    }, 1000);
+                };
+
+                const logout = () => {
+                    isLoggedIn.value = false;
+                    userRole.value = 'reader';
+                    view.value = 'landing';
+                    loginEmail.value = '';
+                };
+
+                const saveBook = () => {
+                    if (!logBookTitle.value) return alert("Please enter a book title!");
+                    library.value.push({
+                        id: Date.now(),
+                        title: logBookTitle.value,
+                        date: new Date().toLocaleDateString(),
+                        color: logBookColor.value,
+                        height: 60 + Math.random() * 30
+                    });
+                    stats.value.booksRead++;
+                    stats.value.xp += 50;
+                    stats.value.tickets++;
+                    logBookTitle.value = '';
+                    showLogBook.value = false;
+                    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                };
+
+                const triggerConfetti = () => {
+                    confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#E0604D', '#F59E0B', '#38BDF8'] });
+                };
+
+                const buyItem = (item) => {
+                    if (stats.value.xp >= item.cost) {
+                        stats.value.xp -= item.cost;
+                        item.owned = true;
+                        // Carnival-style celebration
+                        confetti({ particleCount: 200, spread: 120, origin: { y: 0.5 }, colors: ['#E0604D', '#F59E0B', '#38BDF8', '#A78BFA', '#34D399'] });
+                        showShopCelebration.value = item.name;
+                        setTimeout(() => { showShopCelebration.value = ''; }, 2500);
+                        applyItem(item);
+                    } else {
+                        alert("Not enough XP!");
+                    }
+                };
+
+                const applyItem = (item) => {
+                    if (item.type === 'theme') {
+                        settings.theme = item.class.replace('theme-', '');
+                    } else if (item.type === 'animation') {
+                        if (activeAnimations.value.includes(item.name)) {
+                            activeAnimations.value = activeAnimations.value.filter(a => a !== item.name);
+                        } else {
+                            activeAnimations.value.push(item.name);
+                            if (item.name === 'Confetti Rain') startRain();
+                            if (item.name === 'Twinkling Stars') stars();
+                            if (item.name === 'Magic Sparkles') magic();
+                            if (item.name === 'Fireflies') fireflies();
+                            //if (item.name === 'Fluttering Butterflies') butterfly();
+                            //if (item.name === 'Falling Leaves') leaves();
+
+
+                        }
+                    }
+                };
+
+
+                const magic = () => {
+                    // Create the container for sparkles
+                    const decorationStars = document.createElement('div');
+                    decorationStars.className = 'decoration-stars';
+                    document.body.appendChild(decorationStars);
+
+                    // Inject CSS styles for sparkles
+                    const style = document.createElement('style');
+                    style.textContent = `
+                        .decoration-stars {
+                            pointer-events: none;
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                            width: 100%;
+                            height: 100%;
+                            z-index: 1;
+                        }
+
+                        .sparkle {
+                            position: absolute;
+                            width: 6px;
+                            height: 6px;
+                            background: gold;
+                            border-radius: 50%;
+                            pointer-events: none;
+                            animation: sparkle-animation 1s ease-out forwards;
+                            box-shadow: 0 0 10px gold, 0 0 20px gold;
+                        }
+
+                        @keyframes sparkle-animation {
+                            0% {
+                                opacity: 1;
+                                transform: scale(1);
+                            }
+                            100% {
+                                opacity: 0;
+                                transform: scale(2);
+                            }
+                        }
+                    `;
+                    document.head.appendChild(style);
+
+                    // Add an event listener to track mouse movement
+                    document.addEventListener('mousemove', (e) => {
+                        // Create a sparkle element
+                        const sparkle = document.createElement('div');
+                        sparkle.className = 'sparkle';
+
+                        // Set the sparkle's position to the cursor's position
+                        sparkle.style.left = `${e.pageX}px`;
+                        sparkle.style.top = `${e.pageY}px`;
+
+                        // Append the sparkle to the decoration container
+                        decorationStars.appendChild(sparkle);
+
+                        // Remove the sparkle after the animation ends
+                        setTimeout(() => {
+                            sparkle.remove();
+                        }, 1000); // Adjust the duration to match the animation
+                    });
+                };
+
+
+
+                const fireflies = () => {
+                    // Create the container for stars
+                    const decorationStars = document.createElement('div');
+                    decorationStars.className = 'decoration-stars';
+                    document.body.appendChild(decorationStars);
+
+                    // Inject CSS styles for stars
+                    const style = document.createElement('style');
+                    style.textContent = `
+                        .decoration-stars {
+                            pointer-events: none;
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                            width: 100%;
+                            height: 100vh;
+                            z-index: 1;
+                        }
+
+                        .star {
+                            position: absolute;
+                            width: 4px;
+                            height: 4px;
+                            background: gold;
+                            border-radius: 50%;
+                            animation: twinkle 3s infinite, drift 5s infinite ease-in-out;
+                        }
+
+                        @keyframes twinkle {
+                            0%, 100% {
+                                opacity: 0.3;
+                                transform: scale(1);
+                            }
+                            50% {
+                                opacity: 1;
+                                transform: scale(1.5);
+                            }
+                        }
+
+                        @keyframes drift {
+                            0% {
+                                transform: translate(0, 0);
+                            }
+                            25% {
+                                transform: translate(-10px, 5px);
+                            }
+                            50% {
+                                transform: translate(10px, -10px);
+                            }
+                            75% {
+                                transform: translate(-5px, -5px);
+                            }
+                            100% {
+                                transform: translate(0, 0);
+                            }
+                        }
+                    `;
+                    document.head.appendChild(style);
+
+                    // Generate random stars
+                    const numStars = 100; // Number of stars
+                    for (let i = 0; i < numStars; i++) {
+                        const star = document.createElement('div');
+                        star.className = 'star';
+                        star.style.top = `${Math.random() * 100}%`;
+                        star.style.left = `${Math.random() * 100}%`;
+
+                        const randomDelay = Math.random() * 3; // Random delay between 0s and 3s
+                        star.style.animationDelay = `${randomDelay}s, ${Math.random() * 5}s`;
+                        decorationStars.appendChild(star);
+                    }
+                };
+
+
+
+                const stars = () => {
+                    // Create the container for stars
+                    const decorationStars = document.createElement('div');
+                    decorationStars.className = 'decoration-stars';
+                    document.body.appendChild(decorationStars);
+
+                    // Inject CSS styles for stars
+                    const style = document.createElement('style');
+                    style.textContent = `
+                        .decoration-stars {
+                            pointer-events: none;
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                            width: 100%;
+                            height: 100vh;
+                            z-index: 1;
+                        }
+
+                        .star {
+                            position: absolute;
+                            width: 4px;
+                            height: 4px;
+                            background: silver;
+                            border-radius: 50%;
+                            animation: twinkle 3s infinite;
+                        }
+
+                        @keyframes twinkle {
+                            0%, 100% {
+                                opacity: 0.3;
+                                transform: scale(1);
+                            }
+                            50% {
+                                opacity: 1;
+                                transform: scale(1.5);
+                            }
+                        }
+                    `;
+                    document.head.appendChild(style);
+
+                    // Generate random stars
+                    const numStars = 75; // Number of stars
+                    for (let i = 0; i < numStars; i++) {
+                        const star = document.createElement('div');
+                        star.className = 'star';
+                        star.style.top = `${Math.random() * 100}%`;
+                        star.style.left = `${Math.random() * 100}%`;
+
+                        const randomDelay = Math.random() * 3; // Random delay between 0s and 3s
+                        star.style.animationDelay = `${randomDelay}s`;
+                        const randomSize = 2 + Math.random() * 4;
+                        star.style.width = `${randomSize}px`;
+                        star.style.height = `${randomSize}px`;
+                        decorationStars.appendChild(star);
+                    }
+                };
+
+
+
+                const startRain = () => {
+                    const end = Date.now() + (10 * 1000);
+                    const frame = () => {
+                        confetti({ particleCount: 2, angle: 60, spread: 55, origin: { x: 0 } });
+                        confetti({ particleCount: 2, angle: 120, spread: 55, origin: { x: 1 } });
+                        if (Date.now() < end && activeAnimations.value.includes('Confetti Rain')) {
+                            requestAnimationFrame(frame);
+                        }
+                    };
+                    frame();
+                };
+
+                const getBadgeClass = (type) => {
+                    switch (type) {
+                        case 'mcq': return 'bg-brand-yellow/20 text-brand-dark border-2 border-brand-yellow/50';
+                        case 'text': return 'bg-brand-blue/20 text-brand-blue border-2 border-brand-blue/50';
+                        case 'video': return 'bg-brand-pink/20 text-brand-pink border-2 border-brand-pink/50';
+                        default: return 'bg-gray-100 text-gray-500 border-2 border-gray-200';
+                    }
+                };
+
+                const checkAnswer = () => {
+                    const q = activeForm.value.questions[currentQuestionIndex.value];
+                    feedbackVisible.value[q.id] = true;
+                    confetti({ particleCount: 50, spread: 40, origin: { y: 0.7 }, colors: ['#E0604D', '#F59E0B', '#38BDF8'] });
+                };
+
+                const nextStep = () => {
+                    if (currentQuestionIndex.value < activeForm.value.questions.length - 1) {
+                        currentQuestionIndex.value++;
+                        // Auto-skip video questions if user has their own book
+                        if (hasOwnBook.value && activeForm.value.questions[currentQuestionIndex.value].type === 'video') {
+                            nextStep(); // recursively skip
+                        }
+                    } else {
+                        submitChallenge();
+                    }
+                };
+
+                const submitChallenge = () => {
+                    const duration = 3 * 1000;
+                    const animationEnd = Date.now() + duration;
+                    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+                    const randomInRange = (min, max) => Math.random() * (max - min) + min;
+                    const interval = setInterval(function () {
+                        const timeLeft = animationEnd - Date.now();
+                        if (timeLeft <= 0) return clearInterval(interval);
+                        const particleCount = 50 * (timeLeft / duration);
+                        confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
+                        confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+                    }, 250);
+
+                    if (activeForm.value) {
+                        completedWeeks.value.push(activeForm.value.id);
+                    }
+                    stats.value.xp += 100;
+                    stats.value.tickets += 1;
+                    showRaffleReward.value = true;
+                    ticketDropped.value = false;
+                    ticketOverBox.value = false;
+                    ticketStyle.value = {};
+                    setTimeout(() => {
+                        activeForm.value = null;
+                        currentQuestionIndex.value = 0;
+                        feedbackVisible.value = {};
+                        answers.value = {};
+                    }, 500);
+                };
+
+                const spinRaffle = () => {
+                    isSpinning.value = true;
+                    raffleWinner.value = null;
+                    setTimeout(() => {
+                        isSpinning.value = false;
+                        raffleWinner.value = students.value[Math.floor(Math.random() * students.value.length)];
+                        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+                    }, 2000);
+                };
+
+                // Raffle ticket drag-and-drop handlers
+                const onTicketDragStart = (e) => {
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('text/plain', 'ticket');
+                };
+
+                const onTicketDrop = () => {
+                    ticketOverBox.value = false;
+                    ticketDropped.value = true;
+                    confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 }, colors: ['#F59E0B', '#EAB308', '#FACC15'] });
+                };
+
+                // Touch handlers for mobile drag
+                let touchStartY = 0;
+                const onTicketTouchStart = (e) => {
+                    touchStartY = e.touches[0].clientY;
+                };
+
+                const onTicketTouchMove = (e) => {
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    const deltaY = touch.clientY - touchStartY;
+                    ticketStyle.value = { transform: `translate(-50%, ${deltaY}px)` };
+                    // Check if over the drop zone
+                    const box = document.getElementById('raffle-box');
+                    if (box) {
+                        const rect = box.getBoundingClientRect();
+                        ticketOverBox.value = touch.clientX >= rect.left && touch.clientX <= rect.right && touch.clientY >= rect.top && touch.clientY <= rect.bottom;
+                    }
+                };
+
+                const onTicketTouchEnd = () => {
+                    if (ticketOverBox.value) {
+                        onTicketDrop();
+                    } else {
+                        ticketStyle.value = {};
+                    }
+                };
+
+                const formatDate = (dateStr) => {
+                    if (!dateStr) return '';
+                    const d = new Date(dateStr);
+                    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+                };
+
+                const selectedFormDetails = ref(null);
+
+                const viewFormDetails = (form) => {
+                    selectedFormDetails.value = form;
+                };
+
+                return {
+                    view, formsMode, decorTab, locale, userRole, adminTab, showLogBook,
+                    logBookTitle, logBookColor, saveBook,
+                    stats, publishedForms, activeForm, currentQuestionIndex,
+                    answers, feedbackVisible, library, shopItems, activeBackground,
+                    activeShelf, activeAnimations, badges, students, raffleWinner,
+                    searchStudent, sortStudent, filteredAndSortedStudents,
+                    isSpinning, formTitle, formDueDate, questions, completedWeeks, defaultQuestions,
+                    challengeCompleted, addQuestion, publishForm, editPublishedForm, toggleFormPublish, editingFormId,
+                    settings, announcements, newAnnouncement, addAnnouncement, deleteAnnouncement, isAnnouncementActive, isLoggedIn, loginEmail,
+                    completedFormsThisWeek, completionMessage,
+                    startChallenge, buyItem, applyItem, triggerConfetti, checkAnswer,
+                    nextStep, submitChallenge, spinRaffle, getBadgeClass,
+                    goToLogin, simulateLogin, logout, saveBook, t, toggleLanguage,
+                    preFormStep, preFormBookTitle, preFormAddBook, preFormSkipToForm,
+                    showRaffleReward, ticketDropped, ticketOverBox, ticketStyle, hasOwnBook, showShopCelebration,
+                    onTicketDragStart, onTicketDrop, onTicketTouchStart, onTicketTouchMove, onTicketTouchEnd,
+                    kidProfiles, activeProfileIdx,
+                    raffleWeek, raffleSubmissions,
+                    thisWeekForms, missedForms,
+                    builderSubTab, announcementSubTab, formWeekStart, formDays, getCalculatedDate, currentCalculatedDate,
+                    dragStart, onDrop, draggedItemIndex,
+                    historyWeekStart, filteredPublishedForms,
+                    announcementFilterWeek, filteredAnnouncements,
+                    formatDate,
+                    selectedFormDetails, viewFormDetails
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+
+</html>

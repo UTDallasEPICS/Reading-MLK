@@ -1,90 +1,127 @@
-import { Param } from '@prisma/client/runtime/client'
 import { prisma } from '../server/utils/prisma'
-import { faker } from '@faker-js/faker'
 
 async function main() {
-  console.log('Start seeding...')
 
-  // 1. Create a Parent with a Password (Local Auth) and one child
+  const seededEmails = [
+    'parent1@example.com',
+    'parent2@gmail.com',
+    'rae@readinghuddle.com',
+    'admin2@example.com',
+  ]
+
+  // Make seed idempotent by removing existing users with seed emails first.
+  // Related rows (accounts, students, admin) are cleaned up by cascade rules.
+  await prisma.user.deleteMany({
+    where: {
+      email: {
+        in: seededEmails,
+      },
+    },
+  })
+
+  // 1. Create a parent with one child
   const user1 = await prisma.user.create({
     data: {
+      id: 'seed_user_1',
       name: 'Oryx',
       email: 'parent1@example.com',
       emailVerified: true,
+      role: 'reader',
       accounts: {
         create: {
-          accountId: 'oryx_local_id',
-          providerId: 'credential', // Common for email/password
-          password: 'hashed_password_here', // In a real app, hash this!
-          students: {
-            create: { name: 'Crota', exp: 5000, settings: { dyslexiaFont: true, fontSize: 1, language: 'en'}} },
-          },
+          id: 'seed_account_1',
+          accountId: 'parent1@example.com',
+          providerId: 'magic-link',
         },
+      },
+      students: {
+        create: {
+          name: 'Crota',
+          exp: 5000,
+          settings: {
+            dyslexiaFont: true,
+            fontSize: 1,
+            language: 'en',
+          },
+        }],
       },
     },
   })
 
-  // 2. Create a Parent with an OAuth Account (e.g., Google) and multiple children
+  // 2. Create a parent with multiple children
   const user2 = await prisma.user.create({
     data: {
+      id: 'seed_user_2',
       name: 'Richard Watterson',
       email: 'parent2@gmail.com',
       emailVerified: true,
+      role: 'reader',
       accounts: {
         create: {
-          accountId: 'rich_google_id',
-          providerId: 'google',
-          accessToken: 'mock_access_token',
-          students: {
-            create: [
-              { name: 'Gumball' },
-              { name: 'Darwin' },
-              { name: 'Anais' },
-            ],
-          },
+          id: 'seed_account_2',
+          accountId: 'parent2@gmail.com',
+          providerId: 'magic-link',
         },
+      },
+      students: {
+        create: [
+          { name: 'Gumball' },
+          { name: 'Darwin' },
+          { name: 'Anais' },
+        ],
       },
     },
   })
 
-  //create a test admin user
+  // 3. Create a test admin user
   const admin1 = await prisma.user.create({
     data: {
-      name: 'Gary Admin',
-      email: 'admin1@example.com',
+      id: 'seed_user_3',
+      name: 'Rae',
+      email: 'rae@readinghuddle.com',
       emailVerified: true,
+      role: 'admin',
       accounts: {
         create: {
-          accountId: 'gary_admin_id',
-          providerId: 'credential',
-          password: 'hashed_password_here',
-          admin: { create: {} },
+          id: 'seed_account_3',
+          accountId: 'rae@readinghuddle.com',
+          providerId: 'magic-link',
         },
+      },
+      admin: {
+        create: {},
       },
     },
   })
 
-  //create a second test admin user
+  // 4. Create a second test admin user
   const admin2 = await prisma.user.create({
     data: {
+      id: 'seed_user_4',
       name: 'Admin Two',
       email: 'admin2@example.com',
       emailVerified: true,
+      role: 'admin',
       accounts: {
         create: {
-          accountId: 'admin2_local_id',
-          providerId: 'credential',
-          password: 'hashed_password_here',
-          admin: { create: { settings: { dyslexiaFont: true, fontSize: 1, language: 'en' } } } },
+          id: 'seed_account_4',
+          accountId: 'admin2@example.com',
+          providerId: 'magic-link',
         },
+      },
+      admin: {
+        create: {
+          settings: {
+            dyslexiaFont: true,
+            fontSize: 1,
+            language: 'en',
+          },
+        }],
       },
     },
   })
-
-  console.log({ user1, user2, admin1, admin2 })
   console.log('Seeding finished.')
 }
-
 
 main()
   .then(async () => {
