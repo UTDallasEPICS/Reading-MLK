@@ -1,4 +1,5 @@
-import type { Student, Form, FormGroup, FormSubmission } from '~~/prisma/generated/client'
+import type { Student } from '~~/prisma/generated/client'
+
 export type StudentSettings = {
   dyslexiaFont: boolean
   language: string
@@ -6,12 +7,11 @@ export type StudentSettings = {
 }
 
 export const useCurrentStudent = () => {
-  // useState creates global state shared across all components and pages without needing constant API fetches
   const student = useState<Student | null>('currentStudent', () => null)
 
-  // Computes guaranteed fallback settings from the active student
   const settings = computed<StudentSettings>(() => {
-    const raw = student.value?.settings as Partial<StudentSettings> || {}
+    const raw = (student.value?.settings as Partial<StudentSettings>) || {}
+
     return {
       dyslexiaFont: Boolean(raw.dyslexiaFont),
       language: raw.language || 'en',
@@ -19,16 +19,52 @@ export const useCurrentStudent = () => {
     }
   })
   
-  // Fetch a student directly from the DB by ID
-  const loadStudent = async (id: number) => {
-    try {
-      student.value = await $fetch<Student>(`/api/student/${id}`)
-    } catch (e) {
-      console.error("Failed to load student", e)
+  const setStudent = (newStudent: Student | null) => {
+    student.value = newStudent
+
+    if (process.client) {
+      if (newStudent?.id) {
+        localStorage.setItem('currentStudentId', String(newStudent.id))
+      } else {
+        localStorage.removeItem('currentStudentId')
+      }
     }
   }
 
-  // Save the new settings to the DB and instantly update the sitewide global state
+  const loadStudent = async (id: number) => {
+    try {
+      student.value = await $fetch<Student>(`/api/student/${id}`)
+
+      if (process.client) {
+        localStorage.setItem('currentStudentId', String(id))
+      }
+    } catch (e) {
+      console.error('Failed to load student', e)
+    }
+  }
+
+  const restoreStudent = async () => {
+    if (!process.client) return
+
+    const savedId = localStorage.getItem('currentStudentId')
+    if (!savedId) return
+
+    const parsedId = Number(savedId)
+    if (Number.isNaN(parsedId)) return
+
+    if (student.value?.id === parsedId) return
+
+    await loadStudent(parsedId)
+  }
+
+  const clearStudent = () => {
+    student.value = null
+
+    if (process.client) {
+      localStorage.removeItem('currentStudentId')
+    }
+  }
+
   const saveSettings = async (newSettings: Partial<StudentSettings>) => {
     if (!student.value?.id) return
 
@@ -71,8 +107,11 @@ export const useCurrentStudent = () => {
   return {
     student,
     settings,
-    loadStudent,
     saveSettings,
-    updateExp
+    updateExp,
+    setStudent,
+    loadStudent,
+    restoreStudent,
+    clearStudent
   }
 }

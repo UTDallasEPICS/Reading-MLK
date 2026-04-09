@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { onMounted } from 'vue'
+import { authClient } from '~/utils/auth-client'
 import StatsBar from '~/components/StatsBar.vue'
 import type { Student, Announcement} from '~~/prisma/generated/client'
 
@@ -13,17 +15,45 @@ definePageMeta({ ssr: false })
 */
 
 //TODO 4 retrieve active student
-const { student, settings: globalSettings, loadStudent } = useCurrentStudent()
+const { student, settings: settings, restoreStudent } = useCurrentStudent()
 const { totalFormsInGroup: totalForms, loadActiveFormGroup} = useCurrentFormGroup()
 const { tickets: tickets, loadProgress} = useCurrentStudentProgress()
-await loadStudent(3)
 await loadActiveFormGroup()
 await loadProgress()
+const checkingStudent = ref(true)
+
+onMounted(async () => {
+  if (!student.value) {
+    await restoreStudent()
+  }
+
+  if (!student.value) {
+    await navigateTo('/reader/profile')
+    return
+  }
+
+  checkingStudent.value = false
+})
+
+//Logout
+const { clearStudent } = useCurrentStudent()
+
+async function logout() {
+  try {
+    clearStudent()
+
+    await authClient.signOut()
+
+    await navigateTo('/')
+  } catch (error) {
+    console.error('Logout failed:', error)
+  }
+}
 
 // ── Theme class ──
 const themeClass = computed(() => {
   const t = 'light'
-  const d = globalSettings.value.dyslexiaFont ? 'dyslexia-font' : ''
+  const d = settings.value.dyslexiaFont ? 'dyslexia-font' : ''
   return `reader-app ${t} ${d}`.trim()
 })
 
@@ -57,7 +87,7 @@ const completionMessage = computed(() => {
 </script>
 
 <template>
-  <div :class="themeClass" :style="`font-size: ${globalSettings.fontSize * 16}px`" class="pb-32 px-4 pt-4 min-h-screen">
+  <div :class="themeClass" :style="`font-size: ${settings.fontSize * 16}px`" class="pb-32 px-4 pt-4 min-h-screen">
 
     <!-- ── TOP BAR ── -->
     <header class="max-w-4xl mx-auto flex justify-between items-center mb-8 px-2 relative z-[200]">

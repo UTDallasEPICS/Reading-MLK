@@ -1,209 +1,247 @@
 <script setup lang="ts">
+definePageMeta({ ssr: false })
+
 import { z } from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
-import { authClient } from '../utils/auth-client'
+import { authClient } from '~/utils/auth-client'
 
 const toast = useToast()
-const isEmailSent = ref(false)
-const view = ref<'landing' | 'login'>('landing')
-const loginRole = ref<'admin' | 'reader'>('admin')
+const route = useRoute()
+
+const loginRole = computed(() => {
+  return route.query.role === 'admin' ? 'admin' : 'reader'
+})
+
+const isNewUser = ref(false)
+const checkingEmail = ref(false)
 
 const schema = computed(() => {
-  if (!isEmailSent.value) {
+  if (isNewUser.value && loginRole.value === 'reader') {
     return z.object({
       email: z.string().email('Invalid email'),
-    })
-  } else {
-    return z.object({
-      email: z.string().email('Invalid email'),
-      otp: z.array(z.string()).length(6, 'Must be 6 digits'),
+      name: z.string().min(1, 'Name is required'),
     })
   }
+
+  return z.object({
+    email: z.string().email('Invalid email'),
+  })
 })
 
 const state = reactive({
   email: '',
-  otp: [] as string[],
+  name: '',
 })
 
-function goToLogin(role: 'admin' | 'reader') {
-  loginRole.value = role
-  view.value = 'login'
+async function sendMagicLink(callbackURL: string) {
+  const { error } = await authClient.signIn.magicLink({
+    email: state.email,
+    callbackURL,
+  })
+
+  if (error) {
+    toast.add({
+      title: 'Error',
+      description: error.message,
+      color: 'error',
+    })
+    return false
+  }
+
+  return true
 }
 
-async function handleSubmit(event: FormSubmitEvent<any>) {
-  if (!isEmailSent.value) {
-    const { data, error } = await authClient.emailOtp.sendVerificationOtp({
-      email: state.email,
-      type: 'sign-in',
+async function handleSubmit(_event: FormSubmitEvent<any>) {
+  const callbackURL = loginRole.value === 'admin' ? '/admin' : '/reader/profile'
+
+  // New reader flow: create account first, then send magic link
+  if (isNewUser.value && loginRole.value === 'reader') {
+    const signupResult = await $fetch('/api/users/signup', {
+      method: 'POST',
+      body: {
+        email: state.email,
+        name: state.name,
+      },
+    }).catch((error) => {
+      toast.add({
+        title: 'Error',
+        description: error?.data?.statusMessage || 'Failed to create account',
+        color: 'error',
+      })
+      return null
     })
-    if (error) {
-      toast.add({ title: 'Error', description: error.message, color: 'error' })
-    } else {
-      isEmailSent.value = true
-      toast.add({ title: 'Success', description: 'OTP sent to your email', color: 'success' })
+
+    if (!signupResult) return
+
+    const success = await sendMagicLink(callbackURL)
+
+    if (success) {
+      toast.add({
+        title: 'Check your email',
+        description: 'Your account was created. We sent you a magic sign-in link.',
+        color: 'success',
+      })
     }
-  } else {
-    const { data, error } = await authClient.signIn.emailOtp({
-      email: state.email,
-      otp: state.otp.join(''),
-    })
-    if (error) {
-      toast.add({ title: 'Error', description: error.message, color: 'error' })
-    } else {
-      await navigateTo('/', { external: true })
-    }
+
+    return
   }
+
+  // First step: check whether the email exists
+  checkingEmail.value = true
+
+  const result = await $fetch<{
+    exists: boolean
+    user: {
+      id: string
+      email: string
+      name: string
+      role: string
+    } | null
+  }>('/api/users/check-email', {
+    method: 'POST',
+    body: {
+      email: state.email,
+    },
+  }).catch((error) => {
+    toast.add({
+      title: 'Error',
+      description: error?.data?.statusMessage || 'Failed to check email',
+      color: 'error',
+    })
+    return null
+  })
+
+  checkingEmail.value = false
+
+  if (!result) return
+
+  // Existing user
+  if (result.exists) {
+    if (loginRole.value === 'admin' && result.user?.role !== 'admin') {
+      toast.add({
+        title: 'Error',
+        description: 'Admin account not found.',
+        color: 'error',
+      })
+      return
+    }
+
+    const success = await sendMagicLink(callbackURL)
+
+    if (success) {
+      toast.add({
+        title: 'Check your email',
+        description: 'We sent you a magic sign-in link.',
+        color: 'success',
+      })
+    }
+
+    return
+  }
+
+  // New admins are not allowed through public signup
+  if (loginRole.value === 'admin') {
+    toast.add({
+      title: 'Error',
+      description: 'Admin account not found.',
+      color: 'error',
+    })
+    return
+  }
+
+  // New reader: reveal name field
+  isNewUser.value = true
+
+  toast.add({
+    title: 'New user',
+    description: 'Please enter your name to create an account.',
+    color: 'primary',
+  })
 }
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#f8f7f4] font-sans">
+  <div class="min-h-screen bg-[#f8efe5] relative overflow-hidden font-sans">
+    <div class="absolute inset-0 bg-gradient-to-br from-[#faefe5] via-[#f7eee6] to-[#f5eadf]" />
+    <div class="absolute inset-0 pointer-events-none opacity-70">
+      <div class="absolute top-16 left-16 h-36 w-36 rounded-full bg-orange-100 blur-3xl" />
+      <div class="absolute bottom-20 right-20 h-44 w-44 rounded-full bg-yellow-100 blur-3xl" />
+      <div class="absolute top-1/3 right-1/4 h-28 w-28 rounded-full bg-pink-100 blur-2xl" />
+    </div>
 
-    <!-- Shared top gradient bar -->
-    <div class="h-1.5 w-full bg-gradient-to-r from-indigo-600 via-amber-400 to-amber-500" />
+    <main class="relative z-10 min-h-screen flex items-center justify-center px-4 py-6">
+      <div class="w-full max-w-lg rounded-[2.25rem] bg-white/80 backdrop-blur border border-white shadow-[0_20px_60px_rgba(0,0,0,0.10)] overflow-hidden">
+        <div class="h-2 w-full bg-gradient-to-r from-[#6b6ee8] via-[#f0a446] to-[#ffb400]" />
 
-    <main class="max-w-4xl mx-auto min-h-[calc(100vh-6px)] flex flex-col">
-
-      <!-- ── LANDING VIEW ── -->
-      <Transition name="fade" mode="out-in">
-        <div
-          v-if="view === 'landing'"
-          class="flex flex-col items-center justify-center flex-1 py-20 text-center gap-12"
-        >
-          <!-- Bouncing rocket -->
-          <div class="animate-bounce text-8xl select-none">🚀</div>
-
-          <!-- Headline -->
-          <div class="space-y-3">
-            <h1
-              class="text-6xl sm:text-7xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-amber-400 to-amber-500 drop-shadow-sm leading-none pb-1"
-            >
-              Welcome!
-            </h1>
-            <p class="text-xl sm:text-2xl font-medium text-gray-400 max-w-xl mx-auto">
-              Your school reading adventure starts here.
-            </p>
+        <div class="px-8 sm:px-12 py-8 text-center">
+          <div class="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-[#eef0fb] text-5xl shadow-inner">
+            🪄
           </div>
 
-          <!-- Role cards -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-2xl px-4">
-            <!-- Admin card -->
-            <button
-              @click="navigateTo('/admin')"
-              class="group bg-white rounded-3xl border-2 border-gray-100 p-10 text-center shadow-sm hover:border-indigo-400 hover:shadow-lg transition-all duration-200 cursor-pointer"
+          <h1 class="text-4xl sm:text-5xl font-black text-[#0f1730] mb-3 tracking-tight">
+            Magic Login
+          </h1>
+
+          <p class="text-lg font-bold text-[#70798c] mb-8">
+            Signing in as:
+            {{ loginRole === 'admin' ? 'Faculty & Admin' : 'Reading Buddy' }}
+          </p>
+
+          <UForm :schema="schema" :state="state" @submit="handleSubmit" class="space-y-5 text-left">
+            <UFormField
+              name="email"
+              label="Email Address"
+              :ui="{ label: 'text-[#5c6475] font-bold text-sm tracking-wide' }"
             >
-              <div
-                class="w-20 h-20 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center text-5xl mb-5 mx-auto group-hover:rotate-12 transition-transform duration-300 select-none"
-              >
-                🏫
-              </div>
-              <h3 class="text-2xl font-bold text-gray-900 mb-2">Faculty & Admin</h3>
-              <p class="text-gray-400 font-medium">Manage students, curriculum & raffles.</p>
-            </button>
-
-            <!-- Student card -->
-            <button
-              @click="navigateTo('/reader')"
-
-              class="group bg-white rounded-3xl border-2 border-gray-100 p-10 text-center shadow-sm hover:border-amber-400 hover:shadow-lg transition-all duration-200 cursor-pointer"
-            >
-              <div
-                class="w-20 h-20 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center text-5xl mb-5 mx-auto group-hover:rotate-12 transition-transform duration-300 select-none"
-              >
-                ✨
-              </div>
-              <h3 class="text-2xl font-bold text-gray-900 mb-2">Reading Buddy</h3>
-              <p class="text-gray-400 font-medium">Complete challenges, log books & win prizes!</p>
-            </button>
-          </div>
-        </div>
-
-        <!-- ── LOGIN VIEW ── -->
-        <div
-          v-else-if="view === 'login'"
-          class="flex items-center justify-center flex-1 py-20 px-4"
-        >
-          <div class="relative bg-white/80 backdrop-blur rounded-3xl border border-gray-100 shadow-xl p-12 w-full max-w-md text-center space-y-8 overflow-hidden">
-
-            <!-- Top accent bar -->
-            <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-indigo-600 via-amber-400 to-amber-500" />
-
-            <!-- Icon -->
-            <div class="w-24 h-24 bg-indigo-50 rounded-full flex items-center justify-center text-6xl mx-auto shadow-inner select-none">
-              🪄
-            </div>
-
-            <!-- Title -->
-            <div>
-              <h2 class="text-4xl font-black text-gray-900 mb-1">Magic Login</h2>
-              <p class="text-gray-400 font-medium">
-                {{ isEmailSent ? 'Enter the 6-digit code we sent you.' : 'Enter your email to receive a one-time code.' }}
-              </p>
-            </div>
-
-            <!-- Form -->
-            <UForm :schema="schema" :state="state" @submit="handleSubmit" class="space-y-5 text-left">
-
-              <!-- Email field -->
-              <UFormField v-if="!isEmailSent" name="email" label="Email Address">
-                <UInput
-                  v-model="state.email"
-                  type="email"
-                  placeholder="name@school.edu"
-                  size="xl"
-                  class="w-full"
-                />
-              </UFormField>
-
-              <!-- OTP field -->
-              <UFormField v-if="isEmailSent" name="otp" label="Verification Code">
-                <div class="flex justify-center">
-                  <UPinInput
-                    otp
-                    v-model="state.otp"
-                    :length="6"
-                    size="xl"
-                  />
-                </div>
-              </UFormField>
-
-              <!-- Submit -->
-              <UButton
-                loading-auto
-                type="submit"
+              <UInput
+                v-model="state.email"
+                type="email"
+                placeholder="name@school.edu"
                 size="xl"
-                class="w-full justify-center font-bold rounded-2xl bg-gray-900 hover:bg-black text-white transition active:scale-95"
-              >
-                {{ isEmailSent ? 'Verify & Login 🪄' : 'Send Magic Link 🪄' }}
-              </UButton>
-            </UForm>
+                class="w-full"
+                :ui="{
+                  base: 'rounded-2xl h-14 px-4 text-lg bg-white border border-gray-200 text-gray-900 placeholder:text-gray-300 shadow-sm'
+                }"
+              />
+            </UFormField>
 
-            <!-- Back link -->
-            <button
-              @click="view = 'landing'; isEmailSent = false"
-              class="text-xs font-bold text-gray-400 hover:text-gray-700 uppercase tracking-widest transition-colors"
+            <UFormField
+              v-if="isNewUser && loginRole === 'reader'"
+              name="name"
+              label="Your Name"
+              :ui="{ label: 'text-[#5c6475] font-bold text-sm tracking-wide' }"
             >
-              ← Back to Portal
-            </button>
-          </div>
+              <UInput
+                v-model="state.name"
+                type="text"
+                placeholder="Enter your name"
+                size="xl"
+                class="w-full"
+                :ui="{
+                  base: 'rounded-2xl h-14 px-4 text-lg bg-white border border-gray-200 text-gray-900 placeholder:text-gray-300 shadow-sm'
+                }"
+              />
+            </UFormField>
+
+            <UButton
+              :loading="checkingEmail"
+              loading-auto
+              type="submit"
+              size="xl"
+              class="w-full justify-center rounded-2xl h-14 text-xl font-black bg-[#0d1735] hover:bg-[#132149] text-white shadow-xl"
+            >
+              {{ isNewUser && loginRole === 'reader' ? 'Create Account ✨' : 'Send Magic Link 🪄' }}
+            </UButton>
+          </UForm>
+
+          <button
+            @click="navigateTo('/')"
+            class="mt-6 text-sm font-black uppercase tracking-[0.25em] text-[#9aa3b4] hover:text-[#6c7486] transition-colors"
+          >
+            ← Back to Portal
+          </button>
         </div>
-      </Transition>
+      </div>
     </main>
   </div>
 </template>
-
-<style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
-}
-.fade-enter-from {
-  opacity: 0;
-  transform: translateY(8px);
-}
-.fade-leave-to {
-  opacity: 0;
-  transform: translateY(-8px);
-}
-</style>
