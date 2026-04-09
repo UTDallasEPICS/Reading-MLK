@@ -15,6 +15,22 @@ const settings = reactive({
   fontSize: globalSettings.value.fontSize
 })
 
+//Logout
+const { clearStudent } = useCurrentStudent()
+
+async function logout() {
+  try {
+    clearStudent()
+
+    await authClient.signOut()
+
+    await navigateTo('/')
+  } catch (error) {
+    console.error('Logout failed:', error)
+  }
+}
+
+
 // ── Theme class ── 
 const themeClass = computed(() => {
   const t = 'light'
@@ -52,7 +68,7 @@ watch(settings, (newSettings) => {
               <!-- Profile Switcher -->
               <div>
                 <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Which Student?</label>
-                <NuxtLink to="/reader/StudentSelect"
+                <NuxtLink to="/reader/profile"
                 class="w-full text-white font-bold py-2.5 rounded-lg transition-all hover:-translate-y-1 hover:shadow-lg active:scale-95 flex items-center justify-center gap-2"
                 style="background-color: var(--brand-indigo); box-shadow: 0 4px 14px rgba(224, 96, 77, 0.4);">
                   👥 Switch Profile

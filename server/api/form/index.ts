@@ -175,7 +175,7 @@ const requireAdminSession = async (event: H3Event) => {
 
   if (!session) {
     if (isFormApiDevBypassEnabled()) {
-      return { session: null, userId: null, account: null, admin: null, bypassed: true }
+      return { session: null, userId: null, admin: null, bypassed: true }
     }
 
     throw createError({
@@ -184,20 +184,19 @@ const requireAdminSession = async (event: H3Event) => {
     })
   }
 
-  const userId = Number(normalizeScalar(session.user.id))
+  const userId = normalizeScalar(session.user.id)
 
-  if (!Number.isInteger(userId)) {
+  if (!userId || typeof userId !== 'string') {
     throw createError({ statusCode: 400, statusMessage: 'Invalid session user id' })
   }
 
-  const account = await prisma.account.findFirst({
+  const admin = await prisma.admin.findUnique({
     where: { userId },
-    include: { admin: true },
   })
 
-  if (!account?.admin) {
+  if (!admin) {
     if (isFormApiDevBypassEnabled()) {
-      return { session, userId, account, admin: null, bypassed: true }
+      return { session, userId, admin: null, bypassed: true }
     }
 
     throw createError({
@@ -206,7 +205,7 @@ const requireAdminSession = async (event: H3Event) => {
     })
   }
 
-  return { session, userId, account, admin: account.admin, bypassed: false }
+  return { session, userId, admin, bypassed: false }
 }
 
 const mapComponent = (component: {
@@ -235,7 +234,7 @@ const mapForm = (
     startDate: Date
     endDate: Date | null
     published: boolean
-    author: number | null
+    author: string | null
     formGroup: number
     Components?: Array<{
       id: number
@@ -631,13 +630,7 @@ export default defineEventHandler(async (event) => {
 
     if (action === 'updateComponent') {
       const id = toInt(body?.id, 'id')
-      const data: {
-        form?: number
-        order?: number
-        questionType?: string
-        questionText?: string
-        questionOptions?: unknown
-      } = {}
+      const data: Prisma.FormComponentUpdateInput = {}
 
       if (hasOwnField(body, 'form')) {
         const form = toInt(body?.form, 'form')
@@ -650,7 +643,9 @@ export default defineEventHandler(async (event) => {
           throw createError({ statusCode: 404, statusMessage: 'Form not found' })
         }
 
-        data.form = form as number
+        data.Form = {
+          connect: { id: form as number },
+}
       }
 
       if (hasOwnField(body, 'order')) {
