@@ -1,32 +1,33 @@
 -- CreateTable
 CREATE TABLE "user" (
-    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "id" TEXT NOT NULL PRIMARY KEY,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "emailVerified" BOOLEAN NOT NULL DEFAULT false,
+    "role" TEXT NOT NULL DEFAULT 'reader',
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL
 );
 
 -- CreateTable
 CREATE TABLE "session" (
-    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "id" TEXT NOT NULL PRIMARY KEY,
     "expiresAt" DATETIME NOT NULL,
     "token" TEXT NOT NULL,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL,
     "ipAddress" TEXT,
     "userAgent" TEXT,
-    "userId" INTEGER NOT NULL,
+    "userId" TEXT NOT NULL,
     CONSTRAINT "session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- CreateTable
 CREATE TABLE "account" (
-    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "id" TEXT NOT NULL PRIMARY KEY,
     "accountId" TEXT NOT NULL,
     "providerId" TEXT NOT NULL,
-    "userId" INTEGER NOT NULL,
+    "userId" TEXT NOT NULL,
     "accessToken" TEXT,
     "refreshToken" TEXT,
     "idToken" TEXT,
@@ -51,10 +52,10 @@ CREATE TABLE "verification" (
 
 -- CreateTable
 CREATE TABLE "Admin" (
-    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "id" TEXT NOT NULL PRIMARY KEY,
     "settings" JSONB,
-    "account" INTEGER NOT NULL,
-    CONSTRAINT "Admin_account_fkey" FOREIGN KEY ("account") REFERENCES "account" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    "userId" TEXT NOT NULL,
+    CONSTRAINT "Admin_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- CreateTable
@@ -63,14 +64,14 @@ CREATE TABLE "Student" (
     "name" TEXT NOT NULL,
     "settings" JSONB,
     "exp" INTEGER NOT NULL DEFAULT 0,
-    "parent" INTEGER NOT NULL,
-    CONSTRAINT "Student_parent_fkey" FOREIGN KEY ("parent") REFERENCES "account" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+    "parentUserId" TEXT NOT NULL,
+    CONSTRAINT "Student_parentUserId_fkey" FOREIGN KEY ("parentUserId") REFERENCES "user" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- CreateTable
 CREATE TABLE "Announcement" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    "author" INTEGER,
+    "author" TEXT,
     "postDate" DATETIME NOT NULL,
     "expiryDate" DATETIME,
     "content" TEXT NOT NULL,
@@ -93,8 +94,9 @@ CREATE TABLE "Form" (
     "startDate" DATETIME NOT NULL,
     "endDate" DATETIME,
     "published" BOOLEAN NOT NULL DEFAULT false,
-    "author" INTEGER,
+    "author" TEXT,
     "formGroup" INTEGER NOT NULL,
+    "title" TEXT,
     CONSTRAINT "Form_author_fkey" FOREIGN KEY ("author") REFERENCES "Admin" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT "Form_formGroup_fkey" FOREIGN KEY ("formGroup") REFERENCES "FormGroup" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -160,19 +162,19 @@ CREATE TABLE "ShopAnimation" (
 CREATE UNIQUE INDEX "user_email_key" ON "user"("email");
 
 -- CreateIndex
-CREATE INDEX "session_userId_idx" ON "session"("userId");
+CREATE UNIQUE INDEX "session_token_key" ON "session"("token");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "session_token_key" ON "session"("token");
+CREATE INDEX "session_userId_idx" ON "session"("userId");
 
 -- CreateIndex
 CREATE INDEX "account_userId_idx" ON "account"("userId");
 
 -- CreateIndex
-CREATE INDEX "verification_identifier_idx" ON "verification"("identifier");
+CREATE UNIQUE INDEX "verification_identifier_key" ON "verification"("identifier");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Admin_account_key" ON "Admin"("account");
+CREATE UNIQUE INDEX "Admin_userId_key" ON "Admin"("userId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "ShopTheme_shopItem_key" ON "ShopTheme"("shopItem");
