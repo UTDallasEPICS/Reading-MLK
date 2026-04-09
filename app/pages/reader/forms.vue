@@ -79,6 +79,32 @@ const currentComponentID        = ref(0)
 const answers            = ref<Record<number,string>>({})
 const feedbackVisible    = ref<Record<number,boolean>>({})
 
+const isCurrentComponentCorrect = computed(() => {
+  const q = currentComponent.value
+  if (!q || !answers.value[q.id]) return true
+  if (q.questionType !== 'mcq') return true
+  const options = q.questionOptions as any
+  if (!options || !options.choices) return true
+  const choice = options.choices.find((c: any) => c.text === answers.value[q.id])
+  return choice ? choice.correct : false
+})
+
+const correctAnswerText = computed(() => {
+  const q = currentComponent.value
+  if (!q || q.questionType !== 'mcq') return ''
+  const options = q.questionOptions as any
+  if (!options || !options.choices) return ''
+  const correctChoice = options.choices.find((c: any) => c.correct)
+  return correctChoice ? correctChoice.text : ''
+})
+
+const feedbackReferenceText = computed(() => {
+  const q = currentComponent.value
+  if (!q) return ''
+  const options = q.questionOptions as any
+  return options?.reference || ''
+})
+
 // Raffle reward
 const showRaffleReward   = ref(false)
 const ticketDropped      = ref(false)
@@ -373,11 +399,22 @@ function getBadgeClass(type: string) {
 
                     <!-- Feedback -->
                     <div v-else class="p-6 rounded-[2rem] animate-pop-bounce border-2"
-                         style="background:rgba(45,212,191,0.1); border-color:rgba(45,212,191,0.3)">
-                      <div class="font-black mb-2 uppercase tracking-widest flex items-center gap-2" style="color:var(--brand-mint)">
-                        ✨ Great job!
+                         :style="isCurrentComponentCorrect 
+                           ? 'background:rgba(45,212,191,0.1); border-color:rgba(45,212,191,0.3)' 
+                           : 'background:rgba(245,158,11,0.1); border-color:rgba(245,158,11,0.3)'">
+                      <div class="font-black mb-2 uppercase tracking-widest flex items-center gap-2" 
+                           :style="isCurrentComponentCorrect ? 'color:var(--brand-mint)' : 'color:var(--brand-gold)'">
+                        {{ isCurrentComponentCorrect ? '✨ Great job!' : '💡 Great Try!' }}
                       </div>
-                      <p class="text-gray-700 font-medium">Keep going! You're doing awesome!</p>
+                      <div class="text-gray-700 font-medium space-y-2">
+                        <p v-if="feedbackReferenceText" class="italic">{{ feedbackReferenceText }}</p>
+                        <p v-else-if="isCurrentComponentCorrect">
+                          Keep going! You're doing awesome!
+                        </p>
+                        <p v-if="!isCurrentComponentCorrect">
+                          The correct answer was: <span class="font-bold">{{ correctAnswerText }}</span> You'll get it next time!
+                        </p>
+                      </div>
                     </div>
                   </div>
 
@@ -423,10 +460,10 @@ function getBadgeClass(type: string) {
 
     <!-- ── RAFFLE TICKET DRAG-AND-DROP OVERLAY ── -->
     <Transition name="fade">
-      <div v-if="showRaffleReward" class="fixed inset-0 z-[200]" style="width:100vw; height:100vh; left:0; top:0;">
+      <div v-if="showRaffleReward" class="fixed inset-0 z-[200] flex items-center justify-center" style="width:100vw; height:100vh; left:0; top:0;">
         <div class="absolute inset-0 backdrop-blur-md" style="background:rgba(15,23,42,0.6)" />
-        <div class="p-6 bg-white max-w-md w-[90%] absolute z-10 animate-pop text-center space-y-5 overflow-auto"
-             style="border-radius:2.5rem; box-shadow:0 20px 60px rgba(0,0,0,0.3); border-bottom:8px solid var(--brand-gold); left:50%; top:50%; transform:translate(-50%,-50%)">
+        <div class="p-6 bg-white max-w-md w-[90%] relative z-10 animate-pop text-center space-y-5 overflow-auto"
+             style="border-radius:2.5rem; box-shadow:0 20px 60px rgba(0,0,0,0.3); border-bottom:8px solid var(--brand-gold);">
 
           <!-- Drag zone -->
           <div v-if="!ticketDropped" class="space-y-6">

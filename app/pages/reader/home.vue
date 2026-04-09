@@ -82,7 +82,7 @@ const completionMessage = computed(() => {
           @click="triggerXpClick"
         >
         <span class="text-lg" :class="xpClicked ? 'animate-star-spin' : ''">🪙</span>
-          <span class="font-heading font-bold text-amber-600">{{ student?.exp }}</span>
+          <span class="font-heading font-bold text-amber-600">{{ Number(student?.exp) }}</span>
           <span class="text-gray-300">|</span>
           <span class="text-lg" :class="ticketClicked ? 'animate-ticket-wobble' : ''" @click.stop="triggerTicketClick">🎟️</span>
           <span class="font-heading font-bold" style="color:var(--brand-mint)">{{ tickets }}</span>

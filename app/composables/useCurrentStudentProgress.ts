@@ -12,9 +12,13 @@ export const useCurrentStudentProgress = () => {
   //Computed state for an array of completed form IDs within the active form group
   const completedFormIds = computed(() => {
     const activeFormIds = new Set(formGroupState.value.forms.map((f) => f.id))
-    return submissions.value
-      .filter((sub) => activeFormIds.has(sub.form))
-      .map((sub) => sub.form)
+    const completed = new Set<number>()
+    submissions.value.forEach((sub) => {
+      if (activeFormIds.has(sub.form)) {
+        completed.add(sub.form)
+      }
+    })
+    return Array.from(completed)
   })
 
   // Computed progress metrics
@@ -58,7 +62,7 @@ export const useCurrentStudentProgress = () => {
       })
 
       // Update local state without needing a new fetch
-      submissions.value.push(newSubmission)
+      submissions.value = [...submissions.value, newSubmission]
       return newSubmission
     } catch (error) {
       console.error('Failed to log form submission:', error)
