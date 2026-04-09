@@ -1,58 +1,67 @@
 <script setup lang="ts">
-import type { Student, Announcement, Form, FormGroup } from '~~/prisma/generated/client'
+import { onMounted } from 'vue'
+import { authClient } from '~/utils/auth-client'
+import StatsBar from '~/components/StatsBar.vue'
+import type { Student, Announcement} from '~~/prisma/generated/client'
 
 definePageMeta({ ssr: false })
 /* TODO:
-  1 change settings option to switch profiles into a redirect to teh profile selection page
-
-  2 calculations/parsing for selected student
-    -- streak    (decide between daily and weekly)
-    -- tickets    (raffle entries, number of forms completed during the current form group))
-    -- completed forms in form group
-    ✓✓ settings
-      --move student settings type to a shared location and import here and into settings page
-
   3 Announcements
-    ✓✓ get active announcements 
     -- default display for no announcements
     -- change display to be larger
     -- change display to show the most recent announcement with a dropdown to show all
  
-  4 get student selected from previous page
-    -- should come from session, nuxt store, or be passed as a param from previous page, could also use a tool like pinia or may also be a function of auth
   5 find and apply unlocked shop items from selected student
-
-  6 make progress bar dynamic based on form group size and completed forms.
-
-  7 change settings to it's own page, with settings button as a redirect
 */
 
 //TODO 4 retrieve active student
-const {data: student} = await useFetch<Student | null>('/api/student/1')
- 
-//define type for student settings
-type StudentSettings = {
-  dyslexiaFont?: boolean
-  language?: string
-  fontSize?: number
-}
-//cast raw student settings JSON from api call to type
-const parsedSettings = computed(() => {
-  return (student.value?.settings || {}) as StudentSettings
+const { student, restoreStudent } = useCurrentStudent()
+const checkingStudent = ref(true)
+
+onMounted(async () => {
+  if (!student.value) {
+    await restoreStudent()
+  }
+
+  if (!student.value) {
+    await navigateTo('/reader/profile')
+    return
+  }
+
+  checkingStudent.value = false
 })
 
-//load parsed student settings
-const settings = reactive({
-  dyslexiaFont: computed(() => Boolean(parsedSettings.value.dyslexiaFont) || false),
-  language:    computed(() => parsedSettings.value.language || 'en'),
-  fontSize:    computed(() => Number(parsedSettings.value.fontSize) || 1),
+//Logout
+const { clearStudent } = useCurrentStudent()
+
+async function logout() {
+  try {
+    clearStudent()
+
+    await authClient.signOut()
+
+    await navigateTo('/')
+  } catch (error) {
+    console.error('Logout failed:', error)
+  }
+}
+ 
+//TODO 2 parse settings from student
+const settings = computed(() => {
+  const raw = student.value?.settings as any || {}
+
+  return {
+    dyslexiaFont: !!raw.dyslexiaFont,
+    language: raw.language || 'en',
+    fontSize: Number(raw.fontSize) || 1,
+  }
 })
 
 //TODO 2 calculate stats from student data
 const stats = {
-  xp: computed(() => Number(student.value?.exp ?? 0)),
-  streak: 5,
-  tickets: 3,
+  xp: computed(() => student.value?.exp ?? 0),
+  streak: 0,   // we'll implement later
+  tickets: 0,  // will come from submissions later
 }
 
 const showSettings = ref(false)
@@ -60,7 +69,7 @@ const showSettings = ref(false)
 // ── Theme class ──
 const themeClass = computed(() => {
   const t = 'light'
-  const d = settings.dyslexiaFont ? 'dyslexia-font' : ''
+  const d = settings.value.dyslexiaFont ? 'dyslexia-font' : ''
   return `reader-app ${t} ${d}`.trim()
 })
 
@@ -87,8 +96,21 @@ function triggerTicketClick() {
 }
 
 //TODO 3
-// Announcement
-const { data: announcements } = await useFetch<Announcement[] | null>('/api/announcement?active=true')
+// Announcements 
+const announcements = computed(() => [
+  {
+    id: 1,
+    title: 'New Book Added!',
+    content: student.value?.name ?? 'Student',
+    icon: '📚',
+  },
+  {
+    id: 2,
+    title: 'Raffle Winners Announced!',
+    content: 'Congrats to our latest raffle winners! 🎉',
+    icon: '🎟️',
+  },
+])
 
 //TODO 2
 //  Weekly forms progress 
@@ -106,14 +128,21 @@ const completedThisWeek = computed(() =>
 )
 
 const completionMessage = computed(() => {
-  const n = completedThisWeek.value.length
-  return ['', 'Nice!', 'Good Job!', 'Great Job!', 'Wow!', 'Awesome!', 'Amazing!'][n] ?? 'Spectacular!'
+  return ['', 'Nice!', 'Good Job!', 'Great Job!', 'Wow!', 'Awesome!', 'Amazing!'][stats.tickets] ?? 'Spectacular!'
 })
 </script>
 
 <template>
-  <div :class="themeClass" :style="`font-size: ${settings.fontSize * 16}px`" class="pb-32 px-4 pt-4 min-h-screen">
+  <div v-if="checkingStudent" class="min-h-screen flex items-center justify-center bg-[#f8f7f4]">
+    <p class="text-gray-500 font-semibold text-lg">Loading reader...</p>
+  </div>
 
+  <div
+    v-else
+    :class="themeClass"
+    :style="`font-size: ${settings.fontSize * 16}px`"
+    class="pb-32 px-4 pt-4 min-h-screen"
+  >
     <!-- ── TOP BAR ── -->
     <header class="max-w-4xl mx-auto flex justify-between items-center mb-8 px-2 relative z-[200]">
       <div class="flex items-center gap-3">
@@ -137,7 +166,7 @@ const completionMessage = computed(() => {
           @click="triggerXpClick"
         >
         <span class="text-lg" :class="xpClicked ? 'animate-star-spin' : ''">🪙</span>
-          <span class="font-heading font-bold text-amber-600">{{ stats.xp }}</span>
+          <span class="font-heading font-bold text-amber-600">{{ student?.exp }}</span>
           <span class="text-gray-300">|</span>
           <span class="text-lg" :class="ticketClicked ? 'animate-ticket-wobble' : ''" @click.stop="triggerTicketClick">🎟️</span>
           <span class="font-heading font-bold" style="color:var(--brand-mint)">{{ stats.tickets }}</span>
@@ -156,12 +185,13 @@ const completionMessage = computed(() => {
 
         </div>
 
-        <!-- Settings button TODO 7-->
-        <NuxtLink
-          to="/reader/settings"
+        <!-- Settings button -->
+        <button
+          @click="showSettings = !showSettings"
           class="w-14 h-14 bg-white/90 backdrop-blur-md rounded-xl flex items-center justify-center text-2xl transition-all border-2 border-white shadow-xl hover:scale-110 active:scale-95"
-          style="hover:color: var(--brand-indigo)"
-        >⚙️</NuxtLink>
+        >
+          ⚙️
+        </button>
       </div>
     </header>
 
@@ -171,20 +201,32 @@ const completionMessage = computed(() => {
 
         <!-- Welcome heading -->
         <div class="text-center py-4">
-          <h1 class="font-heading text-5xl font-bold mb-1" style="color: var(--brand-dark)">Welcome Back! 👋</h1>
+          <h1 class="font-heading text-5xl font-bold mb-1" style="color: var(--brand-dark)">Welcome Back, {{ student?.name }}! 👋</h1>
           <p class="text-lg text-gray-500 font-medium">Ready for today's reading adventure?</p>
         </div>
 
         <!-- Announcements Ticker TODO 3-->
-        <div v-if="announcements && announcements.length > 0" class="premium-card px-5 py-3" style="background: rgba(245,158,11,0.05); border-color: rgba(245,158,11,0.2)">
+        <div
+          v-if="announcements.length > 0"
+          class="premium-card px-5 py-3"
+          style="background: rgba(245,158,11,0.05); border-color: rgba(245,158,11,0.2)"
+        >
           <div class="flex items-center gap-3">
             <span class="text-xl">📢</span>
+
             <div class="flex-grow overflow-hidden">
               <p class="text-sm font-bold truncate" style="color: var(--brand-dark)">
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase mr-2 text-gray-900" style="background: var(--brand-gold)">New</span>
-                {{announcements[0]?.content}}
+                <span
+                  class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase mr-2 text-gray-900"
+                  style="background: var(--brand-gold)"
+                >
+                  New
+                </span>
+                {{ announcements[0]?.title }} — {{ announcements[0]?.content }}
               </p>
             </div>
+
+            <span class="text-lg">{{ announcements[0]?.icon }}</span>
           </div>
         </div>
 
@@ -199,59 +241,13 @@ const completionMessage = computed(() => {
               <p class="text-sm font-bold uppercase tracking-widest opacity-80 mb-1">Today's Challenge</p>
               <h3 class="font-heading text-3xl font-black">Start Your Daily Form 📝</h3>
               <p class="text-base opacity-80 mt-1 font-medium">
-                {{ completedThisWeek.length }} out of {{ thisWeekForms.length }} completed this week.
+                {{ stats.tickets }} out of {{ thisWeekForms.length }} completed this week.
                 {{ completionMessage }}
               </p>
             </div>
             <span class="text-5xl group-hover:translate-x-2 transition-transform duration-300">➜</span>
           </div>
         </NuxtLink>
-        <!-- TODO 6-->>
-        <!-- 7-Day Raffle Progress -->
-        <div class="premium-card p-5 bg-white/80" style="border: 2px solid rgba(224,96,77,0.1)">
-          <div class="flex items-center justify-between mb-3">
-            <h3 class="font-heading font-black text-base flex items-center gap-2" style="color: var(--brand-dark)">
-              🎟️ Weekly Raffle Progress
-            </h3>
-            <span class="text-sm font-bold text-gray-400">
-              {{ completedThisWeek.length }} / {{ thisWeekForms.length }} days
-            </span>
-          </div>
-
-          <div class="flex items-center justify-between gap-2">
-            <div v-for="form in thisWeekForms" :key="form.id" class="flex-1 flex flex-col items-center gap-1">
-              <div
-                class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-all shadow-sm"
-                :class="
-                  completedWeeks.includes(form.id)
-                    ? 'text-white scale-110'
-                    : form.missed
-                      ? 'text-amber-500 border-2 border-amber-300 border-dashed bg-amber-100'
-                      : 'text-gray-300 border-2 border-gray-200 bg-gray-100'
-                "
-                :style="completedWeeks.includes(form.id) ? `background: var(--brand-mint)` : ''"
-              >
-                <span v-if="completedWeeks.includes(form.id)">✓</span>
-                <span v-else>{{ form.dayNum }}</span>
-              </div>
-              <span class="text-[10px] font-bold text-gray-400 uppercase">{{ form.day.substring(0,3) }}</span>
-            </div>
-          </div>
-
-          <div class="mt-3 h-2 bg-gray-100 rounded-full overflow-hidden">
-            <div
-              class="h-full rounded-full transition-all duration-500"
-              style="background: linear-gradient(to right, var(--brand-mint), var(--brand-indigo))"
-              :style="`width: ${(completedThisWeek.length / thisWeekForms.length) * 100}%`"
-            />
-          </div>
-          <p v-if="completedThisWeek.length === thisWeekForms.length"
-             class="text-center font-bold mt-2 text-sm animate-pop"
-             style="color: var(--brand-mint)">
-            🎉 All done this week! Your raffle ticket is in!
-          </p>
-        </div>
-
       </section>
     </main>
 
@@ -280,7 +276,7 @@ const completionMessage = computed(() => {
       </svg>
     </NuxtLink>
 
-    <!-- ── SETTINGS PANEL (slide-up) TODO 2 ── -->
+    <!-- ── SETTINGS PANEL (slide-up) ── -->
     <Transition name="slide-up">
       <div v-if="showSettings" class="fixed inset-0 z-50 flex flex-col justify-end">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="showSettings = false" />
@@ -293,21 +289,25 @@ const completionMessage = computed(() => {
 
           <!-- Kid profiles TODO 1-->
           <div>
-            <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Who's Reading?</label>
-            <div class="flex gap-4 justify-center flex-wrap">
-              <div
-                v-for="(profile, idx) in kidProfiles" :key="idx"
-                @click="activeProfileIdx = idx"
-                class="flex flex-col items-center gap-2 cursor-pointer transition-all p-3 rounded-xl"
-                :class="activeProfileIdx === idx ? 'scale-105 shadow-md' : 'opacity-70 hover:opacity-100'"
-                :style="activeProfileIdx === idx ? 'background: rgba(224,96,77,0.1)' : ''"
-              >
-                <div class="w-16 h-16 rounded-xl flex items-center justify-center text-2xl font-black text-white shadow-md" :class="profile.color">
-                  {{ profile.avatar }}
+            <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">
+              Profile
+            </label>
+
+            <button
+              @click="navigateTo('/reader/profile')"
+              class="w-full flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition"
+            >
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-indigo-500 text-white flex items-center justify-center font-bold">
+                  {{ student?.name?.charAt(0).toUpperCase() }}
                 </div>
-                <span class="text-xs font-bold" style="color: var(--brand-dark)">{{ profile.name }}</span>
+                <span class="font-bold text-gray-800">
+                  {{ student?.name }}
+                </span>
               </div>
-            </div>
+
+              <span class="text-gray-400 font-bold">Switch</span>
+            </button>
           </div>
 
           <!-- Font size -->
@@ -354,6 +354,12 @@ const completionMessage = computed(() => {
               {{ settings.language === 'en' ? '🇪🇸 Español' : '🇺🇸 English' }}
             </button>
           </div>
+          <button
+            @click="logout"
+            class="w-full py-4 rounded-2xl font-heading font-bold text-lg border-2 border-red-200 text-red-600 bg-red-50 hover:bg-red-100 transition active:scale-95"
+          >
+            Log Out
+          </button>
 
           <button @click="showSettings = false"
             class="w-full py-4 rounded-2xl font-heading font-bold text-lg text-white transition transform active:scale-95 shadow-lg hover:bg-black"

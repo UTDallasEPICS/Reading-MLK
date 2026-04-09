@@ -1,6 +1,6 @@
 import { createAuthClient } from 'better-auth/vue'
-import { emailOTPClient } from 'better-auth/client/plugins'
+import { magicLinkClient } from 'better-auth/client/plugins'
 
 export const authClient = createAuthClient({
-  plugins: [emailOTPClient()],
+  plugins: [magicLinkClient()],
 })
