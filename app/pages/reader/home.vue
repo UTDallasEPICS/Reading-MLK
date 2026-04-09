@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { authClient } from '~/utils/auth-client'
-import StatsBar from '~/components/StatsBar.vue'
 import type { Student, Announcement} from '~~/prisma/generated/client'
 
 definePageMeta({ ssr: false })
@@ -35,20 +34,6 @@ onMounted(async () => {
   checkingStudent.value = false
 })
 
-//Logout
-const { clearStudent } = useCurrentStudent()
-
-async function logout() {
-  try {
-    clearStudent()
-
-    await authClient.signOut()
-
-    await navigateTo('/')
-  } catch (error) {
-    console.error('Logout failed:', error)
-  }
-}
 
 // ── Theme class ──
 const themeClass = computed(() => {
