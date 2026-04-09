@@ -2,6 +2,84 @@
 // Place this at: app/composables/useAdmin.ts
 
 export const useAdmin = () => {
+  const callFormApi = async <T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', params: Record<string, unknown> = {}, body?: Record<string, unknown>): Promise<T> => {
+    const queryString = method === 'GET' || method === 'DELETE'
+      ? `?${new URLSearchParams(Object.entries(params).reduce((acc, [key, value]) => {
+          if (value !== undefined && value !== null) {
+            acc[key] = String(value)
+          }
+
+          return acc
+        }, {} as Record<string, string>)).toString()}`
+      : ''
+
+    return await $fetch<T>(`/api/form${queryString}`, {
+      method,
+      body: method === 'GET' ? undefined : body,
+    })
+  }
+
+  const parseDateToYmd = (value: string) => {
+    if (!value) {
+      return ''
+    }
+
+    const parsed = new Date(value)
+
+    if (Number.isNaN(parsed.getTime())) {
+      return ''
+    }
+
+    return parsed.toISOString().slice(0, 10)
+  }
+
+  const buildQuestionOptions = (question: any) => ({
+    textEs: question.textEs ?? '',
+    reference: question.reference ?? '',
+    referenceEs: question.referenceEs ?? '',
+    url: question.url ?? '',
+    choices: Array.isArray(question.choices) ? question.choices : [],
+  })
+
+  const toApiQuestionText = (question: any, fallbackTitle: string) => {
+    if (typeof question.text === 'string' && question.text.trim()) {
+      return question.text.trim()
+    }
+
+    if (typeof question.reference === 'string' && question.reference.trim()) {
+      return question.reference.trim()
+    }
+
+    if (typeof question.url === 'string' && question.url.trim()) {
+      return `Video: ${question.url.trim()}`
+    }
+
+    return fallbackTitle || 'Untitled question'
+  }
+
+  const mapApiFormToUi = (form: any) => {
+    const questionList = Array.isArray(form.questions) ? form.questions : []
+
+    return {
+      id: Number(form.id),
+      weekStart: parseDateToYmd(form.weekStart || form.startDate || ''),
+      day: form.day || 'Monday',
+      title: form.title || `Form ${form.id}`,
+      date: form.date || formatDate(form.startDate || ''),
+      status: form.status || (form.published ? 'Active' : 'Unpublished'),
+      questions: questionList.map((question: any, index: number) => ({
+        id: Number(question.id ?? index + 1),
+        type: question.type || question.questionType || 'text',
+        text: question.text || question.questionText || '',
+        textEs: question.questionOptions?.textEs || '',
+        reference: question.questionOptions?.reference || '',
+        referenceEs: question.questionOptions?.referenceEs || '',
+        url: question.questionOptions?.url || '',
+        choices: Array.isArray(question.questionOptions?.choices) ? question.questionOptions.choices : question.choices,
+      })),
+    }
+  }
+
   // ── Builder state ──
   const builderSubTab  = useState<'history' | 'creation'>('builderSubTab', () => 'history')
   const formTitle      = useState('formTitle', () => '')
@@ -33,7 +111,7 @@ export const useAdmin = () => {
   }
   const getLastMonday = (dateStr: string) => {
     const d = new Date(`${dateStr}T00:00:00Z`)
-    const daysSinceMonday = (d.getDay() + 6) % 7
+    const daysSinceMonday = (d.getDay()) % 7
     d.setDate(d.getDate() - daysSinceMonday)
     return d.toISOString().slice(0, 10)
   }
@@ -56,28 +134,20 @@ export const useAdmin = () => {
   ]
 
   // ── Published forms ──
-  const publishedForms = useState<any[]>('publishedForms', () => [
-    {
-      id: 1, weekStart: '2026-02-09', day: 'Monday', title: 'Kindness & Compassion',
-      date: 'Feb 9, 2026', status: 'Active',
-      questions: [
-        { id: 101, type: 'context', text: 'Read the story of the Bell of Atri.',            textEs: 'Lee la historia de la Campana de Atri.',                reference: 'A story about justice and kindness to animals.', referenceEs: 'Una historia sobre la justicia y la bondad.' },
-        { id: 102, type: 'video',   text: 'Watch this video on empathy',                    textEs: 'Mira este video sobre la empatía',                     url: 'https://www.youtube.com/embed/1Evwgu369Jw', reference: '', referenceEs: '' },
-        { id: 103, type: 'text',    text: 'What did the horse do in the story?',            textEs: '¿Qué hizo el caballo en la historia?',                reference: 'He rang the bell to ask for justice.',           referenceEs: 'Tocó la campana para pedir justicia.' },
-        { id: 104, type: 'mcq',     text: 'If there are 5 bells and 3 horses, how many?',   textEs: 'Si hay 5 campanas y 3 caballos, ¿cuántos en total?', reference: '8',                                            referenceEs: '8',
-          choices: [{ text:'6',correct:false },{ text:'8',correct:true },{ text:'10',correct:false },{ text:'15',correct:false }] },
-      ],
-    },
-    { id: 2, weekStart: '2026-02-09', day: 'Tuesday',   title: 'Honesty & Truth',       date: 'Feb 10, 2026', status: 'Active',      questions: [{ id: 201, type: 'text', text: 'Why tell the truth?', textEs: '¿Por qué decir la verdad?', reference: 'Truth builds trust.', referenceEs: 'La verdad genera confianza.', url: '' }] },
-    { id: 3, weekStart: '2026-02-09', day: 'Wednesday', title: 'Courage & Bravery',     date: 'Feb 11, 2026', status: 'Active',      questions: [{ id: 301, type: 'text', text: 'Who is a brave person?', textEs: '¿Quién es valiente?', reference: 'Someone who faces fear.', referenceEs: 'Alguien que enfrenta el miedo.', url: '' }] },
-    { id: 4, weekStart: '2026-02-16', day: 'Monday',    title: 'Patience & Persistence', date: 'Feb 16, 2026', status: 'Active',      questions: [{ id: 401, type: 'text', text: 'What is patience?', textEs: '¿Qué es la paciencia?', reference: 'Waiting without getting upset.', referenceEs: 'Esperar sin molestarse.', url: '' }] },
-    { id: 5, weekStart: '2026-02-16', day: 'Friday',    title: 'Weekly Review',          date: 'Feb 20, 2026', status: 'Unpublished', questions: [{ id: 501, type: 'text', text: 'What did you learn?', textEs: '¿Qué aprendiste?', reference: 'Review of the week.', referenceEs: 'Resumen de la semana.', url: '' }] },
-    { id: 6, weekStart: '2026-03-02', day: 'Monday',    title: 'Empathy in Action',      date: 'Mar 2, 2026',  status: 'Active',      questions: [{ id: 601, type: 'text', text: 'Help a friend.', textEs: 'Ayuda a un amigo.', reference: 'Show kindness.', referenceEs: 'Muestra bondad.', url: '' }] },
-  ])
+  const publishedForms = useState<any[]>('publishedForms', () => [])
 
   const filteredPublishedForms = computed(() =>
     publishedForms.value.filter(f => !historyWeekStart.value || f.weekStart === historyWeekStart.value)
   )
+
+  const loadPublishedForms = async () => {
+    try {
+      const forms = await callFormApi<any[]>('GET', { action: 'listForms' })
+      publishedForms.value = (forms ?? []).map(mapApiFormToUi)
+    } catch (error) {
+      console.error('Failed to load forms', error)
+    }
+  }
 
   // ── Drag-and-drop for question reorder ──
   const draggedIdx = useState<number | null>('draggedIdx', () => null)
@@ -109,29 +179,123 @@ export const useAdmin = () => {
     questions.value.push(q)
   }
 
-  const publishForm = () => {
+  const publishForm = async () => {
     if (!formTitle.value)       { alert('Please enter a title!');           return }
     if (!formDays.value.length) { alert('Please select at least one day!'); return }
 
-    formDays.value.forEach(day => {
-      const calcDate   = getCalculatedDate(getLastMonday(formWeekStart.value || ''), day)
-      const existingIdx = publishedForms.value.findIndex(
-        f => f.weekStart === formWeekStart.value && f.day === day
-      )
-      const newForm = {
-        id:        existingIdx !== -1 ? publishedForms.value[existingIdx].id : Date.now() + Math.random(),
-        weekStart: formWeekStart.value,
-        day,
-        title:     formTitle.value,
-        date:      calcDate,
-        status:    'Active',
-        questions: JSON.parse(JSON.stringify(questions.value)),
-      }
-      if (existingIdx !== -1) publishedForms.value[existingIdx] = newForm
-      else                    publishedForms.value.unshift(newForm)
-    })
+    try {
+      const weekStart = getLastMonday(formWeekStart.value || '')
+      const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
 
-    alert(`Published for: ${formDays.value.join(', ')}`)
+      if (editingFormId.value) {
+        const targetDay = formDays.value[0] || 'Monday'
+        const dayIndex = days.indexOf(targetDay)
+
+        if (dayIndex === -1) {
+          throw new Error('Invalid day selected for update')
+        }
+
+        const startDate = new Date(`${weekStart}T00:00:00Z`)
+        startDate.setUTCDate(startDate.getUTCDate() + dayIndex)
+
+        await callFormApi('PUT', {}, {
+          action: 'updateForm',
+          id: editingFormId.value,
+          startDate: startDate.toISOString(),
+          published: true,
+        })
+
+        const existingForm = publishedForms.value.find((form) => Number(form.id) === Number(editingFormId.value))
+        const existingComponentIds = new Set<number>(
+          (existingForm?.questions ?? [])
+            .map((question: any) => Number(question.id))
+            .filter((questionId: number) => Number.isInteger(questionId) && questionId > 0)
+        )
+
+        for (let index = 0; index < questions.value.length; index++) {
+          const question = questions.value[index]
+          const numericQuestionId = Number(question.id)
+          const isExistingComponent = Number.isInteger(numericQuestionId) && existingComponentIds.has(numericQuestionId)
+
+          if (isExistingComponent) {
+            await callFormApi('PUT', {}, {
+              action: 'updateComponent',
+              id: numericQuestionId,
+              order: index,
+              questionType: question.type,
+              questionText: toApiQuestionText(question, formTitle.value),
+              questionOptions: buildQuestionOptions(question),
+            })
+
+            existingComponentIds.delete(numericQuestionId)
+          } else {
+            await callFormApi('POST', {}, {
+              action: 'createComponent',
+              form: editingFormId.value,
+              order: index,
+              questionType: question.type,
+              questionText: toApiQuestionText(question, formTitle.value),
+              questionOptions: buildQuestionOptions(question),
+            })
+          }
+        }
+
+        for (const removedId of existingComponentIds) {
+          await callFormApi('DELETE', {}, {
+            action: 'deleteComponent',
+            id: removedId,
+          })
+        }
+
+        await loadPublishedForms()
+        editingFormId.value = null
+        builderSubTab.value = 'history'
+        alert('Form updated successfully')
+        return
+      }
+
+      for (const day of formDays.value) {
+        const dayIndex = days.indexOf(day)
+
+        if (dayIndex === -1) {
+          continue
+        }
+
+        const startDate = new Date(`${weekStart}T00:00:00Z`)
+        startDate.setUTCDate(startDate.getUTCDate() + dayIndex)
+
+        const createdFormResponse = await callFormApi<any>('POST', {}, {
+          action: 'createForm',
+          startDate: startDate.toISOString(),
+          published: true,
+        })
+
+        const createdForm = createdFormResponse?.data
+
+        if (!createdForm?.id) {
+          continue
+        }
+
+        for (let index = 0; index < questions.value.length; index++) {
+          const question = questions.value[index]
+
+          await callFormApi('POST', {}, {
+            action: 'createComponent',
+            form: createdForm.id,
+            order: index,
+            questionType: question.type,
+            questionText: toApiQuestionText(question, formTitle.value),
+            questionOptions: buildQuestionOptions(question),
+          })
+        }
+      }
+
+      await loadPublishedForms()
+      alert(`Published for: ${formDays.value.join(', ')}`)
+    } catch (error) {
+      console.error('Failed to publish form', error)
+      alert('Failed to publish form. Please try again.')
+    }
   }
 
   const editPublishedForm = (form: any) => {
@@ -248,6 +412,7 @@ export const useAdmin = () => {
     selectedFormDetails, viewFormDetails,
     draggedIdx, dragStart, onDrop,
     addQuestion, publishForm, editPublishedForm, toggleFormPublish,
+    loadPublishedForms,
     // progress
     students, searchStudent, sortStudent, filteredAndSortedStudents,
     // raffle

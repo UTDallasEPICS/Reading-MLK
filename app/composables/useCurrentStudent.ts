@@ -6,11 +6,6 @@ export type StudentSettings = {
   fontSize: number
 }
 
-export type StudentStats = {
-  exp: number
-  tickets: number
-}
-
 export const useCurrentStudent = () => {
   const student = useState<Student | null>('currentStudent', () => null)
 
@@ -23,18 +18,7 @@ export const useCurrentStudent = () => {
       fontSize: Number(raw.fontSize) || 1,
     }
   })
-
-  const tickets = computed<number>(() => {
-    return 0
-  })
-
-  const stats = computed<StudentStats>(() => {
-    return {
-      exp: student.value?.exp || 0,
-      tickets: tickets.value,
-    }
-  })
-
+  
   const setStudent = (newStudent: Student | null) => {
     student.value = newStudent
 
@@ -90,32 +74,44 @@ export const useCurrentStudent = () => {
       const updatedStudent = await $fetch<Student>(`/api/student/${student.value.id}`, {
         method: 'PUT',
         body: {
-          settings: updatedSettings,
-        },
+          settings: updatedSettings
+        }
       })
 
+      // Update the global state with the response, automatically passing it to pages like Home.vue
       student.value = updatedStudent
     } catch (error) {
       console.error('Failed to save settings:', error)
     }
   }
 
-  const saveProgress = async () => {
-  }
+  // Update student XP and persist to DB
+  const updateExp = async (amount: number) => {
+    if (!student.value?.id) return
 
-  const saveStats = async () => {
+    const newExp = (student.value.exp || 0) + amount
+
+    try {
+      const updatedStudent = await $fetch<Student>(`/api/student/${student.value.id}`, {
+        method: 'PUT',
+        body: {
+          exp: newExp
+        }
+      })
+      student.value = updatedStudent
+    } catch (error) {
+      console.error('Failed to update student XP:', error)
+    }
   }
 
   return {
     student,
     settings,
-    stats,
+    saveSettings,
+    updateExp,
     setStudent,
     loadStudent,
     restoreStudent,
-    clearStudent,
-    saveSettings,
-    saveProgress,
-    saveStats,
+    clearStudent
   }
 }

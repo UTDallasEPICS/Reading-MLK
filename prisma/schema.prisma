@@ -120,6 +120,7 @@ model Form {
   published             Boolean   @default(false)
   author                String?
   formGroup             Int
+  title                 String?
 
   Author        Admin?    @relation(fields: [author], references: [id], onDelete: SetNull)
   FormGroup     FormGroup @relation(fields: [formGroup], references: [id], onDelete: Cascade)
@@ -134,6 +135,7 @@ model FormComponent {
   questionType      String
   questionText      String
   questionOptions   Json?
+
   
   Form          Form      @relation(fields: [form], references: [id], onDelete: Cascade)
   Responses     SubmissionResponse[]

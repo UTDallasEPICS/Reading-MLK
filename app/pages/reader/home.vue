@@ -15,7 +15,11 @@ definePageMeta({ ssr: false })
 */
 
 //TODO 4 retrieve active student
-const { student, restoreStudent } = useCurrentStudent()
+const { student, settings: settings, restoreStudent } = useCurrentStudent()
+const { totalFormsInGroup: totalForms, loadActiveFormGroup} = useCurrentFormGroup()
+const { tickets: tickets, loadProgress} = useCurrentStudentProgress()
+await loadActiveFormGroup()
+await loadProgress()
 const checkingStudent = ref(true)
 
 onMounted(async () => {
@@ -45,26 +49,6 @@ async function logout() {
     console.error('Logout failed:', error)
   }
 }
- 
-//TODO 2 parse settings from student
-const settings = computed(() => {
-  const raw = student.value?.settings as any || {}
-
-  return {
-    dyslexiaFont: !!raw.dyslexiaFont,
-    language: raw.language || 'en',
-    fontSize: Number(raw.fontSize) || 1,
-  }
-})
-
-//TODO 2 calculate stats from student data
-const stats = {
-  xp: computed(() => student.value?.exp ?? 0),
-  streak: 0,   // we'll implement later
-  tickets: 0,  // will come from submissions later
-}
-
-const showSettings = ref(false)
 
 // ── Theme class ──
 const themeClass = computed(() => {
@@ -95,54 +79,16 @@ function triggerTicketClick() {
   setTimeout(() => { ticketClicked.value = false; flyTickets.value = [] }, 1000)
 }
 
-//TODO 3
-// Announcements 
-const announcements = computed(() => [
-  {
-    id: 1,
-    title: 'New Book Added!',
-    content: student.value?.name ?? 'Student',
-    icon: '📚',
-  },
-  {
-    id: 2,
-    title: 'Raffle Winners Announced!',
-    content: 'Congrats to our latest raffle winners! 🎉',
-    icon: '🎟️',
-  },
-])
-
-//TODO 2
-//  Weekly forms progress 
-const thisWeekForms = ref([
-  { id: 201, day: 'Monday',    dayNum: 1, missed: true  },
-  { id: 202, day: 'Tuesday',   dayNum: 2, missed: true  },
-  { id: 203, day: 'Wednesday', dayNum: 3, missed: false },
-  { id: 204, day: 'Thursday',  dayNum: 4, missed: false },
-  { id: 205, day: 'Friday',    dayNum: 5, missed: false },
-])
-const completedWeeks = ref<number[]>([201, 202])
-
-const completedThisWeek = computed(() =>
-  completedWeeks.value.filter(id => thisWeekForms.value.some(f => f.id === id))
-)
+const { data: announcements } = await useFetch<Announcement[] | null>('/api/announcement?active=true')
 
 const completionMessage = computed(() => {
-  return ['', 'Nice!', 'Good Job!', 'Great Job!', 'Wow!', 'Awesome!', 'Amazing!'][stats.tickets] ?? 'Spectacular!'
+  return ['', 'Nice!', 'Good Job!', 'Great Job!', 'Wow!', 'Awesome!', 'Amazing!'][tickets.value] ?? 'Spectacular!'
 })
 </script>
 
 <template>
-  <div v-if="checkingStudent" class="min-h-screen flex items-center justify-center bg-[#f8f7f4]">
-    <p class="text-gray-500 font-semibold text-lg">Loading reader...</p>
-  </div>
+  <div :class="themeClass" :style="`font-size: ${settings.fontSize * 16}px`" class="pb-32 px-4 pt-4 min-h-screen">
 
-  <div
-    v-else
-    :class="themeClass"
-    :style="`font-size: ${settings.fontSize * 16}px`"
-    class="pb-32 px-4 pt-4 min-h-screen"
-  >
     <!-- ── TOP BAR ── -->
     <header class="max-w-4xl mx-auto flex justify-between items-center mb-8 px-2 relative z-[200]">
       <div class="flex items-center gap-3">
@@ -166,10 +112,10 @@ const completionMessage = computed(() => {
           @click="triggerXpClick"
         >
         <span class="text-lg" :class="xpClicked ? 'animate-star-spin' : ''">🪙</span>
-          <span class="font-heading font-bold text-amber-600">{{ student?.exp }}</span>
+          <span class="font-heading font-bold text-amber-600">{{ Number(student?.exp) }}</span>
           <span class="text-gray-300">|</span>
           <span class="text-lg" :class="ticketClicked ? 'animate-ticket-wobble' : ''" @click.stop="triggerTicketClick">🎟️</span>
-          <span class="font-heading font-bold" style="color:var(--brand-mint)">{{ stats.tickets }}</span>
+          <span class="font-heading font-bold" style="color:var(--brand-mint)">{{ tickets }}</span>
           <span v-for="c in burstCoins" :key="c.id" class="absolute text-sm animate-coin-burst"
                 :style="`--tx:${c.tx}px;--ty:${c.ty}px;left:50%;top:50%;`">🪙</span>
           <Transition name="box-pop">
@@ -185,13 +131,12 @@ const completionMessage = computed(() => {
 
         </div>
 
-        <!-- Settings button -->
-        <button
-          @click="showSettings = !showSettings"
+        <!-- Settings button TODO 7-->
+        <NuxtLink
+          to="/reader/settings"
           class="w-14 h-14 bg-white/90 backdrop-blur-md rounded-xl flex items-center justify-center text-2xl transition-all border-2 border-white shadow-xl hover:scale-110 active:scale-95"
-        >
-          ⚙️
-        </button>
+          style="hover:color: var(--brand-indigo)"
+        >⚙️</NuxtLink>
       </div>
     </header>
 
@@ -201,32 +146,20 @@ const completionMessage = computed(() => {
 
         <!-- Welcome heading -->
         <div class="text-center py-4">
-          <h1 class="font-heading text-5xl font-bold mb-1" style="color: var(--brand-dark)">Welcome Back, {{ student?.name }}! 👋</h1>
+          <h1 class="font-heading text-5xl font-bold mb-1" style="color: var(--brand-dark)">Welcome Back! 👋</h1>
           <p class="text-lg text-gray-500 font-medium">Ready for today's reading adventure?</p>
         </div>
 
         <!-- Announcements Ticker TODO 3-->
-        <div
-          v-if="announcements.length > 0"
-          class="premium-card px-5 py-3"
-          style="background: rgba(245,158,11,0.05); border-color: rgba(245,158,11,0.2)"
-        >
+        <div v-if="announcements && announcements.length > 0" class="premium-card px-5 py-3" style="background: rgba(245,158,11,0.05); border-color: rgba(245,158,11,0.2)">
           <div class="flex items-center gap-3">
             <span class="text-xl">📢</span>
-
             <div class="flex-grow overflow-hidden">
               <p class="text-sm font-bold truncate" style="color: var(--brand-dark)">
-                <span
-                  class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase mr-2 text-gray-900"
-                  style="background: var(--brand-gold)"
-                >
-                  New
-                </span>
-                {{ announcements[0]?.title }} — {{ announcements[0]?.content }}
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase mr-2 text-gray-900" style="background: var(--brand-gold)">New</span>
+                {{announcements[0]?.content}}
               </p>
             </div>
-
-            <span class="text-lg">{{ announcements[0]?.icon }}</span>
           </div>
         </div>
 
@@ -241,7 +174,7 @@ const completionMessage = computed(() => {
               <p class="text-sm font-bold uppercase tracking-widest opacity-80 mb-1">Today's Challenge</p>
               <h3 class="font-heading text-3xl font-black">Start Your Daily Form 📝</h3>
               <p class="text-base opacity-80 mt-1 font-medium">
-                {{ stats.tickets }} out of {{ thisWeekForms.length }} completed this week.
+                {{ tickets }} out of {{ totalForms }} completed this week.
                 {{ completionMessage }}
               </p>
             </div>
@@ -275,100 +208,6 @@ const completionMessage = computed(() => {
         <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
       </svg>
     </NuxtLink>
-
-    <!-- ── SETTINGS PANEL (slide-up) ── -->
-    <Transition name="slide-up">
-      <div v-if="showSettings" class="fixed inset-0 z-50 flex flex-col justify-end">
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="showSettings = false" />
-        <div class="relative rounded-t-[2.5rem] p-8 space-y-5 shadow-2xl max-h-[90vh] overflow-y-auto bg-white">
-          <div class="w-12 h-1.5 rounded-full bg-gray-300 mx-auto -mt-2" />
-          <div class="text-center mb-2">
-            <div class="text-5xl mb-3">⚙️</div>
-            <h2 class="font-heading text-3xl font-bold" style="color: var(--brand-dark)">Settings</h2>
-          </div>
-
-          <!-- Kid profiles TODO 1-->
-          <div>
-            <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">
-              Profile
-            </label>
-
-            <button
-              @click="navigateTo('/reader/profile')"
-              class="w-full flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition"
-            >
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-indigo-500 text-white flex items-center justify-center font-bold">
-                  {{ student?.name?.charAt(0).toUpperCase() }}
-                </div>
-                <span class="font-bold text-gray-800">
-                  {{ student?.name }}
-                </span>
-              </div>
-
-              <span class="text-gray-400 font-bold">Switch</span>
-            </button>
-          </div>
-
-          <!-- Font size -->
-          <div>
-            <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-3">Text Size</label>
-            <div class="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
-              <span class="text-sm font-bold text-gray-400">A</span>
-              <input type="range" min="1" max="1.5" step="0.1" v-model.number="settings.fontSize"
-                     class="flex-grow h-2 bg-gray-200 rounded-full appearance-none cursor-pointer accent-brand-indigo" />
-              <span class="text-xl font-bold text-gray-400">A</span>
-              <span class="text-xs font-bold px-2 py-1 rounded-lg" style="color: var(--brand-indigo); background: rgba(224,96,77,0.1)">
-                {{ Math.round(settings.fontSize * 100) }}%
-              </span>
-            </div>
-          </div>
-
-          <!-- Dyslexia font -->
-          <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-            <div>
-              <h4 class="font-bold" style="color: var(--brand-dark)">Dyslexia-Friendly Font</h4>
-              <p class="text-xs text-gray-400">Uses OpenDyslexic typeface</p>
-            </div>
-            <button
-              @click="settings.dyslexiaFont = !settings.dyslexiaFont"
-              class="w-14 h-8 rounded-full transition-all relative"
-              :style="settings.dyslexiaFont ? `background: var(--brand-mint)` : 'background: #d1d5db'"
-            >
-              <div class="w-6 h-6 bg-white rounded-full shadow-md absolute top-1 transition-all"
-                   :class="settings.dyslexiaFont ? 'right-1' : 'left-1'" />
-            </button>
-          </div>
-
-          <!-- Language -->
-          <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-            <div>
-              <h4 class="font-bold" style="color: var(--brand-dark)">Language / Idioma</h4>
-              <p class="text-xs text-gray-400">{{ settings.language === 'en' ? 'English' : 'Español' }}</p>
-            </div>
-            <button
-              @click="settings.language = settings.language === 'en' ? 'es' : 'en'"
-              class="px-4 py-2 rounded-xl font-bold text-sm transition"
-              style="background: rgba(224,96,77,0.1); color: var(--brand-indigo)"
-            >
-              {{ settings.language === 'en' ? '🇪🇸 Español' : '🇺🇸 English' }}
-            </button>
-          </div>
-          <button
-            @click="logout"
-            class="w-full py-4 rounded-2xl font-heading font-bold text-lg border-2 border-red-200 text-red-600 bg-red-50 hover:bg-red-100 transition active:scale-95"
-          >
-            Log Out
-          </button>
-
-          <button @click="showSettings = false"
-            class="w-full py-4 rounded-2xl font-heading font-bold text-lg text-white transition transform active:scale-95 shadow-lg hover:bg-black"
-            style="background: var(--brand-dark)"
-          >Done ✓</button>
-        </div>
-      </div>
-    </Transition>
-
   </div>
 </template>
 
