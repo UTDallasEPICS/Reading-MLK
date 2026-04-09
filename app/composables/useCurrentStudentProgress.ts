@@ -1,4 +1,4 @@
-import type { FormSubmission } from '~~/prisma/generated/client'
+import type { FormSubmission, SubmissionResponse } from '~~/prisma/generated/client'
 import { useCurrentStudent } from './currentStudent'
 import { useCurrentFormGroup } from './useCurrentFormGroup'
 
@@ -66,12 +66,20 @@ export const useCurrentStudentProgress = () => {
     }
   }
 
+  const logSubmissionResponse = async (submissionID: number, formComponentID: number, response: string) => {
+    if (!student.value?.id) {
+      console.error('Cannot log form submission: No student is currently active.')
+      return null
+    }
+  }
+
   return {
     submissions,
     completedFormIds,
     tickets,
     isFormGroupCompleted,
     loadProgress,
-    logFormSubmission
+    logFormSubmission,
+    logSubmissionResponse
   }
 }

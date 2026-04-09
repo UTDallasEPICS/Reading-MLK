@@ -3,7 +3,7 @@ definePageMeta({ ssr: false })
 
 const { student, settings, updateExp } = useCurrentStudent()
 const { FormGroup } = useCurrentFormGroup()
-const { tickets, completedFormIds, logFormSubmission } = useCurrentStudentProgress()
+const { tickets, completedFormIds, logFormSubmission, logSubmissionResponse } = useCurrentStudentProgress()
 
 const stats = computed(() => ({
   xp: student.value ? student.value.exp : 0,
@@ -20,39 +20,37 @@ const currentFormComponentsWithVideo = computed(() => {
   return FormGroup.value.formComponents[activeForm.value.id] || []
 })
 
-const firstVideoUrl = computed(() => {
-  const videoComp = currentFormComponentsWithVideo.value.find(c => (c as any).questionType === 'video')
-  const rawUrl = (videoComp as any)?.questionText || null
-
-  if (!rawUrl) return null
-  
-  // Convert standard YouTube 'watch' URLs to 'embed' format so iframes allow displaying them
+function embedURL(rawUrl: string) {
   const match = rawUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i)
   if (match && match[1]) {
     return `https://www.youtube.com/embed/${match[1]}`
   }
-
   return rawUrl
+}
+
+const firstVideoUrl = computed(() => {
+  const videoComponent = currentFormComponentsWithVideo.value.find(c => (c as any).questionType === 'video')
+  const rawUrl = (videoComponent as any)?.questionText || null
+
+  return rawUrl ? embedURL(rawUrl) : null
 })
 
 const currentFormComponents = computed(() => {
-  const comps = currentFormComponentsWithVideo.value
+  const components = currentFormComponentsWithVideo.value
   
   // Find the first video component (the reading resource)
-  const firstVideoIndex = comps.findIndex(c => c.questionType === 'video')
-  let filteredComps = [...comps]
+  const firstVideoIndex = components.findIndex(c => c.questionType === 'video')
+  let filteredComponents = [...components]
   
-  // Always remove the first video component so it doesn't appear in the form flow itself
+  // Always remove the first video component so it doesn't appear in the form flow itself, only pre-form stage
   if (firstVideoIndex !== -1) {
-    filteredComps.splice(firstVideoIndex, 1)
+    filteredComponents.splice(firstVideoIndex, 1)
   }
 
-  // If we have our own book, filter out any remaining video components
-  if (hasOwnBook.value) return filteredComps.filter(c => c.questionType !== 'video')
-  return filteredComps
+  return filteredComponents
 })
 
-const currentComponent = computed(() => currentFormComponents.value[currentQIdx.value])
+const currentComponent = computed(() => currentFormComponents.value[currentComponentID.value])
 
 // Click badge animations
 const xpClicked     = ref(false)
@@ -76,9 +74,8 @@ function triggerTicketClick() {
 // Flow state
 const activeForm         = ref<any>(null)
 const preFormStep        = ref<string|null>(null)   // 'ask' | 'has-book' | 'no-book' | null
-const preFormBookTitle   = ref('')
 const hasOwnBook         = ref(false)
-const currentQIdx        = ref(0)
+const currentComponentID        = ref(0)
 const answers            = ref<Record<number,string>>({})
 const feedbackVisible    = ref<Record<number,boolean>>({})
 
@@ -92,9 +89,9 @@ let touchStartY = 0
 function startChallenge(form: any) {
   activeForm.value      = form
   preFormStep.value     = 'ask'
-  preFormBookTitle.value = ''
-  currentQIdx.value     = 0
+  currentComponentID.value     = 0
   feedbackVisible.value = {}
+  //load answers
   answers.value         = {}
 }
 
@@ -104,14 +101,14 @@ function preFormSkipToForm() {
 }
 
 function checkAnswer() {
-  const q = currentFormComponents.value[currentQIdx.value]
+  const q = currentFormComponents.value[currentComponentID.value]
   if (q) feedbackVisible.value[q.id] = true
 }
 
 function nextStep() {
   const qs = currentFormComponents.value
-  if (currentQIdx.value < qs.length - 1) {
-    currentQIdx.value++
+  if (currentComponentID.value < qs.length - 1) {
+    currentComponentID.value++
   } else {
     submitChallenge()
   }
@@ -121,8 +118,11 @@ async function submitChallenge() {
   const formId = activeForm.value.id
   
   // Persist completion and XP
-  await logFormSubmission(formId)
+  const submission  = await logFormSubmission(formId)
   await updateExp(100)
+
+  // grab newly posted submission ID
+  const submissionID = Number(submission?.id)
 
   showRaffleReward.value = true
   ticketDropped.value    = false
@@ -130,7 +130,7 @@ async function submitChallenge() {
   ticketStyle.value      = {}
   setTimeout(() => {
     activeForm.value      = null
-    currentQIdx.value     = 0
+    currentComponentID.value     = 0
     feedbackVisible.value = {}
     answers.value         = {}
   }, 500)
@@ -297,19 +297,19 @@ function getBadgeClass(type: string) {
             <!-- Progress bar -->
             <div class="absolute top-0 left-0 w-full h-2 bg-gray-100">
               <div class="h-full transition-all duration-500" style="background:var(--brand-indigo)"
-                   :style="`width:${((currentQIdx + 1) / currentFormComponents.length) * 100}%`" />
+                   :style="`width:${((currentComponentID + 1) / currentFormComponents.length) * 100}%`" />
             </div>
 
             <div class="flex justify-between items-center mb-4 mt-2">
               <div>
                 <h3 class="font-heading text-2xl font-bold" style="color:var(--brand-dark)">{{ activeForm?.title }}</h3>
-                <p class="text-gray-400 font-bold">Step {{ Number(currentQIdx) + 1 }} of {{ currentFormComponents?.length }}</p>
+                <p class="text-gray-400 font-bold">Step {{ Number(currentComponentID) + 1 }} of {{ currentFormComponents?.length }}</p>
               </div>
               <button @click="activeForm = null; preFormStep = null" class="text-gray-400 hover:text-red-500 font-bold text-lg">Cancel</button>
             </div>
 
             <Transition name="step-fade" mode="out-in">
-              <div :key="currentQIdx">
+              <div :key="currentComponentID">
                 <div v-if="currentComponent" class="space-y-3">
 
                   <!-- Type badge -->
@@ -327,7 +327,7 @@ function getBadgeClass(type: string) {
                   <!-- Video -->
                   <div v-else-if="currentComponent.questionType === 'video'"
                     class="max-w-2xl mx-auto aspect-video w-full rounded-2xl overflow-hidden shadow-lg border-4 border-white">
-                    <iframe class="w-full h-full" :src="currentComponent.questionText" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    <iframe class="w-full h-full" :src="embedURL(currentComponent.questionText)" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                   </div>
 
                   <!-- Text / MCQ question -->
@@ -383,7 +383,7 @@ function getBadgeClass(type: string) {
 
                   <!-- Navigation -->
                   <div class="flex justify-between items-center mt-4">
-                    <button v-if="currentQIdx > 0" @click="currentQIdx--"
+                    <button v-if="currentComponentID > 0" @click="currentComponentID--"
                       class="text-gray-400 font-bold hover:text-gray-700 transition text-lg">← Back</button>
                     <div v-else />
                     <div class="flex-grow" />
@@ -393,14 +393,14 @@ function getBadgeClass(type: string) {
                       @click="nextStep"
                       class="btn-fun text-white px-10 py-3 rounded-2xl font-bold text-lg shadow-lg"
                       style="background:var(--brand-dark)"
-                    >{{ currentQIdx < currentFormComponents.length - 1 ? 'Continue ➡️' : 'Finish Challenge! 🎉' }}</button>
+                    >{{ currentComponentID < currentFormComponents.length - 1 ? 'Continue ➡️' : 'Finish Challenge! 🎉' }}</button>
                     <!-- Text/MCQ after answered -->
                     <button
                       v-else-if="feedbackVisible[currentComponent.id]"
                       @click="nextStep"
                       class="btn-fun text-white px-10 py-3 rounded-2xl font-bold text-lg"
                       style="background:var(--brand-dark)"
-                    >{{ currentQIdx < currentFormComponents.length - 1 ? 'Next Step' : 'Finish Challenge! 🎉' }}</button>
+                    >{{ currentComponentID < currentFormComponents.length - 1 ? 'Next Step' : 'Finish Challenge! 🎉' }}</button>
                   </div>
                 </div>
               </div>
