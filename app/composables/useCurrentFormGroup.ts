@@ -37,7 +37,7 @@ export const useCurrentFormGroup = () => {
 
         try {
           const formsAPIResponse = await $fetch<Form[]>('/api/form', {
-            query: { formGroup: activeFg.id, published: true }
+            query: { action: 'getOnlyActiveFormsinGroup', formGroup: activeFg.id }
           })
 
           FormGroup.value.forms = Array.isArray(formsAPIResponse) ? formsAPIResponse : []

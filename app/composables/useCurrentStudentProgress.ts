@@ -1,5 +1,5 @@
 import type { FormSubmission, SubmissionResponse } from '~~/prisma/generated/client'
-import { useCurrentStudent } from './currentStudent'
+import { useCurrentStudent } from './useCurrentStudent'
 import { useCurrentFormGroup } from './useCurrentFormGroup'
 
 export const useCurrentStudentProgress = () => {
