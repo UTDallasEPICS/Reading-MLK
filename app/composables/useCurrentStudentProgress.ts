@@ -1,5 +1,5 @@
-import type { FormSubmission } from '~~/prisma/generated/client'
-import { useCurrentStudent } from './currentStudent'
+import type { FormSubmission, SubmissionResponse } from '~~/prisma/generated/client'
+import { useCurrentStudent } from './useCurrentStudent'
 import { useCurrentFormGroup } from './useCurrentFormGroup'
 
 export const useCurrentStudentProgress = () => {
@@ -12,9 +12,13 @@ export const useCurrentStudentProgress = () => {
   //Computed state for an array of completed form IDs within the active form group
   const completedFormIds = computed(() => {
     const activeFormIds = new Set(formGroupState.value.forms.map((f) => f.id))
-    return submissions.value
-      .filter((sub) => activeFormIds.has(sub.form))
-      .map((sub) => sub.form)
+    const completed = new Set<number>()
+    submissions.value.forEach((sub) => {
+      if (activeFormIds.has(sub.form)) {
+        completed.add(sub.form)
+      }
+    })
+    return Array.from(completed)
   })
 
   // Computed progress metrics
@@ -58,10 +62,17 @@ export const useCurrentStudentProgress = () => {
       })
 
       // Update local state without needing a new fetch
-      submissions.value.push(newSubmission)
+      submissions.value = [...submissions.value, newSubmission]
       return newSubmission
     } catch (error) {
       console.error('Failed to log form submission:', error)
+      return null
+    }
+  }
+
+  const logSubmissionResponse = async (submissionID: number, formComponentID: number, response: string) => {
+    if (!student.value?.id) {
+      console.error('Cannot log form submission: No student is currently active.')
       return null
     }
   }
@@ -72,6 +83,7 @@ export const useCurrentStudentProgress = () => {
     tickets,
     isFormGroupCompleted,
     loadProgress,
-    logFormSubmission
+    logFormSubmission,
+    logSubmissionResponse
   }
 }

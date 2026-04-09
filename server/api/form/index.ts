@@ -1,9 +1,11 @@
+import { Prisma } from '~~/prisma/generated/client'
 import { auth } from '~~/server/utils/auth'
 import { prisma } from '~~/server/utils/prisma'
 import { getQuery, setResponseStatus, type H3Event } from 'h3'
 
 type ActionName =
   | 'listFormGroups'
+  | 'getOnlyActiveFormsinGroup'
   | 'getFormGroup'
   | 'listForms'
   | 'createFormGroup'
@@ -293,9 +295,7 @@ export default defineEventHandler(async (event) => {
   const body = method === 'GET' ? null : ((await readBody(event).catch(() => null)) as Record<string, unknown> | null)
   const action = getAction(event, body)
 
-  if (method !== 'GET' && !action) {
-    throw createError({ statusCode: 400, statusMessage: 'Missing action' })
-  }
+  if (method !== 'GET' && !action) { throw createError({ statusCode: 400, statusMessage: 'Missing action' }) }
 
   if (method === 'GET') {
     const selectedAction = action ?? 'listFormGroups'
@@ -342,8 +342,14 @@ export default defineEventHandler(async (event) => {
       const query = getQuery(event)
       const formGroupId = query.formGroup !== undefined ? toInt(query.formGroup, 'formGroup', false) : null
 
+      const where: Prisma.FormWhereInput = {}
+
+      if (formGroupId !== null) { where.formGroup = formGroupId }
+
+      if (query.published) { where.published = toBoolean(query.published) }
+
       const forms = await prisma.form.findMany({
-        where: formGroupId ? { formGroup: formGroupId } : {},
+        where,
         orderBy: [{ formGroup: 'asc' }, { order: 'asc' }, { id: 'asc' }],
         include: formInclude,
       })
@@ -351,8 +357,25 @@ export default defineEventHandler(async (event) => {
       return forms.map((form) => mapForm(form, form.FormGroup.startDate))
     }
 
+    if (selectedAction === 'getOnlyActiveFormsinGroup') {
+      const query = getQuery(event)
+      const where: Prisma.FormWhereInput = {}
+
+      if (query.formGroup !== null) { where.formGroup = Number(query.formGroup) }
+
+      if (query.published) { where.published = toBoolean(query.published) }
+
+      return await prisma.form.findMany({
+        where,
+        orderBy: [{ formGroup: 'asc' }, { order: 'asc' }, { id: 'asc' }],
+      })
+    }
+
+
     throw createError({ statusCode: 400, statusMessage: 'Unknown action' })
   }
+
+
 
   const { admin } = await requireAdminSession(event)
 
