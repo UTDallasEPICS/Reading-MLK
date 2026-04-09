@@ -35,20 +35,6 @@ onMounted(async () => {
   checkingStudent.value = false
 })
 
-//Logout
-const { clearStudent } = useCurrentStudent()
-
-async function logout() {
-  try {
-    clearStudent()
-
-    await authClient.signOut()
-
-    await navigateTo('/')
-  } catch (error) {
-    console.error('Logout failed:', error)
-  }
-}
 
 // ── Theme class ──
 const themeClass = computed(() => {
