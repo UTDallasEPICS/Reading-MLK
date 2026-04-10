@@ -5,7 +5,7 @@ const builderSectionRef = ref<HTMLElement | null>(null)
 
 const {
   builderSubTab, formTitle, editingFormId, questions,
-  formWeekStart, formDays, historyWeekStart, getLastMonday,
+  formWeekStart, formDays, historyWeekStart, historyStatusSelection, historyGroupStartDate, historyGroupEndDate, toggleHistoryStatus, getLastMonday,
   getCalculatedDate, formatDate, defaultQuestions,
   filteredPublishedForms, selectedFormDetails, viewFormDetails,
   draggedIdx, dragStart, onDrop,
@@ -385,10 +385,40 @@ onBeforeUnmount(() => {
         >+ Create New Form</button>
       </div>
 
-      <!-- Week filter -->
+      <!-- Filters -->
       <div class="section-card">
-        <label class="field-label">Filter by Week Starting</label>
-        <input v-model="historyWeekStart" type="date" class="input-base max-w-xs" />
+        <div class="history-filters-grid">
+          <div>
+            <label class="field-label">Weekly Date (Find Matching Form Group)</label>
+            <input v-model="historyWeekStart" type="date" class="input-base" />
+          </div>
+
+          <div>
+            <label class="field-label">Status</label>
+            <div class="status-filter-btns">
+              <button
+                class="status-filter-btn"
+                :class="historyStatusSelection.includes('published') ? 'active' : ''"
+                @click="toggleHistoryStatus('published')"
+              >Published</button>
+              <button
+                class="status-filter-btn"
+                :class="historyStatusSelection.includes('unpublished') ? 'active' : ''"
+                @click="toggleHistoryStatus('unpublished')"
+              >Unpublished</button>
+            </div>
+          </div>
+
+          <div>
+            <label class="field-label">Form Group Start (From)</label>
+            <input v-model="historyGroupStartDate" type="date" class="input-base" />
+          </div>
+
+          <div>
+            <label class="field-label">Form Group Start (To)</label>
+            <input v-model="historyGroupEndDate" type="date" class="input-base" />
+          </div>
+        </div>
       </div>
 
       <!-- Form rows -->
@@ -426,7 +456,7 @@ onBeforeUnmount(() => {
         </div>
 
         <div v-if="filteredPublishedForms.length === 0" class="q-empty">
-          No published forms found for this week/day.
+          No forms found for the selected filters.
         </div>
       </div>
     </div>
