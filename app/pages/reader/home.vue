@@ -1,66 +1,44 @@
 <script setup lang="ts">
-import type { Student, Announcement, Form, FormGroup } from '~~/prisma/generated/client'
+import { onMounted } from 'vue'
+import { authClient } from '~/utils/auth-client'
+import type { Student, Announcement} from '~~/prisma/generated/client'
 
 definePageMeta({ ssr: false })
 /* TODO:
-  1 change settings option to switch profiles into a redirect to teh profile selection page
-
-  2 calculations/parsing for selected student
-    -- streak    (decide between daily and weekly)
-    -- tickets    (raffle entries, number of forms completed during the current form group))
-    -- completed forms in form group
-    ✓✓ settings
-      --move student settings type to a shared location and import here and into settings page
-
   3 Announcements
-    ✓✓ get active announcements 
     -- default display for no announcements
     -- change display to be larger
     -- change display to show the most recent announcement with a dropdown to show all
  
-  4 get student selected from previous page
-    -- should come from session, nuxt store, or be passed as a param from previous page, could also use a tool like pinia or may also be a function of auth
   5 find and apply unlocked shop items from selected student
-
-  6 make progress bar dynamic based on form group size and completed forms.
-
-  7 change settings to it's own page, with settings button as a redirect
 */
 
 //TODO 4 retrieve active student
-const {data: student} = await useFetch<Student | null>('/api/student/1')
- 
-//define type for student settings
-type StudentSettings = {
-  dyslexiaFont?: boolean
-  language?: string
-  fontSize?: number
-}
-//cast raw student settings JSON from api call to type
-const parsedSettings = computed(() => {
-  return (student.value?.settings || {}) as StudentSettings
+const { student, settings: settings, restoreStudent } = useCurrentStudent()
+const { totalFormsInGroup: totalForms, loadActiveFormGroup} = useCurrentFormGroup()
+const { tickets: tickets, loadProgress} = useCurrentStudentProgress()
+await loadActiveFormGroup()
+await loadProgress()
+const checkingStudent = ref(true)
+
+onMounted(async () => {
+  if (!student.value) {
+    await restoreStudent()
+  }
+
+  if (!student.value) {
+    await navigateTo('/reader/profile')
+    return
+  }
+
+  checkingStudent.value = false
 })
 
-//load parsed student settings
-const settings = reactive({
-  dyslexiaFont: computed(() => Boolean(parsedSettings.value.dyslexiaFont) || false),
-  language:    computed(() => parsedSettings.value.language || 'en'),
-  fontSize:    computed(() => Number(parsedSettings.value.fontSize) || 1),
-})
-
-//TODO 2 calculate stats from student data
-const stats = {
-  xp: computed(() => Number(student.value?.exp ?? 0)),
-  streak: 5,
-  tickets: 3,
-}
-
-const showSettings = ref(false)
 
 // ── Theme class ──
 const themeClass = computed(() => {
   const t = 'light'
-  const d = settings.dyslexiaFont ? 'dyslexia-font' : ''
+  const d = settings.value.dyslexiaFont ? 'dyslexia-font' : ''
   return `reader-app ${t} ${d}`.trim()
 })
 
@@ -123,24 +101,8 @@ const mostRecent = computed(() => {
 // Controls the "View All Announcements" slide-up popup
 const showAllAnnouncements = ref(false)
 
-//TODO 2
-//  Weekly forms progress 
-const thisWeekForms = ref([
-  { id: 201, day: 'Monday',    dayNum: 1, missed: true  },
-  { id: 202, day: 'Tuesday',   dayNum: 2, missed: true  },
-  { id: 203, day: 'Wednesday', dayNum: 3, missed: false },
-  { id: 204, day: 'Thursday',  dayNum: 4, missed: false },
-  { id: 205, day: 'Friday',    dayNum: 5, missed: false },
-])
-const completedWeeks = ref<number[]>([201, 202])
-
-const completedThisWeek = computed(() =>
-  completedWeeks.value.filter(id => thisWeekForms.value.some(f => f.id === id))
-)
-
 const completionMessage = computed(() => {
-  const n = completedThisWeek.value.length
-  return ['', 'Nice!', 'Good Job!', 'Great Job!', 'Wow!', 'Awesome!', 'Amazing!'][n] ?? 'Spectacular!'
+  return ['', 'Nice!', 'Good Job!', 'Great Job!', 'Wow!', 'Awesome!', 'Amazing!'][tickets.value] ?? 'Spectacular!'
 })
 </script>
 
@@ -170,10 +132,10 @@ const completionMessage = computed(() => {
           @click="triggerXpClick"
         >
         <span class="text-lg" :class="xpClicked ? 'animate-star-spin' : ''">🪙</span>
-          <span class="font-heading font-bold text-amber-600">{{ stats.xp }}</span>
+          <span class="font-heading font-bold text-amber-600">{{ Number(student?.exp) }}</span>
           <span class="text-gray-300">|</span>
           <span class="text-lg" :class="ticketClicked ? 'animate-ticket-wobble' : ''" @click.stop="triggerTicketClick">🎟️</span>
-          <span class="font-heading font-bold" style="color:var(--brand-mint)">{{ stats.tickets }}</span>
+          <span class="font-heading font-bold" style="color:var(--brand-mint)">{{ tickets }}</span>
           <span v-for="c in burstCoins" :key="c.id" class="absolute text-sm animate-coin-burst"
                 :style="`--tx:${c.tx}px;--ty:${c.ty}px;left:50%;top:50%;`">🪙</span>
           <Transition name="box-pop">
@@ -282,59 +244,13 @@ const completionMessage = computed(() => {
               <p class="text-sm font-bold uppercase tracking-widest opacity-80 mb-1">Today's Challenge</p>
               <h3 class="font-heading text-3xl font-black">Start Your Daily Form 📝</h3>
               <p class="text-base opacity-80 mt-1 font-medium">
-                {{ completedThisWeek.length }} out of {{ thisWeekForms.length }} completed this week.
+                {{ tickets }} out of {{ totalForms }} completed this week.
                 {{ completionMessage }}
               </p>
             </div>
             <span class="text-5xl group-hover:translate-x-2 transition-transform duration-300">➜</span>
           </div>
         </NuxtLink>
-        <!-- TODO 6-->>
-        <!-- 7-Day Raffle Progress -->
-        <div class="premium-card p-5 bg-white/80" style="border: 2px solid rgba(224,96,77,0.1)">
-          <div class="flex items-center justify-between mb-3">
-            <h3 class="font-heading font-black text-base flex items-center gap-2" style="color: var(--brand-dark)">
-              🎟️ Weekly Raffle Progress
-            </h3>
-            <span class="text-sm font-bold text-gray-400">
-              {{ completedThisWeek.length }} / {{ thisWeekForms.length }} days
-            </span>
-          </div>
-
-          <div class="flex items-center justify-between gap-2">
-            <div v-for="form in thisWeekForms" :key="form.id" class="flex-1 flex flex-col items-center gap-1">
-              <div
-                class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-all shadow-sm"
-                :class="
-                  completedWeeks.includes(form.id)
-                    ? 'text-white scale-110'
-                    : form.missed
-                      ? 'text-amber-500 border-2 border-amber-300 border-dashed bg-amber-100'
-                      : 'text-gray-300 border-2 border-gray-200 bg-gray-100'
-                "
-                :style="completedWeeks.includes(form.id) ? `background: var(--brand-mint)` : ''"
-              >
-                <span v-if="completedWeeks.includes(form.id)">✓</span>
-                <span v-else>{{ form.dayNum }}</span>
-              </div>
-              <span class="text-[10px] font-bold text-gray-400 uppercase">{{ form.day.substring(0,3) }}</span>
-            </div>
-          </div>
-
-          <div class="mt-3 h-2 bg-gray-100 rounded-full overflow-hidden">
-            <div
-              class="h-full rounded-full transition-all duration-500"
-              style="background: linear-gradient(to right, var(--brand-mint), var(--brand-indigo))"
-              :style="`width: ${(completedThisWeek.length / thisWeekForms.length) * 100}%`"
-            />
-          </div>
-          <p v-if="completedThisWeek.length === thisWeekForms.length"
-             class="text-center font-bold mt-2 text-sm animate-pop"
-             style="color: var(--brand-mint)">
-            🎉 All done this week! Your raffle ticket is in!
-          </p>
-        </div>
-
       </section>
     </main>
 
@@ -362,6 +278,7 @@ const completionMessage = computed(() => {
         <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
       </svg>
     </NuxtLink>
+
 
     <!-- ── ALL ANNOUNCEMENTS POPUP (slide-up) ── -->
     <!-- Opens when the user clicks "View All ›" in the announcement bar.
@@ -498,6 +415,7 @@ const completionMessage = computed(() => {
         </div>
       </div>
     </Transition>
+
 
   </div>
 </template>

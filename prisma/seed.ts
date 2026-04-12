@@ -1,146 +1,121 @@
-import { Param } from '@prisma/client/runtime/client'
 import { prisma } from '../server/utils/prisma'
 
 async function main() {
-  console.log('Start seeding...')
-  // 1. Create a Parent with a Password (Local Auth) and one child
-  const user1 = await prisma.user.create({
+  const seededEmails = [
+    'parent1@example.com',
+    'parent2@gmail.com',
+    'rae@readinghuddle.com',
+    'asloran23@gmail.com',
+  ]
+
+  await prisma.user.deleteMany({
+    where: {
+      email: {
+        in: seededEmails,
+      },
+    },
+  })
+
+  await prisma.user.create({
     data: {
+      id: 'seed_user_1',
       name: 'Oryx',
       email: 'parent1@example.com',
       emailVerified: true,
+      role: 'reader',
       accounts: {
-        create: [{
-          accountId: 'oryx_local_id',
-          providerId: 'credential', // Common for email/password
-          password: 'hashed_password_here', // In a real app, hash this!
-          students: {
-            create: [{ name: 'Crota', exp: 5000, settings: { dyslexiaFont: true, fontSize: 1, language: 'en' } }],
-          },
-        }],
+        create: {
+          id: 'seed_account_1',
+          accountId: 'parent1@example.com',
+          providerId: 'magic-link',
+        },
       },
-    }
+      students: {
+        create: {
+          name: 'Crota',
+          exp: 5000,
+          settings: {
+            dyslexiaFont: true,
+            fontSize: 1,
+            language: 'en',
+          },
+        },
+      },
+    },
   })
 
-  // 2. Create a Parent with an OAuth Account (e.g., Google) and multiple children
-  const user2 = await prisma.user.create({
+  await prisma.user.create({
     data: {
+      id: 'seed_user_2',
       name: 'Richard Watterson',
       email: 'parent2@gmail.com',
       emailVerified: true,
+      role: 'reader',
       accounts: {
-        create: [{
-          accountId: 'rich_google_id',
-          providerId: 'google',
-          accessToken: 'mock_access_token',
-          students: {
-            create: [
-              { name: 'Gumball' },
-              { name: 'Darwin' },
-              { name: 'Anais' },
-            ],
+        create: {
+          id: 'seed_account_2',
+          accountId: 'parent2@gmail.com',
+          providerId: 'magic-link',
+        },
+      },
+      students: {
+        create: [
+          { name: 'Gumball' },
+          { name: 'Darwin' },
+          { name: 'Anais' },
+        ],
+      },
+    },
+  })
+
+  await prisma.user.create({
+    data: {
+      id: 'seed_user_3',
+      name: 'Rae',
+      email: 'rae@readinghuddle.com',
+      emailVerified: true,
+      role: 'admin',
+      accounts: {
+        create: {
+          id: 'seed_account_3',
+          accountId: 'rae@readinghuddle.com',
+          providerId: 'magic-link',
+        },
+      },
+      admin: {
+        create: {},
+      },
+    },
+  })
+
+  await prisma.user.create({
+    data: {
+      id: 'seed_user_4',
+      name: 'Aidan',
+      email: 'asloran23@gmail.com',
+      emailVerified: true,
+      role: 'admin',
+      accounts: {
+        create: {
+          id: 'seed_account_4',
+          accountId: 'asloran23@gmail.com',
+          providerId: 'magic-link',
+        },
+      },
+      admin: {
+        create: {
+          settings: {
+            dyslexiaFont: true,
+            fontSize: 1,
+            language: 'en',
           },
-        }],
+        },
       },
     },
   })
 
-  //create a test admin user
-  const admin1 = await prisma.user.create({
-    data: {
-      name: 'Gary Admin',
-      email: 'admin1@example.com',
-      emailVerified: true,
-      accounts: {
-        create: [{
-          accountId: 'gary_admin_id',
-          providerId: 'credential',
-          password: 'hashed_password_here',
-          admin: { create: {} },
-        }],
-      },
-    },
-  })
-
-  //create a second test admin user
-  const admin2 = await prisma.user.create({
-    data: {
-      name: 'Admin Two',
-      email: 'admin2@example.com',
-      emailVerified: true,
-      accounts: {
-        create: [{
-          accountId: 'admin2_local_id',
-          providerId: 'credential',
-          password: 'hashed_password_here',
-          admin: { create: { settings: { dyslexiaFont: true, fontSize: 1, language: 'en' } } }
-        }],
-      },
-    }],
-  },
-  } } )
-
-// 2. Create a Parent with an OAuth Account (e.g., Google) and multiple children
-const user2 = await prisma.user.create({
-  data: {
-    name: 'Richard Watterson',
-    email: 'parent2@gmail.com',
-    emailVerified: true,
-    accounts: {
-      create: [{
-        accountId: 'rich_google_id',
-        providerId: 'google',
-        accessToken: 'mock_access_token',
-        students: {
-          create: [
-            { name: 'Gumball' },
-            { name: 'Darwin' },
-            { name: 'Anais' },
-          ],
-        },
-      }],
-    },
-  },
-})
-
-//create a test admin user
-const admin1 = await prisma.user.create({
-  data: {
-    name: 'Gary Admin',
-    email: 'admin1@example.com',
-    emailVerified: true,
-    accounts: {
-      create: [{
-        accountId: 'gary_admin_id',
-        providerId: 'credential',
-        password: 'hashed_password_here',
-        admin: { create: {} },
-      }],
-    },
-  },
-})
-
-//create a second test admin user
-const admin2 = await prisma.user.create({
-  data: {
-    name: 'Admin Two',
-    email: 'admin2@example.com',
-    emailVerified: true,
-    accounts: {
-      create: [{
-        accountId: 'admin2_local_id',
-        providerId: 'credential',
-        password: 'hashed_password_here',
-        admin: { create: { settings: { dyslexiaFont: true, fontSize: 1, language: 'en' } } }
-      },
-        },
-  },
-})
-
-console.log({ user1, user2, admin1, admin2 })
-console.log('Seeding finished.')
+  console.log('Seeding finished.')
 }
-
 
 main()
   .then(async () => {

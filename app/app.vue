@@ -17,7 +17,6 @@
       class="flex min-h-screen flex-col bg-white text-gray-900 transition-colors duration-300 dark:bg-gray-900 dark:text-gray-100"
     >
 
-
       <main class="flex-1">
         <NuxtLayout>
           <NuxtPage />
