@@ -98,7 +98,7 @@ model Announcement {
   author      Int?
   postDate    DateTime
   expiryDate  DateTime?
-  content     String
+  content     Json?
 
   Author      Admin?  @relation(fields: [author], references: [id], onDelete: SetNull)
 }

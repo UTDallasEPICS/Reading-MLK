@@ -87,8 +87,41 @@ function triggerTicketClick() {
 }
 
 //TODO 3
-// Announcement
-const { data: announcements } = await useFetch<Announcement[] | null>('/api/announcement?active=true')
+// Announcement — fetch all currently-active announcements
+const { data: announcements } = await useFetch<any[] | null>('/api/announcement?active=true')
+
+// parseContent
+// ------------
+// Handles two storage formats that may exist in the database:
+// 1. Object  – new records posted as a plain JS object (Prisma deserializes automatically)
+// 2. String  – legacy records where the client called JSON.stringify() before sending,
+//              causing Prisma to double-encode them. On read Prisma decodes once,
+//              returning the inner JSON string which we must parse ourselves.
+function parseContent (raw: any): { icon: string; title: string; body: string } {
+  if (raw && typeof raw === 'object') return raw as { icon: string; title: string; body: string }
+  if (typeof raw === 'string') {
+    try { return JSON.parse(raw) as { icon: string; title: string; body: string } }
+    catch { return { icon: '📢', title: raw, body: '' } }
+  }
+  return { icon: '📢', title: '', body: '' }
+}
+
+// fmtDate — converts ISO string to a short, human-readable date e.g. "Apr 12, 2026"
+function fmtDate (iso: string | null) {
+  if (!iso) return null
+  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+// mostRecent — the newest active announcement sorted by postDate descending
+const mostRecent = computed(() => {
+  if (!announcements.value?.length) return null
+  return [...announcements.value].sort(
+    (a, b) => new Date(b.postDate).getTime() - new Date(a.postDate).getTime()
+  )[0]
+})
+
+// Controls the "View All Announcements" slide-up popup
+const showAllAnnouncements = ref(false)
 
 //TODO 2
 //  Weekly forms progress 
@@ -175,17 +208,67 @@ const completionMessage = computed(() => {
           <p class="text-lg text-gray-500 font-medium">Ready for today's reading adventure?</p>
         </div>
 
-        <!-- Announcements Ticker TODO 3-->
-        <div v-if="announcements && announcements.length > 0" class="premium-card px-5 py-3" style="background: rgba(245,158,11,0.05); border-color: rgba(245,158,11,0.2)">
-          <div class="flex items-center gap-3">
+        <!-- ── ANNOUNCEMENTS ── TODO 3 -->
+        <!-- Orange-tinted card mirrors the brand-gold accent used throughout the reader UI -->
+        <div
+          v-if="mostRecent"
+          class="premium-card px-5 py-4"
+          style="background: rgba(245,158,11,0.06); border-color: rgba(245,158,11,0.25);"
+        >
+          <!-- ── Ticker row: icon + title + optional View All button ── -->
+          <div class="flex items-center gap-3 mb-4">
             <span class="text-xl">📢</span>
             <div class="flex-grow overflow-hidden">
               <p class="text-sm font-bold truncate" style="color: var(--brand-dark)">
                 <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase mr-2 text-gray-900" style="background: var(--brand-gold)">New</span>
-                {{announcements[0]?.content}}
+                {{ parseContent(mostRecent.content).title }}
+              </p>
+            </div>
+            <!-- "View All" tab — only visible when 2+ active announcements exist -->
+            <button
+              v-if="(announcements?.length ?? 0) > 1"
+              @click="showAllAnnouncements = true"
+              class="shrink-0 text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full transition-all"
+              style="background: rgba(245,158,11,0.18); color: var(--brand-dark); border: 1px solid rgba(245,158,11,0.3);"
+            >
+              View All ›
+            </button>
+          </div>
+
+          <!-- ── Full preview card — matches the admin live preview exactly ── -->
+          <div class="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-xl flex gap-6 items-start">
+            <!-- Icon -->
+            <div class="p-4 bg-indigo-50 rounded-2xl text-4xl shrink-0 border border-indigo-100 shadow-sm flex items-center justify-center min-w-[80px] min-h-[80px]">
+              {{ parseContent(mostRecent.content).icon }}
+            </div>
+            <!-- Body -->
+            <div class="flex-grow mt-1">
+              <div class="flex flex-col gap-1 mb-3">
+                <h4 class="text-xl font-bold text-gray-800">
+                  {{ parseContent(mostRecent.content).title }}
+                </h4>
+                <div class="flex gap-2 items-center">
+                  <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-[10px] font-bold uppercase tracking-widest">
+                    {{ fmtDate(mostRecent.postDate) }}
+                    {{ mostRecent.expiryDate ? '\u2192 ' + fmtDate(mostRecent.expiryDate) : '(Ongoing)' }}
+                  </span>
+                </div>
+              </div>
+              <p class="text-gray-500 font-medium leading-relaxed">
+                {{ parseContent(mostRecent.content).body }}
               </p>
             </div>
           </div>
+        </div>
+
+        <!-- Empty state: no active announcements -->
+        <div
+          v-else
+          class="premium-card px-5 py-4 flex items-center gap-3"
+          style="background: rgba(245,158,11,0.04); border-color: rgba(245,158,11,0.15);"
+        >
+          <span class="text-xl">📤</span>
+          <p class="text-sm font-medium text-gray-400">No announcements right now. Check back later!</p>
         </div>
 
         <!-- Daily Form CTA TODO 2-->
@@ -279,6 +362,59 @@ const completionMessage = computed(() => {
         <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
       </svg>
     </NuxtLink>
+
+    <!-- ── ALL ANNOUNCEMENTS POPUP (slide-up) ── -->
+    <!-- Opens when the user clicks "View All ›" in the announcement bar.
+         Lists every currently-active announcement sorted newest first.
+         Reuses the same slide-up transition as the settings panel but sits
+         at z-[150] so it layers above other overlays if they're both open. -->
+    <Transition name="slide-up">
+      <div v-if="showAllAnnouncements" class="fixed inset-0 z-[150] flex flex-col justify-end">
+        <!-- Backdrop: clicking it closes the popup -->
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="showAllAnnouncements = false" />
+        <div class="relative rounded-t-[2.5rem] shadow-2xl max-h-[85vh] overflow-y-auto bg-white">
+          <!-- Handle bar -->
+          <div class="w-12 h-1.5 rounded-full bg-gray-300 mx-auto mt-4" />
+          <!-- Header row -->
+          <div class="px-8 pt-5 pb-3 flex items-center justify-between">
+            <div>
+              <h2 class="font-heading text-2xl font-bold" style="color: var(--brand-dark)">📢 Announcements</h2>
+              <p class="text-xs text-gray-400 mt-0.5">{{ announcements?.length ?? 0 }} active</p>
+            </div>
+            <button
+              @click="showAllAnnouncements = false"
+              class="w-9 h-9 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-700 transition"
+              style="background: #f3f4f6"
+            >✕</button>
+          </div>
+
+          <!-- Announcement cards — sorted newest first -->
+          <div class="px-8 pb-10 space-y-4">
+            <div
+              v-for="ann in [...(announcements ?? [])].sort((a,b) => new Date(b.postDate).getTime() - new Date(a.postDate).getTime())"
+              :key="ann.id"
+              class="bg-white border border-gray-100 rounded-3xl shadow-md p-5 flex gap-4 items-start"
+            >
+              <!-- Icon -->
+              <div class="p-3 bg-indigo-50 rounded-2xl text-3xl shrink-0 border border-indigo-100 shadow-sm flex items-center justify-center min-w-[64px] min-h-[64px]">
+                {{ parseContent(ann.content).icon }}
+              </div>
+              <!-- Body -->
+              <div class="flex-grow">
+                <div class="flex flex-col gap-1 mb-2">
+                  <h4 class="text-lg font-bold text-gray-800">{{ parseContent(ann.content).title }}</h4>
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                    {{ fmtDate(ann.postDate) }}
+                    {{ ann.expiryDate ? '→ ' + fmtDate(ann.expiryDate) : '(Ongoing)' }}
+                  </span>
+                </div>
+                <p class="text-sm text-gray-500 font-medium leading-relaxed">{{ parseContent(ann.content).body }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Transition>
 
     <!-- ── SETTINGS PANEL (slide-up) TODO 2 ── -->
     <Transition name="slide-up">
