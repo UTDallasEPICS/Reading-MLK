@@ -9,13 +9,27 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return navigateTo('/auth')
   }
 
-  if (session.value && to.path === '/auth') {
+  if (!session.value) {
+    return
+  }
+
+  const userRole = (session.value.user as { role?: string } | undefined)?.role
+
+  if (to.path === '/') {
+    return navigateTo(userRole === 'admin' ? '/admin' : '/reader/profile')
+  }
+
+  if (to.path === '/auth') {
     const role = to.query.role
 
     if (role === 'admin') {
-      return navigateTo('/admin')
+      return navigateTo(userRole === 'admin' ? '/admin' : '/')
     }
 
     return navigateTo('/reader/profile')
+  }
+
+  if (to.path.startsWith('/admin') && userRole !== 'admin') {
+    return navigateTo('/')
   }
 })

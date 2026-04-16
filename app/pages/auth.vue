@@ -4,9 +4,23 @@ definePageMeta({ ssr: false })
 import { z } from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
 import { authClient } from '~/utils/auth-client'
+import { onMounted } from 'vue'
 
 const toast = useToast()
 const route = useRoute()
+const router = useRouter()
+
+onMounted(() => {
+  if (route.query.emailChanged) {
+    alert('Your email was successfully updated. Please sign in again.')
+
+    // remove query param so it doesn't trigger again
+    const newQuery = { ...route.query }
+    delete newQuery.emailChanged
+
+    router.replace({ query: newQuery })
+  }
+})
 
 const loginRole = computed(() => {
   return route.query.role === 'admin' ? 'admin' : 'reader'
