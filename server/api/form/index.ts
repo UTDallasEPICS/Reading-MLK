@@ -249,7 +249,7 @@ const mapForm = (
     startDate: Date
     endDate: Date | null
     published: boolean
-    author: string | number | null
+    author: string | null
     formGroup: number
     title?: string | null
     Components?: Array<{
