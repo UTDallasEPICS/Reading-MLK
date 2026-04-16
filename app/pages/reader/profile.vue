@@ -6,6 +6,14 @@ import { useCurrentStudent } from '~/composables/useCurrentStudent'
 definePageMeta({ ssr: false })
 
 const { setStudent } = useCurrentStudent()
+const { settings } = useCurrentStudent()
+
+const readerAppStyle = computed(() => buildReaderAppStyle(settings.value.theme, settings.value.fontSize))
+
+const themeClass = computed(() => {
+  const d = settings.value.dyslexiaFont ? 'dyslexia-font' : ''
+  return `reader-app ${d}`.trim()
+})
 
 const students = ref<Student[]>([])
 const loadingStudents = ref(true)
@@ -85,8 +93,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#f8f2ea] relative overflow-hidden">
-    <div class="absolute inset-0 bg-gradient-to-b from-[#f8e9df] via-[#f8f2ea] to-[#f6efe6]" />
+  <div :class="themeClass" :style="readerAppStyle" class="min-h-screen relative overflow-hidden">
+    <ReaderAnimationLayer :active-animations="settings.activeAnimations" />
+
+    <div class="absolute inset-0 bg-white/12 pointer-events-none" />
     <div class="absolute inset-0 opacity-40 pointer-events-none">
       <div class="absolute top-20 left-20 w-40 h-40 bg-pink-100 rounded-full blur-3xl" />
       <div class="absolute bottom-16 right-20 w-52 h-52 bg-yellow-100 rounded-full blur-3xl" />

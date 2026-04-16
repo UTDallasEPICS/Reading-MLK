@@ -40,14 +40,22 @@
 }
 
 /* ---------- Themes ---------- */
-.reader-app.theme-dark {
+.reader-app.theme-dark,
+.reader-app.theme-blue {
   --brand-dark: #f8fafc;
   --bg-gradient:
     radial-gradient(at 0% 0%,   hsla(250, 20%, 20%, 0.5) 0px, transparent 50%),
     radial-gradient(at 100% 0%, hsla(280, 30%, 15%, 0.5) 0px, transparent 50%),
     radial-gradient(at 100% 100%, hsla(200, 30%, 10%, 0.5) 0px, transparent 50%);
   background-color: #0f172a !important;
-  color: #f8fafc;
+  color: #e2e8f0;
+}
+
+.reader-app.theme-dark .text-gray-400,
+.reader-app.theme-dark .text-gray-500,
+.reader-app.theme-blue .text-gray-400,
+.reader-app.theme-blue .text-gray-500 {
+  color: #cbd5e1 !important;
 }
 
 .reader-app.theme-sepia {

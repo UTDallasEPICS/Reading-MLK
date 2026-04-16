@@ -10,6 +10,8 @@ const stats = computed(() => ({
   tickets: tickets.value? tickets.value : 0,
 }))
 
+const readerAppStyle = computed(() => buildReaderAppStyle(settings.value.theme, settings.value.fontSize))
+
 const themeClass = computed(() => {
   const d = settings.value.dyslexiaFont ? 'dyslexia-font' : ''
   return `reader-app ${d}`.trim()
@@ -144,11 +146,21 @@ async function submitChallenge() {
   const formId = activeForm.value.id
   
   // Persist completion and XP
-  const submission  = await logFormSubmission(formId)
+  const submissionResult = await logFormSubmission(formId)
+
+  if (!submissionResult?.created) {
+    alert('This form was already submitted. You cannot submit it twice.')
+    activeForm.value = null
+    currentComponentID.value = 0
+    feedbackVisible.value = {}
+    answers.value = {}
+    return
+  }
+
   await updateExp(100)
 
   // grab newly posted submission ID
-  const submissionID = Number(submission?.id)
+  const submissionID = Number(submissionResult?.submission?.id)
 
   showRaffleReward.value = true
   ticketDropped.value    = false
@@ -187,7 +199,8 @@ function getBadgeClass(type: string) {
 </script>
 
 <template>
-  <div :class="themeClass" :style="`font-size:${settings.fontSize*16}px`" class="pb-32 px-4 pt-4 min-h-screen">
+  <div :class="themeClass" :style="readerAppStyle" class="pb-32 px-4 pt-4 min-h-screen">
+    <ReaderAnimationLayer :active-animations="settings.activeAnimations" />
 
     <!-- ── TOP BAR ── -->
     <header class="max-w-4xl mx-auto flex justify-between items-center mb-8 px-2 relative z-[200]">

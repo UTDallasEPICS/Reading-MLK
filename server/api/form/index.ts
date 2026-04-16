@@ -249,9 +249,9 @@ const mapForm = (
     startDate: Date
     endDate: Date | null
     published: boolean
-    author: string | number | null
+    author: string | null
     formGroup: number
-    title?: string | null
+    title?: string 
     Components?: Array<{
       id: number
       form: number
@@ -357,7 +357,7 @@ export default defineEventHandler(async (event) => {
       const query = getQuery(event)
       const formGroupId = query.formGroup !== undefined ? toInt(query.formGroup, 'formGroup', false) : null
       const weeklyDate =
-        query.weeklyDate !== undefined && query.weeklyDate !== null && query.weeklyDate !== ''
+        !!query.weeklyDate
           ? (toDate(query.weeklyDate, 'weeklyDate') as Date)
           : null
 
@@ -644,7 +644,7 @@ export default defineEventHandler(async (event) => {
         endDate?: Date | null
         published?: boolean
         order?: number
-        title?: string | null
+        title?: string
       } = {}
 
       if (hasOwnField(body, 'formGroup')) {
@@ -678,8 +678,17 @@ export default defineEventHandler(async (event) => {
       }
 
       if (hasOwnField(body, 'title')) {
-        const title = String(body?.title ?? '').trim()
-        data.title = title || null
+        if (body?.title === null || body?.title === undefined) {
+          throw createError({ statusCode: 400, statusMessage: 'title cannot be null' })
+        }
+
+        const title = String(body?.title).trim()
+
+        if (!title) {
+          throw createError({ statusCode: 400, statusMessage: 'title cannot be empty' })
+        }
+
+        data.title = title
       }
 
       const updated = await prisma.form.update({

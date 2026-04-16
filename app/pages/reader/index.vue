@@ -8,16 +8,13 @@ const kidProfiles = ref([
   { name: 'Sofia',  avatar: '🦋', color: 'bg-purple-400' },
 ])
 
-const settings = reactive({
-  theme:       'light',
-  dyslexiaFont: false,
-  fontSize:    1,
-})
+const { settings } = useCurrentStudent()
+
+const readerAppStyle = computed(() => buildReaderAppStyle(settings.value.theme, settings.value.fontSize))
 
 const themeClass = computed(() => {
-  const t = settings.theme !== 'light' ? `theme-${settings.theme}` : ''
-  const d = settings.dyslexiaFont ? 'dyslexia-font' : ''
-  return `reader-app ${t} ${d}`.trim()
+  const d = settings.value.dyslexiaFont ? 'dyslexia-font' : ''
+  return `reader-app ${d}`.trim()
 })
 
 function selectProfile(idx: number) {
@@ -31,9 +28,11 @@ function selectProfile(idx: number) {
 <template>
   <div
     :class="themeClass"
-    :style="`font-size:${settings.fontSize * 16}px`"
+    :style="readerAppStyle"
     class="min-h-screen pb-32 px-4 pt-4"
   >
+    <ReaderAnimationLayer :active-animations="settings.activeAnimations" />
+
     <!-- ── TOP BAR ── -->
     <header class="max-w-4xl mx-auto flex justify-between items-center mb-8 px-2 relative z-[200]">
       <div class="flex items-center gap-3">

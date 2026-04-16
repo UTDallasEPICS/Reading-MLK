@@ -1,14 +1,113 @@
 <script setup lang="ts">
 definePageMeta({ ssr: false })
 
-const settings = reactive({ theme: 'light', dyslexiaFont: false, language: 'en', fontSize: 1 })
-const stats = reactive({ xp: 1250, booksRead: 14, streak: 5, tickets: 3 })
+const { student, settings: globalSettings, saveSettings, loadStudent, restoreStudent } = useCurrentStudent()
+
+if (!student.value) {
+  await restoreStudent()
+}
+
+if (!student.value) {
+  await loadStudent(1)
+}
+
+const settings = reactive({
+  theme: globalSettings.value.theme,
+  activeAnimations: globalSettings.value.activeAnimations,
+  dyslexiaFont: globalSettings.value.dyslexiaFont,
+  language: globalSettings.value.language,
+  fontSize: globalSettings.value.fontSize,
+})
+
+const stats = computed(() => ({ xp: student.value?.exp ?? 0, booksRead: 14, streak: 5, tickets: 3 }))
+const readerAppStyle = computed(() => buildReaderAppStyle(settings.theme, settings.fontSize))
 
 const themeClass = computed(() => {
-  const t = settings.theme !== 'light' ? `theme-${settings.theme}` : ''
   const d = settings.dyslexiaFont ? 'dyslexia-font' : ''
-  return `reader-app ${t} ${d}`.trim()
+  return `reader-app ${d}`.trim()
 })
+
+watch(settings, (newSettings) => {
+  void saveSettings(newSettings)
+}, { deep: true })
+
+type ShopCatalogItem = {
+  id: number
+  type: 'theme' | 'animation'
+  name: string
+  cost: number
+  owned: boolean
+  class?: string
+  previewBg?: string
+  previewGrad?: string
+}
+
+const shopItems = ref<ShopCatalogItem[]>([])
+
+const themeDefaults = computed(() => {
+  const defaults = new Map(READER_THEME_OPTIONS.map((option) => [option.name, option]))
+  return defaults
+})
+
+const normalizeShopItem = (item: any): ShopCatalogItem => {
+  const themeDefaultsByName = themeDefaults.value.get(item.name)
+  const themeEffect = item.themeEffect && typeof item.themeEffect === 'object' ? item.themeEffect : {}
+  const animationEffect = item.animationEffect && typeof item.animationEffect === 'object' ? item.animationEffect : {}
+
+  const isTheme = item.type === 'theme'
+  const previewBg = String(
+    themeEffect.previewBg
+      ?? themeEffect.backgroundColor
+      ?? themeDefaultsByName?.previewBg
+      ?? '#ffffff'
+  )
+  const previewGrad = String(
+    themeEffect.previewGrad
+      ?? themeEffect.backgroundImage
+      ?? themeDefaultsByName?.previewGrad
+      ?? 'none'
+  )
+  const className = String(
+    themeEffect.className
+      ?? themeEffect.class
+      ?? animationEffect.className
+      ?? item.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+  )
+
+  return {
+    id: Number(item.id),
+    type: isTheme ? 'theme' : 'animation',
+    name: String(item.name),
+    cost: Number(item.cost ?? 0),
+    owned: Boolean(item.owned),
+    class: isTheme ? className : undefined,
+    previewBg: isTheme ? previewBg : undefined,
+    previewGrad: isTheme ? previewGrad : undefined,
+  }
+}
+
+const loadShopItems = async () => {
+  if (!student.value?.id) {
+    shopItems.value = []
+    return
+  }
+
+  try {
+    const items = await $fetch<any[]>(`/api/student/${student.value.id}/shop-items`)
+    shopItems.value = (items ?? []).map(normalizeShopItem)
+  } catch (error) {
+    console.error('Failed to load shop items', error)
+    shopItems.value = []
+  }
+}
+
+watch(
+  () => student.value?.id,
+  async () => {
+    await loadShopItems()
+  },
+  { immediate: true }
+)
 
 // ── Click badge animations ──
 const xpClicked     = ref(false)
@@ -29,70 +128,54 @@ function triggerTicketClick() {
   setTimeout(() => { ticketClicked.value = false; flyTickets.value = [] }, 1000)
 }
 
-// ── Shop tabs ──
-const decorTab = ref<'shop'|'badges'>('shop')
-
-// ── Shop items — themes ──
-const shopItems = ref([
-  { id: 1,  type:'theme', name:'Light Bloom',   cost:0,   class:'light',  owned:true,  previewBg:'#f5ede3',  previewGrad:'radial-gradient(at 0% 0%, hsla(25,95%,75%,0.3) 0px, transparent 50%)' },
-  { id: 2,  type:'theme', name:'Galaxy Night',  cost:500, class:'blue',   owned:false, previewBg:'#1f3b7c',  previewGrad:'radial-gradient(at 0% 0%, hsla(250,20%,20%,0.5) 0px, transparent 50%)' },
-  { id: 3,  type:'theme', name:'Old Parchment', cost:300, class:'sepia',  owned:false, previewBg:'#f4ecd8',  previewGrad:'none' },
-  { id: 10, type:'theme', name:'Sunset',        cost:100, class:'sunset', owned:false, previewBg:'#fff5f5',  previewGrad:'radial-gradient(at 0% 0%, hsla(10,90%,75%,0.25) 0px, transparent 50%)' },
-  { id: 11, type:'theme', name:'Ocean',         cost:100, class:'ocean',  owned:false, previewBg:'#f0f9ff',  previewGrad:'radial-gradient(at 0% 0%, hsla(200,90%,75%,0.25) 0px, transparent 50%)' },
-  { id: 12, type:'theme', name:'Forest',        cost:150, class:'forest', owned:false, previewBg:'#f0fdf4',  previewGrad:'radial-gradient(at 0% 0%, hsla(140,80%,70%,0.25) 0px, transparent 50%)' },
-  { id: 13, type:'theme', name:'Candy',         cost:150, class:'candy',  owned:false, previewBg:'#fdf2f8',  previewGrad:'radial-gradient(at 0% 0%, hsla(330,90%,85%,0.35) 0px, transparent 50%)' },
-  { id: 14, type:'theme', name:'Fire',          cost:150, class:'fire',   owned:false, previewBg:'#fff7ed',  previewGrad:'radial-gradient(at 30% 40%, hsla(20,95%,65%,0.3) 0px, transparent 50%)' },
-  { id: 15, type:'theme', name:'Ice',           cost:150, class:'ice',    owned:false, previewBg:'#f0f9ff',  previewGrad:'radial-gradient(at 0% 0%, hsla(200,100%,95%,0.4) 0px, transparent 50%)' },
-  { id: 4,  type:'animation', name:'Twinkling Stars',      cost:200,  owned:false },
-  { id: 5,  type:'animation', name:'Confetti Rain',        cost:1000, owned:false },
-  { id: 6,  type:'animation', name:'Magic Sparkles',       cost:400,  owned:false },
-  { id: 7,  type:'animation', name:'Fireflies',            cost:400,  owned:false },
-  { id: 8,  type:'animation', name:'Fluttering Butterflies', cost:500, owned:false },
-  { id: 9,  type:'animation', name:'Falling Leaves',       cost:800,  owned:false },
-])
-
-const activeAnimations = ref<string[]>([])
 const showShopCelebration = ref('')
 
-function buyItem(item: any) {
-  if (stats.xp >= item.cost) {
-    stats.xp -= item.cost
-    item.owned = true
+async function buyItem(item: ShopCatalogItem) {
+  if (!student.value?.id) {
+    alert('No active student selected.')
+    return
+  }
+
+  try {
+    const result = await $fetch<{ created: boolean; student?: { exp: number } }>(`/api/student/${student.value.id}/shop-items`, {
+      method: 'POST',
+      body: {
+        shopItemId: item.id,
+      },
+    })
+
+    if (typeof result?.student?.exp === 'number') {
+      student.value.exp = result.student.exp
+    }
+
     showShopCelebration.value = item.name
     setTimeout(() => { showShopCelebration.value = '' }, 2500)
+
+    await loadShopItems()
     applyItem(item)
-  } else {
-    alert('Not enough XP!')
+  } catch (error) {
+    console.error('Failed to buy item', error)
+    alert('Not enough XP or item unavailable yet.')
   }
 }
 
-function applyItem(item: any) {
+function applyItem(item: ShopCatalogItem) {
   if (item.type === 'theme') {
     settings.theme = item.class
   } else if (item.type === 'animation') {
-    if (activeAnimations.value.includes(item.name)) {
-      activeAnimations.value = activeAnimations.value.filter(a => a !== item.name)
+    if (settings.activeAnimations.includes(item.name)) {
+      settings.activeAnimations = settings.activeAnimations.filter((name) => name !== item.name)
     } else {
-      activeAnimations.value.push(item.name)
+      settings.activeAnimations = [...settings.activeAnimations, item.name]
     }
   }
 }
 
-// ── Badges ──
-const badges = ref([
-  { id:1, name:'First Steps',   icon:'🐣', desc:'Read your first book',      unlocked:true  },
-  { id:2, name:'Book Worm',     icon:'🐛', desc:'Read 10 books',             unlocked:true  },
-  { id:3, name:'Form Master',   icon:'📝', desc:'Complete 5 weekly forms',   unlocked:false },
-  { id:4, name:'Early Bird',    icon:'☀️', desc:'Read before 8am',           unlocked:true  },
-  { id:5, name:'Night Owl',     icon:'🦉', desc:'Read after 8pm',            unlocked:false },
-  { id:6, name:'Streak Star',   icon:'⭐', desc:'Get a 7 day streak',        unlocked:false },
-  { id:7, name:'Raffle Champ',  icon:'🎫', desc:'Enter 3 raffles',           unlocked:true  },
-  { id:8, name:'Super Sage',    icon:'🧙', desc:'Reach level 20',            unlocked:false },
-])
 </script>
 
 <template>
-  <div :class="themeClass" :style="`font-size:${settings.fontSize*16}px`" class="pb-32 px-4 pt-4 min-h-screen">
+  <div :class="themeClass" :style="readerAppStyle" class="pb-32 px-4 pt-4 min-h-screen">
+    <ReaderAnimationLayer :active-animations="settings.activeAnimations" />
 
     <!-- ── TOP BAR ── -->
     <header class="max-w-4xl mx-auto flex justify-between items-center mb-8 px-2 relative z-[200]">
@@ -135,18 +218,8 @@ const badges = ref([
     <!-- ── MAIN ── -->
     <main class="max-w-4xl mx-auto min-h-[60vh]">
 
-      <!-- Tab switcher -->
-      <div class="flex gap-4 p-1 rounded-2xl border-2 border-white max-w-sm mx-auto mb-8" style="background:rgba(255,255,255,0.5); backdrop-filter:blur(10px)">
-        <button @click="decorTab = 'shop'"
-          class="flex-1 py-2 rounded-xl font-bold transition-all"
-          :style="decorTab === 'shop' ? 'background:var(--brand-indigo); color:white' : 'color:#9ca3af'">Shop</button>
-        <button @click="decorTab = 'badges'"
-          class="flex-1 py-2 rounded-xl font-bold transition-all"
-          :style="decorTab === 'badges' ? 'background:var(--brand-indigo); color:white' : 'color:#9ca3af'">Badges</button>
-      </div>
-
       <!-- ── SHOP ── -->
-      <div v-if="decorTab === 'shop'" class="space-y-8">
+      <div class="space-y-8">
 
         <!-- Themes -->
         <div>
@@ -181,7 +254,7 @@ const badges = ref([
             <div
               v-for="item in shopItems.filter(i => i.type === 'animation')" :key="item.id"
               class="flex items-center justify-between p-4 rounded-2xl border-2 transition-all"
-              :style="activeAnimations.includes(item.name)
+              :style="settings.activeAnimations.includes(item.name)
                 ? 'border-color:var(--brand-mint); background:rgba(45,212,191,0.05)'
                 : 'border-color:white; background:rgba(255,255,255,0.6)'"
             >
@@ -199,31 +272,17 @@ const badges = ref([
                 style="background:var(--brand-gold)">BUY</button>
               <button v-else @click="applyItem(item)"
                 class="px-6 py-2 rounded-xl font-black text-xs transition-colors"
-                :style="activeAnimations.includes(item.name)
+                :style="settings.activeAnimations.includes(item.name)
                   ? 'background:var(--brand-dark); color:white'
                   : 'background:white; color:var(--brand-dark)'">
-                {{ activeAnimations.includes(item.name) ? 'REMOVE' : 'EQUIP' }}
+                {{ settings.activeAnimations.includes(item.name) ? 'REMOVE' : 'EQUIP' }}
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- ── BADGES ── -->
-      <div v-else class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div
-          v-for="badge in badges" :key="badge.id"
-          class="premium-card p-6 flex flex-col items-center text-center gap-2 group"
-          :class="badge.unlocked ? '' : 'opacity-40 grayscale'"
-          :style="badge.unlocked ? 'border-color:var(--brand-gold)' : ''"
-        >
-          <div class="text-5xl group-hover:scale-110 transition duration-500">{{ badge.icon }}</div>
-          <h4 class="font-heading font-bold text-lg leading-tight" style="color:var(--brand-dark)">{{ badge.name }}</h4>
-          <p class="text-[10px] font-bold text-gray-400">{{ badge.desc }}</p>
-          <div v-if="badge.unlocked" class="mt-2 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider" style="background:rgba(245,158,11,0.2); color:var(--brand-dark)">Unlocked</div>
-        </div>
-      </div>
-
+      
     </main>
 
     <!-- ── LEFT / RIGHT ARROWS ── -->

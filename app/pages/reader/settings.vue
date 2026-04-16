@@ -10,10 +10,13 @@ if (!student.value) {
 
 // Map the global settings to a local reactive object so our sliders/toggles can mutate them
 const settings = reactive({ 
+  theme: globalSettings.value.theme,
   dyslexiaFont: globalSettings.value.dyslexiaFont,
   language: globalSettings.value.language,
   fontSize: globalSettings.value.fontSize
 })
+
+const readerAppStyle = computed(() => buildReaderAppStyle(settings.theme, settings.fontSize))
 
 //Logout
 const { clearStudent } = useCurrentStudent()
@@ -33,9 +36,8 @@ async function logout() {
 
 // ── Theme class ── 
 const themeClass = computed(() => {
-  const t = 'light'
   const d = settings.dyslexiaFont ? 'dyslexia-font' : ''
-  return `reader-app ${t} ${d}`.trim()
+  return `reader-app ${d}`.trim()
 })
 
 // Watch for any changes to settings and automatically save using the composable
@@ -46,7 +48,8 @@ watch(settings, (newSettings) => {
 </script>
 
 <template>
-  <div :class="themeClass" :style="`font-size: ${settings.fontSize * 16}px`" class="pb-32 px-4 pt-4 min-h-screen relative">
+  <div :class="themeClass" :style="readerAppStyle" class="pb-32 px-4 pt-4 min-h-screen relative">
+    <ReaderAnimationLayer :active-animations="globalSettings.activeAnimations" />
     
     <!-- ── TOP BAR ── -->
     <header class="absolute top-4 left-0 right-0 w-full max-w-4xl mx-auto flex justify-end items-center px-6 z-[200]">

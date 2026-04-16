@@ -20,6 +20,7 @@ const { tickets: tickets, loadProgress} = useCurrentStudentProgress()
 await loadActiveFormGroup()
 await loadProgress()
 const checkingStudent = ref(true)
+const readerAppStyle = computed(() => buildReaderAppStyle(settings.value.theme, settings.value.fontSize))
 
 onMounted(async () => {
   if (!student.value) {
@@ -37,9 +38,8 @@ onMounted(async () => {
 
 // ── Theme class ──
 const themeClass = computed(() => {
-  const t = 'light'
   const d = settings.value.dyslexiaFont ? 'dyslexia-font' : ''
-  return `reader-app ${t} ${d}`.trim()
+  return `reader-app ${d}`.trim()
 })
 
 // ── Click-triggered badge animations ──
@@ -72,7 +72,8 @@ const completionMessage = computed(() => {
 </script>
 
 <template>
-  <div :class="themeClass" :style="`font-size: ${settings.fontSize * 16}px`" class="pb-32 px-4 pt-4 min-h-screen">
+  <div :class="themeClass" :style="readerAppStyle" class="pb-32 px-4 pt-4 min-h-screen">
+    <ReaderAnimationLayer :active-animations="settings.activeAnimations" />
 
     <!-- ── TOP BAR ── -->
     <header class="max-w-4xl mx-auto flex justify-between items-center mb-8 px-2 relative z-[200]">

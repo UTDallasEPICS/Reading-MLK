@@ -7,9 +7,9 @@ const {
   builderSubTab, formTitle, editingFormId, questions,
   formWeekStart, formDays, historyWeekStart, historyStatusSelection, historyGroupStartDate, historyGroupEndDate, toggleHistoryStatus, getLastMonday,
   getCalculatedDate, formatDate, defaultQuestions,
-  filteredPublishedForms, selectedFormDetails, viewFormDetails,
+  filteredPublishedForms, selectedFormDetails, viewFormDetails, formPublishDialog, closeFormPublishDialog,
   draggedIdx, dragStart, onDrop,
-  addQuestion, publishForm, editPublishedForm, toggleFormPublish, loadPublishedForms,
+  addQuestion, publishForm, saveDraftForm, editPublishedForm, toggleFormPublish, loadPublishedForms,
 } = useAdmin()
 
 const previewDates = computed(() => {
@@ -124,6 +124,26 @@ onBeforeUnmount(() => {
 <template>
   <div class="builder-wrap">
 
+    <!-- Publish success dialog -->
+    <Transition name="fade">
+      <div v-if="formPublishDialog.visible" class="publish-dialog-backdrop">
+        <div class="publish-dialog-overlay" @click="closeFormPublishDialog" />
+        <div class="publish-dialog-box" role="dialog" aria-modal="true" aria-label="Form published">
+          <div class="publish-dialog-icon-wrap">
+            <span class="publish-dialog-icon">✓</span>
+          </div>
+          <h3 class="publish-dialog-title">{{ formPublishDialog.title }}</h3>
+          <p class="publish-dialog-message">{{ formPublishDialog.message }}</p>
+          <p v-if="formPublishDialog.days.length" class="publish-dialog-days">
+            {{ formPublishDialog.days.join(' • ') }}
+          </p>
+          <button class="btn-indigo publish-dialog-btn" @click="closeFormPublishDialog">
+            Continue
+          </button>
+        </div>
+      </div>
+    </Transition>
+
     <!-- ══════════════════════════════════════════ -->
     <!--  FORM DETAILS MODAL                        -->
     <!-- ══════════════════════════════════════════ -->
@@ -181,7 +201,7 @@ onBeforeUnmount(() => {
       <div class="history-header">
         <h3 class="history-title">{{ editingFormId ? 'Editing Form' : 'Build New Form' }}</h3>
         <button class="btn-indigo" @click="builderSubTab = 'history';">
-            {{ "Published Forms History" }}
+          {{ "Forms History" }}
           </button>
       </div>
 
@@ -348,6 +368,9 @@ onBeforeUnmount(() => {
           <button class="btn-indigo preview-cancel-btn" @click="publishForm">
             {{ editingFormId ? 'Update Form' : 'Publish Form' }}
           </button>
+          <button class="btn-ghost preview-cancel-btn" @click="saveDraftForm">
+            {{ editingFormId ? 'Save As Draft' : 'Save Draft' }}
+          </button>
 
           <div class="preview-list">
             <div v-if="questions.length === 0" class="preview-empty">No questions to preview yet.</div>
@@ -378,7 +401,7 @@ onBeforeUnmount(() => {
     <div v-if="builderSubTab === 'history'" class="history-wrap">
 
       <div class="history-header">
-        <h3 class="history-title">Published Curriculums History</h3>
+        <h3 class="history-title">Forms History</h3>
         <button
           class="btn-indigo"
           @click="builderSubTab = 'creation'; editingFormId = null; formTitle = ''; questions = defaultQuestions()"

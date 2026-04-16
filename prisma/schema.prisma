@@ -90,6 +90,7 @@ model Student {
   Parent                User       @relation(fields: [parentUserId], references: [id], onDelete: Cascade)
   Submissions           FormSubmission[]
   WinnerOf              FormGroup[]   @relation("RaffleWinner")
+  unlockedShopItems     StudentShopItem[]
 }
 
 model Announcement {
@@ -150,6 +151,8 @@ model FormSubmission {
   Student         Student     @relation(fields: [student], references: [id], onDelete: Cascade)
   Form            Form        @relation(fields: [form], references: [id], onDelete: Cascade)
   Responses       SubmissionResponse[]
+
+  @@unique([student, form])
 }
 
 model SubmissionResponse{
@@ -167,9 +170,11 @@ model ShopItem {
   type            String
   name            String
   dateAvailable   DateTime
+  cost            Int     @default(0)
 
   Theme           ShopTheme?
   Animation       ShopAnimation?
+  unlockedByStudents StudentShopItem[]
 }
 
 model ShopTheme {
@@ -188,4 +193,18 @@ model ShopAnimation {
   animationEffect         Json?  
 
   ShopItem                ShopItem   @relation(fields: [shopItem], references: [id], onDelete: Cascade)
+}
+
+model StudentShopItem {
+  id         Int      @id @default(autoincrement())
+  studentId   Int
+  shopItemId  Int
+  unlockedAt  DateTime @default(now())
+
+  Student    Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  ShopItem   ShopItem  @relation(fields: [shopItemId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, shopItemId])
+  @@index([studentId])
+  @@index([shopItemId])
 }

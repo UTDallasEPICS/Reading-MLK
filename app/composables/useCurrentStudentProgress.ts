@@ -2,6 +2,13 @@ import type { FormSubmission, SubmissionResponse } from '~~/prisma/generated/cli
 import { useCurrentStudent } from './useCurrentStudent'
 import { useCurrentFormGroup } from './useCurrentFormGroup'
 
+type CreateSubmissionResponse = {
+  created?: boolean
+  submission?: FormSubmission
+  error?: string
+  message?: string
+}
+
 export const useCurrentStudentProgress = () => {
   const { student } = useCurrentStudent()
   const { FormGroup: formGroupState, totalFormsInGroup: totalFormsInGroup } = useCurrentFormGroup()
@@ -53,7 +60,7 @@ export const useCurrentStudentProgress = () => {
     }
 
     try {
-      const newSubmission = await $fetch<FormSubmission>('/api/formSubmission', {
+      const response = await $fetch<CreateSubmissionResponse>('/api/formSubmission', {
         method: 'POST',
         body: {
           student: student.value.id,
@@ -61,10 +68,34 @@ export const useCurrentStudentProgress = () => {
         }
       })
 
+      const newSubmission = response?.submission
+
+      if (!newSubmission) {
+        return null
+      }
+
       // Update local state without needing a new fetch
-      submissions.value = [...submissions.value, newSubmission]
-      return newSubmission
+      const alreadyTracked = submissions.value.some((submission) => submission.id === newSubmission.id)
+
+      if (!alreadyTracked) {
+        submissions.value = [...submissions.value, newSubmission]
+      }
+
+      return {
+        submission: newSubmission,
+        created: Boolean(response?.created),
+      }
     } catch (error) {
+      const apiError = error as { statusCode?: number; data?: { error?: string } }
+
+      if (apiError?.statusCode === 409 || apiError?.data?.error === 'DUPLICATE_SUBMISSION') {
+        await loadProgress()
+        return {
+          submission: null,
+          created: false,
+        }
+      }
+
       console.error('Failed to log form submission:', error)
       return null
     }

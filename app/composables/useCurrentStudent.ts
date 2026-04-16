@@ -1,6 +1,8 @@
 import type { Student } from '~~/prisma/generated/client'
 
 export type StudentSettings = {
+  theme: string
+  activeAnimations: string[]
   dyslexiaFont: boolean
   language: string
   fontSize: number
@@ -13,6 +15,10 @@ export const useCurrentStudent = () => {
     const raw = (student.value?.settings as Partial<StudentSettings>) || {}
 
     return {
+      theme: raw.theme || 'light',
+      activeAnimations: Array.isArray(raw.activeAnimations)
+        ? raw.activeAnimations.map((value) => String(value))
+        : [],
       dyslexiaFont: Boolean(raw.dyslexiaFont),
       language: raw.language || 'en',
       fontSize: Number(raw.fontSize) || 1,
