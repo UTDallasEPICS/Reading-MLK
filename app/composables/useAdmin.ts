@@ -397,14 +397,11 @@ export const useAdmin = () => {
   }
 
   // ── Students / Progress ──
-  const students = useState<any[]>('adminStudents', () => [
-    { id: 1, name: 'Aiden Smith', initials: 'AS', email: 'aiden@school.edu', tickets: 12, streak: 4, lastActive: '2 hours ago' },
-    { id: 2, name: 'Nevin Kumar', initials: 'NK', email: 'nevin@school.edu', tickets: 14, streak: 5, lastActive: 'Just now'     },
-    { id: 3, name: 'Swarna Jay',  initials: 'SJ', email: 'swarna@school.edu',tickets: 8,  streak: 2, lastActive: 'Yesterday'   },
-  ])
+  const students = useState<any[]>('adminStudents', () => [])
+
 
   const searchStudent = useState('searchStudent', () => '')
-  const sortStudent   = useState('sortStudent',   () => 'tickets')
+  const sortStudent   = useState('sortStudent',   () => 'total submissions')
 
   const filteredAndSortedStudents = computed(() => {
     let res = students.value
@@ -421,18 +418,134 @@ export const useAdmin = () => {
   })
 
   // ── Raffle ──
-  const raffleWinner      = useState<any | null>('raffleWinner',      () => null)
-  const isSpinning        = useState<boolean>('isSpinning',           () => false)
-  const raffleWeek        = useState('raffleWeek',        () => 'Feb 9 – Feb 15, 2026')
-  const raffleSubmissions = useState('raffleSubmissions', () => 42)
+  const raffleWinner            = useState<any | null>('raffleWinner', () => null)
+  const isSpinning              = useState<boolean>('isSpinning', () => false)
+  const raffleFormGroups        = useState<any[]>('raffleFormGroups', () => [])
+  const raffleSelectedGroupId   = useState<number | null>('raffleSelectedGroupId', () => null)
+  const raffleSubmissionsList   = useState<any[]>('raffleSubmissionsList', () => [])
+  const raffleSubmissions       = useState<number>('raffleSubmissions', () => 0)
+  const raffleCalendarOpen      = useState<boolean>('raffleCalendarOpen', () => false)
+  const raffleLoading           = useState<boolean>('raffleLoading', () => false)
+  const rafflePreviousWinner    = useState<any | null>('rafflePreviousWinner', () => null)
+
+  const raffleSelectedGroup = computed(() =>
+    raffleFormGroups.value.find((g: any) => g.id === raffleSelectedGroupId.value) ?? null
+  )
+
+  const raffleWeekLabel = computed(() => {
+    const group = raffleSelectedGroup.value
+    if (!group) return 'No week selected'
+    const start = new Date(group.startDate)
+    const end = group.endDate ? new Date(group.endDate) : null
+    const fmt = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    return end ? `${fmt(start)} – ${fmt(end)}` : `Week of ${fmt(start)}`
+  })
+
+  const loadRaffleFormGroups = async () => {
+    try {
+      const groups = await callFormApi<any[]>('GET', { action: 'listFormGroups' })
+      raffleFormGroups.value = (groups ?? []).map((g: any) => ({
+        id: g.id,
+        startDate: g.startDate,
+        endDate: g.endDate,
+        raffleWinner: g.raffleWinner,
+        raffleWinnerStudent: g.raffleWinnerStudent,
+      }))
+
+      // Auto-select the most recent form group
+      if (raffleFormGroups.value.length > 0 && raffleSelectedGroupId.value === null) {
+        raffleSelectedGroupId.value = raffleFormGroups.value[0].id
+      }
+    } catch (error) {
+      console.error('Failed to load raffle form groups', error)
+    }
+  }
+
+  const loadRaffleSubmissions = async () => {
+    if (!raffleSelectedGroupId.value) {
+      raffleSubmissionsList.value = []
+      raffleSubmissions.value = 0
+      return
+    }
+
+    raffleLoading.value = true
+    try {
+      const result = await callFormApi<{ submissions: any[]; totalEntries: number }>('GET', {
+        action: 'getFormGroupSubmissions',
+        formGroupId: raffleSelectedGroupId.value,
+      })
+      raffleSubmissionsList.value = result?.submissions ?? []
+      raffleSubmissions.value = result?.totalEntries ?? 0
+
+      // Check if this group already has a winner
+      const group = raffleSelectedGroup.value
+      if (group?.raffleWinnerStudent) {
+        rafflePreviousWinner.value = group.raffleWinnerStudent
+      } else {
+        rafflePreviousWinner.value = null
+      }
+    } catch (error) {
+      console.error('Failed to load raffle submissions', error)
+      raffleSubmissionsList.value = []
+      raffleSubmissions.value = 0
+    } finally {
+      raffleLoading.value = false
+    }
+  }
+
+  const selectRaffleGroupByDate = (dateStr: string) => {
+    if (!dateStr) return
+    const target = new Date(`${dateStr}T00:00:00Z`)
+
+    const match = raffleFormGroups.value.find((g: any) => {
+      const start = new Date(g.startDate)
+      const end = g.endDate ? new Date(g.endDate) : new Date(start.getTime() + 6 * 24 * 60 * 60 * 1000)
+      return target >= start && target <= end
+    })
+
+    if (match) {
+      raffleSelectedGroupId.value = match.id
+      raffleWinner.value = null
+    }
+    raffleCalendarOpen.value = false
+  }
+
+  watch(raffleSelectedGroupId, async () => {
+    raffleWinner.value = null
+    await loadRaffleSubmissions()
+  })
 
   const spinRaffle = () => {
+    if (raffleSubmissionsList.value.length === 0) {
+      alert('No submissions found for this week!')
+      return
+    }
+
     isSpinning.value   = true
     raffleWinner.value = null
-    setTimeout(() => {
-      isSpinning.value   = false
-      raffleWinner.value = students.value[Math.floor(Math.random() * students.value.length)]
-    }, 2000)
+
+    setTimeout(async () => {
+      const randomIdx = Math.floor(Math.random() * raffleSubmissionsList.value.length)
+      const winning = raffleSubmissionsList.value[randomIdx]
+      raffleWinner.value = {
+        name: winning.studentName,
+        studentId: winning.studentId,
+        formTitle: winning.formTitle,
+        submissionDate: winning.submissionDate,
+      }
+      isSpinning.value = false
+
+      // Persist the winner to the form group
+      try {
+        await callFormApi('PUT', {}, {
+          action: 'updateFormGroup',
+          id: raffleSelectedGroupId.value,
+          raffleWinner: winning.studentId,
+        })
+      } catch (error) {
+        console.error('Failed to save raffle winner', error)
+      }
+    }, 2400)
   }
 
   // ── Announcements ──
@@ -496,7 +609,10 @@ export const useAdmin = () => {
     // progress
     students, searchStudent, sortStudent, filteredAndSortedStudents,
     // raffle
-    raffleWinner, isSpinning, raffleWeek, raffleSubmissions, spinRaffle,
+    raffleWinner, isSpinning, raffleSubmissions, spinRaffle,
+    raffleFormGroups, raffleSelectedGroupId, raffleSelectedGroup, raffleWeekLabel,
+    raffleSubmissionsList, raffleCalendarOpen, raffleLoading, rafflePreviousWinner,
+    loadRaffleFormGroups, loadRaffleSubmissions, selectRaffleGroupByDate,
     // announcements
     announcementSubTab, announcements, newAnnouncement,
     announcementFilterWeek, filteredAnnouncements,
