@@ -513,7 +513,7 @@ export default defineEventHandler(async (event) => {
           author: admin?.id ?? null,
       }
 
-      if (title !== null) {
+      if (title) {
         createData.title = title
       }
 
