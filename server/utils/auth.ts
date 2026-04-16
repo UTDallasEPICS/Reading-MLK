@@ -18,9 +18,18 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: 'sqlite',
   }),
-  
+
   baseURL: process.env.BETTER_AUTH_URL,
-  
+
+  user: {
+    additionalFields: {
+      role: {
+        type: 'string',
+        input: false,
+      },
+    },
+  },
+
   plugins: [
     magicLink({
       async sendMagicLink({ email, url }) {
@@ -31,9 +40,9 @@ export const auth = betterAuth({
           html: `
             <p>Click the link below to sign in to Reading Huddle:</p>
             <p><a href="${url}">Sign in</a></p>
-          `
+          `,
         })
       },
-    })
+    }),
   ],
-})  
+})
