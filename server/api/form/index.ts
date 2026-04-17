@@ -357,7 +357,7 @@ export default defineEventHandler(async (event) => {
       const query = getQuery(event)
       const formGroupId = query.formGroup !== undefined ? toInt(query.formGroup, 'formGroup', false) : null
       const weeklyDate =
-        query.weeklyDate !== undefined && query.weeklyDate !== null && query.weeklyDate !== ''
+        !!query.weeklyDate
           ? (toDate(query.weeklyDate, 'weeklyDate') as Date)
           : null
 
