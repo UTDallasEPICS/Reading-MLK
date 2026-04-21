@@ -7,6 +7,7 @@ async function main() {
     'rae@readinghuddle.com',
     'asloran23@gmail.com',
     'nevins321@gmail.com',
+    'sxg230203@utdallas.edu'
   ]
 
   await prisma.user.deleteMany({
@@ -112,6 +113,32 @@ async function main() {
   await prisma.user.create({
     data: {
       id: 'seed_user_5',
+      name: 'Swarna',
+      email: 'sxg230203@utdallas.edu',
+      emailVerified: true,
+      role: 'admin',
+      accounts: {
+        create: {
+          id: 'seed_account_5',
+          accountId: 'sxg230203@utdallas.edu',
+          providerId: 'magic-link',
+        },
+      },
+      admin: {
+        create: {
+          settings: {
+            dyslexiaFont: true,
+            fontSize: 1,
+            language: 'en',
+          },
+        },
+      },
+    },
+  })
+
+  await prisma.user.create({
+    data: {
+      id: 'seed_user_4',
       name: 'Aidan',
       email: 'asloran23@gmail.com',
       emailVerified: true,
@@ -134,6 +161,7 @@ async function main() {
       },
     },
   })
+
 
   console.log('Seeding finished.')
 }
