@@ -1,6 +1,7 @@
 <script setup lang="ts">
 
 import { authClient } from '~/utils/auth-client'
+import { onMounted } from 'vue'
 
 const { student, settings: globalSettings, saveSettings: pushSettings, clearStudent } = useCurrentStudent()
 
@@ -64,10 +65,7 @@ async function changeEmail() {
 //Loading accont settings
 async function loadAccountSettings() {
   try {
-    const data = await $fetch<{
-      raffleOptIn: boolean
-      publicityConsent: boolean
-    }>('/api/users/account-settings', {
+    const data = await $fetch('/api/users/account-settings', {
       method: 'GET',
     })
 
@@ -79,6 +77,11 @@ async function loadAccountSettings() {
     loadingAccountSettings.value = false
   }
 }
+
+onMounted(async () => {
+  await loadAccountSettings()
+})
+
 
 //Saving aacount settings
 async function saveAccountSettings() {
@@ -104,8 +107,6 @@ async function saveAccountSettings() {
     savingAccountSettings.value = false
   }
 }
-
-await loadAccountSettings()
 
 // ── Theme class ── 
 const themeClass = computed(() => {
@@ -165,7 +166,7 @@ watch(settings, (newSettings) => {
           to="/reader/profile"
           class="w-full text-white font-bold py-3 rounded-xl transition-all hover:-translate-y-1 hover:shadow-lg active:scale-95 flex items-center justify-center gap-2 bg-[#e25d47]"
         >
-          👥 Switch Profile
+          Switch Profile
         </NuxtLink>
       </div>
 
