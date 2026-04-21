@@ -13,6 +13,8 @@ model User {
   email               String               @unique
   emailVerified       Boolean              @default(false)
   role                String               @default("reader")
+  raffleOptIn         Boolean              @default(true)
+  publicityConsent    Boolean              @default(false)
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
   sessions            Session[]
