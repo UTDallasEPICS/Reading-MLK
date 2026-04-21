@@ -21,9 +21,6 @@ const accountSettings = reactive({
   publicityConsent: false,
 })
 
-const loadingAccountSettings = ref(true)
-const savingAccountSettings = ref(false)
-
 //Logout
 async function logout() {
   try {
@@ -73,8 +70,6 @@ async function loadAccountSettings() {
     accountSettings.publicityConsent = data.publicityConsent
   } catch (error) {
     console.error('Failed to load account settings:', error)
-  } finally {
-    loadingAccountSettings.value = false
   }
 }
 
@@ -85,8 +80,6 @@ onMounted(async () => {
 
 //Saving aacount settings
 async function saveAccountSettings() {
-  savingAccountSettings.value = true
-
   try {
     await $fetch<{
       success: boolean
@@ -103,8 +96,6 @@ async function saveAccountSettings() {
     })
   } catch (error) {
     console.error('Failed to save account settings:', error)
-  } finally {
-    savingAccountSettings.value = false
   }
 }
 
