@@ -13,6 +13,8 @@ model User {
   email               String               @unique
   emailVerified       Boolean              @default(false)
   role                String               @default("reader")
+  raffleOptIn         Boolean              @default(true)
+  publicityConsent    Boolean              @default(false)
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
   sessions            Session[]
@@ -93,11 +95,11 @@ model Student {
 }
 
 model Announcement {
-  id         Int       @id @default(autoincrement())
-  author     String?
-  postDate   DateTime
-  expiryDate DateTime?
-  content    String
+  id          Int     @id @default(autoincrement())
+  author      String?
+  postDate    DateTime
+  expiryDate  DateTime?
+  content     Json?
 
   Author Admin? @relation(fields: [author], references: [id], onDelete: SetNull)
 }

@@ -58,6 +58,21 @@ const toDate = (value: unknown, fieldName: string, required = true): Date | null
     return null
   }
 
+  if (typeof normalized === 'string') {
+    const dateOnlyMatch = normalized.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+
+    if (dateOnlyMatch) {
+      const [, year, month, day] = dateOnlyMatch
+      const parsed = new Date(Number(year), Number(month) - 1, Number(day))
+
+      if (Number.isNaN(parsed.getTime())) {
+        throw createError({ statusCode: 400, statusMessage: `${fieldName} must be a valid date` })
+      }
+
+      return parsed
+    }
+  }
+
   const parsed = new Date(String(normalized))
 
   if (Number.isNaN(parsed.getTime())) {
@@ -250,7 +265,7 @@ const mapForm = (
     startDate: Date
     endDate: Date | null
     published: boolean
-    author: string | number | null
+    author: string | null
     formGroup: number
     title?: string | null
     Components?: Array<{
@@ -358,7 +373,7 @@ export default defineEventHandler(async (event) => {
       const query = getQuery(event)
       const formGroupId = query.formGroup !== undefined ? toInt(query.formGroup, 'formGroup', false) : null
       const weeklyDate =
-        query.weeklyDate !== undefined && query.weeklyDate !== null && query.weeklyDate !== ''
+        !!query.weeklyDate
           ? (toDate(query.weeklyDate, 'weeklyDate') as Date)
           : null
 
@@ -549,7 +564,7 @@ export default defineEventHandler(async (event) => {
           author: admin?.id ?? null,
       }
 
-      if (title !== null) {
+      if (title) {
         createData.title = title
       }
 
