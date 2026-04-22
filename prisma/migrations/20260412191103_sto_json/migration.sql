@@ -9,7 +9,7 @@ PRAGMA defer_foreign_keys=ON;
 PRAGMA foreign_keys=OFF;
 CREATE TABLE "new_Announcement" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    "author" INTEGER,
+    "author" TEXT,
     "postDate" DATETIME NOT NULL,
     "expiryDate" DATETIME,
     "content" JSONB,
