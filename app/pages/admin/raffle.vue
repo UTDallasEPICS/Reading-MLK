@@ -5,16 +5,21 @@ const {
   getLastMonday, formatDate,
 } = useAdmin()
 
-const {raffleWeekStart, raffleWinner, isSpinning, raffleFormGroup, raffleForms, raffleSubmissions, spinRaffle} = useRaffleSpin()
-
+const {loadRaffleData, raffleWeekStart, raffleWinner, raffleFormGroup, raffleSubmissions, spinRaffle} = useRaffleSpin()
 
 function toDateStr(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-onMounted(async () => {
-  
+watch(raffleWeekStart, () => {
+  loadRaffleData()
 })
+
+onMounted(() => {
+  raffleWeekStart.value = new Date()
+  loadRaffleData()
+})
+
 </script>
 
 <template>
@@ -39,38 +44,34 @@ onMounted(async () => {
         <button
           v-if="!raffleWinner"
           class="btn-indigo"
-          :disabled="raffleSubmissions === 0"
+          :disabled="raffleSubmissions?.length === 0 || !raffleFormGroup"
           @click="spinRaffle">
             SPIN 🎟️
         </button>
         <button v-else
           class="btn-ghost"
-          :disabled="raffleSubmissions === 0"
-          @click="spinRaffle"
-        >
+          :disabled="raffleSubmissions?.length === 0 || !raffleFormGroup"
+          @click="spinRaffle">
           RESPIN 🎟️
         </button>
       </div>
     </div>
     
     <!-- Main Section -->
-      <!-- Spinning -->
-      <div v-if="isSpinning" class="raffle-state spinning-state">
-        <div class="raffle-emoji animate-spin-emoji">🎟️</div>
-        <h3 class="spinning-text">Spinning...</h3>
-      </div>
-
       <!-- Winner -->
-      <div v-else class="raffle-state winner-state">
-        <p class="raffle-section-text">Total Entries: {{ raffleSubmissions }}</p>
+      <div class="raffle-state winner-state">
+        <p class="raffle-section-text">Total Entries: {{ raffleSubmissions?.length || 0 }}</p>
 
-        <p v-if="raffleWinner" class="raffle-section-text">
-          Winning Student: {{ raffleWinner }}
-          Parent Name:
-          Parent Email:
-          Winning Ticket from Form: 
-          Date Spun: 
-        </p>
+        <template v-if="raffleWinner">
+          <p class="raffle-section-text">
+            Winning Student: {{ raffleWinner.name }}<br/>
+            Parent Name: {{ (raffleWinner as any).Parent?.name || 'N/A' }}<br/>
+            Parent Email: {{ (raffleWinner as any).Parent?.email || 'N/A' }}
+          </p>
+        </template>
+        <template v-else>
+          <p class="raffle-section-text">No winner yet.</p>
+        </template>
       </div>
 
     </div>

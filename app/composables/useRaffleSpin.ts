@@ -1,29 +1,45 @@
-import type { Student, FormGroup, Form, FormSubmission } from  '~~/prisma/generated/client'
-export const useRaffleSpin = async () => {
+import type { Student, FormGroup, Form, FormSubmission } from '~~/prisma/generated/client'
+export const useRaffleSpin = () => {
 
-  const raffleWeekStart = ref(new Date())
-  
+  const raffleWeekStart = ref<Date | string>(new Date())
+
   const raffleFormGroup = ref<FormGroup | null>(null)
   const raffleForms = ref<Form[]>([])
   const raffleSubmissions = ref<FormSubmission[]>([])
-  const raffleWinner  = ref<Student | null>(null)
+  const raffleWinner = ref<Student | null>(null)
 
   const loadRaffleFormGroup = async () => {
-    raffleFormGroup.value = await useFetch<FormGroup>(() => `/api/raffle/formGroup`, {method: 'GET'})
+    const val = raffleWeekStart.value
+    const dateStr = val instanceof Date ? val.toISOString().split('T')[0] : String(val).split('T')[0]
+    const { data } = await useFetch<FormGroup>(`/api/formGroup?date=${dateStr}`, { method: 'GET' })
+    raffleFormGroup.value = data ? data.value as FormGroup : null
   }
 
   const loadRaffleForms = async () => {
-    if (!raffleFormGroup.value) return
-    raffleForms.value = await useFetch<Form[]>(() => `/api/raffle/forms/${raffleFormGroup.value.id}`, {method: 'GET'})
+    if (!raffleFormGroup.value) {
+      raffleForms.value = []
+      return
+    }
+    const { data } = await useFetch<Form[]>(`/api/form?action=listForms&formGroup=${raffleFormGroup.value.id}`, { method: 'GET' })
+    raffleForms.value = data.value || []
   }
 
   const loadRaffleSubmissions = async () => {
-    if (!raffleFormGroup.value) return
-    raffleSubmissions.value = await useFetch<FormSubmission[]>(() => `/api/raffle/submissions/${raffleFormGroup.value.id}`, {method: 'GET'})
+    if (!raffleFormGroup.value) {
+      raffleSubmissions.value = []
+      return
+    }
+    const { data } = await useFetch<FormSubmission[]>(`/api/formSubmission?formGroup=${raffleFormGroup.value.id}`, { method: 'GET' })
+    raffleSubmissions.value = data.value || []
   }
 
   const loadRaffleWinner = async () => {
-    raffleWinner.value = await useFetch<Student>(() => `/api/student/${raffleFormGroup.value?.raffleWinner}`, {method: 'GET'})
+    const fg = raffleFormGroup.value as any
+    if (fg?.RaffleWinner) {
+      raffleWinner.value = fg.RaffleWinner
+    } else {
+      raffleWinner.value = null
+    }
   }
 
   const loadRaffleData = async () => {
@@ -33,19 +49,35 @@ export const useRaffleSpin = async () => {
     try { await loadRaffleWinner() } catch (error) { console.error('Error loading raffle winner:', error) }
   }
 
-
-  const isSpinning = ref(false)
-
   const spinRaffle = async () => {
+    if (!raffleFormGroup.value || !raffleSubmissions.value || raffleSubmissions.value.length === 0) return
+
+
+    const randomIndex = Math.floor(Math.random() * raffleSubmissions.value.length)
+    const winningSubmission = raffleSubmissions.value[randomIndex] as FormSubmission
+    const studentId = winningSubmission.student
+
+    try {
+      await $fetch(`/api/formGroup`, {
+        method: 'PUT',
+        body: {
+          id: raffleFormGroup.value.id,
+          raffleWinner: studentId
+        }
+      })
+      await loadRaffleData()
+    } catch (e) {
+      console.error("Error setting winner", e)
+    }
   }
 
   return {
     raffleWinner,
-    isSpinning,
     raffleFormGroup,
     raffleForms,
     raffleSubmissions,
     raffleWeekStart,
-    spinRaffle
+    spinRaffle,
+    loadRaffleData
   }
 }
