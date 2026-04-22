@@ -61,6 +61,7 @@ type ApiResponse =
       pageSize: number
     }
 
+// Reactive State Management
 const searchStudent = ref('')
 const selectedDate = ref('')
 const selectedFormIds = ref<number[]>([])
@@ -107,6 +108,7 @@ const availableForms = computed(() => {
   )
 })
 
+// User Interaction Handlers
 function toggleFormSelection(formId: number) {
   if (selectedFormIds.value.includes(formId)) {
     selectedFormIds.value = selectedFormIds.value.filter((id) => id !== formId)
@@ -164,24 +166,15 @@ function toggleMissingSort(key: MissingSortKey) {
   missingSortDirection.value = null
 }
 
-function recordSortIndicator(key: RecordSortKey) {
-  if (recordSortKey.value !== key) return '↕'
-  if (recordSortDirection.value === 'asc') return '↑'
-  if (recordSortDirection.value === 'desc') return '↓'
-  return '↕'
-}
-
-function groupedSortIndicator(key: GroupSortKey) {
-  if (groupedSortKey.value !== key) return '↕'
-  if (groupedSortDirection.value === 'asc') return '↑'
-  if (groupedSortDirection.value === 'desc') return '↓'
-  return '↕'
-}
-
-function missingSortIndicator(key: MissingSortKey) {
-  if (missingSortKey.value !== key) return '↕'
-  if (missingSortDirection.value === 'asc') return '↑'
-  if (missingSortDirection.value === 'desc') return '↓'
+// Generic helper to generate sort arrows for column headers
+function getSortIndicator(
+  key: string,
+  currentKey: string | null,
+  currentDirection: 'asc' | 'desc' | null
+) {
+  if (currentKey !== key) return '↕'
+  if (currentDirection === 'asc') return '↑'
+  if (currentDirection === 'desc') return '↓'
   return '↕'
 }
 
@@ -195,6 +188,7 @@ const activeSortDirection = computed(() => {
   return groupByStudent.value ? groupedSortDirection.value : recordSortDirection.value
 })
 
+// API Data Fetching
 async function loadWeekForms() {
   if (!selectedDate.value) {
     allWeekRecords.value = []
@@ -300,6 +294,7 @@ function downloadCsv(filename: string, rows: Array<Array<string | number>>) {
   URL.revokeObjectURL(url)
 }
 
+// CSV Export Logic
 async function exportCurrentTable() {
   try {
     const response = await $fetch<ApiResponse>('/api/admin/class-progress', {
@@ -456,9 +451,7 @@ onMounted(async () => {
         <button
           type="button"
           @click="viewMode = 'completed'"
-          :style="viewMode === 'completed'
-            ? 'padding: 0.5rem 0.9rem; border-radius: 9999px; border: 1px solid #4f46e5; background: #eef2ff; color: #3730a3; font-weight: 700;'
-            : 'padding: 0.5rem 0.9rem; border-radius: 9999px; border: 1px solid #d1d5db; background: white; color: #374151;'"
+          :class="viewMode === 'completed' ? 'view-btn active' : 'view-btn inactive'"
         >
           Completed
         </button>
@@ -466,9 +459,7 @@ onMounted(async () => {
         <button
           type="button"
           @click="viewMode = 'missing'"
-          :style="viewMode === 'missing'
-            ? 'padding: 0.5rem 0.9rem; border-radius: 9999px; border: 1px solid #4f46e5; background: #eef2ff; color: #3730a3; font-weight: 700;'
-            : 'padding: 0.5rem 0.9rem; border-radius: 9999px; border: 1px solid #d1d5db; background: white; color: #374151;'"
+          :class="viewMode === 'missing' ? 'view-btn active' : 'view-btn inactive'"
         >
           Missing
         </button>
@@ -498,9 +489,7 @@ onMounted(async () => {
             :key="form.id"
             @click="toggleFormSelection(form.id)"
             type="button"
-            :style="selectedFormIds.includes(form.id)
-              ? 'padding: 0.5rem 0.75rem; border-radius: 9999px; border: 1px solid #4f46e5; background: #eef2ff; color: #3730a3; font-weight: 600;'
-              : 'padding: 0.5rem 0.75rem; border-radius: 9999px; border: 1px solid #d1d5db; background: white; color: #374151;'"
+            :class="selectedFormIds.includes(form.id) ? 'view-btn active form-btn' : 'view-btn inactive form-btn'"
           >
             {{ form.title }}
           </button>
@@ -540,16 +529,16 @@ onMounted(async () => {
         <thead>
           <tr>
             <th @click="toggleRecordSort('studentName')" class="cursor-pointer select-none">
-              Student Name {{ recordSortIndicator('studentName') }}
+              Student Name {{ getSortIndicator('studentName', recordSortKey, recordSortDirection) }}
             </th>
             <th @click="toggleRecordSort('formGroupLabel')" class="cursor-pointer select-none">
-              Form Group / Week {{ recordSortIndicator('formGroupLabel') }}
+              Form Group / Week {{ getSortIndicator('formGroupLabel', recordSortKey, recordSortDirection) }}
             </th>
             <th @click="toggleRecordSort('formTitle')" class="cursor-pointer select-none">
-              Specific Form {{ recordSortIndicator('formTitle') }}
+              Specific Form {{ getSortIndicator('formTitle', recordSortKey, recordSortDirection) }}
             </th>
             <th @click="toggleRecordSort('dateCompleted')" class="cursor-pointer select-none">
-              Date Completed {{ recordSortIndicator('dateCompleted') }}
+              Date Completed {{ getSortIndicator('dateCompleted', recordSortKey, recordSortDirection) }}
             </th>
           </tr>
         </thead>
@@ -586,13 +575,13 @@ onMounted(async () => {
         <thead>
           <tr>
             <th @click="toggleGroupedSort('studentName')" class="cursor-pointer select-none">
-              Student Name {{ groupedSortIndicator('studentName') }}
+              Student Name {{ getSortIndicator('studentName', groupedSortKey, groupedSortDirection) }}
             </th>
             <th @click="toggleGroupedSort('formsCompleted')" class="cursor-pointer select-none">
-              Forms Completed {{ groupedSortIndicator('formsCompleted') }}
+              Forms Completed {{ getSortIndicator('formsCompleted', groupedSortKey, groupedSortDirection) }}
             </th>
             <th @click="toggleGroupedSort('lastSubmitted')" class="cursor-pointer select-none">
-              Last Submitted {{ groupedSortIndicator('lastSubmitted') }}
+              Last Submitted {{ getSortIndicator('lastSubmitted', groupedSortKey, groupedSortDirection) }}
             </th>
           </tr>
         </thead>
@@ -628,16 +617,16 @@ onMounted(async () => {
         <thead>
           <tr>
             <th @click="toggleMissingSort('studentName')" class="cursor-pointer select-none">
-              Student Name {{ missingSortIndicator('studentName') }}
+              Student Name {{ getSortIndicator('studentName', missingSortKey, missingSortDirection) }}
             </th>
             <th @click="toggleMissingSort('missingFormsCount')" class="cursor-pointer select-none">
-              Missing Forms Count {{ missingSortIndicator('missingFormsCount') }}
+              Missing Forms Count {{ getSortIndicator('missingFormsCount', missingSortKey, missingSortDirection) }}
             </th>
             <th>
               Missing Forms
             </th>
             <th @click="toggleMissingSort('lastSubmitted')" class="cursor-pointer select-none">
-              Last Submitted {{ missingSortIndicator('lastSubmitted') }}
+              Last Submitted {{ getSortIndicator('lastSubmitted', missingSortKey, missingSortDirection) }}
             </th>
           </tr>
         </thead>
@@ -721,4 +710,33 @@ onMounted(async () => {
 
 <style scoped>
 @import './styles/progress.css';
+
+/* Abstracted view button styles to clean up template HTML */
+.view-btn {
+  padding: 0.5rem 0.9rem;
+  border-radius: 9999px;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.view-btn.form-btn {
+  padding: 0.5rem 0.75rem;
+}
+
+.view-btn.active {
+  border: 1px solid #4f46e5;
+  background: #eef2ff;
+  color: #3730a3;
+  font-weight: 700;
+}
+
+.view-btn.form-btn.active {
+  font-weight: 600;
+}
+
+.view-btn.inactive {
+  border: 1px solid #d1d5db;
+  background: white;
+  color: #374151;
+}
 </style>
