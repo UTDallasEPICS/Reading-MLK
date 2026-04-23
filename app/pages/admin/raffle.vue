@@ -41,6 +41,9 @@ onMounted(() => {
         <input v-model="raffleWeekStart" type="date" class="input-base" data-builder-field="true"/>
       </div>
       <div>
+        <p class="week-label">Total Entries: {{ raffleSubmissions?.length || 0 }}</p>
+      </div>
+      <div>
         <button
           v-if="!raffleWinner"
           class="btn-indigo"
@@ -60,14 +63,15 @@ onMounted(() => {
     <!-- Main Section -->
       <!-- Winner -->
       <div class="raffle-state winner-state">
-        <p class="raffle-section-text">Total Entries: {{ raffleSubmissions?.length || 0 }}</p>
-
         <template v-if="raffleWinner">
-          <p class="raffle-section-text" :key="spinCount">
-            Winning Student:    {{ raffleWinner.name }}<br/>
-            Parent Name:        {{ (raffleWinner as any).Parent?.name || 'N/A' }}<br/>
-            Parent Email:       {{ (raffleWinner as any).Parent?.email || 'N/A' }}
-          </p>
+          <div class="raffle-section-text" :key="spinCount">
+            Winning Student:<br/>
+            <p class="raffle-winner-name">{{ raffleWinner.name }}</p>
+            <br/>Parent Name:<br/>    
+            <p class="raffle-winner-name">{{ (raffleWinner as any).Parent?.name || 'N/A' }}</p>
+            <br/>Parent Email:<br/>
+            <p class="raffle-winner-name">{{ (raffleWinner as any).Parent?.email || 'N/A' }}</p>
+          </div>
         </template>
         <template v-else>
           <p class="raffle-section-text">No winner yet.</p>
