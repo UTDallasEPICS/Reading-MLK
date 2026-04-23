@@ -1,11 +1,10 @@
 <script setup lang="ts">
 
 import { authClient } from '~/utils/auth-client'
+import { onMounted } from 'vue'
 
 const { student, settings: globalSettings, saveSettings: pushSettings, clearStudent } = useCurrentStudent()
 
-// Fallback: If no student is currently loaded into global state, load student 1
-//this is stupid and funny, remove
 if (!student.value) {
   await navigateTo('/reader/profile')
 }
@@ -14,7 +13,12 @@ if (!student.value) {
 const settings = reactive({ 
   dyslexiaFont: globalSettings.value.dyslexiaFont,
   language: globalSettings.value.language,
-  fontSize: globalSettings.value.fontSize
+  fontSize: globalSettings.value.fontSize,
+})
+
+const accountSettings = reactive({
+  raffleOptIn: true,
+  publicityConsent: false,
 })
 
 //Logout
@@ -28,6 +32,7 @@ async function logout() {
   }
 }
 
+//Change Email
 const newEmail = ref('')
 const savingEmail = ref(false)
 
@@ -54,6 +59,46 @@ async function changeEmail() {
   }
 }
 
+//Loading accont settings
+async function loadAccountSettings() {
+  try {
+    const data = await $fetch('/api/users/account-settings', {
+      method: 'GET',
+    })
+
+    accountSettings.raffleOptIn = data.raffleOptIn
+    accountSettings.publicityConsent = data.publicityConsent
+  } catch (error) {
+    console.error('Failed to load account settings:', error)
+  }
+}
+
+onMounted(async () => {
+  await loadAccountSettings()
+})
+
+
+//Saving aacount settings
+async function saveAccountSettings() {
+  try {
+    await $fetch<{
+      success: boolean
+      settings: {
+        raffleOptIn: boolean
+        publicityConsent: boolean
+      }
+    }>('/api/users/account-settings', {
+      method: 'PUT',
+      body: {
+        raffleOptIn: accountSettings.raffleOptIn,
+        publicityConsent: accountSettings.publicityConsent,
+      },
+    })
+  } catch (error) {
+    console.error('Failed to save account settings:', error)
+  }
+}
+
 // ── Theme class ── 
 const themeClass = computed(() => {
   const t = 'light'
@@ -69,107 +114,220 @@ watch(settings, (newSettings) => {
 </script>
 
 <template>
-  <div :class="themeClass" :style="`font-size: ${settings.fontSize * 16}px`" class="pb-32 px-4 pt-4 min-h-screen relative">
-    
-    <!-- ── TOP BAR ── -->
-    <header class="absolute top-4 left-0 right-0 w-full max-w-4xl mx-auto flex justify-end items-center px-6 z-[200]">
-      <div class="flex items-center gap-3">
-        <!-- Home button -->
-        <NuxtLink
-          to="/reader/home"
-          class="w-14 h-14 bg-white/90 backdrop-blur-md rounded-xl flex items-center justify-center text-2xl transition-all border-2 border-white shadow-xl hover:scale-110 active:scale-95"
-        >🏠</NuxtLink>
-      </div>
+  <div
+    :class="themeClass"
+    :style="`font-size: ${settings.fontSize * 16}px`"
+    class="pb-32 px-4 pt-4 min-h-screen relative text-gray-800"
+  >
+
+    <!-- TOP BAR -->
+    <header
+      class="absolute top-4 left-0 right-0 w-full max-w-4xl mx-auto flex justify-end items-center px-6 z-[200]"
+    >
+      <NuxtLink
+        to="/reader/home"
+        class="w-14 h-14 bg-white rounded-xl flex items-center justify-center text-2xl transition-all border border-gray-200 shadow-lg hover:scale-110 active:scale-95"
+      >
+        🏠
+      </NuxtLink>
     </header>
 
-    <div class="p-6 max-w-lg mx-auto space-y-4 bg-white/80 mt-8 backdrop-blur-xl rounded-[2.5rem] border-2 border-white/40 shadow-[0_10px_30px_rgba(79,70,229,0.1)]">
-      <div class="text-center mb-1">
-          <div class="text-5xl mb-2">⚙️</div>
-          <h2 class="font-heading text-2xl font-bold text-brand-dark">Settings</h2>
-            </div>
+    <!-- MAIN CARD -->
+    <div
+      class="p-6 max-w-lg mx-auto space-y-4 bg-white mt-8 rounded-[2.5rem] border border-gray-200 shadow-xl"
+    >
 
-              <!-- Profile Switcher -->
-              <div>
-                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Which Student?</label>
-                <NuxtLink to="/reader/profile"
-                class="w-full text-white font-bold py-2.5 rounded-lg transition-all hover:-translate-y-1 hover:shadow-lg active:scale-95 flex items-center justify-center gap-2"
-                style="background-color: var(--brand-indigo); box-shadow: 0 4px 14px rgba(224, 96, 77, 0.4);">
-                  👥 Switch Profile
-                </NuxtLink>
-              </div>
+      <!-- TITLE -->
+      <div class="text-center mb-2">
+        <div class="text-5xl mb-2">⚙️</div>
+        <h2 class="font-heading text-3xl font-bold text-gray-800">
+          Settings
+        </h2>
+      </div>
 
+      <!-- PROFILE SWITCH -->
+      <div>
+        <label
+          class="block text-[10px] font-black text-gray-600 uppercase tracking-widest mb-1.5"
+        >
+          Which Student?
+        </label>
 
+        <NuxtLink
+          to="/reader/profile"
+          class="w-full text-white font-bold py-3 rounded-xl transition-all hover:-translate-y-1 hover:shadow-lg active:scale-95 flex items-center justify-center gap-2 bg-[#e25d47]"
+        >
+          Switch Profile
+        </NuxtLink>
+      </div>
 
-              <!-- Font Size Slider -->
-              <div>
-                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Text
-                  Size</label>
-                  <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    <span class="text-xs font-bold text-gray-400">A</span>
-                      <input type="range" min="1" max="1.5" step="0.1" v-model.number="settings.fontSize"
-                                    class="flex-grow h-2 bg-gray-200 rounded-full appearance-none cursor-pointer accent-brand-indigo">
-                                <span class="text-lg font-bold text-gray-400">A</span>
-                                <span
-                                    class="text-xs font-bold text-brand-indigo bg-brand-indigo/10 px-2 py-1 rounded-lg">{{
-                                    Math.round(settings.fontSize * 100) }}%</span>
-                            </div>
-                        </div>
+      <!-- FONT SIZE -->
+      <div>
+        <label
+          class="block text-[10px] font-black text-gray-600 uppercase tracking-widest mb-1.5"
+        >
+          Text Size
+        </label>
 
-                        <!-- Dyslexia Font Toggle -->
-                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <div>
-                                <h4 class="font-bold text-sm text-brand-dark">Dyslexia-Friendly Font</h4>
-                                <p class="text-[10px] text-gray-400">Uses OpenDyslexic typeface</p>
-                            </div>
-                            <button @click="settings.dyslexiaFont = !settings.dyslexiaFont"
-                                :class="['w-12 h-6 rounded-full transition-all relative', settings.dyslexiaFont ? 'bg-brand-mint' : 'bg-gray-300']">
-                                <div
-                                    :class="['w-5 h-5 bg-white rounded-full shadow-md absolute top-0.5 transition-all', settings.dyslexiaFont ? 'right-0.5' : 'left-0.5']">
-                                </div>
-                            </button>
-                        </div>
+        <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+          <span class="text-sm font-bold text-gray-500">A</span>
 
-                        <!-- Language Toggle -->
-                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                            <div>
-                                <h4 class="font-bold text-sm text-brand-dark">Language / Idioma</h4>
-                                <p class="text-[10px] text-gray-400">{{ settings.language === 'en' ? 'English' : 'Español' }}</p>
-                            </div>
-                            <button @click="settings.language = settings.language === 'en' ? 'es' : 'en'"
-                                class="bg-brand-indigo/10 text-brand-indigo px-3 py-1.5 rounded-lg font-bold text-xs hover:bg-brand-indigo/20 transition">
-                                {{ settings.language === 'en' ? '🇪🇸 Español' : '🇺🇸 English' }}
-                            </button>
-                        </div>
+          <input
+            type="range"
+            min="1"
+            max="1.5"
+            step="0.1"
+            v-model.number="settings.fontSize"
+            class="flex-grow h-2 bg-gray-200 rounded-full appearance-none cursor-pointer accent-indigo-500"
+          />
 
-                        <!-- Change Email -->
-                        <div>
-                          <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">
-                            Change Email
-                          </label>
+          <span class="text-lg font-bold text-gray-500">A</span>
 
-                          <div class="p-3 bg-gray-50 rounded-lg space-y-3">
-                            <input
-                              v-model="newEmail"
-                              type="email"
-                              placeholder="Enter new email"
-                              class="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder:text-gray-400 outline-none focus:border-[var(--brand-indigo)]"
-                            />
+          <span
+            class="text-xs font-bold text-indigo-600 bg-indigo-100 px-2 py-1 rounded-lg"
+          >
+            {{ Math.round(settings.fontSize * 100) }}%
+          </span>
+        </div>
+      </div>
 
-                            <button
-                              @click="changeEmail"
-                              :disabled="savingEmail"
-                              class="w-full bg-brand-indigo hover:bg-indigo-700 text-white font-heading font-bold text-sm py-3 rounded-lg shadow-lg hover:shadow-xl transition transform active:scale-95 disabled:opacity-50"
-                            >
-                              {{ savingEmail ? 'Updating...' : 'Update Email ✉️' }}
-                            </button>
-                          </div>
-                        </div>
+      <!-- DYSLEXIA -->
+      <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+        <div>
+          <h4 class="font-bold text-sm text-gray-800">
+            Dyslexia-Friendly Font
+          </h4>
+          <p class="text-xs text-gray-600">
+            Uses OpenDyslexic typeface
+          </p>
+        </div>
 
-                        <!-- Logout Button -->
-                        <button @click="logout"
-                            class="w-full bg-red-500 hover:bg-red-600 text-white font-heading font-bold text-base py-3 rounded-lg shadow-lg hover:shadow-xl transition transform active:scale-95 mt-2">
-                            Logout 👋
-                        </button>
-                    </div>
+        <button
+          @click="settings.dyslexiaFont = !settings.dyslexiaFont"
+          :class="[
+            'w-12 h-6 rounded-full transition-all relative',
+            settings.dyslexiaFont ? 'bg-green-400' : 'bg-gray-300'
+          ]"
+        >
+          <div
+            :class="[
+              'w-5 h-5 bg-white rounded-full shadow absolute top-0.5 transition-all',
+              settings.dyslexiaFont ? 'right-0.5' : 'left-0.5'
+            ]"
+          />
+        </button>
+      </div>
+
+      <!-- LANGUAGE -->
+      <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+        <div>
+          <h4 class="font-bold text-sm text-gray-800">
+            Language / Idioma
+          </h4>
+
+          <p class="text-xs text-gray-600">
+            {{ settings.language === 'en' ? 'English' : 'Español' }}
+          </p>
+        </div>
+
+        <button
+          @click="settings.language = settings.language === 'en' ? 'es' : 'en'"
+          class="bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-lg font-bold text-xs hover:bg-indigo-200 transition"
+        >
+          {{ settings.language === 'en' ? '🇪🇸 Español' : '🇺🇸 English' }}
+        </button>
+      </div>
+
+      <!-- RAFFLE -->
+      <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+        <div>
+          <h4 class="font-bold text-sm text-gray-800">
+            Raffle Participation
+          </h4>
+
+          <p class="text-xs text-gray-600">
+            Opt in or out of Friends of MLK raffles
+          </p>
+        </div>
+
+        <button
+          @click="accountSettings.raffleOptIn = !accountSettings.raffleOptIn; saveAccountSettings()"
+          :class="[
+            'w-12 h-6 rounded-full transition-all relative',
+            accountSettings.raffleOptIn ? 'bg-green-400' : 'bg-gray-300'
+          ]"
+        >
+          <div
+            :class="[
+              'w-5 h-5 bg-white rounded-full shadow absolute top-0.5 transition-all',
+              accountSettings.raffleOptIn ? 'right-0.5' : 'left-0.5'
+            ]"
+          />
+        </button>
+      </div>
+
+      <!-- PUBLICITY -->
+      <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+        <div>
+          <h4 class="font-bold text-sm text-gray-800">
+            Publicity Consent
+          </h4>
+
+          <p class="text-xs text-gray-600">
+            Allow Friends of MLK to use responses for publicity
+          </p>
+        </div>
+
+        <button
+          @click="accountSettings.publicityConsent = !accountSettings.publicityConsent; saveAccountSettings()"
+          :class="[
+            'w-12 h-6 rounded-full transition-all relative',
+            accountSettings.publicityConsent ? 'bg-green-400' : 'bg-gray-300'
+          ]"
+        >
+          <div
+            :class="[
+              'w-5 h-5 bg-white rounded-full shadow absolute top-0.5 transition-all',
+              accountSettings.publicityConsent ? 'right-0.5' : 'left-0.5'
+            ]"
+          />
+        </button>
+      </div>
+
+      <!-- CHANGE EMAIL -->
+      <div>
+        <label
+          class="block text-[10px] font-black text-gray-600 uppercase tracking-widest mb-1.5"
+        >
+          Change Email
+        </label>
+
+        <div class="p-3 bg-gray-50 rounded-xl space-y-3">
+          <input
+            v-model="newEmail"
+            type="email"
+            placeholder="Enter new email"
+            class="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 placeholder:text-gray-500 outline-none focus:border-indigo-500"
+          />
+
+          <button
+            @click="changeEmail"
+            :disabled="savingEmail"
+            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm py-3 rounded-xl shadow-md transition active:scale-95 disabled:opacity-50"
+          >
+            {{ savingEmail ? 'Updating...' : 'Update Email ✉️' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- LOGOUT -->
+      <button
+        @click="logout"
+        class="w-full bg-red-500 hover:bg-red-600 text-white font-bold text-base py-3 rounded-xl shadow-lg transition active:scale-95 mt-2"
+      >
+        Logout 👋
+      </button>
+
+    </div>
   </div>
 </template>

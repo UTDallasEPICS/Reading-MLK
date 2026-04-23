@@ -6,6 +6,7 @@ async function main() {
     'parent2@gmail.com',
     'rae@readinghuddle.com',
     'asloran23@gmail.com',
+    'nevins321@gmail.com',
   ]
 
   await prisma.user.deleteMany({
@@ -88,16 +89,36 @@ async function main() {
     },
   })
 
+    await prisma.user.create({
+      data: {
+        id: 'seed_user_4',
+        name: 'Nevin',
+        email: 'nevins321@gmail.com',
+        emailVerified: true,
+        role: 'admin',
+        accounts: {
+          create: {
+            id: 'seed_account_4',
+            accountId: 'nevins321@gmail.com',
+            providerId: 'magic-link',
+          },
+        },
+        admin: {
+          create: {},
+        },
+      },
+    })
+
   await prisma.user.create({
     data: {
-      id: 'seed_user_4',
+      id: 'seed_user_5',
       name: 'Aidan',
       email: 'asloran23@gmail.com',
       emailVerified: true,
       role: 'admin',
       accounts: {
         create: {
-          id: 'seed_account_4',
+          id: 'seed_account_5',
           accountId: 'asloran23@gmail.com',
           providerId: 'magic-link',
         },

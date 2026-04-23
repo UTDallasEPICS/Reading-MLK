@@ -13,13 +13,15 @@ model User {
   email               String               @unique
   emailVerified       Boolean              @default(false)
   role                String               @default("reader")
+  raffleOptIn         Boolean              @default(true)
+  publicityConsent    Boolean              @default(false)
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
   sessions            Session[]
   accounts            Account[]
   admin               Admin?
   students            Student[]
-  pendingEmailChanges PendingEmailChange[]
+  pendingEmailChanges PendingEmailChange?
 
   @@map("user")
 }
@@ -191,8 +193,8 @@ model ShopAnimation {
 
 model PendingEmailChange {
   id        String   @id @default(cuid())
-  userId    String
-  newEmail  String
+  userId    String   @unique
+  newEmail  String   @unique
   token     String   @unique
   expiresAt DateTime
   createdAt DateTime @default(now())
