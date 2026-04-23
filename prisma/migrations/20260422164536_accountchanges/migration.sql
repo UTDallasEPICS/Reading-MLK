@@ -32,3 +32,7 @@ PRAGMA defer_foreign_keys=OFF;
 
 -- CreateIndex
 CREATE UNIQUE INDEX "PendingEmailChange_token_key" ON "PendingEmailChange"("token");
+-- CreateIndex
+CREATE UNIQUE INDEX "PendingEmailChange_userId_key" ON "PendingEmailChange"("userId");
+-- CreateIndex
+CREATE UNIQUE INDEX "PendingEmailChange_newEmail_key" ON "PendingEmailChange"("newEmail");

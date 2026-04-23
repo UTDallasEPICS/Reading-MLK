@@ -14,7 +14,6 @@ onMounted(() => {
   if (route.query.emailChanged) {
     alert('Your email was successfully updated. Please sign in again.')
 
-    // remove query param so it doesn't trigger again
     const newQuery = { ...route.query }
     delete newQuery.emailChanged
 

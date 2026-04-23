@@ -21,7 +21,7 @@ model User {
   accounts            Account[]
   admin               Admin?
   students            Student[]
-  pendingEmailChanges PendingEmailChange[]
+  pendingEmailChanges PendingEmailChange?
 
   @@map("user")
 }
@@ -193,8 +193,8 @@ model ShopAnimation {
 
 model PendingEmailChange {
   id        String   @id @default(cuid())
-  userId    String
-  newEmail  String
+  userId    String   @unique
+  newEmail  String   @unique
   token     String   @unique
   expiresAt DateTime
   createdAt DateTime @default(now())
