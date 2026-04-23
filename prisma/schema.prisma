@@ -119,9 +119,9 @@ model Form {
   startDate             DateTime
   endDate               DateTime?
   published             Boolean   @default(false)
-  author                String?
+  author                String
   formGroup             Int
-  title                 String?
+  title                 String
 
   Author        Admin?    @relation(fields: [author], references: [id], onDelete: SetNull)
   FormGroup     FormGroup @relation(fields: [formGroup], references: [id], onDelete: Cascade)
