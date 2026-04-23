@@ -5,7 +5,17 @@ import { useCurrentStudent } from '~/composables/useCurrentStudent'
 
 definePageMeta({ ssr: false })
 
-const { setStudent } = useCurrentStudent()
+const { setStudent, saveSettings } = useCurrentStudent()
+
+// Applies a language preference saved to localStorage during the signup flow.
+// This is needed because the Student record doesn't exist yet at signup time.
+async function applySignupLanguageIfPresent() {
+  if (!process.client) return
+  const lang = localStorage.getItem('signupPreferredLanguage')
+  if (!lang) return
+  await saveSettings({ language: lang })
+  localStorage.removeItem('signupPreferredLanguage')
+}
 
 const students = ref<Student[]>([])
 const loadingStudents = ref(true)
@@ -49,6 +59,8 @@ function getCardColor(index: number) {
 
 async function selectStudent(selectedStudent: Student) {
   setStudent(selectedStudent)
+  // Apply any language preference captured at signup time
+  await applySignupLanguageIfPresent()
   await navigateTo('/reader/home')
 }
 
@@ -67,6 +79,8 @@ async function createStudent() {
 
     students.value.push(newStudent)
     setStudent(newStudent)
+    // Apply any language preference captured at signup time
+    await applySignupLanguageIfPresent()
     name.value = ''
     showCreateForm.value = false
     await navigateTo('/reader/home')
