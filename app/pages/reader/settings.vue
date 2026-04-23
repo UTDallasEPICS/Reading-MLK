@@ -88,7 +88,7 @@ async function saveAccountSettings() {
         publicityConsent: boolean
       }
     }>('/api/users/account-settings', {
-      method: 'PUT' as 'PUT',
+      method: 'PUT',
       body: {
         raffleOptIn: accountSettings.raffleOptIn,
         publicityConsent: accountSettings.publicityConsent,
