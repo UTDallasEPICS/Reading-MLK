@@ -46,7 +46,7 @@
   .hover-spin:hover { transform: rotate(12deg); }
   
   /* ── Entries ── */
-  .raffle-section-text { align-items: left; display: block; font-size: 0.75rem; font-weight: 500; color: #111827; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;  }
+  .raffle-section-text { align-items: left; display: block; font-size: 1rem; font-weight: 500; color: #111827; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;  }
 
   
   /* ── Spin button ── */

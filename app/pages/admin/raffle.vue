@@ -5,7 +5,7 @@ const {
   getLastMonday, formatDate,
 } = useAdmin()
 
-const {loadRaffleData, raffleWeekStart, raffleWinner, raffleFormGroup, raffleSubmissions, spinRaffle} = useRaffleSpin()
+const {loadRaffleData, raffleWeekStart, raffleWinner, raffleFormGroup, raffleSubmissions, spinRaffle, spinCount} = useRaffleSpin()
 
 function toDateStr(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
@@ -16,7 +16,7 @@ watch(raffleWeekStart, () => {
 })
 
 onMounted(() => {
-  raffleWeekStart.value = new Date()
+  raffleWeekStart.value = toDateStr(new Date())
   loadRaffleData()
 })
 
@@ -63,10 +63,10 @@ onMounted(() => {
         <p class="raffle-section-text">Total Entries: {{ raffleSubmissions?.length || 0 }}</p>
 
         <template v-if="raffleWinner">
-          <p class="raffle-section-text">
-            Winning Student: {{ raffleWinner.name }}<br/>
-            Parent Name: {{ (raffleWinner as any).Parent?.name || 'N/A' }}<br/>
-            Parent Email: {{ (raffleWinner as any).Parent?.email || 'N/A' }}
+          <p class="raffle-section-text" :key="spinCount">
+            Winning Student:    {{ raffleWinner.name }}<br/>
+            Parent Name:        {{ (raffleWinner as any).Parent?.name || 'N/A' }}<br/>
+            Parent Email:       {{ (raffleWinner as any).Parent?.email || 'N/A' }}
           </p>
         </template>
         <template v-else>

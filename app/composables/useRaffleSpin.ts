@@ -7,12 +7,13 @@ export const useRaffleSpin = () => {
   const raffleForms = ref<Form[]>([])
   const raffleSubmissions = ref<FormSubmission[]>([])
   const raffleWinner = ref<Student | null>(null)
+  const spinCount = ref(0)
 
   const loadRaffleFormGroup = async () => {
     const val = raffleWeekStart.value
     const dateStr = val instanceof Date ? val.toISOString().split('T')[0] : String(val).split('T')[0]
-    const { data } = await useFetch<FormGroup>(`/api/formGroup?date=${dateStr}`, { method: 'GET' })
-    raffleFormGroup.value = data ? data.value as FormGroup : null
+    const data = await $fetch<FormGroup>(`/api/formGroup?date=${dateStr}`, { method: 'GET' })
+    raffleFormGroup.value = data || null
   }
 
   const loadRaffleForms = async () => {
@@ -20,8 +21,8 @@ export const useRaffleSpin = () => {
       raffleForms.value = []
       return
     }
-    const { data } = await useFetch<Form[]>(`/api/form?action=listForms&formGroup=${raffleFormGroup.value.id}`, { method: 'GET' })
-    raffleForms.value = data.value || []
+    const data = await $fetch<Form[]>(`/api/form?action=listForms&formGroup=${raffleFormGroup.value.id}`, { method: 'GET' })
+    raffleForms.value = data || []
   }
 
   const loadRaffleSubmissions = async () => {
@@ -29,8 +30,8 @@ export const useRaffleSpin = () => {
       raffleSubmissions.value = []
       return
     }
-    const { data } = await useFetch<FormSubmission[]>(`/api/formSubmission?formGroup=${raffleFormGroup.value.id}`, { method: 'GET' })
-    raffleSubmissions.value = data.value || []
+    const data = await $fetch<FormSubmission[]>(`/api/formSubmission?formGroup=${raffleFormGroup.value.id}`, { method: 'GET' })
+    raffleSubmissions.value = data || []
   }
 
   const loadRaffleWinner = async () => {
@@ -66,6 +67,7 @@ export const useRaffleSpin = () => {
         }
       })
       await loadRaffleData()
+      spinCount.value++
     } catch (e) {
       console.error("Error setting winner", e)
     }
@@ -78,6 +80,7 @@ export const useRaffleSpin = () => {
     raffleSubmissions,
     raffleWeekStart,
     spinRaffle,
-    loadRaffleData
+    loadRaffleData,
+    spinCount
   }
 }
