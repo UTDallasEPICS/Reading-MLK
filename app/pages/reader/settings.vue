@@ -9,7 +9,6 @@ if (!student.value) {
   await navigateTo('/reader/profile')
 }
 
-// Map the global settings to a local reactive object so our sliders/toggles can mutate them
 const settings = reactive({ 
   dyslexiaFont: globalSettings.value.dyslexiaFont,
   language: globalSettings.value.language,
@@ -21,7 +20,6 @@ const accountSettings = reactive({
   publicityConsent: false,
 })
 
-//Logout
 async function logout() {
   try {
     clearStudent()
@@ -32,7 +30,6 @@ async function logout() {
   }
 }
 
-//Change Email
 const newEmail = ref('')
 const savingEmail = ref(false)
 
