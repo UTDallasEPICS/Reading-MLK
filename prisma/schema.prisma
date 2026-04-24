@@ -8,17 +8,20 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String
-  email         String    @unique
-  emailVerified Boolean   @default(false)
-  role          String    @default("reader")
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  sessions      Session[]
-  accounts      Account[]
-  admin                 Admin?
-  students              Student[]
+  id                  String               @id @default(cuid())
+  name                String
+  email               String               @unique
+  emailVerified       Boolean              @default(false)
+  role                String               @default("reader")
+  raffleOptIn         Boolean              @default(true)
+  publicityConsent    Boolean              @default(false)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  sessions            Session[]
+  accounts            Account[]
+  admin               Admin?
+  students            Student[]
+  pendingEmailChanges PendingEmailChange?
 
   @@map("user")
 }
@@ -39,7 +42,7 @@ model Session {
 }
 
 model Account {
-  id                    String       @id
+  id                    String    @id
   accountId             String
   providerId            String
   userId                String
@@ -54,13 +57,12 @@ model Account {
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
-
   @@index([userId])
   @@map("account")
 }
 
 model Verification {
-  id         String   @id 
+  id         String   @id
   identifier String   @unique
   value      String
   expiresAt  DateTime
@@ -71,121 +73,131 @@ model Verification {
 }
 
 model Admin {
-  id                    String           @id @default(cuid())
-  settings              Json?
-  userId                  String       @unique
+  id       String @id @default(cuid())
+  settings Json?
+  userId   String @unique
 
-  User                   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  User                  User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   authoredAnnouncements Announcement[]
   authoredForms         Form[]
 }
 
 model Student {
-  id                    Int           @id @default(autoincrement())
-  name                  String
-  settings              Json?
-  exp                   Int           @default(0)
-  parentUserId                String           
+  id           Int    @id @default(autoincrement())
+  name         String
+  settings     Json?
+  exp          Int    @default(0)
+  parentUserId String
 
-  Parent                User       @relation(fields: [parentUserId], references: [id], onDelete: Cascade)
-  Submissions           FormSubmission[]
-  WinnerOf              FormGroup[]   @relation("RaffleWinner")
+  Parent      User             @relation(fields: [parentUserId], references: [id], onDelete: Cascade)
+  Submissions FormSubmission[]
+  WinnerOf    FormGroup[]      @relation("RaffleWinner")
 }
 
 model Announcement {
-  id          Int     @id @default(autoincrement())
-  author      String?
-  postDate    DateTime
-  expiryDate  DateTime?
-  content     String
+  id         Int       @id @default(autoincrement())
+  author     String?
+  postDate   DateTime
+  expiryDate DateTime?
+  content    String
 
-  Author      Admin?  @relation(fields: [author], references: [id], onDelete: SetNull)
+  Author Admin? @relation(fields: [author], references: [id], onDelete: SetNull)
 }
 
 model FormGroup {
-  id            Int       @id @default(autoincrement())
-  startDate     DateTime
-  endDate       DateTime?
-  raffleWinner  Int?      // References the id of the Student who won the raffle for this form group
-  
-  RaffleWinner  Student?  @relation(name: "RaffleWinner", fields: [raffleWinner], references: [id], onDelete: SetNull)
-  Forms         Form[]
+  id           Int       @id @default(autoincrement())
+  startDate    DateTime
+  endDate      DateTime?
+  raffleWinner Int? // References the id of the Student who won the raffle for this form group
+
+  RaffleWinner Student? @relation(name: "RaffleWinner", fields: [raffleWinner], references: [id], onDelete: SetNull)
+  Forms        Form[]
 }
 
 model Form {
-  id                    Int       @id @default(autoincrement())
-  order                 Int       @default(0)
-  startDate             DateTime
-  endDate               DateTime?
-  published             Boolean   @default(false)
-  author                String?
-  formGroup             Int
-  title                 String?
+  id        Int       @id @default(autoincrement())
+  order     Int       @default(0)
+  startDate DateTime
+  endDate   DateTime?
+  published Boolean   @default(false)
+  author    String?
+  formGroup Int
+  title     String?
 
-  Author        Admin?    @relation(fields: [author], references: [id], onDelete: SetNull)
-  FormGroup     FormGroup @relation(fields: [formGroup], references: [id], onDelete: Cascade)
-  Submissions   FormSubmission[]
-  Components    FormComponent[]
+  Author      Admin?           @relation(fields: [author], references: [id], onDelete: SetNull)
+  FormGroup   FormGroup        @relation(fields: [formGroup], references: [id], onDelete: Cascade)
+  Submissions FormSubmission[]
+  Components  FormComponent[]
 }
 
 model FormComponent {
-  id                Int       @id @default(autoincrement())
-  form              Int
-  order             Int       @default(0)
-  questionType      String
-  questionText      String
-  questionOptions   Json?
+  id              Int    @id @default(autoincrement())
+  form            Int
+  order           Int    @default(0)
+  questionType    String
+  questionText    String
+  questionOptions Json?
 
-  
-  Form          Form      @relation(fields: [form], references: [id], onDelete: Cascade)
-  Responses     SubmissionResponse[]
+  Form      Form                 @relation(fields: [form], references: [id], onDelete: Cascade)
+  Responses SubmissionResponse[]
 }
 
 model FormSubmission {
-  id              Int         @id @default(autoincrement())
-  student         Int
-  form            Int
-  submissionDate  DateTime    @default(now())
+  id             Int      @id @default(autoincrement())
+  student        Int
+  form           Int
+  submissionDate DateTime @default(now())
 
-  Student         Student     @relation(fields: [student], references: [id], onDelete: Cascade)
-  Form            Form        @relation(fields: [form], references: [id], onDelete: Cascade)
-  Responses       SubmissionResponse[]
+  Student   Student              @relation(fields: [student], references: [id], onDelete: Cascade)
+  Form      Form                 @relation(fields: [form], references: [id], onDelete: Cascade)
+  Responses SubmissionResponse[]
 }
 
-model SubmissionResponse{
-  id                Int       @id @default(autoincrement())
-  submission        Int
-  formComponent     Int
-  response          String
+model SubmissionResponse {
+  id            Int    @id @default(autoincrement())
+  submission    Int
+  formComponent Int
+  response      String
 
-  FormSubmission   FormSubmission   @relation(fields: [submission], references: [id], onDelete: Cascade)
-  FormComponent    FormComponent    @relation(fields: [formComponent], references: [id], onDelete: Cascade)
+  FormSubmission FormSubmission @relation(fields: [submission], references: [id], onDelete: Cascade)
+  FormComponent  FormComponent  @relation(fields: [formComponent], references: [id], onDelete: Cascade)
 }
 
 model ShopItem {
-  id              Int     @id @default(autoincrement()) 
-  type            String
-  name            String
-  dateAvailable   DateTime
+  id            Int      @id @default(autoincrement())
+  type          String
+  name          String
+  dateAvailable DateTime
 
-  Theme           ShopTheme?
-  Animation       ShopAnimation?
+  Theme     ShopTheme?
+  Animation ShopAnimation?
 }
 
 model ShopTheme {
-  id                  Int        @id @default(autoincrement())
-  shopItem            Int        @unique
-  themeColor          String
-  themeEffect         Json?  
+  id          Int    @id @default(autoincrement())
+  shopItem    Int    @unique
+  themeColor  String
+  themeEffect Json?
 
-  ShopItem            ShopItem   @relation(fields: [shopItem], references: [id], onDelete: Cascade)
+  ShopItem ShopItem @relation(fields: [shopItem], references: [id], onDelete: Cascade)
 }
 
 model ShopAnimation {
-  id                      Int        @id @default(autoincrement())
-  shopItem                Int        @unique
-  animationType           String
-  animationEffect         Json?  
+  id              Int    @id @default(autoincrement())
+  shopItem        Int    @unique
+  animationType   String
+  animationEffect Json?
 
-  ShopItem                ShopItem   @relation(fields: [shopItem], references: [id], onDelete: Cascade)
+  ShopItem ShopItem @relation(fields: [shopItem], references: [id], onDelete: Cascade)
+}
+
+model PendingEmailChange {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  newEmail  String   @unique
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  User User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
