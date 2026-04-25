@@ -1,5 +1,3 @@
-// composables/useAdmin.ts
-// Place this at: app/composables/useAdmin.ts
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 
