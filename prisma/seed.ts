@@ -11,7 +11,6 @@ async function main() {
     'parent2@gmail.com',
     'rae@readinghuddle.com',
     'asloran23@gmail.com',
-    'nevins321@gmail.com',
     'sxg230203@utdallas.edu'
   ]
 
@@ -143,7 +142,7 @@ async function main() {
 
   await prisma.user.create({
     data: {
-      id: 'seed_user_6',
+      id: 'seed_user_4',
       name: 'Aidan',
       email: 'asloran23@gmail.com',
       emailVerified: true,

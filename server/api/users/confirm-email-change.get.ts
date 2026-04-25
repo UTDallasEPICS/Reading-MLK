@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
     if (!pending) {
         throw createError({
             statusCode: 404,
-            statusMessage: 'Invalid or expired email change link',
+            statusMessage: 'Invalid email change link',
         })
     }
 
@@ -64,7 +64,7 @@ export default defineEventHandler(async (event) => {
             },
         }),
         prisma.pendingEmailChange.delete({
-            where: { token },
+            where: { userId: pending.userId },
         }),
     ])
 

@@ -62,13 +62,6 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // Optional cleanup: only keep one active pending request per user
-  await prisma.pendingEmailChange.deleteMany({
-    where: {
-      userId: session.user.id,
-    },
-  })
-
   const token = crypto.randomBytes(32).toString('hex')
   const expiresAt = new Date(Date.now() + 1000 * 60 * 60) // 1 hour
 
