@@ -15,9 +15,6 @@ const loginRole = computed(() => {
 const isNewUser = ref(false)
 const checkingEmail = ref(false)
 
-// Language preference selected during signup (before a Student record exists)
-const selectedLanguage = ref<'en' | 'es'>('en')
-
 const schema = computed(() => {
   if (isNewUser.value && loginRole.value === 'reader') {
     return z.object({
@@ -75,12 +72,6 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
     })
 
     if (!signupResult) return
-
-    // Persist the language preference so the profile page can apply it
-    // when the student record is first selected after login
-    if (process.client) {
-      localStorage.setItem('signupPreferredLanguage', selectedLanguage.value)
-    }
 
     const success = await sendMagicLink(callbackURL)
 
@@ -231,39 +222,6 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
                 }"
               />
             </UFormField>
-
-            <!-- Language preference — shown when creating a new reader account -->
-            <div v-if="isNewUser && loginRole === 'reader'" class="space-y-2">
-              <p class="text-[#5c6475] font-bold text-sm tracking-wide">
-                Preferred Language / Idioma preferido
-              </p>
-              <div class="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  @click="selectedLanguage = 'en'"
-                  :class="[
-                    'flex items-center justify-center gap-2 h-14 rounded-2xl font-bold text-base border-2 transition-all',
-                    selectedLanguage === 'en'
-                      ? 'border-[#6b6ee8] bg-[#eef0fb] text-[#6b6ee8] shadow-md scale-[1.02]'
-                      : 'border-gray-200 bg-white text-gray-500 hover:border-[#6b6ee8]/50'
-                  ]"
-                >
-                  <span class="text-xl">🇺🇸</span> English
-                </button>
-                <button
-                  type="button"
-                  @click="selectedLanguage = 'es'"
-                  :class="[
-                    'flex items-center justify-center gap-2 h-14 rounded-2xl font-bold text-base border-2 transition-all',
-                    selectedLanguage === 'es'
-                      ? 'border-[#6b6ee8] bg-[#eef0fb] text-[#6b6ee8] shadow-md scale-[1.02]'
-                      : 'border-gray-200 bg-white text-gray-500 hover:border-[#6b6ee8]/50'
-                  ]"
-                >
-                  <span class="text-xl">🇪🇸</span> Español
-                </button>
-              </div>
-            </div>
 
             <UButton
               :loading="checkingEmail"
