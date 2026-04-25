@@ -1,6 +1,5 @@
 // composables/useAdmin.ts
 // Place this at: app/composables/useAdmin.ts
-
 export const useAdmin = () => {
   const callFormApi = async <T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', params: Record<string, unknown> = {}, body?: Record<string, unknown>): Promise<T> => {
     const queryString = method === 'GET' || method === 'DELETE'
