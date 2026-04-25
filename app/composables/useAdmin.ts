@@ -1,9 +1,5 @@
 // composables/useAdmin.ts
 // Place this at: app/composables/useAdmin.ts
-import dayjs from 'dayjs'
-import utc from 'dayjs/plugin/utc'
-
-dayjs.extend(utc)
 export const useAdmin = () => {
   const callFormApi = async <T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', params: Record<string, unknown> = {}, body?: Record<string, unknown>): Promise<T> => {
     const queryString = method === 'GET' || method === 'DELETE'
@@ -22,18 +18,38 @@ export const useAdmin = () => {
     })
   }
 
+  const parseLocalDate = (value: string) => {
+    if (!value) return null
+
+    const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+    if (!match) return null
+
+    const [, year, month, day] = match
+    const parsed = new Date(Number(year), Number(month) - 1, Number(day))
+
+    return Number.isNaN(parsed.getTime()) ? null : parsed
+  }
+
+  const formatYmdLocal = (date: Date) => {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
   const parseDateToYmd = (value: string) => {
-    if (!value) {
+    const parsed = parseLocalDate(value)
+
+    if (parsed) {
+      return formatYmdLocal(parsed)
+    }
+
+    const fallback = new Date(value)
+    if (Number.isNaN(fallback.getTime())) {
       return ''
     }
 
-    const parsed = new Date(value)
-
-    if (Number.isNaN(parsed.getTime())) {
-      return ''
-    }
-
-    return parsed.toISOString().slice(0, 10)
+    return formatYmdLocal(fallback)
   }
 
   const buildQuestionOptions = (question: any) => ({
@@ -90,11 +106,11 @@ export const useAdmin = () => {
   const questions      = useState<any[]>('questions', () => [])
 
   // Week/day pickers — default to current Monday
-  const todayDate  = new Date()
-  const dayOff     = (todayDate.getDay() + 6) % 7
-  const mon        = new Date(todayDate)
+  const todayDate = new Date()
+  const dayOff = (todayDate.getDay() + 6) % 7
+  const mon = new Date(todayDate)
   mon.setDate(todayDate.getDate() - dayOff)
-  const monStr     = mon.toISOString().split('T')[0]
+  const monStr = formatYmdLocal(mon)
 
   const formWeekStart    = useState('formWeekStart', () => monStr)
   const formDays         = useState<string[]>('formDays', () => ['Monday'])
@@ -116,23 +132,49 @@ export const useAdmin = () => {
   // ── Helpers ──
   const getCalculatedDate = (weekStartStr: string, dayName: string): string => {
     if (!weekStartStr) return ''
-    const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
-    const idx  = days.indexOf(dayName)
+
+    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    const idx = days.indexOf(dayName)
     if (idx === -1) return ''
-    const d = new Date(`${weekStartStr}T00:00:00Z`)
-    d.setDate(d.getDate() + idx)
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-  
+
+    const base = parseLocalDate(weekStartStr)
+    if (!base) return ''
+
+    const d = new Date(base)
+    d.setDate(base.getDate() + idx)
+
+    return d.toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    })
   }
+
   const getLastMonday = (dateStr: string) => {
-    const d = new Date(`${dateStr}T00:00:00Z`)
-    const daysSinceMonday = (d.getDay()) % 7
-    d.setDate(d.getDate() - daysSinceMonday)
-    return d.toISOString().slice(0, 10)
+    const d = parseLocalDate(dateStr)
+    if (!d) return ''
+
+    const day = d.getDay()
+    const diffToMonday = day === 0 ? -6 : 1 - day
+
+    const monday = new Date(d)
+    monday.setDate(d.getDate() + diffToMonday)
+
+    return formatYmdLocal(monday)
   }
+
   const formatDate = (dateStr: string): string => {
     if (!dateStr) return ''
-    return new Date(`${dateStr}T00:00:00Z`).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+
+    const parsed = parseLocalDate(dateStr)
+    if (!parsed) return ''
+
+    return parsed.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    })
   }
 
   const defaultQuestions = (): any[] => [
@@ -192,7 +234,16 @@ export const useAdmin = () => {
     }
 
     const fallbackWeekStart = getLastMonday(historyWeekStart.value)
-    const fallbackWeekEnd = dayjs.utc(fallbackWeekStart).add(6, 'day').format('YYYY-MM-DD')
+    const fallbackEnd = parseLocalDate(fallbackWeekStart)
+
+    if (!fallbackEnd) {
+      historyGroupStartDate.value = ''
+      historyGroupEndDate.value = ''
+      return
+    }
+
+    fallbackEnd.setDate(fallbackEnd.getDate() + 6)
+    const fallbackWeekEnd = formatYmdLocal(fallbackEnd)
 
     try {
       const result = await callFormApi<{
@@ -274,13 +325,14 @@ export const useAdmin = () => {
           throw new Error('Invalid day selected for update')
         }
 
-        const startDate = new Date(`${weekStart}T00:00:00Z`)
-        startDate.setUTCDate(startDate.getUTCDate() + dayIndex)
+        const startDate = parseLocalDate(weekStart)
+        if (!startDate) throw new Error('Invalid week start date')
+        startDate.setDate(startDate.getDate() + dayIndex)
 
         await callFormApi('PUT', {}, {
           action: 'updateForm',
           id: editingFormId.value,
-          startDate: startDate.toISOString(),
+          startDate: formatYmdLocal(startDate),
           published: true,
           title: formTitle.value,
         })
@@ -341,15 +393,19 @@ export const useAdmin = () => {
           continue
         }
 
-        const startDate = new Date(`${weekStart}T00:00:00Z`)
-        startDate.setUTCDate(startDate.getUTCDate() + dayIndex)
+        const startDate = parseLocalDate(weekStart)
+        if (!startDate) {
+          continue
+        }
 
-        const createdFormResponse = await callFormApi<any>('POST', {}, {
-          action: 'createForm',
-          startDate: startDate.toISOString(),
-          published: true,
-          title: formTitle.value,
-        })
+        startDate.setDate(startDate.getDate() + dayIndex)
+
+          const createdFormResponse = await callFormApi<any>('POST', {}, {
+            action: 'createForm',
+            startDate: formatYmdLocal(startDate),
+            published: true,
+            title: formTitle.value,
+          })
 
         const createdForm = createdFormResponse?.data
 
