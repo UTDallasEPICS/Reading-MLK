@@ -1,5 +1,9 @@
 // composables/useAdmin.ts
 // Place this at: app/composables/useAdmin.ts
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+
+dayjs.extend(utc)
 export const useAdmin = () => {
   const callFormApi = async <T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', params: Record<string, unknown> = {}, body?: Record<string, unknown>): Promise<T> => {
     const queryString = method === 'GET' || method === 'DELETE'
@@ -234,16 +238,7 @@ export const useAdmin = () => {
     }
 
     const fallbackWeekStart = getLastMonday(historyWeekStart.value)
-    const fallbackEnd = parseLocalDate(fallbackWeekStart)
-
-    if (!fallbackEnd) {
-      historyGroupStartDate.value = ''
-      historyGroupEndDate.value = ''
-      return
-    }
-
-    fallbackEnd.setDate(fallbackEnd.getDate() + 6)
-    const fallbackWeekEnd = formatYmdLocal(fallbackEnd)
+    const fallbackWeekEnd = dayjs.utc(fallbackWeekStart).add(6, 'day').format('YYYY-MM-DD')
 
     try {
       const result = await callFormApi<{
