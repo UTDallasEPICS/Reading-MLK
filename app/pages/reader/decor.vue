@@ -29,8 +29,7 @@ function triggerTicketClick() {
   setTimeout(() => { ticketClicked.value = false; flyTickets.value = [] }, 1000)
 }
 
-// ── Shop tabs ──
-const decorTab = ref<'shop'|'badges'>('shop')
+//
 
 // ── Shop items — themes ──
 const shopItems = ref([
@@ -78,17 +77,6 @@ function applyItem(item: any) {
   }
 }
 
-// ── Badges ──
-const badges = ref([
-  { id:1, name:'First Steps',   icon:'🐣', desc:'Read your first book',      unlocked:true  },
-  { id:2, name:'Book Worm',     icon:'🐛', desc:'Read 10 books',             unlocked:true  },
-  { id:3, name:'Form Master',   icon:'📝', desc:'Complete 5 weekly forms',   unlocked:false },
-  { id:4, name:'Early Bird',    icon:'☀️', desc:'Read before 8am',           unlocked:true  },
-  { id:5, name:'Night Owl',     icon:'🦉', desc:'Read after 8pm',            unlocked:false },
-  { id:6, name:'Streak Star',   icon:'⭐', desc:'Get a 7 day streak',        unlocked:false },
-  { id:7, name:'Raffle Champ',  icon:'🎫', desc:'Enter 3 raffles',           unlocked:true  },
-  { id:8, name:'Super Sage',    icon:'🧙', desc:'Reach level 20',            unlocked:false },
-])
 </script>
 
 <template>
@@ -135,18 +123,8 @@ const badges = ref([
     <!-- ── MAIN ── -->
     <main class="max-w-4xl mx-auto min-h-[60vh]">
 
-      <!-- Tab switcher -->
-      <div class="flex gap-4 p-1 rounded-2xl border-2 border-white max-w-sm mx-auto mb-8" style="background:rgba(255,255,255,0.5); backdrop-filter:blur(10px)">
-        <button @click="decorTab = 'shop'"
-          class="flex-1 py-2 rounded-xl font-bold transition-all"
-          :style="decorTab === 'shop' ? 'background:var(--brand-indigo); color:white' : 'color:#9ca3af'">Shop</button>
-        <button @click="decorTab = 'badges'"
-          class="flex-1 py-2 rounded-xl font-bold transition-all"
-          :style="decorTab === 'badges' ? 'background:var(--brand-indigo); color:white' : 'color:#9ca3af'">Badges</button>
-      </div>
-
       <!-- ── SHOP ── -->
-      <div v-if="decorTab === 'shop'" class="space-y-8">
+      <div class="space-y-8">
 
         <!-- Themes -->
         <div>
@@ -209,21 +187,7 @@ const badges = ref([
         </div>
       </div>
 
-      <!-- ── BADGES ── -->
-      <div v-else class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div
-          v-for="badge in badges" :key="badge.id"
-          class="premium-card p-6 flex flex-col items-center text-center gap-2 group"
-          :class="badge.unlocked ? '' : 'opacity-40 grayscale'"
-          :style="badge.unlocked ? 'border-color:var(--brand-gold)' : ''"
-        >
-          <div class="text-5xl group-hover:scale-110 transition duration-500">{{ badge.icon }}</div>
-          <h4 class="font-heading font-bold text-lg leading-tight" style="color:var(--brand-dark)">{{ badge.name }}</h4>
-          <p class="text-[10px] font-bold text-gray-400">{{ badge.desc }}</p>
-          <div v-if="badge.unlocked" class="mt-2 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider" style="background:rgba(245,158,11,0.2); color:var(--brand-dark)">Unlocked</div>
-        </div>
-      </div>
-
+      
     </main>
 
     <!-- ── LEFT / RIGHT ARROWS ── -->

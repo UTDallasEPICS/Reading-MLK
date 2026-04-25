@@ -7,6 +7,7 @@ type ActionName =
   | 'listFormGroups'
   | 'getOnlyActiveFormsinGroup'
   | 'getFormGroup'
+  | 'resolveFormGroupRangeByDate'
   | 'listForms'
   | 'createFormGroup'
   | 'createForm'
@@ -160,6 +161,20 @@ const findOrCreateWeeklyFormGroup = async (date: Date) => {
   return createdGroup.id
 }
 
+const findMatchingFormGroupByDate = async (date: Date) => {
+  return await prisma.formGroup.findFirst({
+    where: {
+      startDate: { lte: date },
+      OR: [
+        { endDate: null },
+        { endDate: { gte: date } },
+      ],
+    },
+    orderBy: [{ startDate: 'desc' }, { id: 'desc' }],
+    select: { id: true, startDate: true, endDate: true },
+  })
+}
+
 const getAction = (event: H3Event, body: Record<string, unknown> | null) => {
   const query = getQuery(event)
   return (query.action ?? body?.action) as ActionName | undefined
@@ -234,8 +249,9 @@ const mapForm = (
     startDate: Date
     endDate: Date | null
     published: boolean
-    author: string | null
+    author: string
     formGroup: number
+    title: string
     Components?: Array<{
       id: number
       form: number
@@ -262,7 +278,7 @@ const mapForm = (
     day: formatDayName(startDate),
     weekStart: weekStart ? weekStart.toISOString().slice(0, 10) : '',
     date: formatDisplayDate(startDate),
-    title: `Form ${form.id}`,
+    title: form.title ?? `Form ${form.id}`,
     questions: (form.Components ?? [])
       .slice()
       .sort((left, right) => left.order - right.order)
@@ -340,10 +356,27 @@ export default defineEventHandler(async (event) => {
     if (selectedAction === 'listForms') {
       const query = getQuery(event)
       const formGroupId = query.formGroup !== undefined ? toInt(query.formGroup, 'formGroup', false) : null
+      const weeklyDate =
+        !!query.weeklyDate
+          ? (toDate(query.weeklyDate, 'weeklyDate') as Date)
+          : null
 
       const where: Prisma.FormWhereInput = {}
 
       if (formGroupId !== null) { where.formGroup = formGroupId }
+
+      if (weeklyDate) {
+        const matchingGroup = await findMatchingFormGroupByDate(weeklyDate)
+
+        if (!matchingGroup) {
+          return []
+        }
+
+        where.formGroup = matchingGroup.id
+        where.startDate = matchingGroup.endDate
+          ? { gte: matchingGroup.startDate, lte: matchingGroup.endDate }
+          : { gte: matchingGroup.startDate }
+      }
 
       if (query.published) { where.published = toBoolean(query.published) }
 
@@ -354,6 +387,27 @@ export default defineEventHandler(async (event) => {
       })
 
       return forms.map((form) => mapForm(form, form.FormGroup.startDate))
+    }
+
+    if (selectedAction === 'resolveFormGroupRangeByDate') {
+      const weeklyDate = toDate(getQuery(event).weeklyDate, 'weeklyDate') as Date
+      const matchingGroup = await findMatchingFormGroupByDate(weeklyDate)
+
+      if (!matchingGroup) {
+        return {
+          found: false,
+          formGroupId: null,
+          startDate: null,
+          endDate: null,
+        }
+      }
+
+      return {
+        found: true,
+        formGroupId: matchingGroup.id,
+        startDate: formatIsoDate(matchingGroup.startDate),
+        endDate: formatIsoDate(matchingGroup.endDate),
+      }
     }
 
     if (selectedAction === 'getOnlyActiveFormsinGroup') {
@@ -424,6 +478,7 @@ export default defineEventHandler(async (event) => {
       const startDate = toDate(body?.startDate, 'startDate') as Date
       const endDate = hasOwnField(body, 'endDate') ? toDate(body?.endDate, 'endDate', false) : null
       const published = hasOwnField(body, 'published') ? toBoolean(body?.published) : false
+      const title = hasOwnField(body, 'title') ? String(body?.title ?? '').trim() || null : null
       const explicitOrder = hasOwnField(body, 'order') ? toInt(body?.order, 'order', false) : null
       const requestedGroupId = hasOwnField(body, 'formGroup')
         ? toInt(body?.formGroup, 'formGroup', false)
@@ -449,15 +504,21 @@ export default defineEventHandler(async (event) => {
         _max: { order: true },
       })
 
-      const created = await prisma.form.create({
-        data: {
+      const createData: Record<string, unknown> = {
           formGroup: resolvedFormGroupId,
           startDate,
           endDate,
           published,
           order: explicitOrder ?? ((existingMax._max.order ?? -1) + 1),
           author: admin?.id ?? null,
-        },
+      }
+
+      if (title) {
+        createData.title = title
+      }
+
+      const created = await prisma.form.create({
+        data: createData as Prisma.FormUncheckedCreateInput,
         include: formInclude,
       })
 
@@ -583,6 +644,7 @@ export default defineEventHandler(async (event) => {
         endDate?: Date | null
         published?: boolean
         order?: number
+        title?: string | null
       } = {}
 
       if (hasOwnField(body, 'formGroup')) {
@@ -615,9 +677,14 @@ export default defineEventHandler(async (event) => {
         data.order = toInt(body?.order, 'order') as number
       }
 
+      if (hasOwnField(body, 'title')) {
+        const title = String(body?.title ?? '').trim()
+        data.title = title || null
+      }
+
       const updated = await prisma.form.update({
         where: { id: id as number },
-        data,
+        data: data as Prisma.FormUncheckedUpdateInput,
         include: formInclude,
       })
 

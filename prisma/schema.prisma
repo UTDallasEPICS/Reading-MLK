@@ -89,9 +89,10 @@ model Student {
   exp          Int    @default(0)
   parentUserId String
 
-  Parent      User             @relation(fields: [parentUserId], references: [id], onDelete: Cascade)
-  Submissions FormSubmission[]
-  WinnerOf    FormGroup[]      @relation("RaffleWinner")
+  Parent                User       @relation(fields: [parentUserId], references: [id], onDelete: Cascade)
+  Submissions           FormSubmission[]
+  WinnerOf              FormGroup[]   @relation("RaffleWinner")
+  unlockedShopItems     StudentShopItem[]
 }
 
 model Announcement {
@@ -115,14 +116,14 @@ model FormGroup {
 }
 
 model Form {
-  id        Int       @id @default(autoincrement())
-  order     Int       @default(0)
-  startDate DateTime
-  endDate   DateTime?
-  published Boolean   @default(false)
-  author    String?
-  formGroup Int
-  title     String?
+  id                    Int       @id @default(autoincrement())
+  order                 Int       @default(0)
+  startDate             DateTime
+  endDate               DateTime?
+  published             Boolean   @default(false)
+  author                String
+  formGroup             Int
+  title                 String
 
   Author      Admin?           @relation(fields: [author], references: [id], onDelete: SetNull)
   FormGroup   FormGroup        @relation(fields: [formGroup], references: [id], onDelete: Cascade)
@@ -148,9 +149,11 @@ model FormSubmission {
   form           Int
   submissionDate DateTime @default(now())
 
-  Student   Student              @relation(fields: [student], references: [id], onDelete: Cascade)
-  Form      Form                 @relation(fields: [form], references: [id], onDelete: Cascade)
-  Responses SubmissionResponse[]
+  Student         Student     @relation(fields: [student], references: [id], onDelete: Cascade)
+  Form            Form        @relation(fields: [form], references: [id], onDelete: Cascade)
+  Responses       SubmissionResponse[]
+
+  @@unique([student, form])
 }
 
 model SubmissionResponse {
@@ -164,13 +167,15 @@ model SubmissionResponse {
 }
 
 model ShopItem {
-  id            Int      @id @default(autoincrement())
-  type          String
-  name          String
-  dateAvailable DateTime
+  id              Int     @id @default(autoincrement()) 
+  type            String
+  name            String
+  dateAvailable   DateTime
+  cost            Int     @default(0)
 
-  Theme     ShopTheme?
-  Animation ShopAnimation?
+  Theme           ShopTheme?
+  Animation       ShopAnimation?
+  unlockedByStudents StudentShopItem[]
 }
 
 model ShopTheme {

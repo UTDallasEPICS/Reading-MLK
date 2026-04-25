@@ -1,5 +1,11 @@
 
-.builder-wrap   { width: 100%; max-width: none; margin: 0; }
+.builder-wrap {
+  max-width: 72rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
 .creation-wrap  { display: flex; flex-direction: column; gap: 1.5rem; }
 .history-wrap   { display: flex; flex-direction: column; gap: 1rem; }
 
@@ -265,6 +271,40 @@
 /* ── History ── */
 .history-header { display: flex; justify-content: space-between; align-items: center; }
 .history-title  { font-size: 2.25rem; font-weight: 500; color: #111827; }
+.history-filters-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+@media (min-width: 900px) {
+  .history-filters-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.status-filter-btns {
+  display: flex;
+  gap: 0.5rem;
+}
+.status-filter-btn {
+  flex: 1;
+  padding: 0.6rem 0.8rem;
+  border-radius: 0.75rem;
+  border: 2px solid #e2e8f0;
+  background: #ffffff;
+  color: #64748b;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.status-filter-btn:hover {
+  border-color: #c7d2fe;
+  color: #4338ca;
+}
+.status-filter-btn.active {
+  border-color: #4f46e5;
+  background: #eef2ff;
+  color: #3730a3;
+}
 .form-row {
   background: white; padding: 1.25rem 1.5rem; border-radius: 1.5rem;
   border: 1px solid #e2e8f0; display: flex; align-items: center;
