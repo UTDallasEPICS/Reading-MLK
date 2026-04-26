@@ -1,6 +1,9 @@
 // composables/useAdmin.ts
 // Place this at: app/composables/useAdmin.ts
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
 
+dayjs.extend(utc)
 export const useAdmin = () => {
   const callFormApi = async <T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', params: Record<string, unknown> = {}, body?: Record<string, unknown>): Promise<T> => {
     const queryString = method === 'GET' || method === 'DELETE'
@@ -96,7 +99,19 @@ export const useAdmin = () => {
   const formWeekStart    = useState('formWeekStart', () => monStr)
   const formDays         = useState<string[]>('formDays', () => ['Monday'])
   const historyWeekStart = useState('historyWeekStart', () => '')
+  const historyStatusSelection = useState<Array<'published' | 'unpublished'>>('historyStatusSelection', () => ['published', 'unpublished'])
+  const historyGroupStartDate = useState('historyGroupStartDate', () => '')
+  const historyGroupEndDate = useState('historyGroupEndDate', () => '')
   const selectedFormDetails = useState<any | null>('selectedFormDetails', () => null)
+
+  const toggleHistoryStatus = (value: 'published' | 'unpublished') => {
+    if (historyStatusSelection.value.includes(value)) {
+      historyStatusSelection.value = historyStatusSelection.value.filter((selected) => selected !== value)
+      return
+    }
+
+    historyStatusSelection.value = [...historyStatusSelection.value, value]
+  }
 
   // ── Helpers ──
   const getCalculatedDate = (weekStartStr: string, dayName: string): string => {
@@ -109,7 +124,7 @@ export const useAdmin = () => {
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
   
   }
-   const getLastMonday = (date: string | Date) => {
+  const getLastMonday = (date: string | Date) => {
     const d = new Date(typeof date === 'string' ? `${date}T00:00:00Z` : date)
     const daysSinceMonday = (d.getDay()) % 7
     d.setDate(d.getDate() - daysSinceMonday)
@@ -137,17 +152,81 @@ export const useAdmin = () => {
   const publishedForms = useState<any[]>('publishedForms', () => [])
 
   const filteredPublishedForms = computed(() =>
-    publishedForms.value.filter(f => !historyWeekStart.value || f.weekStart === historyWeekStart.value)
+    publishedForms.value.filter((form) => {
+      const isActive = form.status === 'Active'
+      const matchesPublished = historyStatusSelection.value.includes('published') && isActive
+      const matchesUnpublished = historyStatusSelection.value.includes('unpublished') && !isActive
+      const matchesStatus = matchesPublished || matchesUnpublished
+
+      const matchesGroupStart =
+        !historyGroupStartDate.value ||
+        !form.weekStart ||
+        form.weekStart >= historyGroupStartDate.value
+
+      const matchesGroupEnd =
+        !historyGroupEndDate.value ||
+        !form.weekStart ||
+        form.weekStart <= historyGroupEndDate.value
+
+      return matchesStatus && matchesGroupStart && matchesGroupEnd
+    })
   )
 
   const loadPublishedForms = async () => {
     try {
-      const forms = await callFormApi<any[]>('GET', { action: 'listForms' })
+      const forms = await callFormApi<any[]>('GET', {
+        action: 'listForms',
+        weeklyDate: historyWeekStart.value || undefined,
+      })
       publishedForms.value = (forms ?? []).map(mapApiFormToUi)
     } catch (error) {
       console.error('Failed to load forms', error)
     }
   }
+
+  const syncGroupRangeFromWeeklyDate = async () => {
+    if (!historyWeekStart.value) {
+      historyGroupStartDate.value = ''
+      historyGroupEndDate.value = ''
+      return
+    }
+
+    const fallbackWeekStart = getLastMonday(historyWeekStart.value)
+    const fallbackWeekEnd = dayjs.utc(fallbackWeekStart).add(6, 'day').format('YYYY-MM-DD')
+
+    try {
+      const result = await callFormApi<{
+        found: boolean
+        startDate: string | null
+        endDate: string | null
+      }>('GET', {
+        action: 'resolveFormGroupRangeByDate',
+        weeklyDate: historyWeekStart.value,
+      })
+
+      if (!result?.found) {
+        historyGroupStartDate.value = fallbackWeekStart
+        historyGroupEndDate.value = fallbackWeekEnd
+        return
+      }
+
+      historyGroupStartDate.value = parseDateToYmd(result.startDate || '')
+      historyGroupEndDate.value = parseDateToYmd(result.endDate || '') || fallbackWeekEnd
+    } catch (error) {
+      console.error('Failed to resolve form group range', error)
+      historyGroupStartDate.value = fallbackWeekStart
+      historyGroupEndDate.value = fallbackWeekEnd
+    }
+  }
+
+  watch(
+    historyWeekStart,
+    async () => {
+      await syncGroupRangeFromWeeklyDate()
+      await loadPublishedForms()
+    },
+    { immediate: true }
+  )
 
   // ── Drag-and-drop for question reorder ──
   const draggedIdx = useState<number | null>('draggedIdx', () => null)
@@ -203,6 +282,7 @@ export const useAdmin = () => {
           id: editingFormId.value,
           startDate: startDate.toISOString(),
           published: true,
+          title: formTitle.value,
         })
 
         const existingForm = publishedForms.value.find((form) => Number(form.id) === Number(editingFormId.value))
@@ -268,6 +348,7 @@ export const useAdmin = () => {
           action: 'createForm',
           startDate: startDate.toISOString(),
           published: true,
+          title: formTitle.value,
         })
 
         const createdForm = createdFormResponse?.data
@@ -391,7 +472,7 @@ export const useAdmin = () => {
   return {
     // builder
     builderSubTab, formTitle, editingFormId, questions,
-    formWeekStart, formDays, historyWeekStart, getLastMonday,
+    formWeekStart, formDays, historyWeekStart, historyStatusSelection, historyGroupStartDate, historyGroupEndDate, toggleHistoryStatus, getLastMonday,
     getCalculatedDate, formatDate, defaultQuestions,
     publishedForms, filteredPublishedForms,
     selectedFormDetails, viewFormDetails,
