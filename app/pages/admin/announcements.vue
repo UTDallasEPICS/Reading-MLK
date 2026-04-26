@@ -1,320 +1,534 @@
 <script setup lang="ts">
 definePageMeta({ ssr: false, layout: "admin" })
 
-const {
-  announcementSubTab,
-  newAnnouncement,
-  announcementFilterWeek,
-  filteredAnnouncements,
-  isAnnouncementActive,
-  addAnnouncement,
-  deleteAnnouncement,
-} = useAdmin()
+//Import watch to see when tab switches between history and create
+import { ref, reactive, computed, watch, onMounted, onUnmounted } from 'vue'
+import data from '@emoji-mart/data'
+import { Picker } from 'emoji-mart'
+
+//Props receive array of existing announcements
+const props = defineProps({
+  announcements: {
+    type: Array,
+    default: () => []
+  }
+})
+
+
+const emit = defineEmits(['add', 'delete'])
+const subTab = ref('creation')
+const todayStr = new Date().toISOString().split('T')[0]
+
+//Current announcement form being created
+const form = reactive({
+  title: '',
+  content: '',
+  icon: '🌟',
+  startDate: todayStr,
+  endDate: ''
+})
+
+//Emoji picker state
+const showEmojiPicker = ref(false)
+const emojiTriggerRef = ref<HTMLElement | null>(null)
+const pickerContainerRef = ref<HTMLElement | null>(null)
+let pickerInstance: any = null
+
+function onEmojiSelect(emoji: any) {
+  form.icon = emoji.native
+  showEmojiPicker.value = false
+}
+
+function onDocumentClick(e: MouseEvent) {
+  if (emojiTriggerRef.value && !emojiTriggerRef.value.contains(e.target as Node)) {
+    showEmojiPicker.value = false
+  }
+}
+watch(showEmojiPicker, (open) => {
+  if (open) {
+    document.addEventListener('mousedown', onDocumentClick)
+    
+    // Initialize picker lazily the first time it opens
+    if (!pickerInstance && pickerContainerRef.value) {
+      pickerInstance = new Picker({
+        data,
+        onEmojiSelect: onEmojiSelect,
+        theme: 'light'
+      })
+      pickerContainerRef.value.appendChild(pickerInstance as any)
+    }
+  } else {
+    document.removeEventListener('mousedown', onDocumentClick)
+  }
+})
+onUnmounted(() => document.removeEventListener('mousedown', onDocumentClick))
+
+//Announcement history storage
+const allAnnouncements = ref<any[]>([])
+
+//Loading state
+const historyLoading = ref(false)
+
+//Error state
+const historyError = ref<string | null>(null)
+
+//Parses announcements based on format, used to be string, now JSON object
+function parseContent (raw: any): { icon: string; title: string; body: string } {
+  //New records: Prisma already returned a proper object
+  if (raw && typeof raw === 'object') return raw as { icon: string; title: string; body: string }
+  //Legacy records: raw is a JSON string — parse it back to an object
+  if (typeof raw === 'string') {
+    try { return JSON.parse(raw) as { icon: string; title: string; body: string } }
+    catch { return { icon: '📢', title: raw, body: '' } }  // malformed — show string as title
+  }
+  return { icon: '📢', title: '', body: '' }
+}
+
+//Checks if announcement is active
+function isActive (ann: any) {
+  const now = new Date()
+
+  //Not yet published
+  if (new Date(ann.postDate) > now) return false
+
+  //Already expired
+  if (ann.expiryDate && new Date(ann.expiryDate) < now) return false
+
+  return true
+}
+
+//Converts an ISO 8601 date string into a human-readable short date, null if no date given
+function fmtDate (iso: string | null) {
+  if (!iso) return null
+  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+//Computed list that re-filters allAnnouncements every time the underlying data changes
+const activeAnnouncements = computed(() => allAnnouncements.value.filter(isActive))
+
+//Computed list that shows inactive/expired announcements
+const inactiveAnnouncements = computed(() => allAnnouncements.value.filter(a => !isActive(a)))
+
+//Asynchronously fetches all announcement records from the API endpoint. On success it populates 
+//`allAnnouncements`, which automatically causes both computed lists to re-evaluate. On failure it 
+//stores the error message in `historyError` for display. The `historyLoading` flag wraps the 
+//entire request so the template can show a spinner during the fetch.
+async function loadHistory () {
+  historyLoading.value = true
+  historyError.value = null
+  try {
+    // $fetch is Nuxt's HTTP utility (wraps native fetch with nice error handling).
+    allAnnouncements.value = await $fetch('/api/announcement')
+  } catch (e: any) {
+    //Capture the error message; fall back to a generic string if none exists
+    historyError.value = e?.message ?? 'Failed to load announcements.'
+  } finally {
+    // Always turn off the loading flag, even if the request failed
+    historyLoading.value = false
+  }
+}
+
+//Watcher, triggers fetch on tab switch
+watch(subTab, (tab) => { if (tab === 'history') loadHistory() })
+
+//Deletes an announcement
+async function deleteAnnouncement (id: number) {
+  //Show confirmation dialog before deleting
+  if (!confirm('Are you sure you want to permanently delete this announcement?')) return
+
+  try {
+    //Sends DELETE request and removes the record from the local `allAnnouncements` array
+    await $fetch(`/api/announcement/${id}`, { method: 'DELETE' })
+
+    //Find the deleted record's index in the reactive array and remove it.
+    const idx = allAnnouncements.value.findIndex(a => a.id === id)
+    if (idx !== -1) allAnnouncements.value.splice(idx, 1)
+  } catch (e: any) {
+    //Surface the server's error message if available, otherwise show a generic fallback so the admin knows the operation did not succeed.
+    alert(e?.data?.error ?? 'Failed to delete announcement. Please try again.')
+  }
+}
+
+//Handles form submission and uploads announcement data to the database
+async function postAnnouncement () {
+  //Validate required fields
+  if (!form.title.trim() || !form.content.trim()) {
+    alert('Please fill in title and message!')
+    return
+  }
+
+  try {
+    //Format dates
+    const postDate = new Date(form.startDate!).toISOString()
+    const expiryDate = form.endDate ? new Date(form.endDate).toISOString() : null
+
+    //Build a plain JSON object for the `content` field
+    const content = {
+      icon: form.icon,
+      title: form.title,
+      body: form.content
+    }
+
+    //Post to database
+    const newAnn = await $fetch('/api/announcement', {
+      method: 'POST',
+      body: {
+        content,
+        postDate,
+        expiryDate,
+        author: null //Hardcoded author based on current functionality
+      }
+    })
+
+    //Emit event to parent component
+    emit('add', {
+      title: form.title,
+      content: form.content,
+      icon: form.icon,
+      startDate: form.startDate,
+      endDate: form.endDate,
+      weekStart: '',
+      day: ''
+    })
+
+    //Reset form fields after successful submission
+    form.title = ''
+    form.content = ''
+    form.icon = '🌟'
+    form.startDate = todayStr
+    form.endDate = ''
+  } catch (e) {
+    console.error('Failed to post announcement:', e)
+    alert('Failed to post announcement. Please try again.')
+  }
+}
 </script>
 
+
+
+
 <template>
-  <div class="ann-wrap">
+  <div class="flex min-h-screen bg-gray-50">
 
-    <!-- Header + tab switcher -->
-    <div class="ann-header">
-      <div>
-        <h2 class="ann-title">Announcements</h2>
-        <p class="ann-sub">Direct communication with your students</p>
-      </div>
 
-      <div class="tab-switcher">
-        <button
-          class="tab-btn"
-          :class="announcementSubTab === 'creation' ? 'active' : ''"
-          @click="announcementSubTab = 'creation'"
-        >Post Announcement</button>
-        <button
-          class="tab-btn"
-          :class="announcementSubTab === 'history' ? 'active' : ''"
-          @click="announcementSubTab = 'history'"
-        >Announcement History</button>
-      </div>
-    </div>
+    <!-- ── Main content — pushed right of the fixed sidebar ── -->
+    <main class="ml-6 flex-1 p-8">
+      <div class="space-y-4 animate-fade-in">
 
-    <!-- ══════════════════════════════ -->
-    <!--  POST VIEW                    -->
-    <!-- ══════════════════════════════ -->
-    <div v-if="announcementSubTab === 'creation'" class="post-grid">
-
-      <!-- Form card -->
-      <div class="form-card">
-
-        <!-- Title + icon -->
-        <div>
-          <label class="field-label">Announcement Title</label>
-          <div class="title-row">
-            <input v-model="newAnnouncement.title" type="text" placeholder="e.g., Book Fair Next Week!" class="input-field flex-grow" />
-            <select v-model="newAnnouncement.icon" class="icon-select">
-              <option value="⚠️">⚠️ Alert</option>
-              <option value="🌟">🌟 Star</option>
-              <option value="🎉">🎉 Party</option>
-              <option value="🔔">🔔 Bell</option>
-              <option value="📅">📅 Date</option>
-              <option value="🍎">🍎 Apple</option>
-              <option value="📖">📖 Book</option>
-              <option value="🏆">🏆 Trophy</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Dates -->
-        <div class="dates-grid">
+        <!-- Header Section and Tab Controls -->
+        <!-- Controls whether to display the form to create new announcements or view past records -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <label class="field-label italic">Publish From</label>
-            <input v-model="newAnnouncement.startDate" type="date" class="input-field" />
+            <h2 class="text-3xl font-medium text-gray-900 flex items-center gap-3">
+              Announcements
+            </h2>
+            <p class="text-gray-500 font-medium mt-1">Direct communication with your students</p>
           </div>
-          <div>
-            <label class="field-label">Till Date (Optional)</label>
-            <div class="relative">
-              <input v-model="newAnnouncement.endDate" type="date" class="input-field" />
-              <button v-if="newAnnouncement.endDate" class="clear-btn" @click="newAnnouncement.endDate = ''">✕</button>
-            </div>
-          </div>
-        </div>
 
-        <!-- Week + Day -->
-        <div class="dates-grid">
-          <div>
-            <label class="field-label">Week Starting</label>
-            <input v-model="newAnnouncement.weekStart" type="date" class="input-field" />
-          </div>
-          <div>
-            <label class="field-label">Day</label>
-            <select v-model="newAnnouncement.day" class="input-field">
-              <option v-for="d in ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']" :key="d">{{ d }}</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Content -->
-        <div>
-          <label class="field-label">Message Content</label>
-          <textarea v-model="newAnnouncement.content" rows="4"
-            placeholder="What would you like to share with your students?"
-            class="textarea-field" />
-        </div>
-
-        <button class="btn-post" @click="addAnnouncement">Post Announcement</button>
-      </div>
-
-      <!-- Live preview -->
-      <div class="preview-panel">
-        <h4 class="preview-label">Live Student Preview</h4>
-        <div class="preview-card">
-          <div class="preview-icon">{{ newAnnouncement.icon }}</div>
-          <div class="preview-body">
-            <div class="preview-title">{{ newAnnouncement.title || 'Your Title Here' }}</div>
-            <span class="preview-dates">
-              {{ newAnnouncement.startDate || 'Start Date' }}
-              {{ newAnnouncement.endDate ? ' to ' + newAnnouncement.endDate : '(Ongoing)' }}
-            </span>
-            <p class="preview-content">{{ newAnnouncement.content || 'Your message will appear here...' }}</p>
+          <div class="flex bg-indigo-50 p-1.5 rounded-lg border border-indigo-100 shadow-inner">
+            <button
+              @click="subTab = 'creation'"
+              :class="[
+                'px-6 py-2.5 rounded-lg font-medium transition-all duration-300',
+                subTab === 'creation' ? 'bg-white text-indigo-800 shadow-md' : 'text-indigo-400 hover:text-indigo-600'
+              ]"
+            >
+              Post Announcement
+            </button>
+            <button
+              @click="subTab = 'history'"
+              :class="[
+                'px-6 py-2.5 rounded-lg font-medium transition-all duration-300',
+                subTab === 'history' ? 'bg-white text-indigo-800 shadow-md' : 'text-indigo-400 hover:text-indigo-600'
+              ]"
+            >
+              Current/Past Announcements
+            </button>
           </div>
         </div>
-      </div>
 
-    </div>
+        <!-- ══ POST ANNOUNCEMENT ══ -->
+        <div v-if="subTab === 'creation'" class="space-y-4 animate-fade-in">
+          <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
 
-    <!-- ══════════════════════════════ -->
-    <!--  HISTORY VIEW                 -->
-    <!-- ══════════════════════════════ -->
-    <div v-if="announcementSubTab === 'history'" class="history-wrap">
+            <!-- Announcement Creation Form -->
+            <!-- Collects all user input for title, icon selection, active dates, and text body -->
+            <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm space-y-5">
+              <div class="grid grid-cols-1 gap-5">
 
-      <!-- Filter -->
-      <div class="filter-bar">
-        <div>
-          <label class="field-label">View Week Starting</label>
-          <input v-model="announcementFilterWeek" type="date" class="input-field w-auto" />
-        </div>
-      </div>
+                <!-- Title + Icon -->
+                <div>
+                  <label class="block text-xs font-medium text-gray-400 uppercase tracking-widest mb-3">
+                    Announcement Title
+                  </label>
+                  <div class="flex gap-2">
+                    <input
+                      v-model="form.title"
+                      type="text"
+                      placeholder="e.g., Book Fair Next Week!"
+                      class="flex-grow text-lg font-medium text-gray-800 border-2 border-gray-50 rounded-lg px-5 py-3 focus:border-indigo-500 focus:outline-none transition"
+                    />
+                    <!-- Emoji picker trigger + emoji-mart popup -->
+                    <div class="relative shrink-0" ref="emojiTriggerRef">
+                      <!-- Trigger: displays selected emoji, toggles picker -->
+                      <button
+                        type="button"
+                        @click.stop="showEmojiPicker = !showEmojiPicker"
+                        class="w-14 h-14 text-2xl flex items-center justify-center rounded-lg border-2 border-gray-100 hover:border-indigo-300 transition bg-white shadow-sm"
+                        title="Choose emoji"
+                      >{{ form.icon }}</button>
 
-      <!-- List -->
-      <div class="ann-list">
-        <div
-          v-for="ann in filteredAnnouncements"
-          :key="ann.id"
-          class="ann-item"
-          :class="isAnnouncementActive(ann) ? 'ann-active' : 'ann-expired'"
-        >
-          <div class="ann-icon" :class="isAnnouncementActive(ann) ? 'icon-active' : 'icon-expired'">
-            {{ ann.icon }}
-          </div>
+                      <!-- emoji-mart Picker popup -->
+                      <div
+                        v-show="showEmojiPicker"
+                        class="absolute top-full mt-2 left-0 z-50 shadow-2xl rounded-2xl overflow-hidden"
+                        @mousedown.stop
+                      >
+                        <div ref="pickerContainerRef"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-          <div class="ann-content">
-            <div class="ann-top-row">
-              <h4 class="ann-item-title" :class="isAnnouncementActive(ann) ? '' : 'expired-text'">
-                {{ ann.title }}
-              </h4>
-              <div class="ann-meta-pills">
-                <span v-if="isAnnouncementActive(ann)" class="pill green">Active</span>
-                <span v-else class="pill gray">Expired</span>
-                <span class="pill neutral">{{ ann.day }}</span>
-                <span class="pill neutral">
-                  {{ ann.startDate }} {{ ann.endDate ? 'to ' + ann.endDate : '(Ongoing)' }}
-                </span>
-                <button class="delete-btn" @click="deleteAnnouncement(ann.id)">✕</button>
+                <!-- Dates -->
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-xs font-medium text-gray-400 uppercase tracking-widest mb-3 italic">
+                      Publish From
+                    </label>
+                    <input
+                      v-model="form.startDate"
+                      type="date"
+                      class="w-full text-sm font-medium text-gray-800 border-2 border-gray-50 rounded-lg px-5 py-3 focus:border-indigo-500 focus:outline-none transition"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-gray-400 uppercase tracking-widest mb-3">
+                      Till Date (Optional)
+                    </label>
+                    <div class="relative">
+                      <input
+                        v-model="form.endDate"
+                        type="date"
+                        class="w-full text-sm font-medium text-gray-800 border-2 border-gray-50 rounded-lg px-5 py-3 focus:border-indigo-500 focus:outline-none transition"
+                      />
+                      <button
+                        v-if="form.endDate"
+                        @click="form.endDate = ''"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-red-400"
+                      >✕</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Message Content -->
+              <div>
+                <label class="block text-xs font-medium text-gray-400 uppercase tracking-widest mb-3">
+                  Message Content
+                </label>
+                <textarea
+                  v-model="form.content"
+                  rows="4"
+                  placeholder="eg., Attend the book fair to broaden your reading!"
+                  class="w-full text-lg font-medium text-gray-800 border-2 border-gray-50 rounded-lg px-5 py-4 focus:border-indigo-500 focus:outline-none transition resize-none"
+                ></textarea>
+              </div>
+
+              <!-- Submit -->
+              <div class="flex justify-center pt-4">
+                <button
+                  @click="postAnnouncement"
+                  class="w-full py-4 bg-indigo-600 text-white rounded-lg font-medium text-xl hover:bg-indigo-700 transition shadow-xl shadow-indigo-200"
+                >
+                  Post Announcement
+                </button>
               </div>
             </div>
-            <p class="ann-item-body" :class="isAnnouncementActive(ann) ? '' : 'expired-text'">
-              {{ ann.content }}
-            </p>
+
+            <!-- Live Preview Feature -->
+            <!-- Provides a real-time visualization of what the announcement will look like to students -->
+            <div class="bg-indigo-50/30 p-8 rounded-lg border-2 border-dashed border-indigo-100 flex flex-col justify-center">
+              <h4 class="text-xs font-medium text-indigo-400 uppercase tracking-widest mb-6 text-center">
+                Live Student Preview
+              </h4>
+              <div class="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-xl flex gap-6 items-start">
+                <div class="p-4 bg-indigo-50 rounded-2xl text-4xl shrink-0 border border-indigo-100 shadow-sm flex items-center justify-center min-w-[80px] min-h-[80px]">
+                  {{ form.icon }}
+                </div>
+                <div class="flex-grow mt-1">
+                  <div class="flex flex-col gap-1 mb-3">
+                    <h4 class="text-xl font-bold text-gray-800">
+                      {{ form.title || 'Your Title Here' }}
+                    </h4>
+                    <div class="flex gap-2 items-center">
+                      <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-[10px] font-bold uppercase tracking-widest">
+                        {{ form.startDate || 'Start Date' }}
+                        {{ form.endDate ? 'to ' + form.endDate : '(Ongoing)' }}
+                      </span>
+                    </div>
+                  </div>
+                  <p class="text-gray-500 font-medium leading-relaxed">
+                    {{ form.content || 'Your message will appear here...' }}
+                  </p>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
 
-        <div v-if="filteredAnnouncements.length === 0" class="empty-state">
-          <span class="text-5xl block mb-4">🏜️</span>
-          <p>No announcements found for this filter.</p>
-          <button class="clear-filter" @click="announcementFilterWeek = ''">Clear all filters</button>
+ 
+        <!-- ══ ANNOUNCEMENT HISTORY VIEWER -->
+        <div v-if="subTab === 'history'" class="space-y-6 animate-fade-in">
+
+          <!-- Loading State -->
+          <div v-if="historyLoading" class="flex flex-col items-center justify-center py-20 gap-3 text-indigo-400">
+            <svg class="animate-spin w-8 h-8" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+            </svg>
+            <span class="font-medium text-sm uppercase tracking-widest">Loading announcements…</span>
+          </div>
+
+          <!-- Error State -->
+          <div v-else-if="historyError" class="py-16 text-center bg-red-50 rounded-xl border border-red-100">
+            <p class="text-red-500 font-medium">{{ historyError }}</p>
+            <button @click="loadHistory" class="mt-3 text-indigo-500 text-sm font-medium hover:underline">Retry</button>
+          </div>
+
+          <!-- Loaded State -->
+          <template v-else>
+
+            <!-- Active Announcements Section -->
+            <section>
+              <!-- Section header: green label + animated dot + count badge -->
+              <h3 class="text-xs font-bold uppercase tracking-widest text-green-600 mb-3 flex items-center gap-2">
+                <span class="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                Active
+                <span class="ml-1 px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-[10px]">{{ activeAnnouncements.length }}</span>
+              </h3>
+
+              <!-- Empty sub-state: shown when no announcements are currently active. -->
+              <div v-if="activeAnnouncements.length === 0" class="text-center py-10 bg-white rounded-xl border-2 border-dashed border-gray-100">
+                <p class="text-gray-400 font-medium text-sm">No active announcements right now.</p>
+              </div>
+
+              <!-- Active cards list -->
+              <div v-else class="space-y-3">
+                <div
+                  v-for="ann in activeAnnouncements"
+                  :key="ann.id"
+                  class="p-5 rounded-xl border-2 shadow-sm flex gap-5 items-start transition group relative overflow-hidden bg-white border-indigo-200 shadow-indigo-100 hover:border-indigo-400"
+                >
+                  <!-- Icon cell -->
+                  <div class="p-4 rounded-xl text-3xl shrink-0 border shadow-sm transition group-hover:scale-110 flex items-center justify-center min-w-[80px] min-h-[80px] bg-indigo-50 border-indigo-100">
+                    {{ parseContent(ann.content).icon }}
+                  </div>
+
+                  <!-- Body -->
+                  <div class="flex-grow mt-1">
+                    <div class="flex justify-between items-start mb-2 flex-wrap gap-2">
+                      <!-- Title -->
+                      <h4 class="text-xl font-bold text-gray-800">{{ parseContent(ann.content).title }}</h4>
+
+                      <!-- Metadata badges -->
+                      <div class="flex gap-2 items-center flex-wrap">
+                        <!-- Green "Active" status badge -->
+                        <span class="px-2 py-0.5 bg-green-100 text-green-700 rounded text-[9px] font-bold uppercase tracking-wider border border-green-200 shadow-sm">Active</span>
+
+                        <!-- Post window pill -->
+                        <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-[10px] font-bold uppercase tracking-widest">
+                          {{ fmtDate(ann.postDate) }}{{ ann.expiryDate ? ' → ' + fmtDate(ann.expiryDate) : ' (Ongoing)' }}
+                        </span>
+
+                        <!-- Delete button -->
+                             announcement's database integer ID. The icon-only
+                             button is intentionally subtle (gray) until hovered
+                             (red) to prevent accidental clicks. A confirm() dialog
+                             inside deleteAnnouncement() provides a second safety
+                             gate before the database record is permanently removed. -->
+                        <button
+                          @click="deleteAnnouncement(ann.id)"
+                          class="ml-1 text-gray-300 hover:text-red-500 transition-colors duration-200"
+                          title="Delete announcement"
+                        >✕</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- Inactive / Expired Announcements Section -->
+            <section>
+              <!-- Section header -->
+              <h3 class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3 flex items-center gap-2">
+                <span class="inline-block w-2 h-2 rounded-full bg-gray-300"></span>
+                Inactive / Expired
+                <span class="ml-1 px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-[10px]">{{ inactiveAnnouncements.length }}</span>
+              </h3>
+
+              <!-- Empty sub-state for when there are no expired announcements yet -->
+              <div v-if="inactiveAnnouncements.length === 0" class="text-center py-10 bg-white rounded-xl border-2 border-dashed border-gray-100">
+                <p class="text-gray-400 font-medium text-sm">No expired announcements.</p>
+              </div>
+
+              <!-- Inactive cards list -->
+              <div v-else class="space-y-3">
+                <div
+                  v-for="ann in inactiveAnnouncements"
+                  :key="ann.id"
+                  class="p-5 rounded-xl border-2 shadow-sm flex gap-5 items-start transition group relative overflow-hidden bg-gray-50 border-gray-100 opacity-70 hover:opacity-100 grayscale-[0.3]"
+                >
+                  <!-- Icon -->
+                  <div class="p-4 rounded-xl text-3xl shrink-0 border shadow-sm transition group-hover:scale-110 flex items-center justify-center min-w-[80px] min-h-[80px] bg-gray-100 border-gray-200">
+                    {{ parseContent(ann.content).icon }}
+                  </div>
+
+                  <!-- Body -->
+                  <div class="flex-grow mt-1">
+                    <div class="flex justify-between items-start mb-2 flex-wrap gap-2">
+                      <!-- Title -->
+                      <h4 class="text-xl font-bold text-gray-500">{{ parseContent(ann.content).title }}</h4>
+
+                      <!-- Metadata badges -->
+                      <div class="flex gap-2 items-center flex-wrap">
+                        <!-- Gray "Expired" status badge -->
+                        <span class="px-2 py-0.5 bg-gray-200 text-gray-500 rounded text-[9px] font-bold uppercase tracking-wider border border-gray-300">Expired</span>
+
+                        <!-- Post window -->
+                        <span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-[10px] font-bold uppercase tracking-widest">
+                          {{ fmtDate(ann.postDate) }}{{ ann.expiryDate ? ' → ' + fmtDate(ann.expiryDate) : ' (Ongoing)' }}
+                        </span>
+
+                        <!-- Delete button -->
+                        <button
+                          @click="deleteAnnouncement(ann.id)"
+                          class="ml-1 text-gray-300 hover:text-red-500 transition-colors duration-200"
+                          title="Delete announcement"
+                        >✕</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </template>
         </div>
+
       </div>
-
-    </div>
-
+    </main>
   </div>
 </template>
 
+
 <style scoped>
-/* ── Wrap ── */
-.ann-wrap { max-width: 72rem; margin: 0 auto; display: flex; flex-direction: column; gap: 1rem; }
-
-/* ── Header ── */
-.ann-header {
-  display: flex; flex-direction: column; gap: 1rem;
-  justify-content: space-between; align-items: flex-start;
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-@media (min-width: 768px) { .ann-header { flex-direction: row; align-items: center; } }
-.ann-title { font-size: 1.875rem; font-weight: 500; color: #111827; }
-.ann-sub   { color: #6b7280; font-weight: 500; margin-top: 0.25rem; }
-
-/* ── Tab switcher ── */
-.tab-switcher {
-  display: flex; background: #eef2ff; padding: 0.375rem;
-  border-radius: 0.75rem; border: 1px solid #e0e7ff;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.06);
+.animate-fade-in {
+  animation: fadeIn 0.25s ease both;
 }
-.tab-btn {
-  padding: 0.625rem 1.5rem; border-radius: 0.625rem;
-  font-weight: 500; border: none; cursor: pointer;
-  transition: all 0.3s; background: transparent; color: #818cf8;
-}
-.tab-btn:hover { color: #4f46e5; }
-.tab-btn.active { background: white; color: #3730a3; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-
-/* ── Post grid ── */
-.post-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
-@media (min-width: 1280px) { .post-grid { grid-template-columns: 1fr 1fr; } }
-
-/* ── Form card ── */
-.form-card {
-  background: white; padding: 1.25rem; border-radius: 0.75rem;
-  border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-  display: flex; flex-direction: column; gap: 1.25rem;
-}
-
-/* ── Fields ── */
-.field-label { display: block; font-size: 0.75rem; font-weight: 500; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem; }
-.field-label.italic { font-style: italic; }
-.title-row { display: flex; gap: 0.5rem; }
-.input-field {
-  width: 100%; font-size: 1rem; font-weight: 500; color: #1f2937;
-  border: 2px solid #f8fafc; border-radius: 0.75rem;
-  padding: 0.75rem 1.25rem; outline: none; transition: border-color 0.15s;
-  background: #f8fafc;
-}
-.input-field:focus { border-color: #6366f1; background: white; }
-.flex-grow { flex: 1 1 0%; }
-.icon-select {
-  width: 7rem; font-size: 0.875rem; font-weight: 500;
-  border: 2px solid #f8fafc; border-radius: 0.75rem; padding: 0.75rem 0.5rem;
-  outline: none; transition: border-color 0.15s; background: #f8fafc; color: #374151; cursor: pointer;
-}
-.icon-select:focus { border-color: #6366f1; background: white; }
-.dates-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-.relative { position: relative; }
-.clear-btn { position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: #d1d5db; cursor: pointer; font-size: 1rem; }
-.clear-btn:hover { color: #f87171; }
-.textarea-field {
-  width: 100%; font-size: 1rem; font-weight: 500; color: #1f2937;
-  border: 2px solid #f8fafc; border-radius: 0.75rem;
-  padding: 1rem 1.25rem; outline: none; transition: border-color 0.15s;
-  resize: none; background: #f8fafc;
-}
-.textarea-field:focus { border-color: #6366f1; background: white; }
-.btn-post {
-  width: 100%; padding: 1rem; background: #4f46e5; color: white;
-  border: none; border-radius: 0.75rem; font-weight: 500; font-size: 1.25rem;
-  cursor: pointer; transition: background 0.15s;
-  box-shadow: 0 10px 25px rgba(99,102,241,0.25);
-}
-.btn-post:hover { background: #4338ca; }
-
-/* ── Preview ── */
-.preview-panel {
-  background: rgba(238,242,255,0.3); padding: 2rem; border-radius: 0.75rem;
-  border: 2px dashed #e0e7ff; display: flex; flex-direction: column; justify-content: center;
-}
-.preview-label { font-size: 0.75rem; font-weight: 500; color: #818cf8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1.5rem; text-align: center; }
-.preview-card {
-  background: white; padding: 1.5rem; border-radius: 2.5rem;
-  border: 1px solid #f3f4f6; box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-  display: flex; gap: 1.5rem; align-items: flex-start;
-}
-.preview-icon {
-  padding: 1rem; background: #eef2ff; border-radius: 1rem;
-  font-size: 2.5rem; flex-shrink: 0; border: 1px solid #e0e7ff;
-  display: flex; align-items: center; justify-content: center;
-  min-width: 5rem; min-height: 5rem;
-}
-.preview-body { flex: 1; margin-top: 0.25rem; }
-.preview-title { font-size: 1.25rem; font-weight: 700; color: #1f2937; margin-bottom: 0.5rem; }
-.preview-dates { display: inline-block; padding: 0.25rem 0.75rem; background: #f3f4f6; color: #374151; border-radius: 9999px; font-size: 0.625rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.75rem; }
-.preview-content { color: #6b7280; font-weight: 500; line-height: 1.6; }
-
-/* ── History ── */
-.history-wrap { display: flex; flex-direction: column; gap: 1rem; }
-.filter-bar { background: rgba(238,242,255,0.5); padding: 1.25rem; border-radius: 0.75rem; border: 1px solid #e0e7ff; display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end; }
-.w-auto { width: auto; }
-.ann-list { display: flex; flex-direction: column; gap: 0.75rem; }
-
-.ann-item {
-  padding: 1.25rem; border-radius: 0.75rem; border: 2px solid;
-  display: flex; gap: 1.25rem; align-items: flex-start;
-  transition: all 0.2s; position: relative; overflow: hidden;
-}
-.ann-active  { background: white;   border-color: #a5b4fc; box-shadow: 0 2px 8px rgba(165,180,252,0.2); }
-.ann-active:hover  { border-color: #6366f1; }
-.ann-expired { background: #f9fafb; border-color: #f3f4f6; opacity: 0.7; }
-.ann-expired:hover { opacity: 1; }
-
-.ann-icon {
-  padding: 1rem; border-radius: 0.75rem; font-size: 1.875rem; flex-shrink: 0;
-  border: 1px solid; display: flex; align-items: center; justify-content: center;
-  min-width: 5rem; min-height: 5rem; transition: transform 0.2s;
-}
-.ann-item:hover .ann-icon { transform: scale(1.1); }
-.icon-active  { background: #eef2ff; border-color: #e0e7ff; }
-.icon-expired { background: #f3f4f6; border-color: #e5e7eb; }
-
-.ann-content   { flex: 1; margin-top: 0.25rem; }
-.ann-top-row   { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; }
-.ann-item-title { font-size: 1.25rem; font-weight: 700; color: #1f2937; }
-.ann-item-body  { font-weight: 500; line-height: 1.6; color: #4b5563; }
-.expired-text   { color: #9ca3af; }
-.ann-meta-pills { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; flex-shrink: 0; margin-left: 1rem; }
-
-.pill { padding: 0.125rem 0.5rem; border-radius: 9999px; font-size: 0.5625rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
-.pill.green   { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
-.pill.gray    { background: #e5e7eb; color: #6b7280; border: 1px solid #d1d5db; }
-.pill.neutral { background: #f3f4f6; color: #4b5563; }
-
-.delete-btn { background: none; border: none; color: #fca5a5; cursor: pointer; font-size: 1rem; transition: color 0.15s; margin-left: 0.5rem; }
-.delete-btn:hover { color: #ef4444; }
-
-.empty-state { text-align: center; padding: 5rem 1rem; background: white; border-radius: 0.75rem; border: 4px dashed #f3f4f6; color: #9ca3af; font-weight: 500; }
-.clear-filter { margin-top: 1rem; background: none; border: none; color: #6366f1; font-weight: 500; font-size: 0.75rem; text-transform: uppercase; cursor: pointer; text-decoration: underline; }
 </style>

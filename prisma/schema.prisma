@@ -96,11 +96,11 @@ model Student {
 }
 
 model Announcement {
-  id         Int       @id @default(autoincrement())
-  author     String?
-  postDate   DateTime
-  expiryDate DateTime?
-  content    String
+  id          Int     @id @default(autoincrement())
+  author      String?
+  postDate    DateTime
+  expiryDate  DateTime?
+  content     Json?
 
   Author Admin? @relation(fields: [author], references: [id], onDelete: SetNull)
 }

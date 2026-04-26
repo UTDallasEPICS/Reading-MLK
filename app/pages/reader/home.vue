@@ -4,16 +4,8 @@ import { authClient } from '~/utils/auth-client'
 import type { Student, Announcement} from '~~/prisma/generated/client'
 
 definePageMeta({ ssr: false })
-/* TODO:
-  3 Announcements
-    -- default display for no announcements
-    -- change display to be larger
-    -- change display to show the most recent announcement with a dropdown to show all
- 
-  5 find and apply unlocked shop items from selected student
-*/
 
-//TODO 4 retrieve active student
+// retrieve active student
 const { student, settings: settings, restoreStudent } = useCurrentStudent()
 const { totalFormsInGroup: totalForms, loadActiveFormGroup} = useCurrentFormGroup()
 const { tickets: tickets, loadProgress} = useCurrentStudentProgress()
@@ -64,7 +56,36 @@ function triggerTicketClick() {
   setTimeout(() => { ticketClicked.value = false; flyTickets.value = [] }, 1000)
 }
 
-const { data: announcements } = await useFetch<Announcement[] | null>('/api/announcement?active=true')
+//TODO 3
+//Announcement fetch all currently-active announcements
+const { data: announcements } = await useFetch<any[] | null>('/api/announcement?active=true')
+
+//parseContent of announcement
+function parseContent (raw: any): { icon: string; title: string; body: string } {
+  if (raw && typeof raw === 'object') return raw as { icon: string; title: string; body: string }
+  if (typeof raw === 'string') {
+    try { return JSON.parse(raw) as { icon: string; title: string; body: string } }
+    catch { return { icon: '📢', title: raw, body: '' } }
+  }
+  return { icon: '📢', title: '', body: '' }
+}
+
+//fmtDate - converts ISO string to a short, human-readable date e.g. "Apr 12, 2026"
+function fmtDate (iso: string | null) {
+  if (!iso) return null
+  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+//mostRecent - the newest active announcement sorted by postDate descending
+const mostRecent = computed(() => {
+  if (!announcements.value?.length) return null
+  return [...announcements.value].sort(
+    (a, b) => new Date(b.postDate).getTime() - new Date(a.postDate).getTime()
+  )[0]
+})
+
+//Controls the "View All Announcements"
+const showAllAnnouncements = ref(false)
 
 const completionMessage = computed(() => {
   return ['', 'Nice!', 'Good Job!', 'Great Job!', 'Wow!', 'Awesome!', 'Amazing!'][tickets.value] ?? 'Spectacular!'
@@ -135,17 +156,40 @@ const completionMessage = computed(() => {
           <p class="text-lg text-gray-500 font-medium">Ready for today's reading adventure?</p>
         </div>
 
-        <!-- Announcements Ticker TODO 3-->
-        <div v-if="announcements && announcements.length > 0" class="premium-card px-5 py-3" style="background: rgba(245,158,11,0.05); border-color: rgba(245,158,11,0.2)">
+        <!-- ANNOUNCEMENTS -->
+        <div
+          v-if="mostRecent"
+          class="premium-card px-4 py-3"
+          style="background: rgba(245,158,11,0.06); border-color: rgba(245,158,11,0.25);"
+        >
           <div class="flex items-center gap-3">
-            <span class="text-xl">📢</span>
+            <span class="text-lg shrink-0">{{ parseContent(mostRecent.content).icon }}</span>
             <div class="flex-grow overflow-hidden">
               <p class="text-sm font-bold truncate" style="color: var(--brand-dark)">
                 <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase mr-2 text-gray-900" style="background: var(--brand-gold)">New</span>
-                {{announcements[0]?.content}}
+                {{ parseContent(mostRecent.content).title }}
               </p>
+              <p class="text-xs text-gray-400 mt-0.5 truncate">{{ parseContent(mostRecent.content).body }}</p>
             </div>
+            <!-- "View All" button always visible when there's at least one announcement -->
+            <button
+              @click="showAllAnnouncements = true"
+              class="shrink-0 text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full transition-all"
+              style="background: rgba(245,158,11,0.18); color: var(--brand-dark); border: 1px solid rgba(245,158,11,0.3);"
+            >
+              View All ›
+            </button>
           </div>
+        </div>
+
+        <!-- No active announcements -->
+        <div
+          v-else
+          class="premium-card px-5 py-4 flex items-center gap-3"
+          style="background: rgba(245,158,11,0.04); border-color: rgba(245,158,11,0.15);"
+        >
+          <span class="text-xl">📤</span>
+          <p class="text-sm font-medium text-gray-400">No announcements right now. Check back later!</p>
         </div>
 
         <!-- Daily Form CTA TODO 2-->
@@ -193,6 +237,55 @@ const completionMessage = computed(() => {
         <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
       </svg>
     </NuxtLink>
+
+
+    <!-- ALL ANNOUNCEMENTS -->
+    <Transition name="modal-fade">
+      <div v-if="showAllAnnouncements" class="fixed inset-0 z-[150] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="showAllAnnouncements = false" />
+
+        <!-- Dialog box -->
+        <div class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl flex flex-col max-h-[85vh]">
+          <!-- Header -->
+          <div class="px-6 pt-6 pb-4 flex items-center justify-between shrink-0 border-b border-gray-100">
+            <div>
+              <h2 class="font-heading text-2xl font-bold" style="color: var(--brand-dark)">📢 Announcements</h2>
+              <p class="text-xs text-gray-400 mt-0.5">{{ announcements?.length ?? 0 }} active</p>
+            </div>
+            <!-- ✕ close button -->
+            <button
+              @click="showAllAnnouncements = false"
+              class="w-9 h-9 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition"
+              aria-label="Close announcements"
+            >✕</button>
+          </div>
+
+          <!-- Scrollable announcement cards — sorted newest first -->
+          <div class="overflow-y-auto px-6 py-5 space-y-4">
+            <div
+              v-for="ann in [...(announcements ?? [])].sort((a,b) => new Date(b.postDate).getTime() - new Date(a.postDate).getTime())"
+              :key="ann.id"
+              class="bg-gray-50 border border-gray-100 rounded-2xl p-4 flex gap-4 items-start"
+            >
+              <!-- Icon -->
+              <div class="p-3 bg-indigo-50 rounded-xl text-3xl shrink-0 border border-indigo-100 shadow-sm flex items-center justify-center min-w-[56px] min-h-[56px]">
+                {{ parseContent(ann.content).icon }}
+              </div>
+              <!-- Body -->
+              <div class="flex-grow">
+                <div class="flex flex-col gap-0.5 mb-2">
+                  <h4 class="text-base font-bold text-gray-800">{{ parseContent(ann.content).title }}</h4>
+                  <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                    {{ fmtDate(ann.postDate) }}{{ ann.expiryDate ? ' → ' + fmtDate(ann.expiryDate) : ' (Ongoing)' }}
+                  </span>
+                </div>
+                <p class="text-sm text-gray-500 font-medium leading-relaxed">{{ parseContent(ann.content).body }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
