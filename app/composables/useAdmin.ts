@@ -1,7 +1,6 @@
-import dayjs from 'dayjs'
-import utc from 'dayjs/plugin/utc'
+// composables/useAdmin.ts
+// Place this at: app/composables/useAdmin.ts
 
-dayjs.extend(utc)
 export const useAdmin = () => {
   const callFormApi = async <T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', params: Record<string, unknown> = {}, body?: Record<string, unknown>): Promise<T> => {
     const queryString = method === 'GET' || method === 'DELETE'
@@ -20,38 +19,18 @@ export const useAdmin = () => {
     })
   }
 
-  const parseLocalDate = (value: string) => {
-    if (!value) return null
-
-    const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/)
-    if (!match) return null
-
-    const [, year, month, day] = match
-    const parsed = new Date(Number(year), Number(month) - 1, Number(day))
-
-    return Number.isNaN(parsed.getTime()) ? null : parsed
-  }
-
-  const formatYmdLocal = (date: Date) => {
-    const year = date.getFullYear()
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const day = String(date.getDate()).padStart(2, '0')
-    return `${year}-${month}-${day}`
-  }
-
   const parseDateToYmd = (value: string) => {
-    const parsed = parseLocalDate(value)
-
-    if (parsed) {
-      return formatYmdLocal(parsed)
-    }
-
-    const fallback = new Date(value)
-    if (Number.isNaN(fallback.getTime())) {
+    if (!value) {
       return ''
     }
 
-    return formatYmdLocal(fallback)
+    const parsed = new Date(value)
+
+    if (Number.isNaN(parsed.getTime())) {
+      return ''
+    }
+
+    return parsed.toISOString().slice(0, 10)
   }
 
   const buildQuestionOptions = (question: any) => ({
@@ -108,68 +87,37 @@ export const useAdmin = () => {
   const questions      = useState<any[]>('questions', () => [])
 
   // Week/day pickers — default to current Monday
-  const todayDate = new Date()
-  const dayOff = (todayDate.getDay() + 6) % 7
-  const mon = new Date(todayDate)
+  const todayDate  = new Date()
+  const dayOff     = (todayDate.getDay() + 6) % 7
+  const mon        = new Date(todayDate)
   mon.setDate(todayDate.getDate() - dayOff)
-  const monStr = formatYmdLocal(mon)
+  const monStr     = mon.toISOString().split('T')[0]
 
   const formWeekStart    = useState('formWeekStart', () => monStr)
   const formDays         = useState<string[]>('formDays', () => ['Monday'])
   const historyWeekStart = useState('historyWeekStart', () => '')
-  const historyStatusSelection = useState<Array<'published' | 'unpublished'>>('historyStatusSelection', () => ['published', 'unpublished'])
-  const historyGroupStartDate = useState('historyGroupStartDate', () => '')
-  const historyGroupEndDate = useState('historyGroupEndDate', () => '')
   const selectedFormDetails = useState<any | null>('selectedFormDetails', () => null)
-
-  const toggleHistoryStatus = (value: 'published' | 'unpublished') => {
-    if (historyStatusSelection.value.includes(value)) {
-      historyStatusSelection.value = historyStatusSelection.value.filter((selected) => selected !== value)
-      return
-    }
-
-    historyStatusSelection.value = [...historyStatusSelection.value, value]
-  }
 
   // ── Helpers ──
   const getCalculatedDate = (weekStartStr: string, dayName: string): string => {
     if (!weekStartStr) return ''
-
-    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-    const idx = days.indexOf(dayName)
+    const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
+    const idx  = days.indexOf(dayName)
     if (idx === -1) return ''
-
-    const base = parseLocalDate(weekStartStr)
-    if (!base) return ''
-
-    const d = new Date(base)
-    d.setDate(base.getDate() + idx)
-
-    return d.toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    })
+    const d = new Date(`${weekStartStr}T00:00:00Z`)
+    d.setDate(d.getDate() + idx)
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  
   }
-  const getLastMonday = (date: string | Date) => {
+   const getLastMonday = (date: string | Date) => {
     const d = new Date(typeof date === 'string' ? `${date}T00:00:00Z` : date)
     const daysSinceMonday = (d.getDay()) % 7
     d.setDate(d.getDate() - daysSinceMonday)
     return d.toISOString().slice(0, 10)
   }
-
   const formatDate = (dateStr: string): string => {
     if (!dateStr) return ''
-
-    const parsed = parseLocalDate(dateStr)
-    if (!parsed) return ''
-
-    return parsed.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    })
+    return new Date(`${dateStr}T00:00:00Z`).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
   }
 
   const defaultQuestions = (): any[] => [
@@ -189,81 +137,17 @@ export const useAdmin = () => {
   const publishedForms = useState<any[]>('publishedForms', () => [])
 
   const filteredPublishedForms = computed(() =>
-    publishedForms.value.filter((form) => {
-      const isActive = form.status === 'Active'
-      const matchesPublished = historyStatusSelection.value.includes('published') && isActive
-      const matchesUnpublished = historyStatusSelection.value.includes('unpublished') && !isActive
-      const matchesStatus = matchesPublished || matchesUnpublished
-
-      const matchesGroupStart =
-        !historyGroupStartDate.value ||
-        !form.weekStart ||
-        form.weekStart >= historyGroupStartDate.value
-
-      const matchesGroupEnd =
-        !historyGroupEndDate.value ||
-        !form.weekStart ||
-        form.weekStart <= historyGroupEndDate.value
-
-      return matchesStatus && matchesGroupStart && matchesGroupEnd
-    })
+    publishedForms.value.filter(f => !historyWeekStart.value || f.weekStart === historyWeekStart.value)
   )
 
   const loadPublishedForms = async () => {
     try {
-      const forms = await callFormApi<any[]>('GET', {
-        action: 'listForms',
-        weeklyDate: historyWeekStart.value || undefined,
-      })
+      const forms = await callFormApi<any[]>('GET', { action: 'listForms' })
       publishedForms.value = (forms ?? []).map(mapApiFormToUi)
     } catch (error) {
       console.error('Failed to load forms', error)
     }
   }
-
-  const syncGroupRangeFromWeeklyDate = async () => {
-    if (!historyWeekStart.value) {
-      historyGroupStartDate.value = ''
-      historyGroupEndDate.value = ''
-      return
-    }
-
-    const fallbackWeekStart = getLastMonday(historyWeekStart.value)
-    const fallbackWeekEnd = dayjs.utc(fallbackWeekStart).add(6, 'day').format('YYYY-MM-DD')
-
-    try {
-      const result = await callFormApi<{
-        found: boolean
-        startDate: string | null
-        endDate: string | null
-      }>('GET', {
-        action: 'resolveFormGroupRangeByDate',
-        weeklyDate: historyWeekStart.value,
-      })
-
-      if (!result?.found) {
-        historyGroupStartDate.value = fallbackWeekStart
-        historyGroupEndDate.value = fallbackWeekEnd
-        return
-      }
-
-      historyGroupStartDate.value = parseDateToYmd(result.startDate || '')
-      historyGroupEndDate.value = parseDateToYmd(result.endDate || '') || fallbackWeekEnd
-    } catch (error) {
-      console.error('Failed to resolve form group range', error)
-      historyGroupStartDate.value = fallbackWeekStart
-      historyGroupEndDate.value = fallbackWeekEnd
-    }
-  }
-
-  watch(
-    historyWeekStart,
-    async () => {
-      await syncGroupRangeFromWeeklyDate()
-      await loadPublishedForms()
-    },
-    { immediate: true }
-  )
 
   // ── Drag-and-drop for question reorder ──
   const draggedIdx = useState<number | null>('draggedIdx', () => null)
@@ -311,16 +195,14 @@ export const useAdmin = () => {
           throw new Error('Invalid day selected for update')
         }
 
-        const startDate = parseLocalDate(weekStart)
-        if (!startDate) throw new Error('Invalid week start date')
-        startDate.setDate(startDate.getDate() + dayIndex)
+        const startDate = new Date(`${weekStart}T00:00:00Z`)
+        startDate.setUTCDate(startDate.getUTCDate() + dayIndex)
 
         await callFormApi('PUT', {}, {
           action: 'updateForm',
           id: editingFormId.value,
-          startDate: formatYmdLocal(startDate),
+          startDate: startDate.toISOString(),
           published: true,
-          title: formTitle.value,
         })
 
         const existingForm = publishedForms.value.find((form) => Number(form.id) === Number(editingFormId.value))
@@ -379,19 +261,14 @@ export const useAdmin = () => {
           continue
         }
 
-        const startDate = parseLocalDate(weekStart)
-        if (!startDate) {
-          continue
-        }
+        const startDate = new Date(`${weekStart}T00:00:00Z`)
+        startDate.setUTCDate(startDate.getUTCDate() + dayIndex)
 
-        startDate.setDate(startDate.getDate() + dayIndex)
-
-          const createdFormResponse = await callFormApi<any>('POST', {}, {
-            action: 'createForm',
-            startDate: formatYmdLocal(startDate),
-            published: true,
-            title: formTitle.value,
-          })
+        const createdFormResponse = await callFormApi<any>('POST', {}, {
+          action: 'createForm',
+          startDate: startDate.toISOString(),
+          published: true,
+        })
 
         const createdForm = createdFormResponse?.data
 
@@ -440,11 +317,14 @@ export const useAdmin = () => {
   }
 
   // ── Students / Progress ──
-  const students = useState<any[]>('adminStudents', () => [])
-
+  const students = useState<any[]>('adminStudents', () => [
+    { id: 1, name: 'Aiden Smith', initials: 'AS', email: 'aiden@school.edu', tickets: 12, streak: 4, lastActive: '2 hours ago' },
+    { id: 2, name: 'Nevin Kumar', initials: 'NK', email: 'nevin@school.edu', tickets: 14, streak: 5, lastActive: 'Just now'     },
+    { id: 3, name: 'Swarna Jay',  initials: 'SJ', email: 'swarna@school.edu',tickets: 8,  streak: 2, lastActive: 'Yesterday'   },
+  ])
 
   const searchStudent = useState('searchStudent', () => '')
-  const sortStudent   = useState('sortStudent',   () => 'total submissions')
+  const sortStudent   = useState('sortStudent',   () => 'tickets')
 
   const filteredAndSortedStudents = computed(() => {
     let res = students.value
@@ -511,7 +391,7 @@ export const useAdmin = () => {
   return {
     // builder
     builderSubTab, formTitle, editingFormId, questions,
-    formWeekStart, formDays, historyWeekStart, historyStatusSelection, historyGroupStartDate, historyGroupEndDate, toggleHistoryStatus, getLastMonday,
+    formWeekStart, formDays, historyWeekStart, getLastMonday,
     getCalculatedDate, formatDate, defaultQuestions,
     publishedForms, filteredPublishedForms,
     selectedFormDetails, viewFormDetails,
