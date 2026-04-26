@@ -8,6 +8,7 @@ type ActionName =
   | 'getOnlyActiveFormsinGroup'
   | 'getFormGroup'
   | 'resolveFormGroupRangeByDate'
+  | 'getFormGroupSubmissions'
   | 'listForms'
   | 'createFormGroup'
   | 'createForm'
@@ -422,6 +423,41 @@ export default defineEventHandler(async (event) => {
         formGroupId: matchingGroup.id,
         startDate: formatIsoDate(matchingGroup.startDate),
         endDate: formatIsoDate(matchingGroup.endDate),
+      }
+    }
+
+    if (selectedAction === 'getFormGroupSubmissions') {
+      const formGroupId = toInt(getQuery(event).formGroupId, 'formGroupId')
+
+      const forms = await prisma.form.findMany({
+        where: { formGroup: formGroupId as number },
+        select: { id: true },
+      })
+
+      const formIds = forms.map((f) => f.id)
+
+      if (formIds.length === 0) {
+        return { submissions: [], totalEntries: 0 }
+      }
+
+      const submissions = await prisma.formSubmission.findMany({
+        where: { form: { in: formIds } },
+        include: {
+          Student: true,
+          Form: { select: { id: true, title: true, startDate: true } },
+        },
+      })
+
+      return {
+        submissions: submissions.map((sub) => ({
+          id: sub.id,
+          studentId: sub.student,
+          studentName: sub.Student.name,
+          formId: sub.form,
+          formTitle: sub.Form.title ?? `Form ${sub.Form.id}`,
+          submissionDate: sub.submissionDate.toISOString(),
+        })),
+        totalEntries: submissions.length,
       }
     }
 

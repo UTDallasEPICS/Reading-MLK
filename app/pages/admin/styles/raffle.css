@@ -1,11 +1,13 @@
 .raffle-wrap {
-    max-width: 56rem;
-    margin: 0 auto;
-    text-align: center;
+  max-width: 72rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
   }
   
   .raffle-heading {
-    font-size: 3rem;
+    font-size: 2.25rem;
     font-weight: 500;
     color: #111827;
     margin-bottom: 0.25rem;
@@ -17,8 +19,6 @@
     color: #4f46e5;
     margin-bottom: 1.5rem;
   }
-  
-  /* ── Card ── */
   .raffle-card {
     background: white;
     border-radius: 1rem;
@@ -26,14 +26,13 @@
     padding: 3rem;
     max-width: 36rem;
     margin: 0 auto;
-    border-bottom: 8px solid #6366f1;
     position: relative;
     overflow: hidden;
   }
   
   @media (min-width: 1024px) { .raffle-card { padding: 3.5rem; } }
   
-  .raffle-state { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
+  .raffle-state { display: flex; flex-direction: column; align-items: left; gap: 1.5rem; }
   
   /* ── Emoji ── */
   .raffle-emoji {
@@ -47,16 +46,8 @@
   .hover-spin:hover { transform: rotate(12deg); }
   
   /* ── Entries ── */
-  .raffle-entries { margin-bottom: 0.5rem; }
-  .entries-label {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #9ca3af;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 0.25rem;
-  }
-  .entries-count { font-size: 2.5rem; font-weight: 500; color: #111827; }
+  .raffle-section-text { align-items: left; display: block; font-size: 1rem; font-weight: 500; color: #111827; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;  }
+  .raffle-winner-name { font-size: 1.5rem; font-weight: 500; color: #4f46e5; }
   
   /* ── Spin button ── */
   .btn-spin {
@@ -90,7 +81,7 @@
   .animate-spin-emoji { animation: spinEmoji 0.8s linear infinite; display: inline-block; }
   
   /* ── Winner ── */
-  .winner-state { padding: 1.5rem 0; }
+  .winner-state { text-align: left; align-items: left;}
   .winner-label { font-size: 2.5rem; font-weight: 500; color: #111827; }
   .winner-name  { font-size: 2rem; font-weight: 500; color: #4f46e5; }
   .winner-email { font-size: 1.125rem; font-weight: 500; color: #9ca3af; font-style: italic; }

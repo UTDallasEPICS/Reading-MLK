@@ -472,21 +472,6 @@ export const useAdmin = () => {
     })
   })
 
-  // ── Raffle ──
-  const raffleWinner      = useState<any | null>('raffleWinner',      () => null)
-  const isSpinning        = useState<boolean>('isSpinning',           () => false)
-  const raffleWeek        = useState('raffleWeek',        () => 'Feb 9 – Feb 15, 2026')
-  const raffleSubmissions = useState('raffleSubmissions', () => 42)
-
-  const spinRaffle = () => {
-    isSpinning.value   = true
-    raffleWinner.value = null
-    setTimeout(() => {
-      isSpinning.value   = false
-      raffleWinner.value = students.value[Math.floor(Math.random() * students.value.length)]
-    }, 2000)
-  }
-
   // ── Announcements ──
   const announcementSubTab = useState<'creation' | 'history'>('announcementSubTab', () => 'creation')
 
@@ -547,8 +532,6 @@ export const useAdmin = () => {
     loadPublishedForms,
     // progress
     students, searchStudent, sortStudent, filteredAndSortedStudents,
-    // raffle
-    raffleWinner, isSpinning, raffleWeek, raffleSubmissions, spinRaffle,
     // announcements
     announcementSubTab, announcements, newAnnouncement,
     announcementFilterWeek, filteredAnnouncements,
