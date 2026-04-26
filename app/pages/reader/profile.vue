@@ -5,13 +5,15 @@ import { useCurrentStudent } from '~/composables/useCurrentStudent'
 
 definePageMeta({ ssr: false })
 
-const { setStudent } = useCurrentStudent()
+const { setStudent, saveSettings } = useCurrentStudent()
 
 const students = ref<Student[]>([])
 const loadingStudents = ref(true)
 const creating = ref(false)
 const showCreateForm = ref(false)
 const name = ref('')
+//Language preference for new student
+const newStudentLanguage = ref<'en' | 'es'>('en')
 
 const avatarChoices = ['🦊', '🐸', '🦋', '🐼', '🦁', '🐻', '🐯', '🐨']
 const cardColors = [
@@ -67,7 +69,10 @@ async function createStudent() {
 
     students.value.push(newStudent)
     setStudent(newStudent)
+    //Save chosen language
+    await saveSettings({ language: newStudentLanguage.value })
     name.value = ''
+    newStudentLanguage.value = 'en'
     showCreateForm.value = false
     await navigateTo('/reader/home')
   } catch (error) {
@@ -161,6 +166,39 @@ onMounted(() => {
               placeholder="Child name"
               class="w-full rounded-2xl border-2 border-gray-200 bg-white px-5 py-4 text-lg text-gray-900 placeholder:text-gray-300 outline-none focus:border-[#7fb6ff]"
             />
+
+            <!--Language preferance selection-->
+            <div class="mt-4 space-y-2">
+              <p class="text-sm font-bold text-gray-400 uppercase tracking-widest text-left">
+                Language / Idioma
+              </p>
+              <div class="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  @click="newStudentLanguage = 'en'"
+                  :class="[
+                    'flex items-center justify-center gap-2 h-12 rounded-2xl font-bold text-base border-2 transition-all',
+                    newStudentLanguage === 'en'
+                      ? 'border-[#6b6ee8] bg-[#eef0fb] text-[#6b6ee8] shadow-md'
+                      : 'border-gray-200 bg-white text-gray-500 hover:border-[#6b6ee8]/50'
+                  ]"
+                >
+                  <span class="text-lg">🇺🇸</span> English
+                </button>
+                <button
+                  type="button"
+                  @click="newStudentLanguage = 'es'"
+                  :class="[
+                    'flex items-center justify-center gap-2 h-12 rounded-2xl font-bold text-base border-2 transition-all',
+                    newStudentLanguage === 'es'
+                      ? 'border-[#6b6ee8] bg-[#eef0fb] text-[#6b6ee8] shadow-md'
+                      : 'border-gray-200 bg-white text-gray-500 hover:border-[#6b6ee8]/50'
+                  ]"
+                >
+                  <span class="text-lg">🇪🇸</span> Español
+                </button>
+              </div>
+            </div>
 
             <div class="flex gap-3 mt-5">
               <button

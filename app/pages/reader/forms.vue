@@ -105,6 +105,13 @@ const feedbackReferenceText = computed(() => {
   return options?.reference || ''
 })
 
+const feedbackReferenceTextEs = computed(() => {
+  const q = currentComponent.value
+  if (!q) return ''
+  const options = q.questionOptions as any
+  return options?.referenceEs || ''
+})
+
 // Raffle reward
 const showRaffleReward   = ref(false)
 const ticketDropped      = ref(false)
@@ -348,6 +355,13 @@ function getBadgeClass(type: string) {
                   <!-- Context block -->
                   <div v-if="currentComponent.questionType === 'context'" class="p-5 rounded-2xl bg-amber-50 border border-amber-100 space-y-2">
                     <p class="text-xl font-heading font-bold leading-snug" style="color:var(--brand-dark)">{{ currentComponent.questionText }}</p>
+                    <!-- Spanish translation shown below English when language is set to Spanish -->
+                    <p
+                      v-if="settings.language === 'es' && (currentComponent.questionOptions as any)?.textEs"
+                      class="text-base italic text-gray-500 leading-snug border-t border-amber-200 pt-2"
+                    >
+                      {{ (currentComponent.questionOptions as any).textEs }}
+                    </p>
                   </div>
 
                   <!-- Video -->
@@ -358,7 +372,14 @@ function getBadgeClass(type: string) {
 
                   <!-- Text / MCQ question -->
                   <div v-else class="space-y-1">
-                    <h4 class="text-xl font-heading font-bold" style="color:var(--brand-dark)">"{{ currentComponent.questionText }}"</h4>
+                    <h4 class="text-xl font-heading font-bold" style="color:var(--brand-dark)">&quot;{{ currentComponent.questionText }}&quot;</h4>
+                    <!-- Spanish translation shown below English when language is set to Spanish -->
+                    <p
+                      v-if="settings.language === 'es' && (currentComponent.questionOptions as any)?.textEs"
+                      class="text-base italic text-gray-500"
+                    >
+                      &quot;{{ (currentComponent.questionOptions as any).textEs }}&quot;
+                    </p>
                   </div>
 
                   <!-- Input area -->
@@ -407,7 +428,10 @@ function getBadgeClass(type: string) {
                         {{ isCurrentComponentCorrect ? '✨ Great job!' : '💡 Great Try!' }}
                       </div>
                       <div class="text-gray-700 font-medium space-y-2">
-                        <p v-if="feedbackReferenceText" class="italic">{{ feedbackReferenceText }}</p>
+                        <template v-if="feedbackReferenceText">
+                          <p class="italic">{{ feedbackReferenceText }}</p>
+                          <p v-if="settings.language === 'es' && feedbackReferenceTextEs" class="italic text-gray-500">{{ feedbackReferenceTextEs }}</p>
+                        </template>
                         <p v-else-if="isCurrentComponentCorrect">
                           Keep going! You're doing awesome!
                         </p>
