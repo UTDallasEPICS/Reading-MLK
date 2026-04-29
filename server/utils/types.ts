@@ -1,9 +1,18 @@
 import { z } from "zod";
 
+export const userSchema = z.object({
+  id: z.cuid2(),
+  name: z.string().min(1).max(100),
+  email: z.email(),
+  emailVerified: z.boolean(),
+  role: z.literal(["admin", "reader"]),
+  
+})
+
 export const adminSchema = z.object({
   id: z.string().max(30),
   settings: z.object({}).optional().nullable(),
-  userid: z.string().max(30)
+  userid: z.cuid2()
 })
 
 export const announcementSchema = z.object({
@@ -22,7 +31,7 @@ export const formSchema = z.object({
   startDate: z.coerce.date(), 
   endDate: z.coerce.date(),
   published: z.boolean(),
-  author: z.string().max(30),
+  author: z.cuid2(),
   formGroup: z.int(),
   title: z.string().min(1).max(250),
 })
