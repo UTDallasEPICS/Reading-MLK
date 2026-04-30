@@ -1,7 +1,4 @@
 import { z } from "zod";
-import form from "../api/form";
-import { id } from "zod/v4/locales";
-import { S } from "vue-router/dist/router-CWoNjPRp.mjs";
 
 export const userSchema = z.object({
   id: z.cuid2(),
