@@ -12,8 +12,6 @@ export const userSchema = z.object({
   updatedAt: z.coerce.date()
 })
 
-
-
 export const adminSchema = z.object({
   id: z.string().max(30),
   settings: z.object({}).optional().nullable(),
@@ -30,7 +28,8 @@ export const studentSchema = z.object({
 
 export const announcementSchema = z.object({
   postDate: z.coerce.date(),
-  expireDate: z.coerce.date().nullable().optional(),
+  expiryDate: z.coerce.date().optional().nullable(),
+  author: z.cuid2().optional().nullable(),
   content: z.object({
     icon: z.string().max(8),
     title: z.string().min(1).max(250),
