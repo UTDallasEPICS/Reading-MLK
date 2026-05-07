@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
 
   const record = await prisma.user.findUnique({
     where: {
-      id: Number(userId),
+      id: userId,
     },
     select: {
       image: true,
@@ -35,18 +35,15 @@ export default defineEventHandler(async (event) => {
 
   const fileStream = fs.createReadStream(filePath)
 
-  // Set content type based on file extension
-  // const ext = path.extname(filePath).toLowerCase()
+  // Detect MIME type from the file extension stored at upload time
+  const ext = path.extname(filePath).toLowerCase()
+  const mime =
+    ext === '.png' ? 'image/png' :
+    ext === '.jpg' || ext === '.jpeg' ? 'image/jpeg' :
+    ext === '.webp' ? 'image/webp' :
+    'application/octet-stream'
 
-  // Defaults to octet stream as file types are NOT saved
-  // const mime =
-  //   ext === ".png" ? "image/png" :
-  //   ext === ".jpg" || ext === ".jpeg" ? "image/jpeg" :
-  //   ext === ".gif" ? "image/gif" :
-  //   ext === ".webp" ? "image/webp" :
-  //   "application/octet-stream"
-
-  setHeader(event, 'Content-Type', 'application/octet-stream')
+  setHeader(event, 'Content-Type', mime)
 
   return sendStream(event, fileStream)
 })
