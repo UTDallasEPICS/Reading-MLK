@@ -1,6 +1,7 @@
 import { prisma } from '../../utils/prisma'
-import { getQuery, createError } from 'h3'
-import { requireAdmin } from '../../utils/require-session'
+import { getQuery } from 'h3'
+import { z } from 'zod'
+import { announcementCreateSchema } from '../../utils/schemas'
 
 // GET /api/announcement?active=true to get only active announcements
 export default defineEventHandler(async (event) => {
@@ -21,44 +22,19 @@ export default defineEventHandler(async (event) => {
   }
 
   if (method === 'POST') {
-
-    const session = await requireAdmin(event)
-
-    const admin = await prisma.admin.findUnique({
-      where: { userId: session.user.id },
-    })
-
-    if (!admin) {
-      throw createError({
-        statusCode: 403,
-        statusMessage: 'Forbidden',
-      })
+    const body = announcementCreateSchema.safeParse(await readBody(event))
+    
+    if (!body.success) {
+      throw createError({ statusCode: 400, message: body.error.message })
     }
-
-    const body = await readBody(event)
-
-    // SQLite has no native JSON type — Prisma's generated client for SQLite
-    // types `Json?` columns as String and expects a pre-serialised string.
-    // We stringify here so the value is always stored as a valid JSON string,
-    // whether the client sent a plain object (new code) or a string (legacy).
-    const contentStr = body.content == null
-      ? null
-      : typeof body.content === 'string'
-        ? body.content
-        : JSON.stringify(body.content)
 
     return await prisma.announcement.create({
       data: {
-        content: contentStr,
-        postDate: new Date(body.postDate),
-        expiryDate: body.expiryDate ? new Date(body.expiryDate) : null,
-        author: admin.id,
+        content: body.data.content,
+        postDate: new Date(body.data.postDate),
+        expiryDate: body.data.expiryDate ? new Date(body.data.expiryDate) : null,
+        author: body.data.author,
       }
     })
   }
-
-  throw createError({
-    statusCode: 405,
-    statusMessage: 'Method Not Allowed',
-  })
 })
