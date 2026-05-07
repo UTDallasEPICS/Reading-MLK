@@ -1,8 +1,7 @@
 import { prisma } from '../../utils/prisma'
 import { getQuery } from 'h3'
 import { z } from 'zod'
-import { announcementSchema } from '../../utils/types'
-import type { Announcement } from '../../utils/types'
+import { announcementCreateSchema } from '../../utils/schemas'
 
 // GET /api/announcement?active=true to get only active announcements
 export default defineEventHandler(async (event) => {
@@ -23,7 +22,7 @@ export default defineEventHandler(async (event) => {
   }
 
   if (method === 'POST') {
-    const body = announcementSchema.safeParse(await readBody(event))
+    const body = announcementCreateSchema.safeParse(await readBody(event))
     
     if (!body.success) {
       throw createError({ statusCode: 400, message: body.error.message })

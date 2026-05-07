@@ -1,24 +1,21 @@
 import { z } from "zod";
 
-export const userSchema = z.object({
-  id: z.cuid2(),
+export const emailSchema = z.email()
+
+export const userCreateSchema = z.object({
   name: z.string().min(1).max(100),
-  email: z.email(),
-  emailVerified: z.boolean(),
-  role: z.enum(["admin", "reader"]),
-  raffleOptIn: z.boolean(), 
-  publicityConsent: z.boolean(),
-  createdAt: z.coerce.date(),
-  updatedAt: z.coerce.date()
+  email: emailSchema,
+  role: z.enum(["admin", "reader"]).default("reader"),
+  raffleOptIn: z.boolean().optional().default(false), 
+  publicityConsent: z.boolean().optional().default(false),
 })
 
-export const adminSchema = z.object({
+export const adminCreateSchema = z.object({
   id: z.string().max(30),
   settings: z.object({}).optional()
 })
 
-export const studentSchema = z.object({
-  id: z.int(),
+export const studentCreateSchema = z.object({
   name: z.string().min(1).max(35), 
   settings: z.object({
     dyslexiaFont: z.boolean().optional(), 
@@ -31,7 +28,7 @@ export const studentSchema = z.object({
   parentUserId: z.cuid2()
 })
 
-export const announcementSchema = z.object({
+export const announcementCreateSchema = z.object({
   postDate: z.coerce.date(),
   expiryDate: z.coerce.date().nullish(),
   author: z.cuid2().nullish(),
@@ -42,15 +39,13 @@ export const announcementSchema = z.object({
   })
 })
 
-export const formGroupSchema = z.object({
-  id: z.int(),
+export const formGroupCreateSchema = z.object({
   startDate: z.coerce.date(),
   endDate: z.coerce.date(),
   raffleWinner: z.int().nullable().optional()
 })
 
-export const formSchema = z.object({
-  id: z.int(),
+export const formCreateSchema = z.object({
   order: z.int(),
   startDate: z.coerce.date(), 
   endDate: z.coerce.date(),
@@ -60,8 +55,7 @@ export const formSchema = z.object({
   title: z.string().min(1).max(250),
 })
 
-export const formComponentSchema = z.object({
-  id: z.int(),
+export const formComponentCreateSchema = z.object({
   form: z.int(),
   order: z.int().min(0),
   questionType: z.enum(["mcq", "text", "context", "video"]),
@@ -72,61 +66,56 @@ export const formComponentSchema = z.object({
   })
 })
 
-export const formSubmissionSchema = z.object({
-  id: z.int(),
+export const formSubmissionCreateSchema = z.object({
   student: z.int(),
   form: z.int(),
   submissionDate: z.coerce.date()
 })
 
-export const submissionResponseSchema = z.object({
-  id: z.int(),
+export const submissionResponseCreateSchema = z.object({
   submission: z.int(),
   formComponent: z.int(),
   response: z.string().min(1).max(5000)
 })
 
-export const shopItemSchema = z.object({
-  id: z.int(),
+export const shopItemCreateSchema = z.object({
   type: z.enum(["theme", "animation"]),
   name: z.string().min(1).max(150),
   dateAvailable: z.coerce.date(),
   cost: z.int().min(0).max(150) 
 })
 
-export const shopThemeSchema = z.object({
-  id: z.int(),
+export const shopThemeCreateSchema = z.object({
   shopItem: z.int(),
   themeColor: z.string(),
   themeEffect: z.object({}).nullish()
 })
 
-export const shopAnimationSchema = z.object({
-  id: z.int(),
+export const shopAnimationCreateSchema = z.object({
   shopItem: z.int(),
   animationType: z.string(),
   animationEffect: z.object({}).nullish()
 })
 
-export const pendingEmailChangeSchema = z.object({
-  id: z.int(),
+export const pendingEmailChangeCreateSchema = z.object({
   userId: z.cuid2(),
-  newEmail: z.email(),
+  newEmail: emailSchema,
   token: z.string().min(1),
   expiresAt: z.coerce.date(),
   createdAt: z.coerce.date()
 })
 
-export type User = z.infer<typeof userSchema>
-export type Admin = z.infer<typeof adminSchema>
-export type Student = z.infer<typeof studentSchema>
-export type Announcement = z.infer<typeof announcementSchema>
-export type Form = z.infer<typeof formSchema>
-export type FormGroup = z.infer<typeof formGroupSchema>
-export type FormComponent = z.infer<typeof formComponentSchema>
-export type FormSubmission = z.infer<typeof formSubmissionSchema>
-export type SubmissionResponse = z.infer<typeof submissionResponseSchema>
-export type ShopItem = z.infer<typeof shopItemSchema>
-export type ShopTheme = z.infer<typeof shopThemeSchema>
-export type ShopAnimation = z.infer<typeof shopAnimationSchema>
-export type PendingEmailChange = z.infer<typeof pendingEmailChangeSchema>
+export type Email = z.infer<typeof emailSchema>
+export type UserCreate = z.infer<typeof userCreateSchema>
+export type AdminCreate = z.infer<typeof adminCreateSchema>
+export type StudentCreate = z.infer<typeof studentCreateSchema>
+export type AnnouncementCreate = z.infer<typeof announcementCreateSchema>
+export type FormCreate = z.infer<typeof formCreateSchema>
+export type FormGroupCreate = z.infer<typeof formGroupCreateSchema>
+export type FormComponentCreate = z.infer<typeof formComponentCreateSchema>
+export type FormSubmissionCreate = z.infer<typeof formSubmissionCreateSchema>
+export type SubmissionResponseCreate = z.infer<typeof submissionResponseCreateSchema>
+export type ShopItemCreate = z.infer<typeof shopItemCreateSchema>
+export type ShopThemeCreate = z.infer<typeof shopThemeCreateSchema>
+export type ShopAnimationCreate = z.infer<typeof shopAnimationCreateSchema>
+export type PendingEmailChangeCreate = z.infer<typeof pendingEmailChangeCreateSchema>

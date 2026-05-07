@@ -1,18 +1,19 @@
 import { prisma } from '../../utils/prisma'
+import { emailSchema } from '~~/server/utils/schemas'
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
+  const email = emailSchema.safeParse(await readBody(event))
 
-  if (!body.email || typeof body.email !== 'string') {
+  if (!email.success) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Email is required',
+      statusMessage: 'Invalid email',
     })
   }
 
   const user = await prisma.user.findUnique({
     where: {
-      email: body.email,
+      email: email.data,
     },
     select: {
       id: true,
