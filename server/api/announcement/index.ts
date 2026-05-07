@@ -1,7 +1,6 @@
 import { prisma } from '../../utils/prisma'
-import { getQuery } from 'h3'
-import { z } from 'zod'
-import { requireAdmin } from '../../utils/require-session'
+import { getQuery, createError } from 'h3'
+import { requireAdmin, requireSession } from '../../utils/require-session'
 import { announcementCreateSchema } from '../../utils/schemas'
 
 // GET /api/announcement?active=true to get only active announcements
@@ -11,6 +10,8 @@ export default defineEventHandler(async (event) => {
   const now = new Date()
 
   if (method === 'GET') {
+    await requireSession(event)
+    
     return await prisma.announcement.findMany({
       where: query.active === 'true' ? {
         postDate: { lte: now },

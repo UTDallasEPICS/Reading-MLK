@@ -1,6 +1,6 @@
-import { Prisma } from '~~/prisma/generated/client'
 import { prisma } from '../../utils/prisma'
-import { getQuery } from 'h3'
+import { getQuery, createError } from 'h3'
+import { requireAdmin, requireSession } from '../../utils/require-session'
 
 export default defineEventHandler(async (event) => {
   const method = event.node.req.method
@@ -10,6 +10,8 @@ export default defineEventHandler(async (event) => {
 
   //Get /api/formGroup?active=true to get only active form groups
   if (method === 'GET') {
+    await requireSession(event)
+
     if (query.date) {
       const targetDate = new Date(String(query.date))
       return await prisma.formGroup.findFirst({
@@ -41,13 +43,24 @@ export default defineEventHandler(async (event) => {
   }
 
   if (method === 'PUT') {
+    await requireAdmin(event)
+
     const body = await readBody(event)
-    if (body.id) {
-      return await prisma.formGroup.update({
-        where: { id: Number(body.id) },
-        data: { raffleWinner: body.raffleWinner === null ? null : Number(body.raffleWinner) }
+
+    if (!body.id) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'Form group ID is required',
       })
     }
-  }
 
+    return await prisma.formGroup.update({
+      where: { id: Number(body.id) },
+      data: {
+        raffleWinner: body.raffleWinner === null
+          ? null
+          : Number(body.raffleWinner),
+      },
+    })
+  }
 })

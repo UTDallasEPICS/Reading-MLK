@@ -104,12 +104,6 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
 
   const result = await $fetch<{
     exists: boolean
-    user: {
-      id: string
-      email: string
-      name: string
-      role: string
-    } | null
   }>('/api/users/check-email', {
     method: 'POST',
     body: {
@@ -130,14 +124,6 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
 
   // Existing user
   if (result.exists) {
-    if (loginRole.value === 'admin' && result.user?.role !== 'admin') {
-      toast.add({
-        title: 'Error',
-        description: 'Admin account not found.',
-        color: 'error',
-      })
-      return
-    }
 
     const success = await sendMagicLink(callbackURL)
 
