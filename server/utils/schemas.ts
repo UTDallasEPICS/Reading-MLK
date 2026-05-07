@@ -1,5 +1,4 @@
 import { z } from "zod";
-import form from "../api/form";
 
 export const emailSchema = z.email({ pattern: z.regexes.html5Email }).trim().toLowerCase()
 
