@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const emailSchema = z.email()
+export const emailSchema = z.email({ pattern: z.regexes.html5Email }).trim().toLowerCase()
 
 export const userCreateSchema = z.object({
   name: z.string().min(1).max(100),

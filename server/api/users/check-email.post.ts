@@ -2,7 +2,8 @@ import { prisma } from '../../utils/prisma'
 import { emailSchema } from '~~/server/utils/schemas'
 
 export default defineEventHandler(async (event) => {
-  const email = emailSchema.safeParse(await readBody(event))
+  const body = await readBody(event)
+  const email = emailSchema.safeParse(body.email)
 
   if (!email.success) {
     throw createError({

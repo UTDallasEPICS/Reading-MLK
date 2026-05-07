@@ -26,7 +26,9 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const newEmail = emailSchema.safeParse(await readBody(event))
+  const body = await readBody(event)
+
+  const newEmail = emailSchema.safeParse(body.email)
 
   if (!newEmail.success) {
     throw createError({
