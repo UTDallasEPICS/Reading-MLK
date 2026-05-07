@@ -14,22 +14,27 @@ export const userSchema = z.object({
 
 export const adminSchema = z.object({
   id: z.string().max(30),
-  settings: z.object({}).optional().nullable(),
-  userid: z.cuid2()
+  settings: z.object({}).optional()
 })
 
 export const studentSchema = z.object({
   id: z.int(),
   name: z.string().min(1).max(35), 
-  settings: z.object({}).optional().nullable(),
+  settings: z.object({
+    dyslexiaFont: z.boolean().optional(), 
+    fontSize: z.number().min(1).max(1.5).optional(),
+    language: z.enum(["en", "es"]).optional(),
+    raffleOptIn: z.boolean().optional(),
+    publicityConsent: z.boolean().optional()
+    }).optional(),
   exp: z.int().max(1000).min(0),
   parentUserId: z.cuid2()
 })
 
 export const announcementSchema = z.object({
   postDate: z.coerce.date(),
-  expiryDate: z.coerce.date().optional().nullable(),
-  author: z.cuid2().optional().nullable(),
+  expiryDate: z.coerce.date().nullish(),
+  author: z.cuid2().nullish(),
   content: z.object({
     icon: z.string().max(8),
     title: z.string().min(1).max(250),
@@ -61,7 +66,10 @@ export const formComponentSchema = z.object({
   order: z.int().min(0),
   questionType: z.enum(["mcq", "text", "context", "video"]),
   questionText: z.string().min(1).max(2500),
-  questionOptions: z.object({})
+  questionOptions: z.object({
+    choices: z.array(z.object({text: z.string().min(1), correct: z.boolean()})).optional(),
+    video: z.string().optional()
+  })
 })
 
 export const formSubmissionSchema = z.object({
@@ -90,14 +98,14 @@ export const shopThemeSchema = z.object({
   id: z.int(),
   shopItem: z.int(),
   themeColor: z.string(),
-  themeEffect: z.object({}).optional().nullable()
+  themeEffect: z.object({}).nullish()
 })
 
 export const shopAnimationSchema = z.object({
   id: z.int(),
   shopItem: z.int(),
   animationType: z.string(),
-  animationEffect: z.object({}).optional().nullable()
+  animationEffect: z.object({}).nullish()
 })
 
 export const pendingEmailChangeSchema = z.object({
