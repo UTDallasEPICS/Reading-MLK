@@ -1,4 +1,5 @@
 import { z } from "zod";
+import form from "../api/form";
 
 export const emailSchema = z.email({ pattern: z.regexes.html5Email }).trim().toLowerCase()
 
@@ -43,7 +44,11 @@ export const announcementCreateSchema = z.object({
 export const formGroupCreateSchema = z.object({
   startDate: z.coerce.date(),
   endDate: z.coerce.date(),
-  raffleWinner: z.int().nullable().optional()
+})
+
+export const formGroupGETSchema = formGroupCreateSchema.extend({
+  id: z.int(),   
+  raffleWinner: z.int().nullish()
 })
 
 export const formCreateSchema = z.object({
@@ -54,6 +59,10 @@ export const formCreateSchema = z.object({
   author: z.cuid2(),
   formGroup: z.int(),
   title: z.string().min(1).max(250),
+})
+
+export const formGETSchema = formCreateSchema.extend({
+  id: z.int()
 })
 
 export const formComponentCreateSchema = z.object({
@@ -79,44 +88,16 @@ export const submissionResponseCreateSchema = z.object({
   response: z.string().min(1).max(5000)
 })
 
-export const shopItemCreateSchema = z.object({
-  type: z.enum(["theme", "animation"]),
-  name: z.string().min(1).max(150),
-  dateAvailable: z.coerce.date(),
-  cost: z.int().min(0).max(150) 
-})
-
-export const shopThemeCreateSchema = z.object({
-  shopItem: z.int(),
-  themeColor: z.string(),
-  themeEffect: z.object({}).nullish()
-})
-
-export const shopAnimationCreateSchema = z.object({
-  shopItem: z.int(),
-  animationType: z.string(),
-  animationEffect: z.object({}).nullish()
-})
-
-export const pendingEmailChangeCreateSchema = z.object({
-  userId: z.cuid2(),
-  newEmail: emailSchema,
-  token: z.string().min(1),
-  expiresAt: z.coerce.date(),
-  createdAt: z.coerce.date()
-})
-
 export type Email = z.infer<typeof emailSchema>
 export type UserCreate = z.infer<typeof userCreateSchema>
 export type AdminCreate = z.infer<typeof adminCreateSchema>
 export type StudentCreate = z.infer<typeof studentCreateSchema>
+export type StudentUpdate = z.infer<typeof studentUpdateSchema>
 export type AnnouncementCreate = z.infer<typeof announcementCreateSchema>
 export type FormCreate = z.infer<typeof formCreateSchema>
+export type FormGET = z.infer<typeof formGETSchema>
+export type FormGroupGET = z.infer<typeof formGroupGETSchema>
 export type FormGroupCreate = z.infer<typeof formGroupCreateSchema>
 export type FormComponentCreate = z.infer<typeof formComponentCreateSchema>
 export type FormSubmissionCreate = z.infer<typeof formSubmissionCreateSchema>
 export type SubmissionResponseCreate = z.infer<typeof submissionResponseCreateSchema>
-export type ShopItemCreate = z.infer<typeof shopItemCreateSchema>
-export type ShopThemeCreate = z.infer<typeof shopThemeCreateSchema>
-export type ShopAnimationCreate = z.infer<typeof shopAnimationCreateSchema>
-export type PendingEmailChangeCreate = z.infer<typeof pendingEmailChangeCreateSchema>
