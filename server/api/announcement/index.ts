@@ -22,7 +22,18 @@ export default defineEventHandler(async (event) => {
 
   if (method === 'POST') {
 
-    const { admin } = await requireAdmin(event)
+    const session = await requireAdmin(event)
+
+    const admin = await prisma.admin.findUnique({
+      where: { userId: session.user.id },
+    })
+
+    if (!admin) {
+      throw createError({
+        statusCode: 403,
+        statusMessage: 'Forbidden',
+      })
+    }
 
     const body = await readBody(event)
 
@@ -47,7 +58,7 @@ export default defineEventHandler(async (event) => {
   }
 
   throw createError({
-  statusCode: 405,
-  statusMessage: 'Method Not Allowed',
+    statusCode: 405,
+    statusMessage: 'Method Not Allowed',
   })
 })
