@@ -11,12 +11,14 @@ export const userCreateSchema = z.object({
 })
 
 export const adminCreateSchema = z.object({
-  id: z.string().max(30),
   settings: z.object({}).optional()
 })
 
 export const studentCreateSchema = z.object({
-  name: z.string().min(1).max(35), 
+  name: z.string("Invalid Name").min(1).max(35)
+})
+
+export const studentUpdateSchema = z.object({
   settings: z.object({
     dyslexiaFont: z.boolean().optional(), 
     fontSize: z.number().min(1).max(1.5).optional(),
@@ -24,8 +26,7 @@ export const studentCreateSchema = z.object({
     raffleOptIn: z.boolean().optional(),
     publicityConsent: z.boolean().optional()
     }).optional(),
-  exp: z.int().max(1000).min(0),
-  parentUserId: z.cuid2()
+  exp: z.int().max(100000).min(0),
 })
 
 export const announcementCreateSchema = z.object({
