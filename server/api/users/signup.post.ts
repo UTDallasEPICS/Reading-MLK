@@ -1,19 +1,26 @@
 import { prisma } from '../../utils/prisma'
-import { userCreateSchema } from '../../utils/schemas'
-import { z } from 'zod'
 
 export default defineEventHandler(async (event) => {
-  const body = userCreateSchema.safeParse(await readBody(event))
+  const body = await readBody(event)
 
-  if (!body.success) {
+  const { email, name } = body
+
+  if (!email || typeof email !== 'string') {
     throw createError({
       statusCode: 400,
-      statusMessage: body.error.message,
+      statusMessage: 'Email is required',
+    })
+  }
+
+  if (!name || typeof name !== 'string') {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Name is required',
     })
   }
 
   const existingUser = await prisma.user.findUnique({
-    where: { email: body.data.email },
+    where: { email },
   })
 
   if (existingUser) {
@@ -25,9 +32,9 @@ export default defineEventHandler(async (event) => {
 
   const user = await prisma.user.create({
     data: {
-      email: body.data.email,
-      name: body.data.name,
-      role: body.data.role,
+      email,
+      name,
+      role: 'reader',
       emailVerified: false,
     },
   })

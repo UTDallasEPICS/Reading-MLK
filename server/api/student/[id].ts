@@ -65,7 +65,7 @@ export default defineEventHandler(async (event) => {
         id: studentId,
       },
       data: {
-        name: student.name ?? student.name,
+        name: body.name ?? student.name,
         settings: body.settings ?? student.settings,
         exp: body.exp ?? student.exp,
       },

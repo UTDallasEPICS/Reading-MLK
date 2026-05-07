@@ -1,6 +1,5 @@
 import { prisma } from '../../utils/prisma'
 import { auth } from '../../utils/auth'
-import { emailSchema } from '~~/server/utils/schemas'
 import nodemailer from 'nodemailer'
 import crypto from 'node:crypto'
 
@@ -28,15 +27,23 @@ export default defineEventHandler(async (event) => {
 
   const body = await readBody(event)
 
-  const newEmail = emailSchema.safeParse(body.email)
-
-  if (!newEmail.success) {
+  if (!body.email || typeof body.email !== 'string') {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Invalid email',
+      statusMessage: 'New email is required',
     })
   }
-  if (newEmail.data === session.user.email?.trim().toLowerCase()) {
+
+  const newEmail = body.email.trim().toLowerCase()
+
+  if (!newEmail) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'New email is required',
+    })
+  }
+
+  if (newEmail === session.user.email?.trim().toLowerCase()) {
     throw createError({
       statusCode: 400,
       statusMessage: 'That is already your current email',
@@ -44,7 +51,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const existingUser = await prisma.user.findUnique({
-    where: { email: newEmail.data },
+    where: { email: newEmail },
     select: { id: true },
   })
 
@@ -61,7 +68,7 @@ export default defineEventHandler(async (event) => {
   await prisma.pendingEmailChange.create({
     data: {
       userId: session.user.id,
-      newEmail: newEmail.data,
+      newEmail,
       token,
       expiresAt,
     },
@@ -71,7 +78,7 @@ export default defineEventHandler(async (event) => {
 
   await transporter.sendMail({
     from: process.env.EMAIL_FROM || process.env.EMAIL_SERVER_USER,
-    to: newEmail.data,
+    to: newEmail,
     subject: 'Confirm your new Reading Huddle email',
     html: `
       <p>You requested to change the email on your Reading Huddle account.</p>
