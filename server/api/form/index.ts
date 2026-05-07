@@ -8,6 +8,7 @@ type ActionName =
   | 'getOnlyActiveFormsinGroup'
   | 'getFormGroup'
   | 'resolveFormGroupRangeByDate'
+  | 'getFormGroupSubmissions'
   | 'listForms'
   | 'createFormGroup'
   | 'createForm'
@@ -55,6 +56,21 @@ const toDate = (value: unknown, fieldName: string, required = true): Date | null
     }
 
     return null
+  }
+
+  if (typeof normalized === 'string') {
+    const dateOnlyMatch = normalized.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+
+    if (dateOnlyMatch) {
+      const [, year, month, day] = dateOnlyMatch
+      const parsed = new Date(Number(year), Number(month) - 1, Number(day))
+
+      if (Number.isNaN(parsed.getTime())) {
+        throw createError({ statusCode: 400, statusMessage: `${fieldName} must be a valid date` })
+      }
+
+      return parsed
+    }
   }
 
   const parsed = new Date(String(normalized))
@@ -407,6 +423,41 @@ export default defineEventHandler(async (event) => {
         formGroupId: matchingGroup.id,
         startDate: formatIsoDate(matchingGroup.startDate),
         endDate: formatIsoDate(matchingGroup.endDate),
+      }
+    }
+
+    if (selectedAction === 'getFormGroupSubmissions') {
+      const formGroupId = toInt(getQuery(event).formGroupId, 'formGroupId')
+
+      const forms = await prisma.form.findMany({
+        where: { formGroup: formGroupId as number },
+        select: { id: true },
+      })
+
+      const formIds = forms.map((f) => f.id)
+
+      if (formIds.length === 0) {
+        return { submissions: [], totalEntries: 0 }
+      }
+
+      const submissions = await prisma.formSubmission.findMany({
+        where: { form: { in: formIds } },
+        include: {
+          Student: true,
+          Form: { select: { id: true, title: true, startDate: true } },
+        },
+      })
+
+      return {
+        submissions: submissions.map((sub) => ({
+          id: sub.id,
+          studentId: sub.student,
+          studentName: sub.Student.name,
+          formId: sub.form,
+          formTitle: sub.Form.title ?? `Form ${sub.Form.id}`,
+          submissionDate: sub.submissionDate.toISOString(),
+        })),
+        totalEntries: submissions.length,
       }
     }
 

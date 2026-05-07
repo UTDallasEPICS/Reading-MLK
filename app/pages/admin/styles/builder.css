@@ -228,6 +228,7 @@
 .textarea-field { width: 100%; color: #374151; border: 2px solid #f8fafc; background: #f8fafc; border-radius: 0.75rem; padding: 0.75rem 1rem; outline: none; transition: all 0.15s; resize: none; font-size: 0.875rem; }
 .textarea-field:focus { background: white; border-color: #c7d2fe; }
 
+.input-base[type="date"]::-webkit-calendar-picker-indicator {filter: brightness(0); opacity: 1;}
 /* ── Add question buttons ── */
 .q-type-btns { display: flex; gap: 1rem; flex-wrap: wrap; }
 .q-type-btn  { flex: 1; font-weight: 500; padding: 1rem; border-radius: 0.75rem; border: 1px dashed; transition: all 0.15s; cursor: pointer; min-width: 140px; }

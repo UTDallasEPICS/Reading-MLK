@@ -15,6 +15,11 @@ export default defineEventHandler(async (event) => {
     if (query.student) {
       where.student = Number(query.student)
     }
+    if (query.formGroup) {
+      where.Form = {
+        formGroup: Number(query.formGroup)
+      }
+    }
 
     return await prisma.formSubmission.findMany({
       where

@@ -1,48 +1,90 @@
 <script setup lang="ts">
 definePageMeta({ ssr: false, layout: "admin" })
 
-const { raffleWinner, isSpinning, raffleWeek, raffleSubmissions, spinRaffle } = useAdmin()
+const {
+  getLastMonday, formatDate,
+} = useAdmin()
+
+const {loadRaffleData, raffleWeekStart, raffleWinner, raffleFormGroup, raffleSubmissions, spinRaffle, spinCount} = useRaffleSpin()
+
+function toDateStr(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+watch(raffleWeekStart, () => {
+  loadRaffleData()
+})
+
+onMounted(() => {
+  raffleWeekStart.value = toDateStr(new Date())
+  loadRaffleData()
+})
+
 </script>
 
 <template>
   <div class="raffle-wrap">
 
     <h2 class="raffle-heading">Weekly Raffle</h2>
-    <p class="raffle-sub">Spinning for: {{ raffleWeek }}</p>
-
+    
     <!-- Main card -->
-    <div class="raffle-card">
-
-      <!-- Idle -->
-      <div v-if="!raffleWinner && !isSpinning" class="raffle-state">
-        <div class="raffle-emoji hover-spin" @click="spinRaffle">🎟️</div>
-        <div class="raffle-entries">
-          <p class="entries-label">Total Entries</p>
-          <p class="entries-count">{{ raffleSubmissions }}</p>
-        </div>
-        <button class="btn-spin" @click="spinRaffle">SPIN IT!</button>
+    <div class="section-card">
+      
+    <!-- Header Row -->  
+    <div class="week-row">
+      <div>
+        <p class="field-hint">Selected Week</p>
+        <h4 class="week-label">{{ raffleWeekStart ? 'Week of ' + getLastMonday(raffleWeekStart) : 'Select a week' }}</h4>
       </div>
-
-      <!-- Spinning -->
-      <div v-else-if="isSpinning" class="raffle-state spinning-state">
-        <div class="raffle-emoji animate-spin-emoji">🎟️</div>
-        <h3 class="spinning-text">Spinning...</h3>
+      <div>
+        <label class="field-label">Change Week Starting (Mon)</label>
+        <input v-model="raffleWeekStart" type="date" class="input-base" data-builder-field="true"/>
       </div>
-
+      <div>
+        <p class="week-label">Total Entries: {{ raffleSubmissions?.length || 0 }}</p>
+      </div>
+      <div>
+        <button
+          v-if="!raffleWinner"
+          class="btn-indigo"
+          :disabled="raffleSubmissions?.length === 0 || !raffleFormGroup"
+          @click="spinRaffle">
+            SPIN 🎟️
+        </button>
+        <button v-else
+          class="btn-ghost"
+          :disabled="raffleSubmissions?.length === 0 || !raffleFormGroup"
+          @click="spinRaffle">
+          RESPIN 🎟️
+        </button>
+      </div>
+    </div>
+    
+    <!-- Main Section -->
       <!-- Winner -->
-      <div v-else class="raffle-state winner-state">
-        <div class="raffle-emoji animate-bounce-emoji">🥳</div>
-        <h2 class="winner-label">Winner!</h2>
-        <p class="winner-name">{{ raffleWinner.name }}</p>
-        <p v-if="raffleWinner.email" class="winner-email">{{ raffleWinner.email }}</p>
-        <button class="btn-restart" @click="raffleWinner = null">Start Over</button>
+      <div class="raffle-state winner-state">
+        <template v-if="raffleWinner">
+          <div class="raffle-section-text" :key="spinCount">
+            Winning Student:<br/>
+            <p class="raffle-winner-name">{{ raffleWinner.name }}</p>
+            <br/>Parent Name:<br/>    
+            <p class="raffle-winner-name">{{ (raffleWinner as any).Parent?.name || 'N/A' }}</p>
+            <br/>Parent Email:<br/>
+            <p class="raffle-winner-name">{{ (raffleWinner as any).Parent?.email || 'N/A' }}</p>
+          </div>
+        </template>
+        <template v-else>
+          <p class="raffle-section-text">No winner yet.</p>
+        </template>
       </div>
 
     </div>
-
   </div>
+
 </template>
 
 <style scoped>
 @import './styles/raffle.css';
+@import './styles/builder.css';
+
 </style>

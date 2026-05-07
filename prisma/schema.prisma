@@ -92,7 +92,7 @@ model Student {
   Parent                User       @relation(fields: [parentUserId], references: [id], onDelete: Cascade)
   Submissions           FormSubmission[]
   WinnerOf              FormGroup[]   @relation("RaffleWinner")
-  unlockedShopItems     StudentShopItem[]
+  unlockedShopItems     ShopItem[]
 }
 
 model Announcement {
@@ -121,7 +121,7 @@ model Form {
   startDate             DateTime
   endDate               DateTime?
   published             Boolean   @default(false)
-  author                String
+  author                String?
   formGroup             Int
   title                 String
 
@@ -175,7 +175,7 @@ model ShopItem {
 
   Theme           ShopTheme?
   Animation       ShopAnimation?
-  unlockedByStudents StudentShopItem[]
+  unlockedByStudents Student[]
 }
 
 model ShopTheme {
