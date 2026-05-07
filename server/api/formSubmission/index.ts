@@ -1,6 +1,8 @@
 import { Prisma } from '~~/prisma/generated/client'
 import { prisma } from '../../utils/prisma'
 import { getQuery } from 'h3'
+import { z } from 'zod'
+import { formSubmissionCreateSchema } from '../../utils/schemas'
 
 export default defineEventHandler(async (event) => {
   const method = event.node.req.method
@@ -27,11 +29,19 @@ export default defineEventHandler(async (event) => {
   }
 
   if (method === 'POST') {
-    const body = await readBody(event)
+    const body = formSubmissionCreateSchema.safeParse(await readBody(event))
+
+    if (!body.success) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'Invalid form submission data'
+      })
+    }
+
     return await prisma.formSubmission.create({
       data: {
-        form: Number(body.form),
-        student: Number(body.student)
+        form: body.data.form,
+        student: body.data.student
       }
     })
   }
