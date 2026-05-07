@@ -1,6 +1,7 @@
 import { prisma } from '../../utils/prisma'
 import { getQuery } from 'h3'
 import { z } from 'zod'
+import { requireAdmin } from '../../utils/require-session'
 import { announcementCreateSchema } from '../../utils/schemas'
 
 // GET /api/announcement?active=true to get only active announcements
@@ -22,6 +23,9 @@ export default defineEventHandler(async (event) => {
   }
 
   if (method === 'POST') {
+
+    const session = await requireAdmin(event)
+
     const body = announcementCreateSchema.safeParse(await readBody(event))
     
     if (!body.success) {
