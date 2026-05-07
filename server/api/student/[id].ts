@@ -1,5 +1,7 @@
 import { prisma } from '../../utils/prisma'
+import { Prisma } from '~~/prisma/generated/client'
 import { auth } from '../../utils/auth'
+import { studentUpdateSchema } from '~~/server/utils/schemas'
 
 export default defineEventHandler(async (event) => {
   const method = event.node.req.method
@@ -44,7 +46,14 @@ export default defineEventHandler(async (event) => {
   }
 
   if (method === 'PUT') {
-    const body = await readBody(event)
+    const body = studentUpdateSchema.safeParse(await readBody(event))
+
+    if (!body.success) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: body.error.message,
+      })
+    }
 
     const student = await prisma.student.findFirst({
       where: {
@@ -60,15 +69,16 @@ export default defineEventHandler(async (event) => {
       })
     }
 
+    const data : Prisma.StudentUpdateInput = {}
+
+    if (body.data.exp !== undefined) { data.exp = body.data.exp}
+    if (body.data.settings !== undefined) { data.settings = body.data.settings}
+
     const updatedStudent = await prisma.student.update({
       where: {
         id: studentId,
       },
-      data: {
-        name: student.name ?? student.name,
-        settings: body.settings ?? student.settings,
-        exp: body.exp ?? student.exp,
-      },
+      data
     })
 
     return updatedStudent
