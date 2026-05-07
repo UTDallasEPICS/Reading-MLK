@@ -1,5 +1,6 @@
 import path from 'path'
-import fs from 'fs'
+import { existsSync, mkdirSync } from 'fs'
+import fs from 'node:fs/promises'
 import { prisma } from '~~/server/utils/prisma'
 import { auth } from '~~/server/utils/auth'
 
@@ -31,21 +32,33 @@ export default defineEventHandler(async (event) => {
     'images'
   )
 
-  if (!fs.existsSync(dirPath)) {
-    fs.mkdirSync(dirPath, { recursive: true })
+  if (!existsSync(dirPath)) {
+    mkdirSync(dirPath, { recursive: true })
+  }
+
+  // Validate MIME type and derive file extension
+  const MIME_TO_EXT: Record<string, string> = {
+    'image/jpeg': 'jpg',
+    'image/png': 'png',
+    'image/webp': 'webp',
+  }
+
+  const ext = MIME_TO_EXT[file.type ?? '']
+  if (!ext) {
+    throw createError({ statusCode: 400, statusMessage: 'Unsupported image type. Only JPEG, PNG, and WebP are allowed.' })
   }
 
   const randomImageId = crypto.randomUUID()
 
-  const filePath = path.join(dirPath, randomImageId)
+  //Include extension in filename so the read side can detect MIME type
+  const filePath = path.join(dirPath, `${randomImageId}.${ext}`)
 
-  if (fs.existsSync(filePath)) {
+  if (existsSync(filePath)) {
     throw createError({ statusCode: 400, message: 'Image already exists.' })
   }
 
-  await fs.writeFile(filePath, file.data, (err) => {
-    if (err) throw err
-  })
+  // Use promise-based writeFile so errors are properly caught
+  await fs.writeFile(filePath, file.data)
 
   // Store the generated image ID in the database as required
   const addedImage = await prisma.user.update({
@@ -53,7 +66,7 @@ export default defineEventHandler(async (event) => {
       id: session.user.id,
     },
     data: {
-      image: path.join('users', session.user.id, 'images', randomImageId),
+      image: path.join('users', session.user.id, 'images', `${randomImageId}.${ext}`),
     },
   })
 
