@@ -69,7 +69,7 @@ export const formComponentCreateSchema = z.object({
 export const formSubmissionCreateSchema = z.object({
   student: z.int(),
   form: z.int(),
-  submissionDate: z.coerce.date()
+  submissionDate: z.coerce.date().default(new Date())
 })
 
 export const submissionResponseCreateSchema = z.object({
