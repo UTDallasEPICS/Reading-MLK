@@ -16,14 +16,10 @@ export default defineEventHandler(async (event) => {
     },
     select: {
       id: true,
-      email: true,
-      name: true,
-      role: true,
     },
   })
 
   return {
     exists: !!user,
-    user,
   }
 })
