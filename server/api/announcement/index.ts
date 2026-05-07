@@ -1,5 +1,6 @@
 import { prisma } from '../../utils/prisma'
-import { getQuery } from 'h3'
+import { getQuery, createError } from 'h3'
+import { requireAdmin } from '../../utils/require-session'
 
 // GET /api/announcement?active=true to get only active announcements
 export default defineEventHandler(async (event) => {
@@ -20,6 +21,20 @@ export default defineEventHandler(async (event) => {
   }
 
   if (method === 'POST') {
+
+    const session = await requireAdmin(event)
+
+    const admin = await prisma.admin.findUnique({
+      where: { userId: session.user.id },
+    })
+
+    if (!admin) {
+      throw createError({
+        statusCode: 403,
+        statusMessage: 'Forbidden',
+      })
+    }
+
     const body = await readBody(event)
 
     // SQLite has no native JSON type — Prisma's generated client for SQLite
@@ -37,8 +52,13 @@ export default defineEventHandler(async (event) => {
         content: contentStr,
         postDate: new Date(body.postDate),
         expiryDate: body.expiryDate ? new Date(body.expiryDate) : null,
-        author: body.author,
+        author: admin.id,
       }
     })
   }
+
+  throw createError({
+    statusCode: 405,
+    statusMessage: 'Method Not Allowed',
+  })
 })
