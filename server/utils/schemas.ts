@@ -18,15 +18,15 @@ export const studentCreateSchema = z.object({
   name: z.string("Invalid Name").min(1).max(35)
 })
 
-export const studentUpdateSchema = z.object({
+export const studentUpdateSchema = studentCreateSchema.extend({
   settings: z.object({
     dyslexiaFont: z.boolean().optional(), 
     fontSize: z.number().min(1).max(1.5).optional(),
     language: z.enum(["en", "es"]).optional(),
     raffleOptIn: z.boolean().optional(),
     publicityConsent: z.boolean().optional()
-    }).optional(),
-  exp: z.int().max(100000).min(0),
+    }, "Invalid Settings").optional(),
+  exp: z.int("Invalid EXP").max(100000, "Max EXP").min(0, "Min EXP").optional(),
 })
 
 export const announcementCreateSchema = z.object({
