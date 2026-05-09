@@ -71,8 +71,14 @@ Open `.env` and configure the following:
 - `DATABASE_URL`: The SQLite connection string (default: `file:./dev.db`).
 - `BETTER_AUTH_SECRET`: A secure random string for encryption. You can generate one using `openssl rand -hex 32`.
 - `BETTER_AUTH_URL`: The base URL of your application (default: `http://localhost:3000`).
-- `EMAIL_USER`: Your Gmail address (for OTP delivery).
-- `EMAIL_PASS`: Your Gmail App Password. [How to generate an App Password](https://support.google.com/accounts/answer/185833).
+- `EMAIL_SERVER_HOST`: use preferred email service
+- `EMAIL_SERVER_USER`: email to send dev sign in emails from 
+- `EMAIL_SERVER_PASSWORD`: email server password
+- `EMAIL_FROM`: subject line of email if desired
+
+Open `\prisma\seed.ts` and make the following changes to declare yourself an admin user:
+1. in const seededEmails (line 9) add yours or replace previous admin email
+2. copy or replace await prisma user create block (lines 78-96) with your information
 
 ### 4. Database Setup
 
@@ -106,10 +112,10 @@ Your application will be available at `http://localhost:3000`. This command also
 
 Login requires an email address that already exists in the database.
 
-- **Option A: Use the seeded user**
-  Go to `/auth` and log in with `alice@a.com`.
-- **Option B: Use your own email**
-  Update `prisma/seed.ts` with your email, then run `pnpm prisma:reset` to re-seed.
+- **If email set up in part 3, can log in to either admin or reader side**
+  Go to `/auth` and log in with email.
+- **If not or intended sign in is just for reader**
+  go to `/auth` and register account with email
 
 **To get your OTP:**
 
