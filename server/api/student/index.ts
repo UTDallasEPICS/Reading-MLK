@@ -1,5 +1,6 @@
 import { prisma } from '../../utils/prisma'
 import { auth } from '../../utils/auth'
+import { studentCreateSchema } from '../../utils/schemas'
 
 export default defineEventHandler(async (event) => {
   const method = event.node.req.method
@@ -24,18 +25,18 @@ export default defineEventHandler(async (event) => {
 
     return students
   } else if (method === 'POST') {
-    const body = await readBody(event)
+    const body = studentCreateSchema.safeParse(await readBody(event))
 
-    if (!body.name || typeof body.name !== 'string') {
+    if (!body.success) {
       throw createError({
         statusCode: 400,
-        statusMessage: 'Student name is required',
+        statusMessage: body.error.message,
       })
     }
 
     const student = await prisma.student.create({
       data: {
-        name: body.name,
+        name: body.data.name,
         parentUserId: session.user.id,
       },
     })
