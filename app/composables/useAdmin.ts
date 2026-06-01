@@ -83,17 +83,18 @@ export const useAdmin = () => {
   const mapApiFormToUi = (form: any) => {
     const questionList = Array.isArray(form.questions) ? form.questions : []
 
+   //replace direct type casting with better alternative, maybe zod coercing?
     return {
       id: Number(form.id),
-      weekStart: parseDateToYmd(form.weekStart || form.startDate || ''),
-      day: form.day || 'Monday',
-      title: form.title || `Form ${form.id}`,
-      date: form.date || formatDate(form.startDate || ''),
-      status: form.status || (form.published ? 'Active' : 'Unpublished'),
-      questions: questionList.map((question: any, index: number) => ({
-        id: Number(question.id ?? index + 1),
-        type: question.type || question.questionType || 'text',
-        text: question.text || question.questionText || '',
+      weekStart: parseDateToYmd(form.startDate), //update to dayjs format function
+      day: dayjs(form.startDate).format('dddd'),
+      title: form.title,
+      date: formatDate(form.startDate || ''), //update to dayjs format function
+      status: form.published ? 'Active' : 'Unpublished',
+      questions: form.Components.slice().sort((left, right) => left.order - right.order).map((question: any) => ({
+        id: question.id,
+        type: question.questionType || 'text',
+        text: question.questionText || '',
         textEs: question.questionOptions?.textEs || '',
         reference: question.questionOptions?.reference || '',
         referenceEs: question.questionOptions?.referenceEs || '',

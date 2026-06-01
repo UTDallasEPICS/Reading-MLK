@@ -9,7 +9,6 @@ type ActionName =
   | 'getFormGroup'
   | 'resolveFormGroupRangeByDate'
   | 'getFormGroupSubmissions'
-  | 'listForms'
   | 'createFormGroup'
   | 'createForm'
   | 'createComponent'
@@ -26,67 +25,6 @@ const hasOwnField = (value: Record<string, unknown> | null, key: string) =>
   Object.prototype.hasOwnProperty.call(value ?? {}, key)
 
 const normalizeScalar = (value: unknown) => (Array.isArray(value) ? value[0] : value)
-
-const toInt = (value: unknown, fieldName: string, required = true): number | null => {
-  const normalized = normalizeScalar(value)
-
-  if (normalized === undefined || normalized === null || normalized === '') {
-    if (required) {
-      throw createError({ statusCode: 400, statusMessage: `${fieldName} is required` })
-    }
-
-    return null
-  }
-
-  const parsed = typeof normalized === 'number' ? normalized : Number(normalized)
-
-  if (!Number.isInteger(parsed)) {
-    throw createError({ statusCode: 400, statusMessage: `${fieldName} must be an integer` })
-  }
-
-  return parsed
-}
-
-const toDate = (value: unknown, fieldName: string, required = true): Date | null => {
-  const normalized = normalizeScalar(value)
-
-  if (normalized === undefined || normalized === null || normalized === '') {
-    if (required) {
-      throw createError({ statusCode: 400, statusMessage: `${fieldName} is required` })
-    }
-
-    return null
-  }
-
-  if (typeof normalized === 'string') {
-    const dateOnlyMatch = normalized.match(/^(\d{4})-(\d{2})-(\d{2})$/)
-
-    if (dateOnlyMatch) {
-      const [, year, month, day] = dateOnlyMatch
-      const parsed = new Date(Number(year), Number(month) - 1, Number(day))
-
-      if (Number.isNaN(parsed.getTime())) {
-        throw createError({ statusCode: 400, statusMessage: `${fieldName} must be a valid date` })
-      }
-
-      return parsed
-    }
-  }
-
-  const parsed = new Date(String(normalized))
-
-  if (Number.isNaN(parsed.getTime())) {
-    throw createError({ statusCode: 400, statusMessage: `${fieldName} must be a valid date` })
-  }
-
-  return parsed
-}
-
-const toBoolean = (value: unknown) => {
-  const normalized = normalizeScalar(value)
-
-  return normalized === true || normalized === 'true' || normalized === 1 || normalized === '1'
-}
 
 const toOptionalJson = (value: unknown) => {
   if (value === undefined) {
@@ -367,42 +305,6 @@ export default defineEventHandler(async (event) => {
         raffleWinnerStudent: group.RaffleWinner,
         forms: group.Forms.map((form) => mapForm(form, group.startDate)),
       }
-    }
-
-    if (selectedAction === 'listForms') {
-      const query = getQuery(event)
-      const formGroupId = query.formGroup !== undefined ? toInt(query.formGroup, 'formGroup', false) : null
-      const weeklyDate =
-        !!query.weeklyDate
-          ? (toDate(query.weeklyDate, 'weeklyDate') as Date)
-          : null
-
-      const where: Prisma.FormWhereInput = {}
-
-      if (formGroupId !== null) { where.formGroup = formGroupId }
-
-      if (weeklyDate) {
-        const matchingGroup = await findMatchingFormGroupByDate(weeklyDate)
-
-        if (!matchingGroup) {
-          return []
-        }
-
-        where.formGroup = matchingGroup.id
-        where.startDate = matchingGroup.endDate
-          ? { gte: matchingGroup.startDate, lte: matchingGroup.endDate }
-          : { gte: matchingGroup.startDate }
-      }
-
-      if (query.published) { where.published = toBoolean(query.published) }
-
-      const forms = await prisma.form.findMany({
-        where,
-        orderBy: [{ formGroup: 'asc' }, { order: 'asc' }, { id: 'asc' }],
-        include: formInclude,
-      })
-
-      return forms.map((form) => mapForm(form, form.FormGroup.startDate))
     }
 
     if (selectedAction === 'resolveFormGroupRangeByDate') {

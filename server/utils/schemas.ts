@@ -60,10 +60,6 @@ export const formCreateSchema = z.object({
   title: z.string().min(1).max(250),
 })
 
-export const formGETSchema = formCreateSchema.extend({
-  id: z.int()
-})
-
 export const formComponentCreateSchema = z.object({
   form: z.int(),
   order: z.int().min(0),
@@ -94,7 +90,6 @@ export type StudentCreate = z.infer<typeof studentCreateSchema>
 export type StudentUpdate = z.infer<typeof studentUpdateSchema>
 export type AnnouncementCreate = z.infer<typeof announcementCreateSchema>
 export type FormCreate = z.infer<typeof formCreateSchema>
-export type FormGET = z.infer<typeof formGETSchema>
 export type FormGroupGET = z.infer<typeof formGroupGETSchema>
 export type FormGroupCreate = z.infer<typeof formGroupCreateSchema>
 export type FormComponentCreate = z.infer<typeof formComponentCreateSchema>
