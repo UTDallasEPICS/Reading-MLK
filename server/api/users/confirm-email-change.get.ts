@@ -7,10 +7,7 @@ export default defineEventHandler(async (event) => {
     const token = query.token
 
     if (!token || typeof token !== 'string') {
-        throw createError({
-            statusCode: 400,
-            statusMessage: 'Missing token',
-        })
+        return sendRedirect(event, '/auth?emailChangeError=invalid')
     }
 
     const incomingHash = crypto.createHash('sha256').update(token).digest('hex')
@@ -19,21 +16,14 @@ export default defineEventHandler(async (event) => {
     })
 
     if (!pending) {
-        throw createError({
-            statusCode: 404,
-            statusMessage: 'Invalid email change link',
-        })
+        return sendRedirect(event, '/auth?emailChangeError=invalid')
     }
 
     if (pending.expiresAt.getTime() < Date.now()) {
         await prisma.pendingEmailChange.delete({
             where: { token: incomingHash },
         })
-
-        throw createError({
-            statusCode: 400,
-            statusMessage: 'Email change link has expired',
-        })
+        return sendRedirect(event, '/auth?emailChangeError=expired')
     }
 
     const existingUser = await prisma.user.findUnique({
@@ -45,11 +35,7 @@ export default defineEventHandler(async (event) => {
         await prisma.pendingEmailChange.delete({
             where: { token: incomingHash },
         })
-
-        throw createError({
-            statusCode: 409,
-            statusMessage: 'Email already in use',
-        })
+        return sendRedirect(event, '/auth?emailChangeError=conflict')
     }
 
     await prisma.$transaction([
