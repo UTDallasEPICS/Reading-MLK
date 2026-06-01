@@ -1,18 +1,8 @@
 import { prisma } from '../../utils/prisma'
 import { auth } from '../../utils/auth'
 import { emailSchema } from '~~/server/utils/schemas'
-import nodemailer from 'nodemailer'
+import { mailer, fromAddress } from '../../utils/email'
 import crypto from 'node:crypto'
-
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_SERVER_HOST,
-  port: Number(process.env.EMAIL_SERVER_PORT),
-  secure: process.env.EMAIL_SERVER_SECURE === 'true',
-  auth: {
-    user: process.env.EMAIL_SERVER_USER,
-    pass: process.env.EMAIL_SERVER_PASSWORD,
-  },
-})
 
 export default defineEventHandler(async (event) => {
   const session = await auth.api.getSession({
@@ -69,8 +59,8 @@ export default defineEventHandler(async (event) => {
 
   const confirmUrl = `${process.env.BETTER_AUTH_URL}/api/users/confirm-email-change?token=${token}`
 
-  await transporter.sendMail({
-    from: process.env.EMAIL_FROM || process.env.EMAIL_SERVER_USER,
+  await mailer.sendMail({
+    from: fromAddress(),
     to: newEmail.data,
     subject: 'Confirm your new Reading Huddle email',
     html: `
