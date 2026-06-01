@@ -55,16 +55,21 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const token = crypto.randomBytes(32).toString('hex')
+  // const token = crypto.randomBytes(32).toString('hex')
   const expiresAt = new Date(Date.now() + 1000 * 60 * 60) // 1 hour
+
+  // when creating:
+  const tokenPlain = crypto.randomBytes(32).toString('hex')
+  const tokenHash = crypto.createHash('sha256').update(tokenPlain).digest('hex')
+  // store tokenHash in the DB; send tokenPlain in the email URL
 
   await prisma.pendingEmailChange.upsert({
     where: { userId: session.user.id },
-    update: { newEmail: newEmail.data, token, expiresAt },
-    create: { userId: session.user.id, newEmail: newEmail.data, token, expiresAt },
+    update: { newEmail: newEmail.data, token: tokenHash, expiresAt },
+    create: { userId: session.user.id, newEmail: newEmail.data, token: tokenHash, expiresAt },
   })
 
-  const confirmUrl = `${process.env.BETTER_AUTH_URL}/api/users/confirm-email-change?token=${token}`
+  const confirmUrl = `${process.env.BETTER_AUTH_URL}/api/users/confirm-email-change?token=${tokenPlain}`
 
   await transporter.sendMail({
     from: process.env.EMAIL_FROM || process.env.EMAIL_SERVER_USER,

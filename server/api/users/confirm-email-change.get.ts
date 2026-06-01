@@ -1,5 +1,6 @@
 import { prisma } from '../../utils/prisma'
 import { getQuery, sendRedirect } from 'h3'
+import crypto from 'node:crypto'
 
 export default defineEventHandler(async (event) => {
     const query = getQuery(event)
@@ -12,8 +13,10 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    const pending = await prisma.pendingEmailChange.findUnique({
-        where: { token },
+    // when confirming (server/api/users/confirm-email-change.get.ts):
+    const incomingHash = crypto.createHash('sha256').update(token).digest('hex')
+    const pending = await prisma.pendingEmailChange.findFirst({
+        where: { token: incomingHash },
     })
 
     if (!pending) {
@@ -25,7 +28,7 @@ export default defineEventHandler(async (event) => {
 
     if (pending.expiresAt.getTime() < Date.now()) {
         await prisma.pendingEmailChange.delete({
-            where: { token },
+            where: { token: incomingHash },
         })
 
         throw createError({
@@ -41,7 +44,7 @@ export default defineEventHandler(async (event) => {
 
     if (existingUser && existingUser.id !== pending.userId) {
         await prisma.pendingEmailChange.delete({
-            where: { token },
+            where: { token: incomingHash },
         })
 
         throw createError({
