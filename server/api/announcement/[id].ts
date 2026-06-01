@@ -11,15 +11,13 @@ export default defineEventHandler(async (event) => {
     const id = event.context.params?.id
 
     if (!id) {
-      setResponseStatus(event, 400)
-      return { error: 'Missing announcement ID' }
+      throw createError({ statusCode: 400, statusMessage: 'Missing announcement ID' })
     }
 
     const numericId = parseInt(id, 10)
 
     if (isNaN(numericId)) {
-      setResponseStatus(event, 400)
-      return { error: 'Invalid announcement ID — must be a whole number' }
+      throw createError({ statusCode: 400, statusMessage: 'Invalid announcement ID — must be a whole number' })
     }
 
     try {
