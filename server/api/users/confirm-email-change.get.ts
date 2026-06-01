@@ -13,7 +13,6 @@ export default defineEventHandler(async (event) => {
         })
     }
 
-    // when confirming (server/api/users/confirm-email-change.get.ts):
     const incomingHash = crypto.createHash('sha256').update(token).digest('hex')
     const pending = await prisma.pendingEmailChange.findFirst({
         where: { token: incomingHash },
