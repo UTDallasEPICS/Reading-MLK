@@ -22,8 +22,6 @@ type ActionName =
 
 const WEEKDAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
-
-
 const hasOwnField = (value: Record<string, unknown> | null, key: string) =>
   Object.prototype.hasOwnProperty.call(value ?? {}, key)
 
@@ -446,7 +444,6 @@ export default defineEventHandler(async (event) => {
         orderBy: [{ formGroup: 'asc' }, { order: 'asc' }, { id: 'asc' }],
       })
     }
-
 
     throw createError({ statusCode: 400, statusMessage: 'Unknown action' })
   }
