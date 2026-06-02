@@ -5,7 +5,6 @@ import { requireAdmin, requireSession } from '../../utils/require-session'
 import z from 'zod'
 
 //delete handler once done with api handler output testing
-
 export default eventHandler(async (event) => {
   
   const formInclude = {

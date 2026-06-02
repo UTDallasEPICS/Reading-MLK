@@ -3,6 +3,7 @@ import { Prisma } from '~~/prisma/generated/client'
 import { getQuery, createError } from 'h3'
 import { requireAdmin, requireSession } from '../../utils/require-session'  
 import z from 'zod'
+import { formInclude } from '../../utils/inclusions'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
@@ -18,7 +19,9 @@ export default defineEventHandler(async (event) => {
 
   //split into two handlers? one for date matching an
   if (weeklyDate) {
-    const matchingGroup = await findMatchingFormGroupByDate(weeklyDate) //matchGroupbyDate or whatever handler
+    const matchingGroup = await $fetch('/api/formGroup/MatchByDate', {
+      query: { date: weeklyDate.toISOString() }
+    })
 
     if (!matchingGroup) {
       return []
@@ -31,13 +34,6 @@ export default defineEventHandler(async (event) => {
   }
 
   if (published) {where.published = published}
-
-  const formInclude = {
-    Components: {
-      orderBy: [{ order: 'asc' as const }, { id: 'asc' as const }],
-    },
-    FormGroup: true,
-  }
 
   const forms = await prisma.form.findMany({
     where,

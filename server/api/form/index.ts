@@ -240,25 +240,6 @@ const mapForm = (
   }
 }
 
-const formGroupInclude = {
-  RaffleWinner: true,
-  Forms: {
-    orderBy: [{ order: 'asc' as const }, { id: 'asc' as const }],
-    include: {
-      Components: {
-        orderBy: [{ order: 'asc' as const }, { id: 'asc' as const }],
-      },
-    },
-  },
-}
-
-const formInclude = {
-  Components: {
-    orderBy: [{ order: 'asc' as const }, { id: 'asc' as const }],
-  },
-  FormGroup: true,
-}
-
 export default defineEventHandler(async (event) => {
   const method = event.node.req.method ?? 'GET'
   const body = method === 'GET' ? null : ((await readBody(event).catch(() => null)) as Record<string, unknown> | null)
