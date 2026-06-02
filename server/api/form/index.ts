@@ -1,7 +1,7 @@
 import { Prisma } from '~~/prisma/generated/client'
-import { auth } from '~~/server/utils/auth'
 import { prisma } from '~~/server/utils/prisma'
-import { getQuery, setResponseStatus, type H3Event } from 'h3'
+import { requireAdmin } from '~~/server/utils/require-session'
+import { createError, getQuery, setResponseStatus, type H3Event } from 'h3'
 
 type ActionName =
   | 'listFormGroups'
@@ -21,6 +21,8 @@ type ActionName =
   | 'deleteComponent'
 
 const WEEKDAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+
+
 
 const hasOwnField = (value: Record<string, unknown> | null, key: string) =>
   Object.prototype.hasOwnProperty.call(value ?? {}, key)
@@ -196,49 +198,6 @@ const getAction = (event: H3Event, body: Record<string, unknown> | null) => {
   return (query.action ?? body?.action) as ActionName | undefined
 }
 
-const isFormApiDevBypassEnabled = () =>
-  process.env.NODE_ENV !== 'production' || process.env.FORM_API_DEV_BYPASS === 'true'
-
-const requireAdminSession = async (event: H3Event) => {
-  const session = await auth.api.getSession({
-    headers: event.headers,
-  })
-
-  if (!session) {
-    if (isFormApiDevBypassEnabled()) {
-      return { session: null, userId: null, admin: null, bypassed: true }
-    }
-
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'Unauthorized: no active session. Log in, or set FORM_API_DEV_BYPASS=true for local testing only.',
-    })
-  }
-
-  const userId = normalizeScalar(session.user.id)
-
-  if (!userId || typeof userId !== 'string') {
-    throw createError({ statusCode: 400, statusMessage: 'Invalid session user id' })
-  }
-
-  const admin = await prisma.admin.findUnique({
-    where: { userId },
-  })
-
-  if (!admin) {
-    if (isFormApiDevBypassEnabled()) {
-      return { session, userId, admin: null, bypassed: true }
-    }
-
-    throw createError({
-      statusCode: 403,
-      statusMessage: 'Forbidden: current user is not an admin.',
-    })
-  }
-
-  return { session, userId, admin, bypassed: false }
-}
-
 const mapComponent = (component: {
   id: number
   form: number
@@ -265,9 +224,9 @@ const mapForm = (
     startDate: Date
     endDate: Date | null
     published: boolean
-    author: string
+    author: string | null
     formGroup: number
-    title: string
+    title: string | null
     Components?: Array<{
       id: number
       form: number
@@ -325,6 +284,19 @@ export default defineEventHandler(async (event) => {
   const method = event.node.req.method ?? 'GET'
   const body = method === 'GET' ? null : ((await readBody(event).catch(() => null)) as Record<string, unknown> | null)
   const action = getAction(event, body)
+
+  const session = await requireAdmin(event)
+
+  const admin = await prisma.admin.findUnique({
+    where: { userId: session.user.id },
+  })
+
+  if (!admin) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: 'Forbidden',
+    })
+  }
 
   if (method !== 'GET' && !action) { throw createError({ statusCode: 400, statusMessage: 'Missing action' }) }
 
@@ -478,10 +450,6 @@ export default defineEventHandler(async (event) => {
 
     throw createError({ statusCode: 400, statusMessage: 'Unknown action' })
   }
-
-
-
-  const { admin } = await requireAdminSession(event)
 
   if (method === 'POST') {
     if (action === 'createFormGroup') {
@@ -763,7 +731,7 @@ export default defineEventHandler(async (event) => {
 
         data.Form = {
           connect: { id: form as number },
-}
+        }
       }
 
       if (hasOwnField(body, 'order')) {
