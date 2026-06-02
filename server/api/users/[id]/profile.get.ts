@@ -1,19 +1,18 @@
 import fs from 'node:fs'
 import path from 'node:path'
+import { requireSession } from '../../../utils/require-session'
 
 export default defineEventHandler(async (event) => {
-  const session = await auth.api.getSession({
-    headers: event.headers,
-  })
-
-  if (!session) {
-    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
-  }
+  const session = await requireSession(event)
 
   const userId = getRouterParam(event, 'id')
 
   if (!userId) {
     throw createError({ statusCode: 400, statusMessage: 'Missing userId' })
+  }
+
+  if (userId !== session.user.id && session.user.role !== 'admin') {
+    throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
   }
 
   const record = await prisma.user.findUnique({
