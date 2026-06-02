@@ -93,6 +93,7 @@ model Student {
   Submissions           FormSubmission[]
   WinnerOf              FormGroup[]   @relation("RaffleWinner")
   unlockedShopItems     ShopItem[]
+  @@index([parentUserId])
 }
 
 model Announcement {
@@ -129,6 +130,7 @@ model Form {
   FormGroup   FormGroup        @relation(fields: [formGroup], references: [id], onDelete: Cascade)
   Submissions FormSubmission[]
   Components  FormComponent[]
+  @@index([formGroup])
 }
 
 model FormComponent {
@@ -154,6 +156,7 @@ model FormSubmission {
   Responses       SubmissionResponse[]
 
   @@unique([student, form])
+  @@index([submissionDate])
 }
 
 model SubmissionResponse {
@@ -205,4 +208,5 @@ model PendingEmailChange {
   createdAt DateTime @default(now())
 
   User User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([expiresAt])
 }
