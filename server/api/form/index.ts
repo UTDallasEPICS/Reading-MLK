@@ -2,6 +2,7 @@ import { Prisma } from '~~/prisma/generated/client'
 import { auth } from '~~/server/utils/auth'
 import { prisma } from '~~/server/utils/prisma'
 import { getQuery, setResponseStatus, type H3Event } from 'h3'
+import {z } from 'zod'
 
 type ActionName =
   | 'listFormGroups'
@@ -334,9 +335,9 @@ export default defineEventHandler(async (event) => {
       const query = getQuery(event)
       const where: Prisma.FormWhereInput = {}
 
-      if (query.formGroup !== null) { where.formGroup = Number(query.formGroup) }
+      if (query.formGroup) { where.formGroup = Number(query.formGroup) }
 
-      if (query.published) { where.published = toBoolean(query.published) }
+      if (query.published) { where.published = z.coerce.boolean().parse(query.published) }
 
       return await prisma.form.findMany({
         where,

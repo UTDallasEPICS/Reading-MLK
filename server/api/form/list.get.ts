@@ -8,17 +8,24 @@ import { formInclude } from '../../utils/inclusions'
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   //requireSessions
-  //finish coercion for query params
-  const formGroupId = z.int().safeParse(query.formGroupId).data
+  //fix type casting
+  const formGroupId = z.coerce.number().safeParse(query.formGroupId).data
   const weeklyDate = z.coerce.date().safeParse(query.weeklyDate).data
-  const published = z.boolean().safeParse(query.published).data
+  const published = query.published?.toString
 
   const where: Prisma.FormWhereInput = {}
 
-  if (formGroupId !== null) { where.formGroup = formGroupId }
+  console.log("formGroupId after filtering", formGroupId)
+  console.log("\nweeklyDate after filtering", weeklyDate)
+  console.log("\npublished after filtering", published)
 
-  //split into two handlers? one for date matching an
-  if (weeklyDate) {
+  //if (published) {where.published = published}
+
+  if (formGroupId) {
+    console.log('Filtering forms by formGroupId:', formGroupId)
+    where.formGroup = formGroupId}
+
+  else if (weeklyDate) {
     const matchingGroup = await $fetch('/api/formGroup/matchByDate', {
       query: { date: weeklyDate.toISOString() }
     })
@@ -33,7 +40,6 @@ export default defineEventHandler(async (event) => {
       : { gte: matchingGroup.startDate }
   }
 
-  if (published) {where.published = published}
 
   const forms = await prisma.form.findMany({
     where,
