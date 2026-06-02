@@ -36,6 +36,7 @@ export const useCurrentFormGroup = () => {
         FormGroup.value.activeFormGroup = activeFg
 
         try {
+          //switch to form list handler with published = true
           const formsAPIResponse = await $fetch<Form[]>('/api/form', {
             query: { action: 'getOnlyActiveFormsinGroup', formGroup: activeFg.id }
           })

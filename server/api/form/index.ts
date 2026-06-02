@@ -115,20 +115,6 @@ const findOrCreateWeeklyFormGroup = async (date: Date) => {
   return createdGroup.id
 }
 
-const findMatchingFormGroupByDate = async (date: Date) => {
-  return await prisma.formGroup.findFirst({
-    where: {
-      startDate: { lte: date },
-      OR: [
-        { endDate: null },
-        { endDate: { gte: date } },
-      ],
-    },
-    orderBy: [{ startDate: 'desc' }, { id: 'desc' }],
-    select: { id: true, startDate: true, endDate: true },
-  })
-}
-
 const getAction = (event: H3Event, body: Record<string, unknown> | null) => {
   const query = getQuery(event)
   return (query.action ?? body?.action) as ActionName | undefined

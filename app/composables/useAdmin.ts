@@ -81,7 +81,8 @@ export const useAdmin = () => {
   }
 
   const mapApiFormToUi = (form: any) => {
-    const questionList = Array.isArray(form.questions) ? form.questions : []
+    const questionList = Array.isArray(form.Components) ? form.Components : []
+    questionList.slice().sort((left: any, right: any) => left.order - right.order)
 
    //replace direct type casting with better alternative, maybe zod coercing?
     return {
@@ -91,7 +92,7 @@ export const useAdmin = () => {
       title: form.title,
       date: formatDate(form.startDate || ''), //update to dayjs format function
       status: form.published ? 'Active' : 'Unpublished',
-      questions: form.Components.slice().sort((left, right) => left.order - right.order).map((question: any) => ({
+      questions: questionList.map((question: any) => ({
         id: question.id,
         type: question.questionType || 'text',
         text: question.questionText || '',
@@ -221,10 +222,8 @@ export const useAdmin = () => {
 
   const loadPublishedForms = async () => {
     try {
-      const forms = await callFormApi<any[]>('GET', {
-        action: 'listForms',
-        weeklyDate: historyWeekStart.value || undefined,
-      })
+      const forms = await $fetch<any[]>('/api/form/list', 
+        { query: { weeklyDate: historyWeekStart.value || undefined} })
       publishedForms.value = (forms ?? []).map(mapApiFormToUi)
     } catch (error) {
       console.error('Failed to load forms', error)

@@ -9,6 +9,7 @@ export const useRaffleSpin = () => {
   const raffleWinner = ref<Student | null>(null)
   const spinCount = ref(0)
 
+  //match form group by date, raffle winner include added
   const loadRaffleFormGroup = async () => {
     const val = raffleWeekStart.value
     const dateStr = val instanceof Date ? val.toISOString().split('T')[0] : String(val).split('T')[0]
@@ -16,6 +17,7 @@ export const useRaffleSpin = () => {
     raffleFormGroup.value = data || null
   }
 
+  //wtf is it even calling
   const loadRaffleForms = async () => {
     if (!raffleFormGroup.value) {
       raffleForms.value = []

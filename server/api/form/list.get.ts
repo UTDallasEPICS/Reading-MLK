@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
 
   //split into two handlers? one for date matching an
   if (weeklyDate) {
-    const matchingGroup = await $fetch('/api/formGroup/MatchByDate', {
+    const matchingGroup = await $fetch('/api/formGroup/matchByDate', {
       query: { date: weeklyDate.toISOString() }
     })
 
