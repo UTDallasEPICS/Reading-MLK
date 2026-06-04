@@ -328,7 +328,7 @@ export const useAdmin = () => {
           method: 'PUT',
           body: {
             startDate: formatYmdLocal(startDate), //swap to dayjs 
-            published: true, //this is what it was prev, where is the value for editing form published value ?
+            published: true,
             title: formTitle.value,
           }
         })

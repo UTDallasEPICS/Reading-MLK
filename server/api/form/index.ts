@@ -16,7 +16,6 @@ type ActionName =
   | 'updateFormGroup'
   | 'updateComponent'
   | 'deleteFormGroup'
-  | 'deleteForm'
   | 'deleteComponent'
 
 const WEEKDAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
@@ -587,19 +586,6 @@ export default defineEventHandler(async (event) => {
       return {
         success: true,
         message: 'Form group deleted',
-      }
-    }
-
-    if (action === 'deleteForm') {
-      const id = toInt(body?.id ?? getQuery(event).id, 'id')
-
-      await prisma.form.delete({
-        where: { id: id as number },
-      })
-
-      return {
-        success: true,
-        message: 'Form deleted',
       }
     }
 
