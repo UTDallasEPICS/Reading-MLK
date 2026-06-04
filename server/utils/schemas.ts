@@ -45,11 +45,6 @@ export const formGroupCreateSchema = z.object({
   endDate: z.coerce.date(),
 })
 
-export const formGroupGETSchema = formGroupCreateSchema.extend({
-  id: z.int(),   
-  raffleWinner: z.int().nullish()
-})
-
 export const formCreateSchema = z.object({
   order: z.int(),
   startDate: z.coerce.date(), 
@@ -58,6 +53,16 @@ export const formCreateSchema = z.object({
   author: z.cuid2(),
   formGroup: z.int(),
   title: z.string().min(1).max(250),
+})
+
+export const formUpdateSchema = z.object({
+  order: z.int().optional(),
+  startDate: z.coerce.date().optional(), 
+  endDate: z.coerce.date().nullish(),
+  published: z.boolean().optional(),
+  author: z.cuid2().nullish(),
+  formGroup: z.int().optional(),
+  title: z.string().min(1).max(250).optional(),
 })
 
 export const formComponentCreateSchema = z.object({
@@ -90,7 +95,7 @@ export type StudentCreate = z.infer<typeof studentCreateSchema>
 export type StudentUpdate = z.infer<typeof studentUpdateSchema>
 export type AnnouncementCreate = z.infer<typeof announcementCreateSchema>
 export type FormCreate = z.infer<typeof formCreateSchema>
-export type FormGroupGET = z.infer<typeof formGroupGETSchema>
+export type FormUpdate = z.infer<typeof formUpdateSchema>
 export type FormGroupCreate = z.infer<typeof formGroupCreateSchema>
 export type FormComponentCreate = z.infer<typeof formComponentCreateSchema>
 export type FormSubmissionCreate = z.infer<typeof formSubmissionCreateSchema>

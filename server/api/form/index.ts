@@ -14,7 +14,6 @@ type ActionName =
   | 'createForm'
   | 'createComponent'
   | 'updateFormGroup'
-  | 'updateForm'
   | 'updateComponent'
   | 'deleteFormGroup'
   | 'deleteForm'
@@ -511,65 +510,6 @@ export default defineEventHandler(async (event) => {
           raffleWinnerStudent: updated.RaffleWinner,
           forms: updated.Forms.map((form) => mapForm(form, updated.startDate)),
         },
-      }
-    }
-
-    if (action === 'updateForm') {
-      const id = toInt(body?.id, 'id')
-      const data: {
-        formGroup?: number
-        startDate?: Date
-        endDate?: Date | null
-        published?: boolean
-        order?: number
-        title?: string | null
-      } = {}
-
-      if (hasOwnField(body, 'formGroup')) {
-        const formGroup = toInt(body?.formGroup, 'formGroup')
-        const group = await prisma.formGroup.findUnique({
-          where: { id: formGroup as number },
-          select: { id: true },
-        })
-
-        if (!group) {
-          throw createError({ statusCode: 404, statusMessage: 'Form group not found' })
-        }
-
-        data.formGroup = formGroup as number
-      }
-
-      if (hasOwnField(body, 'startDate')) {
-        data.startDate = toDate(body?.startDate, 'startDate') as Date
-      }
-
-      if (hasOwnField(body, 'endDate')) {
-        data.endDate = toDate(body?.endDate, 'endDate', false)
-      }
-
-      if (hasOwnField(body, 'published')) {
-        data.published = toBoolean(body?.published)
-      }
-
-      if (hasOwnField(body, 'order')) {
-        data.order = toInt(body?.order, 'order') as number
-      }
-
-      if (hasOwnField(body, 'title')) {
-        const title = String(body?.title ?? '').trim()
-        data.title = title || null
-      }
-
-      const updated = await prisma.form.update({
-        where: { id: id as number },
-        data: data as Prisma.FormUncheckedUpdateInput,
-        include: formInclude,
-      })
-
-      return {
-        success: true,
-        message: 'Form updated',
-        data: mapForm(updated, updated.FormGroup.startDate),
       }
     }
 
