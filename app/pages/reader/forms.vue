@@ -390,7 +390,7 @@ function getBadgeClass(type: string) {
                         v-if="currentComponent.questionType === 'text'"
                         v-model="answers[currentComponent.id]"
                         placeholder="Type your answer here..."
-                        class="w-full premium-card bg-white p-6 text-gray-500 outline-none min-h-[120px] shadow-inner"
+                        class="w-full premium-card bg-white p-6 text-lg outline-none min-h-[120px] shadow-inner"
                       />
                       <!-- MCQ -->
                       <div v-else-if="currentComponent.questionType === 'mcq'" class="space-y-3">
