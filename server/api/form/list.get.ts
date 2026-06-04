@@ -8,7 +8,7 @@ import { formInclude } from '../../utils/inclusions'
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   //requireSessions
-  //error handling
+  //add error handling
   const formGroupId = z.coerce.number().safeParse(query.formGroupId).data
   const weeklyDate = z.coerce.date().safeParse(query.weeklyDate).data
   const published = z.boolean().safeParse(query.published).data

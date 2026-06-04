@@ -324,12 +324,13 @@ export const useAdmin = () => {
         if (!startDate) throw new Error('Invalid week start date')
         startDate.setDate(startDate.getDate() + dayIndex)
 
-        await callFormApi('PUT', {}, {
-          action: 'updateForm',
-          id: editingFormId.value,
-          startDate: formatYmdLocal(startDate),
-          published: true,
-          title: formTitle.value,
+        await useFetch(`/api/form/${editingFormId.value}`, {
+          method: 'PUT',
+          body: {
+            startDate: formatYmdLocal(startDate), //swap to dayjs 
+            published: true, //this is what it was prev, where is the value for editing form published value ?
+            title: formTitle.value,
+          }
         })
 
         const existingForm = publishedForms.value.find((form) => Number(form.id) === Number(editingFormId.value))
