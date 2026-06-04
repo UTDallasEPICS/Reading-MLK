@@ -15,8 +15,6 @@ export default eventHandler(async (event) => {
 
   if (!id.success || !id.data) {throw createError({ statusCode: 400, message: 'Missing or Invalid form ID'})}
 
-  console.log("\n\nupdating form:", id.data)
-  
   return await prisma.form.update({
     where: { id: id.data },
     data: body.data
