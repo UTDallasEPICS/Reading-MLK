@@ -124,46 +124,6 @@ const getAction = (event: H3Event, body: Record<string, unknown> | null) => {
 const isFormApiDevBypassEnabled = () =>
   process.env.NODE_ENV !== 'production' || process.env.FORM_API_DEV_BYPASS === 'true'
 
-const requireAdminSession = async (event: H3Event) => {
-  const session = await auth.api.getSession({
-    headers: event.headers,
-  })
-
-  if (!session) {
-    if (isFormApiDevBypassEnabled()) {
-      return { session: null, userId: null, admin: null, bypassed: true }
-    }
-
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'Unauthorized: no active session. Log in, or set FORM_API_DEV_BYPASS=true for local testing only.',
-    })
-  }
-
-  const userId = normalizeScalar(session.user.id)
-
-  if (!userId || typeof userId !== 'string') {
-    throw createError({ statusCode: 400, statusMessage: 'Invalid session user id' })
-  }
-
-  const admin = await prisma.admin.findUnique({
-    where: { userId },
-  })
-
-  if (!admin) {
-    if (isFormApiDevBypassEnabled()) {
-      return { session, userId, admin: null, bypassed: true }
-    }
-
-    throw createError({
-      statusCode: 403,
-      statusMessage: 'Forbidden: current user is not an admin.',
-    })
-  }
-
-  return { session, userId, admin, bypassed: false }
-}
-
 const mapComponent = (component: {
   id: number
   form: number
@@ -349,9 +309,6 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Unknown action' })
   }
 
-
-
-  const { admin } = await requireAdminSession(event)
 
   if (method === 'POST') {
     if (action === 'createFormGroup') {
