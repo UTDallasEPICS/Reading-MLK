@@ -1,22 +1,48 @@
 <script setup lang="ts">
 definePageMeta({ ssr: false, layout: "admin" })
 
+import dayjs from 'dayjs'
+import isoWeek from 'dayjs/plugin/isoWeek'
+import utc from 'dayjs/plugin/utc'
+
+dayjs.extend(isoWeek)
+dayjs.extend(utc)
+
 const builderSectionRef = ref<HTMLElement | null>(null)
 
 const {
   builderSubTab, formTitle, editingFormId, questions,
-  formWeekStart, formDays, historyWeekStart, historyStatusSelection, historyGroupStartDate, historyGroupEndDate, toggleHistoryStatus, getLastMonday,
-  getCalculatedDate, formatDate, defaultQuestions,
-  filteredPublishedForms, selectedFormDetails, viewFormDetails,
+  formWeekStart, formDays, historyWeekStart, historyKeywordQuery, historyAdvancedFiltersOpen,
+  historyStatusSelection, historyGroupStartDate, historyGroupEndDate, emptyFormPromptOpen,
+  toggleHistoryStatus, resetHistoryAdvancedFilters, resetHistoryFilters, formatDate, defaultQuestions,
+  filteredPublishedForms, selectedFormDetails, viewFormDetails, publishSuccessInfo,
   draggedIdx, dragStart, onDrop,
-  addQuestion, publishForm, editPublishedForm, toggleFormPublish, loadPublishedForms,
+  addQuestion, publishForm, saveEmptyFormDraft, editPublishedForm, toggleFormPublish, deleteStoredForm, loadPublishedForms,
 } = useAdmin()
+
+const dayLabels = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
+const getWeekStartLabel = (weekStart: string) => {
+  if (!weekStart) return ''
+
+  return dayjs.utc(weekStart).startOf('isoWeek').format('YYYY-MM-DD')
+}
 
 const previewDates = computed(() => {
   if (!formDays.value.length) return []
-  const weekStart = getLastMonday(formWeekStart.value || '')
+  const weekStart = getWeekStartLabel(formWeekStart.value || '')
   if (!weekStart) return []
-  return formDays.value.map(day => `${day}: ${getCalculatedDate(weekStart, day)}`)
+  return formDays.value
+    .map((day) => {
+      const index = dayLabels.indexOf(day)
+
+      if (index === -1) {
+        return ''
+      }
+
+      return `${day}: ${dayjs.utc(weekStart).add(index, 'day').format('dddd, MMM D, YYYY')}`
+    })
+    .filter(Boolean)
 })
 
 const questionTypeLabel = (type: string) => {
@@ -76,6 +102,23 @@ const removeQuestion = (index: number) => {
   questions.value.splice(index, 1)
 }
 
+const resetBuilderForm = () => {
+  editingFormId.value = null
+  formTitle.value = ''
+  formDays.value = ['Monday']
+  questions.value = defaultQuestions()
+  emptyFormPromptOpen.value = false
+  builderSubTab.value = 'history'
+}
+
+const deleteEmptyForm = async () => {
+  if (editingFormId.value) {
+    await deleteStoredForm({ id: editingFormId.value, title: formTitle.value }, true)
+  }
+
+  resetBuilderForm()
+}
+
 const handleBuilderEnter = (event: KeyboardEvent) => {
   const currentTarget = event.target as HTMLElement | null
 
@@ -128,6 +171,35 @@ onBeforeUnmount(() => {
     <!--  FORM DETAILS MODAL                        -->
     <!-- ══════════════════════════════════════════ -->
     <Transition name="fade">
+      <div v-if="emptyFormPromptOpen" class="modal-backdrop">
+        <div class="modal-overlay" @click="emptyFormPromptOpen = false" />
+        <div class="modal-box">
+          <div class="modal-header">
+            <div>
+              <h3 class="modal-title">You cannot publish because its empty.</h3>
+              <p class="modal-meta">Its empty, do you still want to save or delete?</p>
+            </div>
+          </div>
+
+          <div class="modal-body">
+            <p class="empty-form-copy">
+              Save this form as an unpublished draft, or delete it and start over.
+            </p>
+          </div>
+
+          <div class="modal-footer success-footer">
+            <button class="btn-indigo" @click="saveEmptyFormDraft()">Save</button>
+            <button class="btn-dark" @click="deleteEmptyForm()">Delete</button>
+            <button class="btn-ghost" @click="emptyFormPromptOpen = false">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- ══════════════════════════════════════════ -->
+    <!--  FORM DETAILS MODAL                        -->
+    <!-- ══════════════════════════════════════════ -->
+    <Transition name="fade">
       <div v-if="selectedFormDetails" class="modal-backdrop">
         <div class="modal-overlay" @click="selectedFormDetails = null" />
         <div class="modal-box">
@@ -173,6 +245,45 @@ onBeforeUnmount(() => {
     </Transition>
 
     <!-- ══════════════════════════════════════════ -->
+    <!--  PUBLISH SUCCESS MODAL                     -->
+    <!-- ══════════════════════════════════════════ -->
+    <Transition name="fade">
+      <div v-if="publishSuccessInfo" class="modal-backdrop">
+        <div class="modal-overlay" @click="publishSuccessInfo = null" />
+        <div class="modal-box success-modal">
+
+          <div class="modal-header success-header">
+            <div class="success-icon">✓</div>
+            <div>
+              <h3 class="modal-title">{{ publishSuccessInfo.isUpdate ? 'Form Updated Successfully' : 'Form Published Successfully' }}</h3>
+              <p class="modal-meta">{{ publishSuccessInfo.title }}</p>
+            </div>
+          </div>
+
+          <div class="modal-body success-body">
+            <div class="success-info-block">
+              <div class="info-row">
+                <span class="info-label">📅 Week Starting:</span>
+                <span class="info-value">{{ publishSuccessInfo.weekStart }}</span>
+              </div>
+              <div v-if="publishSuccessInfo.publishedDates && publishSuccessInfo.publishedDates.length > 0" class="info-row">
+                <span class="info-label">📆 Dates:</span>
+                <div class="date-list">
+                  <span v-for="date in publishSuccessInfo.publishedDates" :key="date" class="date-tag">{{ date }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer success-footer">
+            <button class="btn-indigo" @click="publishSuccessInfo = null; builderSubTab = 'history';">View in History</button>
+            <button class="btn-dark" @click="publishSuccessInfo = null">Close</button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- ══════════════════════════════════════════ -->
     <!--  CREATION SUB-TAB                          -->
     <!-- ══════════════════════════════════════════ -->
     <div v-if="builderSubTab === 'creation'" ref="builderSectionRef" class="creation-wrap">
@@ -194,7 +305,7 @@ onBeforeUnmount(() => {
         <div class="week-row">
           <div>
             <p class="field-hint">Selected Week</p>
-            <h4 class="week-label">{{ formWeekStart ? 'Week of ' + getLastMonday(formWeekStart) : 'Select a week' }}</h4>
+            <h4 class="week-label">{{ formWeekStart ? 'Week of ' + getWeekStartLabel(formWeekStart) : 'Select a week' }}</h4>
           </div>
           <div>
             <label class="field-label">Change Week Starting (Mon)</label>
@@ -385,48 +496,87 @@ onBeforeUnmount(() => {
         >+ Create New Form</button>
       </div>
 
-      <!-- Filters -->
-      <div class="section-card">
-        <div class="history-filters-grid">
-          <div>
-            <label class="field-label">Weekly Date (Find Matching Form Group)</label>
+      <div class="section-card history-toolbar">
+        <div class="history-toolbar-main">
+          <div class="history-toolbar-field">
+            <label class="field-label">Weekly Date</label>
             <input v-model="historyWeekStart" type="date" class="input-base" />
           </div>
 
-          <div>
-            <label class="field-label">Status</label>
-            <div class="status-filter-btns">
-              <button
-                class="status-filter-btn"
-                :class="historyStatusSelection.includes('published') ? 'active' : ''"
-                @click="toggleHistoryStatus('published')"
-              >Published</button>
-              <button
-                class="status-filter-btn"
-                :class="historyStatusSelection.includes('unpublished') ? 'active' : ''"
-                @click="toggleHistoryStatus('unpublished')"
-              >Unpublished</button>
-            </div>
-          </div>
-
-          <div>
-            <label class="field-label">Form Group Start (From)</label>
-            <input v-model="historyGroupStartDate" type="date" class="input-base" />
-          </div>
-
-          <div>
-            <label class="field-label">Form Group Start (To)</label>
-            <input v-model="historyGroupEndDate" type="date" class="input-base" />
+          <div class="history-toolbar-field history-search-field">
+            <label class="field-label">Keyword Search</label>
+            <input
+              v-model="historyKeywordQuery"
+              type="search"
+              class="input-base"
+              placeholder="Search titles, dates, questions, or answers"
+            />
           </div>
         </div>
+        <button class="btn-ghost" @click="resetHistoryFilters()">Reset</button>
+        <button class="btn-indigo history-advanced-btn" @click="historyAdvancedFiltersOpen = true">
+          Advanced Filter Options
+        </button>
       </div>
+
+      <Transition name="drawer">
+        <div
+          v-if="historyAdvancedFiltersOpen"
+          class="history-drawer-backdrop"
+          @click.self="historyAdvancedFiltersOpen = false"
+        >
+          <aside class="history-drawer">
+            <div class="history-drawer-header">
+              <div>
+                <h4 class="history-drawer-title">Advanced Filter Options</h4>
+                <p class="history-drawer-subtitle">Refine history by status and exact date range.</p>
+              </div>
+              <button class="history-drawer-close" @click="historyAdvancedFiltersOpen = false">×</button>
+            </div>
+
+            <div class="history-drawer-body">
+              <div>
+                <label class="field-label">Status</label>
+                <div class="status-filter-btns history-status-stack">
+                  <button
+                    class="status-filter-btn"
+                    :class="historyStatusSelection.includes('published') ? 'active' : ''"
+                    @click="toggleHistoryStatus('published')"
+                  >Published</button>
+                  <button
+                    class="status-filter-btn"
+                    :class="historyStatusSelection.includes('unpublished') ? 'active' : ''"
+                    @click="toggleHistoryStatus('unpublished')"
+                  >Unpublished</button>
+                </div>
+              </div>
+
+              <div>
+                <label class="field-label">Form Date (From)</label>
+                <input v-model="historyGroupStartDate" type="date" class="input-base" />
+              </div>
+
+              <div>
+                <label class="field-label">Form Date (To)</label>
+                <input v-model="historyGroupEndDate" type="date" class="input-base" />
+              </div>
+            </div>
+
+            <div class="history-drawer-footer">
+              <button class="btn-ghost" @click="resetHistoryAdvancedFilters()">Reset Filters</button>
+              <button class="btn-indigo history-advanced-btn" @click="historyAdvancedFiltersOpen = false">Done</button>
+            </div>
+          </aside>
+        </div>
+      </Transition>
 
       <!-- Form rows -->
       <div class="space-y-3">
         <div
           v-for="form in filteredPublishedForms" :key="form.id"
-          class="form-row"
+          class="form-row cursor-pointer hover:shadow-lg transition-shadow"
           :class="form.status === 'Unpublished' ? 'opacity-60' : ''"
+          @click="viewFormDetails(form)"
         >
           <!-- Week/day badge -->
           <div class="week-badge">
@@ -445,12 +595,13 @@ onBeforeUnmount(() => {
 
           <div class="form-row-actions">
             <span class="status-pill" :class="form.status === 'Active' ? 'active' : 'inactive'">{{ form.status }}</span>
-            <button class="btn-sm-indigo" @click="viewFormDetails(form)">Details</button>
-            <button class="btn-sm-indigo" @click="editPublishedForm(form)">Edit</button>
+            <button class="btn-sm-indigo" @click.stop="viewFormDetails(form)">Details</button>
+            <button class="btn-sm-indigo" @click.stop="editPublishedForm(form)">Edit</button>
+            <button class="btn-sm danger" @click.stop="deleteStoredForm(form)">Delete</button>
             <button
               class="btn-sm"
               :class="form.status === 'Active' ? 'danger' : 'success'"
-              @click="toggleFormPublish(form)"
+              @click.stop="toggleFormPublish(form)"
             >{{ form.status === 'Active' ? 'Unpublish' : 'Republish' }}</button>
           </div>
         </div>

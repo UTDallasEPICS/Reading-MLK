@@ -1,14 +1,12 @@
 import { prisma } from '../../utils/prisma'
 import { auth } from '../../utils/auth'
 import { getQuery } from 'h3'
+import dayjs from 'dayjs'
+import isoWeek from 'dayjs/plugin/isoWeek'
+import utc from 'dayjs/plugin/utc'
 
-/// Standardizes a UTC date into YYYY-MM-DD string
-const formatYmdUtc = (date: Date) => {
-  const year = date.getUTCFullYear()
-  const month = String(date.getUTCMonth() + 1).padStart(2, '0')
-  const day = String(date.getUTCDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
+dayjs.extend(isoWeek)
+dayjs.extend(utc)
 
 // Formats a UTC date for friendly frontend display (e.g., Nov 4, 2024)
 const formatDisplayDateUtc = (date: Date) => {
@@ -18,37 +16,6 @@ const formatDisplayDateUtc = (date: Date) => {
     day: 'numeric',
     year: 'numeric',
   }).format(date)
-}
-
-// Safely parses YYYY-MM-DD from user input
-const parseLocalDate = (dateString: string) => {
-  const parts = dateString.split('-')
-  if (parts.length !== 3) {
-    throw createError({ statusCode: 400, statusMessage: 'Invalid date format' })
-  }
-  return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]))
-}
-
-// Calculates start and end Date objects for a given week. 
-// Resolves dates from Monday to Sunday.
-const getWeekBoundsDates = (dateString: string) => {
-  const date = parseLocalDate(dateString)
-  const day = date.getDay()
-  const diffToMonday = day === 0 ? -6 : 1 - day
-
-  const monday = new Date(date)
-  monday.setDate(date.getDate() + diffToMonday)
-
-  const sunday = new Date(monday)
-  sunday.setDate(monday.getDate() + 6)
-
-  const mondayYmd = formatYmdUtc(monday)
-  const sundayYmd = formatYmdUtc(sunday)
-
-  return {
-    mondayDate: new Date(`${mondayYmd}T00:00:00.000Z`),
-    sundayDate: new Date(`${sundayYmd}T23:59:59.999Z`)
-  }
 }
 
 // HELPER: Fetches a standard list of individual completed records.
@@ -70,7 +37,8 @@ async function getCompletedRecords(queryState: any) {
 
   // Filter timeframe (week)
   if (selectedDate) {
-    const { mondayDate, sundayDate } = getWeekBoundsDates(selectedDate)
+    const mondayDate = dayjs.utc(selectedDate).startOf('isoWeek').toDate()
+    const sundayDate = dayjs.utc(selectedDate).endOf('isoWeek').toDate()
     where.Form = {
       ...where.Form,
       FormGroup: {
@@ -116,11 +84,11 @@ async function getCompletedRecords(queryState: any) {
       studentName: submission.Student.name,
       formGroupId: submission.Form.FormGroup.id,
       formGroupLabel: `Week of ${formatDisplayDateUtc(groupStart)}`,
-      formGroupStartDate: formatYmdUtc(groupStart),
+      formGroupStartDate: dayjs.utc(groupStart).format('YYYY-MM-DD'),
       formId: submission.Form.id,
       formTitle: submission.Form.title || `Form ${submission.Form.id}`,
       dateCompleted: formatDisplayDateUtc(completedAt),
-      dateCompletedYmd: formatYmdUtc(completedAt),
+      dateCompletedYmd: dayjs.utc(completedAt).format('YYYY-MM-DD'),
     }
   })
 
@@ -135,7 +103,8 @@ async function getGroupedRecords(queryState: any) {
   const submissionWhere: any = {}
 
   if (selectedDate) {
-    const { mondayDate, sundayDate } = getWeekBoundsDates(selectedDate)
+    const mondayDate = dayjs.utc(selectedDate).startOf('isoWeek').toDate()
+    const sundayDate = dayjs.utc(selectedDate).endOf('isoWeek').toDate()
     submissionWhere.Form = { FormGroup: { startDate: { gte: mondayDate, lte: sundayDate } } }
   }
 
@@ -169,7 +138,7 @@ async function getGroupedRecords(queryState: any) {
       studentName: studentNameMap.get(g.student) || 'Unknown',
       formsCompleted: g._count.id,
       lastSubmitted: formatDisplayDateUtc(date),
-      lastSubmittedYmd: formatYmdUtc(date),
+      lastSubmittedYmd: dayjs.utc(date).format('YYYY-MM-DD'),
     }
   })
 
@@ -200,7 +169,8 @@ async function getMissingRecords(queryState: any) {
   }
 
   // Calculate only forms that are expected in this specific week
-  const { mondayDate, sundayDate } = getWeekBoundsDates(selectedDate)
+  const mondayDate = dayjs.utc(selectedDate).startOf('isoWeek').toDate()
+  const sundayDate = dayjs.utc(selectedDate).endOf('isoWeek').toDate()
   const expectedForms = await prisma.form.findMany({
     where: { FormGroup: { startDate: { gte: mondayDate, lte: sundayDate } } },
     select: { id: true, title: true }
@@ -246,7 +216,7 @@ async function getMissingRecords(queryState: any) {
         missingFormsCount: missingForms.length,
         missingForms,
         lastSubmitted: lastSub ? formatDisplayDateUtc(lastSub) : '',
-        lastSubmittedYmd: lastSub ? formatYmdUtc(lastSub) : '',
+        lastSubmittedYmd: lastSub ? dayjs.utc(lastSub).format('YYYY-MM-DD') : '',
       })
     }
   }
