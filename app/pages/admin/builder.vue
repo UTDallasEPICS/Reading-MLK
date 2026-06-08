@@ -177,7 +177,7 @@ onBeforeUnmount(() => {
           <div class="modal-header">
             <div>
               <h3 class="modal-title">You cannot publish because its empty.</h3>
-              <p class="modal-meta">Its empty, do you still want to save or delete?</p>
+              <p class="modal-meta">It's empty — do you still want to save or delete?</p>
             </div>
           </div>
 
