@@ -1,9 +1,24 @@
 <script setup lang="ts">
 definePageMeta({ ssr: false })
 
-const { student, settings, updateExp } = useCurrentStudent()
-const { FormGroup } = useCurrentFormGroup()
-const { tickets, completedFormIds, logFormSubmission, logSubmissionResponse } = useCurrentStudentProgress()
+const { student, settings, updateExp, restoreStudent } = useCurrentStudent()
+const { FormGroup, loadActiveFormGroup } = useCurrentFormGroup()
+const { tickets, completedFormIds, logFormSubmission, logSubmissionResponse, loadProgress } = useCurrentStudentProgress()
+
+const dataLoaded = ref(false)
+
+onMounted(async () => {
+  if (!student.value) {
+    await restoreStudent()
+  }
+  if (!student.value) {
+    await navigateTo('/reader/profile')
+    return
+  }
+  await loadActiveFormGroup()
+  await loadProgress()
+  dataLoaded.value = true
+})
 
 const stats = computed(() => ({
   xp: student.value ? student.value.exp : 0,
@@ -237,7 +252,13 @@ function getBadgeClass(type: string) {
 
     <!-- ── MAIN ── -->
     <main class="max-w-4xl mx-auto min-h-[60vh]">
-      <section class="space-y-6">
+      <!-- Loading state -->
+      <div v-if="!dataLoaded" class="flex flex-col items-center justify-center min-h-[40vh] gap-4">
+        <div class="text-6xl animate-bounce">📝</div>
+        <p class="font-heading text-xl font-bold text-gray-400">Loading forms...</p>
+      </div>
+
+      <section v-else class="space-y-6">
 
         <div class="mb-2">
           <h2 class="font-heading text-4xl font-bold mb-4" style="color:var(--brand-dark)">Daily Forms 📝</h2>
