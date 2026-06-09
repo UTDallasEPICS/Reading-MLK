@@ -302,11 +302,11 @@ onBeforeUnmount(() => {
                 <button
                   class="btn-correct"
                   :class="choice.correct ? 'active' : ''"
-                  @click="q.choices.forEach((c: any) => c.correct = false); choice.correct = true"
+                  @click="q.choices && q.choices.forEach((c: any) => c.correct = false); choice.correct = true"
                 >{{ choice.correct ? '✓ Correct' : 'Set Correct' }}</button>
-                <button class="q-remove-inline" @click="q.choices.splice(ci, 1)">✕</button>
+                <button class="q-remove-inline" @click="q.choices && q.choices.splice(ci, 1)">✕</button>
               </div>
-              <button class="btn-add-choice" @click="q.choices.push({ text: '', correct: false })">+ Add Choice</button>
+              <button class="btn-add-choice" @click="q.choices && q.choices.push({ text: '', correct: false })">+ Add Choice</button>
             </div>
 
             <!-- Video URL -->

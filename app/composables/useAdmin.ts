@@ -2,8 +2,90 @@
 // Place this at: app/composables/useAdmin.ts
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
+import type { FormModel, FormComponentModel, AnnouncementModel, StudentModel } from '~~/prisma/generated/models'
 
 dayjs.extend(utc)
+
+// ── UI-layer types (shapes after API → UI transformation) ──
+
+interface QuestionChoice {
+  text: string
+  correct: boolean
+}
+
+interface QuestionOptions {
+  textEs?: string
+  reference?: string
+  referenceEs?: string
+  url?: string
+  choices?: QuestionChoice[]
+}
+
+/** A question as represented in the builder UI (not the raw DB row). */
+export interface UiQuestion {
+  id: number
+  type: string
+  text: string
+  textEs: string
+  reference: string
+  referenceEs: string
+  url: string
+  choices?: QuestionChoice[]
+}
+
+/** A form after `mapApiFormToUi` transforms the API response. */
+export interface UiForm {
+  id: number
+  weekStart: string
+  day: string
+  title: string
+  date: string
+  status: string
+  questions: UiQuestion[]
+}
+
+/** Shape returned by the create-form API endpoint. */
+type FormApiCreateResponse = {
+  success: boolean
+  message: string
+  data: FormModel & { questions: FormComponentModel[] }
+}
+
+/** A local announcement as managed in admin state. */
+interface UiAnnouncement {
+  id: number
+  title: string
+  content: string
+  icon: string
+  startDate: string
+  endDate: string
+  weekStart: string
+  day: string
+}
+
+interface NewAnnouncement {
+  title: string
+  content: string
+  icon: string
+  startDate: string
+  endDate: string
+  weekStart: string
+  day: string
+}
+
+/** A student row as used in the admin progress tab. */
+interface UiStudent {
+  id: number
+  name: string
+  initials: string
+  email: string
+  tickets: number
+  streak: number
+  lastActive: string
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- raw API responses have unpredictable shapes
+type RawApiRecord = Record<string, any>
 export const useAdmin = () => {
   const callFormApi = async <T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', params: Record<string, unknown> = {}, body?: Record<string, unknown>): Promise<T> => {
     const queryString = method === 'GET' || method === 'DELETE'
@@ -63,7 +145,7 @@ export const useAdmin = () => {
     return formatYmdLocal(fallback)
   }
 
-  const buildQuestionOptions = (question: any) => ({
+  const buildQuestionOptions = (question: UiQuestion): QuestionOptions => ({
     textEs: question.textEs ?? '',
     reference: question.reference ?? '',
     referenceEs: question.referenceEs ?? '',
@@ -71,7 +153,7 @@ export const useAdmin = () => {
     choices: Array.isArray(question.choices) ? question.choices : [],
   })
 
-  const toApiQuestionText = (question: any, fallbackTitle: string) => {
+  const toApiQuestionText = (question: UiQuestion, fallbackTitle: string): string => {
     if (typeof question.text === 'string' && question.text.trim()) {
       return question.text.trim()
     }
@@ -87,7 +169,7 @@ export const useAdmin = () => {
     return fallbackTitle || 'Untitled question'
   }
 
-  const mapApiFormToUi = (form: any) => {
+  const mapApiFormToUi = (form: RawApiRecord): UiForm => {
     const questionList = Array.isArray(form.questions) ? form.questions : []
 
     return {
@@ -97,7 +179,7 @@ export const useAdmin = () => {
       title: form.title || `Form ${form.id}`,
       date: form.date || formatDate(form.startDate || ''),
       status: form.status || (form.published ? 'Active' : 'Unpublished'),
-      questions: questionList.map((question: any, index: number) => ({
+      questions: questionList.map((question: RawApiRecord, index: number) => ({
         id: Number(question.id ?? index + 1),
         type: question.type || question.questionType || 'text',
         text: question.text || question.questionText || '',
@@ -114,7 +196,7 @@ export const useAdmin = () => {
   const builderSubTab = useState<'history' | 'creation'>('builderSubTab', () => 'history')
   const formTitle = useState('formTitle', () => '')
   const editingFormId = useState<number | null>('editingFormId', () => null)
-  const questions = useState<any[]>('questions', () => [])
+  const questions = useState<UiQuestion[]>('questions', () => [])
 
   // Week/day pickers — default to current Monday
   const todayDate = new Date()
@@ -129,7 +211,7 @@ export const useAdmin = () => {
   const historyStatusSelection = useState<Array<'published' | 'unpublished'>>('historyStatusSelection', () => ['published', 'unpublished'])
   const historyGroupStartDate = useState('historyGroupStartDate', () => '')
   const historyGroupEndDate = useState('historyGroupEndDate', () => '')
-  const selectedFormDetails = useState<any | null>('selectedFormDetails', () => null)
+  const selectedFormDetails = useState<UiForm | null>('selectedFormDetails', () => null)
 
   const toggleHistoryStatus = (value: 'published' | 'unpublished') => {
     if (historyStatusSelection.value.includes(value)) {
@@ -188,7 +270,7 @@ export const useAdmin = () => {
     })
   }
 
-  const defaultQuestions = (): any[] => [
+  const defaultQuestions = (): UiQuestion[] => [
     { id: Date.now(), type: 'video', text: '', textEs: '', reference: '', referenceEs: '', url: '' },
     { id: Date.now() + 1, type: 'text', text: '', textEs: '', reference: '', referenceEs: '', url: '' },
     {
@@ -203,7 +285,7 @@ export const useAdmin = () => {
   ]
 
   // ── Published forms ──
-  const publishedForms = useState<any[]>('publishedForms', () => [])
+  const publishedForms = useState<UiForm[]>('publishedForms', () => [])
 
   const filteredPublishedForms = computed(() =>
     publishedForms.value.filter((form) => {
@@ -228,7 +310,7 @@ export const useAdmin = () => {
 
   const loadPublishedForms = async () => {
     try {
-      const forms = await callFormApi<any[]>('GET', {
+      const forms = await callFormApi<RawApiRecord[]>('GET', {
         action: 'listForms',
         weeklyDate: historyWeekStart.value || undefined,
       })
@@ -293,6 +375,7 @@ export const useAdmin = () => {
   const onDrop = (_e: DragEvent, index: number) => {
     if (draggedIdx.value === null) return
     const dragged = questions.value[draggedIdx.value]
+    if (!dragged) return
     questions.value.splice(draggedIdx.value, 1)
     questions.value.splice(index, 0, dragged)
     draggedIdx.value = null
@@ -300,7 +383,7 @@ export const useAdmin = () => {
 
   // ── CRUD ──
   const addQuestion = (type: string) => {
-    const q: any = { id: Date.now(), type, text: '', textEs: '', reference: '', referenceEs: '', url: '' }
+    const q: UiQuestion = { id: Date.now(), type, text: '', textEs: '', reference: '', referenceEs: '', url: '' }
     if (type === 'mcq') {
       q.choices = [
         { text: '', correct: true },
@@ -343,12 +426,13 @@ export const useAdmin = () => {
         const existingForm = publishedForms.value.find((form) => Number(form.id) === Number(editingFormId.value))
         const existingComponentIds = new Set<number>(
           (existingForm?.questions ?? [])
-            .map((question: any) => Number(question.id))
+            .map((question: UiQuestion) => Number(question.id))
             .filter((questionId: number) => Number.isInteger(questionId) && questionId > 0)
         )
 
         for (let index = 0; index < questions.value.length; index++) {
           const question = questions.value[index]
+          if (!question) continue
           const numericQuestionId = Number(question.id)
           const isExistingComponent = Number.isInteger(numericQuestionId) && existingComponentIds.has(numericQuestionId)
 
@@ -392,7 +476,7 @@ export const useAdmin = () => {
           if (!extraStartDate) continue
           extraStartDate.setDate(extraStartDate.getDate() + dayIdx)
 
-          const createdFormResponse = await callFormApi<any>('POST', {}, {
+          const createdFormResponse = await callFormApi<FormApiCreateResponse>('POST', {}, {
             action: 'createForm',
             startDate: formatYmdLocal(extraStartDate),
             published: true,
@@ -404,6 +488,7 @@ export const useAdmin = () => {
 
           for (let index = 0; index < questions.value.length; index++) {
             const question = questions.value[index]
+            if (!question) continue
             await callFormApi('POST', {}, {
               action: 'createComponent',
               form: createdForm.id,
@@ -436,7 +521,7 @@ export const useAdmin = () => {
 
         startDate.setDate(startDate.getDate() + dayIndex)
 
-        const createdFormResponse = await callFormApi<any>('POST', {}, {
+        const createdFormResponse = await callFormApi<FormApiCreateResponse>('POST', {}, {
           action: 'createForm',
           startDate: formatYmdLocal(startDate),
           published: true,
@@ -451,6 +536,7 @@ export const useAdmin = () => {
 
         for (let index = 0; index < questions.value.length; index++) {
           const question = questions.value[index]
+          if (!question) continue
 
           await callFormApi('POST', {}, {
             action: 'createComponent',
@@ -471,7 +557,7 @@ export const useAdmin = () => {
     }
   }
 
-  const editPublishedForm = (form: any) => {
+  const editPublishedForm = (form: UiForm) => {
     formTitle.value = form.title
     formWeekStart.value = form.weekStart || formWeekStart.value
     formDays.value = [form.day || 'Monday']
@@ -481,16 +567,16 @@ export const useAdmin = () => {
     navigateTo('/admin/builder')
   }
 
-  const toggleFormPublish = (form: any) => {
+  const toggleFormPublish = (form: UiForm) => {
     form.status = form.status === 'Active' ? 'Unpublished' : 'Active'
   }
 
-  const viewFormDetails = (form: any) => {
+  const viewFormDetails = (form: UiForm) => {
     selectedFormDetails.value = form
   }
 
   // ── Students / Progress ──
-  const students = useState<any[]>('adminStudents', () => [
+  const students = useState<UiStudent[]>('adminStudents', () => [
     { id: 1, name: 'Aiden Smith', initials: 'AS', email: 'aiden@school.edu', tickets: 12, streak: 4, lastActive: '2 hours ago' },
     { id: 2, name: 'Nevin Kumar', initials: 'NK', email: 'nevin@school.edu', tickets: 14, streak: 5, lastActive: 'Just now' },
     { id: 3, name: 'Swarna Jay', initials: 'SJ', email: 'swarna@school.edu', tickets: 8, streak: 2, lastActive: 'Yesterday' },
@@ -516,7 +602,7 @@ export const useAdmin = () => {
   // ── Announcements ──
   const announcementSubTab = useState<'creation' | 'history'>('announcementSubTab', () => 'creation')
 
-  const announcements = useState<any[]>('announcements', () => [
+  const announcements = useState<UiAnnouncement[]>('announcements', () => [
     { id: 1, title: 'Summer Reading Challenge!', content: 'Log 20 books this month to win a Super Sage badge!', icon: '🌟', startDate: '2026-03-01', endDate: '2026-03-31', weekStart: '2026-03-02', day: 'Monday' },
     { id: 2, title: 'New Badges Available', content: 'Check the shop for new limited edition themes.', icon: '🎉', startDate: '2026-03-05', endDate: '', weekStart: '2026-03-02', day: 'Thursday' },
     { id: 3, title: 'Friday Game Night', content: 'Join us in the library for board games and snacks!', icon: '🎲', startDate: '2026-03-06', endDate: '', weekStart: '2026-03-02', day: 'Friday' },
@@ -524,9 +610,9 @@ export const useAdmin = () => {
     { id: 5, title: 'Author Visit', content: 'Virtual session this Wednesday at 10 AM.', icon: '✍️', startDate: '2026-03-11', endDate: '', weekStart: '2026-03-09', day: 'Wednesday' },
   ])
 
-  const newAnnouncement = useState<any>('newAnnouncement', () => ({
+  const newAnnouncement = useState<NewAnnouncement>('newAnnouncement', () => ({
     title: '', content: '', icon: '🌟',
-    startDate: new Date().toISOString().split('T')[0],
+    startDate: new Date().toISOString().split('T')[0] || '',
     endDate: '', weekStart: monStr, day: 'Monday',
   }))
 
@@ -538,7 +624,7 @@ export const useAdmin = () => {
     )
   )
 
-  const isAnnouncementActive = (ann: any): boolean => {
+  const isAnnouncementActive = (ann: UiAnnouncement): boolean => {
     const now = new Date().toISOString().split('T')[0]
     if (!now) return false // in case of invalid date
     if (ann.startDate > now) return false
@@ -552,13 +638,13 @@ export const useAdmin = () => {
     announcements.value.push({ id: Date.now(), ...JSON.parse(JSON.stringify(na)) })
     newAnnouncement.value = {
       title: '', content: '', icon: '🌟',
-      startDate: new Date().toISOString().split('T')[0],
+      startDate: new Date().toISOString().split('T')[0] || '',
       endDate: '', weekStart: monStr, day: 'Monday',
     }
   }
 
   const deleteAnnouncement = (id: number) => {
-    announcements.value = announcements.value.filter((a: any) => a.id !== id)
+    announcements.value = announcements.value.filter((a) => a.id !== id)
   }
 
   return {

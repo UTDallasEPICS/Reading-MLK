@@ -9,7 +9,9 @@ const { tickets, completedFormIds, logFormSubmission, logSubmissionResponse } = 
 function toLocalDate(dateStr: string): Date {
   //extract the YYYY-MM-DD
   const ymd = dateStr.split('T')[0]
+  if (!ymd) return new Date()
   const [y, m, d] = ymd.split('-').map(Number)
+  if (y === undefined || m === undefined || d === undefined) return new Date()
   return new Date(y, m - 1, d)
 }
 
@@ -179,10 +181,14 @@ async function submitChallenge() {
 
 function onTicketDragStart(e: DragEvent) { e.dataTransfer?.setData('text/plain', 'ticket') }
 function onTicketDrop() { ticketOverBox.value = false; ticketDropped.value = true }
-function onTicketTouchStart(e: TouchEvent) { touchStartY = e.touches[0].clientY }
+function onTicketTouchStart(e: TouchEvent) { 
+  const t = e.touches[0]
+  if (t) touchStartY = t.clientY 
+}
 function onTicketTouchMove(e: TouchEvent) {
   e.preventDefault()
   const t  = e.touches[0]
+  if (!t) return
   const dy = t.clientY - touchStartY
   ticketStyle.value = { transform: `translate(-50%, ${dy}px)` }
   const box = document.getElementById('raffle-box')

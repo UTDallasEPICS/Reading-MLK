@@ -118,7 +118,7 @@ async function loadHistory () {
   historyError.value = null
   try {
     // $fetch is Nuxt's HTTP utility (wraps native fetch with nice error handling).
-    allAnnouncements.value = await $fetch('/api/announcement')
+    allAnnouncements.value = await $fetch<any[]>('/api/announcement')
   } catch (e: any) {
     //Capture the error message; fall back to a generic string if none exists
     historyError.value = e?.message ?? 'Failed to load announcements.'
@@ -442,8 +442,7 @@ async function postAnnouncement () {
                           {{ fmtDate(ann.postDate) }}{{ ann.expiryDate ? ' → ' + fmtDate(ann.expiryDate) : ' (Ongoing)' }}
                         </span>
 
-                        <!-- Delete button -->
-                             announcement's database integer ID. The icon-only
+                        <!-- Delete button: announcement's database integer ID. The icon-only
                              button is intentionally subtle (gray) until hovered
                              (red) to prevent accidental clicks. A confirm() dialog
                              inside deleteAnnouncement() provides a second safety
