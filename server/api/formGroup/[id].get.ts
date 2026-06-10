@@ -8,10 +8,25 @@ import { formGroupInclude } from '../../utils/prismaInclusions'
 
 export default defineEventHandler(async (event) => {
   //add auth
-  const groupId = z.number().safeParse(event.context.params?.id).data
+  const idParam = getRouterParam(event, 'id')
+
+  if (!idParam) {
+    throw createError({
+      statusCode: 400,
+      message: "Missing FormGroup id"
+    })
+  }
+  const groupId = z.coerce.number().safeParse(idParam)
+
+  if (!groupId.success) {
+    throw createError({
+      statusCode: 400,
+      message: groupId.error.message
+    })
+  }
 
   const group = await prisma.formGroup.findUnique({
-    where: { id: groupId as number },
+    where: { id: groupId.data as number },
     include: formGroupInclude,
   })
 

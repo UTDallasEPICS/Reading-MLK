@@ -7,25 +7,32 @@ import z from 'zod'
 export default defineEventHandler(async (event) => {
   //session check needed
   const query = getQuery(event)
-  const date = z.date().safeParse(query.date).data
-
-  if (!date) {
+  
+  if (!query.date) {
     throw createError({
       statusCode: 400,
-      message: 'Invalid or Missing Date',
+      message: 'Missing Date',
+    })
+  }
+
+  const date = z.coerce.date().safeParse(query.date)
+
+  if (!date.success) {
+    throw createError({
+      statusCode: 400,
+      message: date.error.message
     })
   }
 
   return await prisma.formGroup.findFirst({
     where: {
-      startDate: { lte: date },
+      startDate: { lte: date.data },
       OR: [
         { endDate: null },
-        { endDate: { gte: date } },
+        { endDate: { gte: date.data } },
       ],
     },
     orderBy: [{ startDate: 'desc' }, { id: 'desc' }],
-    select: { id: true, startDate: true, endDate: true },
+    select: { id: true, startDate: true, endDate: true }
   })
-
 })

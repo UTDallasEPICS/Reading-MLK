@@ -241,23 +241,20 @@ export const useAdmin = () => {
     const fallbackWeekEnd = dayjs.utc(fallbackWeekStart).add(6, 'day').format('YYYY-MM-DD')
 
     try {
-      const result = await callFormApi<{
-        found: boolean
-        startDate: string | null
-        endDate: string | null
-      }>('GET', {
-        action: 'resolveFormGroupRangeByDate',
-        weeklyDate: historyWeekStart.value,
+      const result = await useFetch('/api/formGroup/matchByDate', {
+        method: 'GET',
+        query: {date: historyWeekStart.value}
       })
 
-      if (!result?.found) {
+      if (!result.data.value) {
         historyGroupStartDate.value = fallbackWeekStart
         historyGroupEndDate.value = fallbackWeekEnd
         return
       }
+      result.data.value
 
-      historyGroupStartDate.value = parseDateToYmd(result.startDate || '')
-      historyGroupEndDate.value = parseDateToYmd(result.endDate || '') || fallbackWeekEnd
+      historyGroupStartDate.value = parseDateToYmd(result.data.value.startDate || '')
+      historyGroupEndDate.value = parseDateToYmd(result.data.value.endDate || '') || fallbackWeekEnd
     } catch (error) {
       console.error('Failed to resolve form group range', error)
       historyGroupStartDate.value = fallbackWeekStart

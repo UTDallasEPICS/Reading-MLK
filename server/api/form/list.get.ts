@@ -7,15 +7,16 @@ import { formInclude } from '../../utils/prismaInclusions'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
+
   //add requireSessions
-  const formGroupId = z.number().safeParse(query.formGroupId).data
-  const weeklyDate = z.date().safeParse(query.weeklyDate).data
+  const formGroupId = z.coerce.number().safeParse(query.formGroupId).data
+  const weeklyDate = z.coerce.date().safeParse(query.weeklyDate).data
   
   const where: Prisma.FormWhereInput = {}
 
   //expecting 0/1 for f/t
   if (query.published) {
-    const pre = z.number().safeParse(query.published)
+    const pre = z.coerce.number().safeParse(query.published)
     if (!pre.success) { throw createError({ statusCode: 400, message: 'Invalid published value' })}
     const published = z.coerce.boolean().safeParse(pre.data).data
     where.published = published

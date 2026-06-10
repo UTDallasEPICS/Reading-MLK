@@ -24,24 +24,28 @@ export const useCurrentFormGroup = () => {
         FormGroup.value.activeFormGroup = activeFg
 
         try {
-          const formsAPIResponse = await $fetch('/api/form/list', {
+          const formsAPIResponse = await useFetch('/api/form/list', {
+            method: 'GET',
             query: { published: 1, formGroup: activeFg.id }
           })
-
+          
           FormGroup.value.formComponents = {}
-
-          FormGroup.value.forms = formsAPIResponse.map((form) => {
-            const {Components, FormGroup: _removedFormGroupField, startDate, endDate, ...restOfForm} = form
+          FormGroup.value.forms = []
+          
+          if (formsAPIResponse.data.value) {
+            FormGroup.value.formComponents = {}
+            FormGroup.value.forms = formsAPIResponse.data.value.map((form) => {
+              const {Components, FormGroup: _removedFormGroupField, startDate, endDate, ...restOfForm} = form
            
-            FormGroup.value.formComponents[form.id] = Components ?? []
+              FormGroup.value.formComponents[form.id] = Components ?? []
 
-            return {
-              ...restOfForm,
-              startDate: dayjs(startDate).toDate(),
-              endDate: endDate ? dayjs(endDate).toDate() : null,
-            }
-          })
-
+              return {
+                ...restOfForm,
+                startDate: dayjs(startDate).toDate(),
+                endDate: endDate ? dayjs(endDate).toDate() : null,
+              }
+            })
+          }
         } catch (error) {
           console.error('Failed to load forms for active form group:', error)
           FormGroup.value.forms = []

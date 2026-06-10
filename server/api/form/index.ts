@@ -5,7 +5,6 @@ import { getQuery, setResponseStatus, type H3Event } from 'h3'
 import {z } from 'zod'
 
 type ActionName =
-  | 'resolveFormGroupRangeByDate'
   | 'getFormGroupSubmissions'
   | 'createFormGroup'
   | 'createForm'
@@ -191,27 +190,6 @@ export default defineEventHandler(async (event) => {
 
   if (method === 'GET') {
     const selectedAction = action ?? 'listFormGroups'
-
-    if (selectedAction === 'resolveFormGroupRangeByDate') {
-      const weeklyDate = toDate(getQuery(event).weeklyDate, 'weeklyDate') as Date
-      const matchingGroup = await findMatchingFormGroupByDate(weeklyDate)
-
-      if (!matchingGroup) {
-        return {
-          found: false,
-          formGroupId: null,
-          startDate: null,
-          endDate: null,
-        }
-      }
-
-      return {
-        found: true,
-        formGroupId: matchingGroup.id,
-        startDate: formatIsoDate(matchingGroup.startDate),
-        endDate: formatIsoDate(matchingGroup.endDate),
-      }
-    }
 
     if (selectedAction === 'getFormGroupSubmissions') {
       const formGroupId = toInt(getQuery(event).formGroupId, 'formGroupId')
