@@ -12,7 +12,7 @@ export default eventHandler(async (event) => {
 
   if (!body.success) {throw createError({ statusCode: 400, message: body.error.message })}
 
-  const id = z.coerce.number().safeParse(event.context.params?.id)
+  const id = z.number().safeParse(event.context.params?.id)
 
   if (!id.success || !id.data) {throw createError({ statusCode: 400, message: 'Missing or Invalid form ID'})}
   

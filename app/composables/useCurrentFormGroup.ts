@@ -1,4 +1,5 @@
 import type { FormGroup, Form, FormComponent } from '~~/prisma/generated/client'
+import dayjs from 'dayjs'
 
 export type CurrentFormGroupState = {
   activeFormGroup: FormGroup | null
@@ -13,41 +14,34 @@ export const useCurrentFormGroup = () => {
     formComponents: {}
   }))
 
-  const loadFormComponents = async (formId: number) => {
-    try {
-      const componentsAPIResponse = await $fetch<FormComponent[]>('/api/formComponent', {
-        query: { form: formId }
-      })
-      FormGroup.value.formComponents[formId] = Array.isArray(componentsAPIResponse) ? componentsAPIResponse : []
-    } catch (error) {
-      console.error(`Failed to load form components for form ${formId}:`, error)
-      FormGroup.value.formComponents[formId] = []
-    }
-  }
-
   const loadActiveFormGroup = async () => {
     try {
       const formGroupAPIResponse = await $fetch<FormGroup | FormGroup[]>('/api/formGroup?active=true')
 
-      // Handle if the API returns an array or single item
       const activeFg = Array.isArray(formGroupAPIResponse) ? formGroupAPIResponse[0] : formGroupAPIResponse
 
       if (activeFg) {
         FormGroup.value.activeFormGroup = activeFg
 
         try {
-          //switch to form list handler with published = true
-          const formsAPIResponse = await $fetch<Form[]>('/api/form', {
-            query: { action: 'getOnlyActiveFormsinGroup', formGroup: activeFg.id }
+          const formsAPIResponse = await $fetch('/api/form/list', {
+            query: { published: 1, formGroup: activeFg.id }
           })
 
-          FormGroup.value.forms = Array.isArray(formsAPIResponse) ? formsAPIResponse : []
-
-          // Load form components for each form in parallel
           FormGroup.value.formComponents = {}
-          await Promise.all(
-            FormGroup.value.forms.map(form => loadFormComponents(form.id))
-          )
+
+          FormGroup.value.forms = formsAPIResponse.map((form) => {
+            const {Components, FormGroup: _removedFormGroupField, startDate, endDate, ...restOfForm} = form
+           
+            FormGroup.value.formComponents[form.id] = Components ?? []
+
+            return {
+              ...restOfForm,
+              startDate: dayjs(startDate).toDate(),
+              endDate: endDate ? dayjs(endDate).toDate() : null,
+            }
+          })
+
         } catch (error) {
           console.error('Failed to load forms for active form group:', error)
           FormGroup.value.forms = []
@@ -71,7 +65,6 @@ export const useCurrentFormGroup = () => {
   return {
     FormGroup,
     loadActiveFormGroup,
-    loadFormComponents,
     totalFormsInGroup
   }
 }

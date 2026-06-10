@@ -5,9 +5,6 @@ import { getQuery, setResponseStatus, type H3Event } from 'h3'
 import {z } from 'zod'
 
 type ActionName =
-  | 'listFormGroups'
-  | 'getOnlyActiveFormsinGroup'
-  | 'getFormGroup'
   | 'resolveFormGroupRangeByDate'
   | 'getFormGroupSubmissions'
   | 'createFormGroup'
@@ -195,44 +192,6 @@ export default defineEventHandler(async (event) => {
   if (method === 'GET') {
     const selectedAction = action ?? 'listFormGroups'
 
-    if (selectedAction === 'listFormGroups') {
-      const groups = await prisma.formGroup.findMany({
-        orderBy: [{ startDate: 'desc' }, { id: 'desc' }],
-        include: formGroupInclude,
-      })
-
-      return groups.map((group) => ({
-        id: group.id,
-        startDate: formatIsoDate(group.startDate),
-        endDate: formatIsoDate(group.endDate),
-        raffleWinner: group.raffleWinner,
-        raffleWinnerStudent: group.RaffleWinner,
-        forms: group.Forms.map((form) => mapForm(form, group.startDate)),
-      }))
-    }
-
-    if (selectedAction === 'getFormGroup') {
-      const groupId = toInt(getQuery(event).id, 'id')
-
-      const group = await prisma.formGroup.findUnique({
-        where: { id: groupId as number },
-        include: formGroupInclude,
-      })
-
-      if (!group) {
-        throw createError({ statusCode: 404, statusMessage: 'Form group not found' })
-      }
-
-      return {
-        id: group.id,
-        startDate: formatIsoDate(group.startDate),
-        endDate: formatIsoDate(group.endDate),
-        raffleWinner: group.raffleWinner,
-        raffleWinnerStudent: group.RaffleWinner,
-        forms: group.Forms.map((form) => mapForm(form, group.startDate)),
-      }
-    }
-
     if (selectedAction === 'resolveFormGroupRangeByDate') {
       const weeklyDate = toDate(getQuery(event).weeklyDate, 'weeklyDate') as Date
       const matchingGroup = await findMatchingFormGroupByDate(weeklyDate)
@@ -288,21 +247,6 @@ export default defineEventHandler(async (event) => {
         totalEntries: submissions.length,
       }
     }
-
-    if (selectedAction === 'getOnlyActiveFormsinGroup') {
-      const query = getQuery(event)
-      const where: Prisma.FormWhereInput = {}
-
-      if (query.formGroup) { where.formGroup = Number(query.formGroup) }
-
-      if (query.published) { where.published = z.coerce.boolean().parse(query.published) }
-
-      return await prisma.form.findMany({
-        where,
-        orderBy: [{ formGroup: 'asc' }, { order: 'asc' }, { id: 'asc' }],
-      })
-    }
-
 
     throw createError({ statusCode: 400, statusMessage: 'Unknown action' })
   }

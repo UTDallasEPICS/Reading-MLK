@@ -7,7 +7,7 @@ import z from 'zod'
 export default defineEventHandler(async (event) => {
   //session check needed
   const query = getQuery(event)
-  const date = z.coerce.date().safeParse(query.date).data
+  const date = z.date().safeParse(query.date).data
 
   if (!date) {
     throw createError({
