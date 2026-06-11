@@ -8,13 +8,21 @@ import { z } from 'zod'
 export default eventHandler(async (event) => {
 
   //require sessions
+  const idParam = getRouterParam(event, 'id')
+  if (!idParam) {
+    throw createError({
+      statusCode: 400,
+      message: "Missing ID"
+    })
+  }
+
   const body = formUpdateSchema.safeParse(await readBody(event))
 
   if (!body.success) {throw createError({ statusCode: 400, message: body.error.message })}
 
-  const id = z.number().safeParse(event.context.params?.id)
+  const id = z.coerce.number().safeParse(idParam)
 
-  if (!id.success || !id.data) {throw createError({ statusCode: 400, message: 'Missing or Invalid form ID'})}
+  if (!id.success) {throw createError({ statusCode: 400, message: 'Invalid form ID'})}
   
   return await prisma.form.update({
     where: { id: id.data },

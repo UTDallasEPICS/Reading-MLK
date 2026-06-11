@@ -45,6 +45,12 @@ export const formGroupCreateSchema = z.object({
   endDate: z.coerce.date().nullish(),
 })
 
+export const formGroupUpdateSchema = z.object({
+  startDate: z.coerce.date().optional(),
+  endDate: z.coerce.date().nullish(),
+  raffleWinner: z.int().optional()
+})
+
 export const formCreateSchema = z.object({
   order: z.int().nullish(),
   startDate: z.coerce.date(), 
@@ -76,6 +82,10 @@ export const formComponentCreateSchema = z.object({
   }).nullish()
 })
 
+export const formComponentUpdateSchema = z.object({
+
+})
+
 export const formSubmissionCreateSchema = z.object({
   student: z.int(),
   form: z.int(),
@@ -97,6 +107,8 @@ export type AnnouncementCreate = z.infer<typeof announcementCreateSchema>
 export type FormCreate = z.infer<typeof formCreateSchema>
 export type FormUpdate = z.infer<typeof formUpdateSchema>
 export type FormGroupCreate = z.infer<typeof formGroupCreateSchema>
+export type FormGroupUpdate = z.infer<typeof formGroupUpdateSchema>
 export type FormComponentCreate = z.infer<typeof formComponentCreateSchema>
+export type FormComponentUpdate = z.infer<typeof formComponentUpdateSchema>
 export type FormSubmissionCreate = z.infer<typeof formSubmissionCreateSchema>
 export type SubmissionResponseCreate = z.infer<typeof submissionResponseCreateSchema>
