@@ -28,11 +28,30 @@ function embedURL(rawUrl: string) {
   return rawUrl
 }
 
-const firstVideoUrl = computed(() => {
-  const videoComponent = currentFormComponentsWithVideo.value.find(c => (c as any).questionType === 'video')
-  const rawUrl = (videoComponent as any)?.questionText || null
+const firstVideoComponent = computed(() => {
+  return currentFormComponentsWithVideo.value.find(c => (c as any).questionType === 'video') as any || null
+})
 
+const firstVideoUrl = computed(() => {
+  const vc = firstVideoComponent.value
+  if (!vc) return null
+  const rawUrl = vc.questionOptions?.url || vc.questionText || null
   return rawUrl ? embedURL(rawUrl) : null
+})
+
+const firstVideoContext = computed(() => {
+  const vc = firstVideoComponent.value
+  if (!vc) return ''
+  // If questionText looks like a plain URL or "Video: url", it's not context text
+  const text = vc.questionText || ''
+  if (!text || text.startsWith('Video:') || text.startsWith('http')) return ''
+  return text
+})
+
+const firstVideoContextEs = computed(() => {
+  const vc = firstVideoComponent.value
+  if (!vc) return ''
+  return vc.questionOptions?.textEs || ''
 })
 
 const currentFormComponents = computed(() => {
@@ -312,6 +331,15 @@ function getBadgeClass(type: string) {
           <div class="premium-card p-5 bg-white/60 text-center space-y-3">
             <h3 class="font-heading text-xl font-bold" style="color:var(--brand-dark)">📺 Let's read a story together!</h3>
             <p class="text-gray-500 font-medium text-sm">Use this provided resource, then we'll do the form.</p>
+            <div v-if="firstVideoContext" class="p-5 rounded-2xl bg-amber-50 border border-amber-100 space-y-2 text-left max-w-2xl mx-auto">
+              <p class="text-xl font-heading font-bold leading-snug" style="color:var(--brand-dark)">{{ firstVideoContext }}</p>
+              <p
+                v-if="settings.language === 'es' && firstVideoContextEs"
+                class="text-base italic text-gray-500 leading-snug border-t border-amber-200 pt-2"
+              >
+                {{ firstVideoContextEs }}
+              </p>
+            </div>
             <div class="max-w-2xl mx-auto aspect-video w-full rounded-2xl overflow-hidden shadow-lg border-4 border-white">
               <iframe v-if="firstVideoUrl" class="w-full h-full" :src="firstVideoUrl" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
             </div>
@@ -365,9 +393,19 @@ function getBadgeClass(type: string) {
                   </div>
 
                   <!-- Video -->
-                  <div v-else-if="currentComponent.questionType === 'video'"
-                    class="max-w-2xl mx-auto aspect-video w-full rounded-2xl overflow-hidden shadow-lg border-4 border-white">
-                    <iframe class="w-full h-full" :src="embedURL(currentComponent.questionText)" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                  <div v-else-if="currentComponent.questionType === 'video'" class="space-y-3">
+                    <div v-if="currentComponent.questionText && !currentComponent.questionText.startsWith('Video:') && !currentComponent.questionText.startsWith('http')" class="p-5 rounded-2xl bg-amber-50 border border-amber-100 space-y-2">
+                      <p class="text-xl font-heading font-bold leading-snug" style="color:var(--brand-dark)">{{ currentComponent.questionText }}</p>
+                      <p
+                        v-if="settings.language === 'es' && (currentComponent.questionOptions as any)?.textEs"
+                        class="text-base italic text-gray-500 leading-snug border-t border-amber-200 pt-2"
+                      >
+                        {{ (currentComponent.questionOptions as any).textEs }}
+                      </p>
+                    </div>
+                    <div class="max-w-2xl mx-auto aspect-video w-full rounded-2xl overflow-hidden shadow-lg border-4 border-white">
+                      <iframe class="w-full h-full" :src="embedURL((currentComponent.questionOptions as any)?.url || currentComponent.questionText)" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
                   </div>
 
                   <!-- Text / MCQ question -->
