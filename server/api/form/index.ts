@@ -5,8 +5,7 @@ import { getQuery, setResponseStatus, type H3Event } from 'h3'
 import {z } from 'zod'
 
 type ActionName =
-'deleteFormGroup'
-  | 'deleteComponent'
+'deleteComponent'
 
 const WEEKDAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
@@ -181,19 +180,6 @@ export default defineEventHandler(async (event) => {
   const action = getAction(event, body)
 
   if (method === 'DELETE') {
-    if (action === 'deleteFormGroup') {
-      const id = toInt(body?.id ?? getQuery(event).id, 'id')
-
-      await prisma.formGroup.delete({
-        where: { id: id as number },
-      })
-
-      return {
-        success: true,
-        message: 'Form group deleted',
-      }
-    }
-
     if (action === 'deleteComponent') {
       const id = toInt(body?.id ?? getQuery(event).id, 'id')
 
