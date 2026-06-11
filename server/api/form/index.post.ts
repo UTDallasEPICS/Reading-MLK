@@ -31,8 +31,8 @@ export default defineEventHandler (async (event) => {
 
   if (!requestedGroupExists) {
     throw createError({
-      statusCode: 400,
-      message: "FormGroup Does Not Exist"
+      statusCode: 404,
+      message: "FormGroup Not Found"
     })
   }
 

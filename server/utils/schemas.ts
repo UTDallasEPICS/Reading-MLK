@@ -73,7 +73,7 @@ export const formComponentCreateSchema = z.object({
   questionOptions: z.object({
     choices: z.array(z.object({text: z.string().min(1), correct: z.boolean()})).optional(),
     video: z.string().optional()
-  })
+  }).nullish()
 })
 
 export const formSubmissionCreateSchema = z.object({
