@@ -4,9 +4,6 @@ import { prisma } from '~~/server/utils/prisma'
 import { getQuery, setResponseStatus, type H3Event } from 'h3'
 import {z } from 'zod'
 
-type ActionName =
-'deleteComponent'
-
 const WEEKDAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
 const hasOwnField = (value: Record<string, unknown> | null, key: string) =>
@@ -174,27 +171,4 @@ const mapForm = (
   }
 }
 
-export default defineEventHandler(async (event) => {
-  const method = event.node.req.method ?? 'GET'
-  const body = method === 'GET' ? null : ((await readBody(event).catch(() => null)) as Record<string, unknown> | null)
-  const action = getAction(event, body)
-
-  if (method === 'DELETE') {
-    if (action === 'deleteComponent') {
-      const id = toInt(body?.id ?? getQuery(event).id, 'id')
-
-      await prisma.formComponent.delete({
-        where: { id: id as number },
-      })
-
-      return {
-        success: true,
-        message: 'Form component deleted',
-      }
-    }
-
-    throw createError({ statusCode: 400, statusMessage: 'Unknown action' })
-  }
-
-  throw createError({ statusCode: 405, statusMessage: 'Method not allowed' })
-})
+export default defineEventHandler(async (event) => {})
