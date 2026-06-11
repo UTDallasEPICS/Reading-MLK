@@ -2,6 +2,7 @@
 // Place this at: app/composables/useAdmin.ts
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
+import type { Form } from '~~/prisma/generated/client'
 
 dayjs.extend(utc)
 export const useAdmin = () => {
@@ -392,15 +393,16 @@ export const useAdmin = () => {
         }
 
         startDate.setDate(startDate.getDate() + dayIndex)
-
-          const createdFormResponse = await callFormApi<any>('POST', {}, {
-            action: 'createForm',
-            startDate: formatYmdLocal(startDate),
-            published: true,
-            title: formTitle.value,
+          const createdFormResponse: any = await useFetch('api/form', {
+            method: 'POST',
+            body: {
+              startDate: dayjs(startDate).toISOString(),
+              published: true,
+              title: formTitle.value,
+            }
           })
 
-        const createdForm = createdFormResponse?.data
+        const createdForm: Form = createdFormResponse?.data.value
 
         if (!createdForm?.id) {
           continue

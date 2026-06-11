@@ -5,7 +5,6 @@ import { getQuery, setResponseStatus, type H3Event } from 'h3'
 import {z } from 'zod'
 
 type ActionName =
-  | 'createForm'
   | 'createComponent'
   | 'updateFormGroup'
   | 'updateComponent'
@@ -185,63 +184,6 @@ export default defineEventHandler(async (event) => {
   const action = getAction(event, body)
 
   if (method === 'POST') {
-
-    if (action === 'createForm') {
-      const startDate = toDate(body?.startDate, 'startDate') as Date
-      const endDate = hasOwnField(body, 'endDate') ? toDate(body?.endDate, 'endDate', false) : null
-      const published = hasOwnField(body, 'published') ? toBoolean(body?.published) : false
-      const title = hasOwnField(body, 'title') ? String(body?.title ?? '').trim() || null : null
-      const explicitOrder = hasOwnField(body, 'order') ? toInt(body?.order, 'order', false) : null
-      const requestedGroupId = hasOwnField(body, 'formGroup')
-        ? toInt(body?.formGroup, 'formGroup', false)
-        : null
-
-      let resolvedFormGroupId: number
-
-      if (requestedGroupId !== null) {
-        const requestedGroup = await prisma.formGroup.findUnique({
-          where: { id: requestedGroupId },
-          select: { id: true },
-        })
-
-        resolvedFormGroupId = requestedGroup
-          ? requestedGroup.id
-          : await findOrCreateWeeklyFormGroup(startDate)
-      } else {
-        resolvedFormGroupId = await findOrCreateWeeklyFormGroup(startDate)
-      }
-
-      const existingMax = await prisma.form.aggregate({
-        where: { formGroup: resolvedFormGroupId },
-        _max: { order: true },
-      })
-
-      const createData: Record<string, unknown> = {
-          formGroup: resolvedFormGroupId,
-          startDate,
-          endDate,
-          published,
-          order: explicitOrder ?? ((existingMax._max.order ?? -1) + 1),
-          author: admin?.id ?? null,
-      }
-
-      if (title) {
-        createData.title = title
-      }
-
-      const created = await prisma.form.create({
-        data: createData as Prisma.FormUncheckedCreateInput,
-        include: formInclude,
-      })
-
-      setResponseStatus(event, 201)
-
-      return {
-        success: true,
-        message: 'Form created',
-        data: mapForm(created, created.FormGroup.startDate),
-      }
-    }
 
     if (action === 'createComponent') {
       const form = toInt(body?.form, 'form')
