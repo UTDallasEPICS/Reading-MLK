@@ -5,8 +5,6 @@ import { getQuery, setResponseStatus, type H3Event } from 'h3'
 import {z } from 'zod'
 
 type ActionName =
-  | 'getFormGroupSubmissions'
-  | 'createFormGroup'
   | 'createForm'
   | 'createComponent'
   | 'updateFormGroup'
@@ -186,91 +184,7 @@ export default defineEventHandler(async (event) => {
   const body = method === 'GET' ? null : ((await readBody(event).catch(() => null)) as Record<string, unknown> | null)
   const action = getAction(event, body)
 
-  if (method !== 'GET' && !action) { throw createError({ statusCode: 400, statusMessage: 'Missing action' }) }
-
-  if (method === 'GET') {
-    const selectedAction = action ?? 'listFormGroups'
-
-    if (selectedAction === 'getFormGroupSubmissions') {
-      const formGroupId = toInt(getQuery(event).formGroupId, 'formGroupId')
-
-      const forms = await prisma.form.findMany({
-        where: { formGroup: formGroupId as number },
-        select: { id: true },
-      })
-
-      const formIds = forms.map((f) => f.id)
-
-      if (formIds.length === 0) {
-        return { submissions: [], totalEntries: 0 }
-      }
-
-      const submissions = await prisma.formSubmission.findMany({
-        where: { form: { in: formIds } },
-        include: {
-          Student: true,
-          Form: { select: { id: true, title: true, startDate: true } },
-        },
-      })
-
-      return {
-        submissions: submissions.map((sub) => ({
-          id: sub.id,
-          studentId: sub.student,
-          studentName: sub.Student.name,
-          formId: sub.form,
-          formTitle: sub.Form.title ?? `Form ${sub.Form.id}`,
-          submissionDate: sub.submissionDate.toISOString(),
-        })),
-        totalEntries: submissions.length,
-      }
-    }
-
-    throw createError({ statusCode: 400, statusMessage: 'Unknown action' })
-  }
-
-
   if (method === 'POST') {
-    if (action === 'createFormGroup') {
-      const startDate = toDate(body?.startDate, 'startDate')
-      const endDate = hasOwnField(body, 'endDate') ? toDate(body?.endDate, 'endDate', false) : null
-      const raffleWinner = hasOwnField(body, 'raffleWinner') ? toInt(body?.raffleWinner, 'raffleWinner', false) : null
-
-      if (raffleWinner !== null) {
-        const student = await prisma.student.findUnique({
-          where: { id: raffleWinner },
-          select: { id: true },
-        })
-
-        if (!student) {
-          throw createError({ statusCode: 404, statusMessage: 'Raffle winner student not found' })
-        }
-      }
-
-      const created = await prisma.formGroup.create({
-        data: {
-          startDate: startDate as Date,
-          endDate,
-          raffleWinner,
-        },
-        include: formGroupInclude,
-      })
-
-      setResponseStatus(event, 201)
-
-      return {
-        success: true,
-        message: 'Form group created',
-        data: {
-          id: created.id,
-          startDate: formatIsoDate(created.startDate),
-          endDate: formatIsoDate(created.endDate),
-          raffleWinner: created.raffleWinner,
-          raffleWinnerStudent: created.RaffleWinner,
-          forms: created.Forms.map((form) => mapForm(form, created.startDate)),
-        },
-      }
-    }
 
     if (action === 'createForm') {
       const startDate = toDate(body?.startDate, 'startDate') as Date

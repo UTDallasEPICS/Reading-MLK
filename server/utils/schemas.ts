@@ -42,15 +42,15 @@ export const announcementCreateSchema = z.object({
 
 export const formGroupCreateSchema = z.object({
   startDate: z.coerce.date(),
-  endDate: z.coerce.date(),
+  endDate: z.coerce.date().nullish(),
 })
 
 export const formCreateSchema = z.object({
-  order: z.int(),
+  order: z.int().nullish(),
   startDate: z.coerce.date(), 
-  endDate: z.coerce.date(),
+  endDate: z.coerce.date().nullish(),
   published: z.boolean(),
-  author: z.cuid2(),
+  author: z.cuid2().nullish(),
   formGroup: z.int(),
   title: z.string().min(1).max(250),
 })
