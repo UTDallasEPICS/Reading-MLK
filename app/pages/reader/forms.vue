@@ -35,17 +35,14 @@ const firstVideoComponent = computed(() => {
 const firstVideoUrl = computed(() => {
   const vc = firstVideoComponent.value
   if (!vc) return null
-  const rawUrl = vc.questionOptions?.url || vc.questionText || null
+  const rawUrl = vc.questionOptions?.url || null
   return rawUrl ? embedURL(rawUrl) : null
 })
 
 const firstVideoContext = computed(() => {
   const vc = firstVideoComponent.value
   if (!vc) return ''
-  // If questionText looks like a plain URL or "Video: url", it's not context text
-  const text = vc.questionText || ''
-  if (!text || text.startsWith('Video:') || text.startsWith('http')) return ''
-  return text
+  return vc.questionText || ''
 })
 
 const firstVideoContextEs = computed(() => {
@@ -394,7 +391,7 @@ function getBadgeClass(type: string) {
 
                   <!-- Video -->
                   <div v-else-if="currentComponent.questionType === 'video'" class="space-y-3">
-                    <div v-if="currentComponent.questionText && !currentComponent.questionText.startsWith('Video:') && !currentComponent.questionText.startsWith('http')" class="p-5 rounded-2xl bg-amber-50 border border-amber-100 space-y-2">
+                    <div v-if="currentComponent.questionText" class="p-5 rounded-2xl bg-amber-50 border border-amber-100 space-y-2">
                       <p class="text-xl font-heading font-bold leading-snug" style="color:var(--brand-dark)">{{ currentComponent.questionText }}</p>
                       <p
                         v-if="settings.language === 'es' && (currentComponent.questionOptions as any)?.textEs"
@@ -404,7 +401,7 @@ function getBadgeClass(type: string) {
                       </p>
                     </div>
                     <div class="max-w-2xl mx-auto aspect-video w-full rounded-2xl overflow-hidden shadow-lg border-4 border-white">
-                      <iframe class="w-full h-full" :src="embedURL((currentComponent.questionOptions as any)?.url || currentComponent.questionText)" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                      <iframe class="w-full h-full" :src="embedURL((currentComponent.questionOptions as any)?.url)" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                     </div>
                   </div>
 

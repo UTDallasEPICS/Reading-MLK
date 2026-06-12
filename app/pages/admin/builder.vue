@@ -313,11 +313,11 @@ onBeforeUnmount(() => {
             <div v-if="q.type === 'video'" class="space-y-4">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label class="field-label">Context Text (English)</label>
+                  <label class="field-label">Text (English)</label>
                   <textarea v-model="q.text" rows="3" placeholder="Provide context for the video..." class="textarea-field" data-builder-field="true" @keydown.enter.prevent="handleBuilderEnter" />
                 </div>
                 <div>
-                  <label class="field-label">Context Text (Spanish)</label>
+                  <label class="field-label">Text (Spanish)</label>
                   <textarea v-model="q.textEs" rows="3" placeholder="Proporcione contexto para el video..." class="textarea-field" data-builder-field="true" @keydown.enter.prevent="handleBuilderEnter" />
                 </div>
               </div>

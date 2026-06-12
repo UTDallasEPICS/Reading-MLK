@@ -73,10 +73,6 @@ export const useAdmin = () => {
       return question.reference.trim()
     }
 
-    if (typeof question.url === 'string' && question.url.trim()) {
-      return `Video: ${question.url.trim()}`
-    }
-
     return fallbackTitle || 'Untitled question'
   }
 
