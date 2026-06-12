@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Missing userId' })
   }
 
-  if (userId !== session.user.id && session.user.role !== 'admin') {
+  if (userId !== session.user.id) {
     throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
   }
 
@@ -38,9 +38,9 @@ export default defineEventHandler(async (event) => {
   const ext = path.extname(filePath).toLowerCase()
   const mime =
     ext === '.png' ? 'image/png' :
-    ext === '.jpg' || ext === '.jpeg' ? 'image/jpeg' :
-    ext === '.webp' ? 'image/webp' :
-    'application/octet-stream'
+      ext === '.jpg' || ext === '.jpeg' ? 'image/jpeg' :
+        ext === '.webp' ? 'image/webp' :
+          'application/octet-stream'
 
   setHeader(event, 'Content-Type', mime)
 
