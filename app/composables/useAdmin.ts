@@ -441,6 +441,8 @@ export const useAdmin = () => {
   }
 
   const toggleFormPublish = async (form: any) => {
+// "unpublished" = "nonactive"  b
+// a form being "published" is measured with True and False - boolean value
     form.status = form.status === 'Active' ? 'Unpublished' : 'Active'
     const newStatus = form.status === 'Active' ? true : false
 
