@@ -104,6 +104,8 @@ model Announcement {
   content     Json?
 
   Author Admin? @relation(fields: [author], references: [id], onDelete: SetNull)
+  @@index([postDate])
+  @@index([expiryDate])
 }
 
 model FormGroup {
@@ -114,6 +116,8 @@ model FormGroup {
 
   RaffleWinner Student? @relation(name: "RaffleWinner", fields: [raffleWinner], references: [id], onDelete: SetNull)
   Forms        Form[]
+  @@index([startDate])
+  @@index([endDate])
 }
 
 model Form {
@@ -167,6 +171,8 @@ model SubmissionResponse {
 
   FormSubmission FormSubmission @relation(fields: [submission], references: [id], onDelete: Cascade)
   FormComponent  FormComponent  @relation(fields: [formComponent], references: [id], onDelete: Cascade)
+  @@index(formComponent)
+  @@index(submission)
 }
 
 model ShopItem {
