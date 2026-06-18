@@ -20,6 +20,14 @@ onMounted(async () => {
   dataLoaded.value = true
 })
 
+//parse a date string (ISO or YYYY-MM-DD) into a local-midnight Date to avoid timezone shift when displaying weekday/day of month
+function toLocalDate(dateStr: string): Date {
+  //extract the YYYY-MM-DD
+  const ymd = dateStr.split('T')[0]
+  const [y, m, d] = ymd.split('-').map(Number)
+  return new Date(y, m - 1, d)
+}
+
 const stats = computed(() => ({
   xp: student.value ? student.value.exp : 0,
   tickets: tickets.value? tickets.value : 0,
@@ -303,14 +311,14 @@ function getBadgeClass(type: string) {
                     ? 'background:#f59e0b; color:white'
                     : 'background:rgba(224,96,77,0.1); color:var(--brand-indigo)'"
               >
-                <span class="text-[9px] uppercase leading-none">{{ new Date(form.startDate).toLocaleDateString('en-US', {weekday:'short'}) }}</span>
-                <span class="text-lg font-black leading-tight">{{ new Date(form.startDate).getDate() }}</span>
+                <span class="text-[9px] uppercase leading-none">{{ toLocalDate(form.startDate).toLocaleDateString('en-US', {weekday:'short'}) }}</span>
+                <span class="text-lg font-black leading-tight">{{ toLocalDate(form.startDate).getDate() }}</span>
               </div>
               <div>
                 <h4 class="font-heading text-lg font-bold" style="color:var(--brand-dark)">{{ form.title }}</h4>
                 <div class="flex items-center gap-2 mt-0.5">
                   <p class="text-xs font-bold text-gray-400">
-                    {{ new Date(form.startDate).toLocaleDateString('en-US', {weekday:'long'}) }} • 
+                    {{ toLocalDate(form.startDate).toLocaleDateString('en-US', {weekday:'long'}) }} • 
                     {{ (FormGroup.formComponents[form.id] || []).length }} Steps
                   </p>
                   <span v-if="completedFormIds.includes(form.id)" class="text-xs font-black px-2 py-0.5 rounded-full" style="color:var(--brand-mint); background:rgba(45,212,191,0.15)">✓ Done</span>

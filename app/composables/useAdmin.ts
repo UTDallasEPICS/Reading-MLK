@@ -8,12 +8,12 @@ export const useAdmin = () => {
   const callFormApi = async <T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', params: Record<string, unknown> = {}, body?: Record<string, unknown>): Promise<T> => {
     const queryString = method === 'GET' || method === 'DELETE'
       ? `?${new URLSearchParams(Object.entries(params).reduce((acc, [key, value]) => {
-          if (value !== undefined && value !== null) {
-            acc[key] = String(value)
-          }
+        if (value !== undefined && value !== null) {
+          acc[key] = String(value)
+        }
 
-          return acc
-        }, {} as Record<string, string>)).toString()}`
+        return acc
+      }, {} as Record<string, string>)).toString()}`
       : ''
 
     return await $fetch<T>(`/api/form${queryString}`, {
@@ -46,6 +46,13 @@ export const useAdmin = () => {
 
     if (parsed) {
       return formatYmdLocal(parsed)
+    }
+
+    //if the value is an ISO string, extract just the "YYYY-MM-DD" portion to avoid timezone shift
+    const isoMatch = value.match(/^(\d{4}-\d{2}-\d{2})/)
+    if (isoMatch && isoMatch[1]) {
+      const datePart = parseLocalDate(isoMatch[1])
+      if (datePart) return formatYmdLocal(datePart)
     }
 
     const fallback = new Date(value)
@@ -100,10 +107,10 @@ export const useAdmin = () => {
   }
 
   // ── Builder state ──
-  const builderSubTab  = useState<'history' | 'creation'>('builderSubTab', () => 'history')
-  const formTitle      = useState('formTitle', () => '')
-  const editingFormId  = useState<number | null>('editingFormId', () => null)
-  const questions      = useState<any[]>('questions', () => [])
+  const builderSubTab = useState<'history' | 'creation'>('builderSubTab', () => 'history')
+  const formTitle = useState('formTitle', () => '')
+  const editingFormId = useState<number | null>('editingFormId', () => null)
+  const questions = useState<any[]>('questions', () => [])
 
   // Week/day pickers — default to current Monday
   const todayDate = new Date()
@@ -112,8 +119,8 @@ export const useAdmin = () => {
   mon.setDate(todayDate.getDate() - dayOff)
   const monStr = formatYmdLocal(mon)
 
-  const formWeekStart    = useState('formWeekStart', () => monStr)
-  const formDays         = useState<string[]>('formDays', () => ['Monday'])
+  const formWeekStart = useState('formWeekStart', () => monStr)
+  const formDays = useState<string[]>('formDays', () => ['Monday'])
   const historyWeekStart = useState('historyWeekStart', () => '')
   const historyStatusSelection = useState<Array<'published' | 'unpublished'>>('historyStatusSelection', () => ['published', 'unpublished'])
   const historyGroupStartDate = useState('historyGroupStartDate', () => '')
@@ -178,11 +185,12 @@ export const useAdmin = () => {
   }
 
   const defaultQuestions = (): any[] => [
-    { id: Date.now(),     type: 'video',   text: '', textEs: '', reference: '', referenceEs: '', url: '' },
-    { id: Date.now() + 1, type: 'text',    text: '', textEs: '', reference: '', referenceEs: '', url: '' },
-    { id: Date.now() + 2, type: 'mcq',     text: '', textEs: '', reference: '', referenceEs: '', url: '',
+    { id: Date.now(), type: 'video', text: '', textEs: '', reference: '', referenceEs: '', url: '' },
+    { id: Date.now() + 1, type: 'text', text: '', textEs: '', reference: '', referenceEs: '', url: '' },
+    {
+      id: Date.now() + 2, type: 'mcq', text: '', textEs: '', reference: '', referenceEs: '', url: '',
       choices: [
-        { text: '', correct: true  },
+        { text: '', correct: true },
         { text: '', correct: false },
         { text: '', correct: false },
         { text: '', correct: false },
@@ -291,7 +299,7 @@ export const useAdmin = () => {
     const q: any = { id: Date.now(), type, text: '', textEs: '', reference: '', referenceEs: '', url: '' }
     if (type === 'mcq') {
       q.choices = [
-        { text: '', correct: true  },
+        { text: '', correct: true },
         { text: '', correct: false },
         { text: '', correct: false },
         { text: '', correct: false },
@@ -301,12 +309,12 @@ export const useAdmin = () => {
   }
 
   const publishForm = async () => {
-    if (!formTitle.value)       { alert('Please enter a title!');           return }
+    if (!formTitle.value) { alert('Please enter a title!'); return }
     if (!formDays.value.length) { alert('Please select at least one day!'); return }
 
     try {
       const weekStart = getLastMonday(formWeekStart.value || '')
-      const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
+      const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
       if (editingFormId.value) {
         const targetDay = formDays.value[0] || 'Monday'
@@ -370,6 +378,39 @@ export const useAdmin = () => {
           })
         }
 
+        //create duplicate forms for any additional selected days
+        const additionalDays = formDays.value.slice(1)
+        for (const day of additionalDays) {
+          const dayIdx = days.indexOf(day)
+          if (dayIdx === -1) continue
+
+          const extraStartDate = parseLocalDate(weekStart)
+          if (!extraStartDate) continue
+          extraStartDate.setDate(extraStartDate.getDate() + dayIdx)
+
+          const createdFormResponse = await callFormApi<any>('POST', {}, {
+            action: 'createForm',
+            startDate: formatYmdLocal(extraStartDate),
+            published: true,
+            title: formTitle.value,
+          })
+
+          const createdForm = createdFormResponse?.data
+          if (!createdForm?.id) continue
+
+          for (let index = 0; index < questions.value.length; index++) {
+            const question = questions.value[index]
+            await callFormApi('POST', {}, {
+              action: 'createComponent',
+              form: createdForm.id,
+              order: index,
+              questionType: question.type,
+              questionText: toApiQuestionText(question, formTitle.value),
+              questionOptions: buildQuestionOptions(question),
+            })
+          }
+        }
+
         await loadPublishedForms()
         editingFormId.value = null
         builderSubTab.value = 'history'
@@ -391,12 +432,12 @@ export const useAdmin = () => {
 
         startDate.setDate(startDate.getDate() + dayIndex)
 
-          const createdFormResponse = await callFormApi<any>('POST', {}, {
-            action: 'createForm',
-            startDate: formatYmdLocal(startDate),
-            published: true,
-            title: formTitle.value,
-          })
+        const createdFormResponse = await callFormApi<any>('POST', {}, {
+          action: 'createForm',
+          startDate: formatYmdLocal(startDate),
+          published: true,
+          title: formTitle.value,
+        })
 
         const createdForm = createdFormResponse?.data
 
@@ -427,10 +468,10 @@ export const useAdmin = () => {
   }
 
   const editPublishedForm = (form: any) => {
-    formTitle.value     = form.title
+    formTitle.value = form.title
     formWeekStart.value = form.weekStart || formWeekStart.value
-    formDays.value      = [form.day || 'Monday']
-    questions.value     = JSON.parse(JSON.stringify(form.questions))
+    formDays.value = [form.day || 'Monday']
+    questions.value = JSON.parse(JSON.stringify(form.questions))
     editingFormId.value = form.id
     builderSubTab.value = 'creation'
     navigateTo('/admin/builder')
@@ -447,12 +488,12 @@ export const useAdmin = () => {
   // ── Students / Progress ──
   const students = useState<any[]>('adminStudents', () => [
     { id: 1, name: 'Aiden Smith', initials: 'AS', email: 'aiden@school.edu', tickets: 12, streak: 4, lastActive: '2 hours ago' },
-    { id: 2, name: 'Nevin Kumar', initials: 'NK', email: 'nevin@school.edu', tickets: 14, streak: 5, lastActive: 'Just now'     },
-    { id: 3, name: 'Swarna Jay',  initials: 'SJ', email: 'swarna@school.edu',tickets: 8,  streak: 2, lastActive: 'Yesterday'   },
+    { id: 2, name: 'Nevin Kumar', initials: 'NK', email: 'nevin@school.edu', tickets: 14, streak: 5, lastActive: 'Just now' },
+    { id: 3, name: 'Swarna Jay', initials: 'SJ', email: 'swarna@school.edu', tickets: 8, streak: 2, lastActive: 'Yesterday' },
   ])
 
   const searchStudent = useState('searchStudent', () => '')
-  const sortStudent   = useState('sortStudent',   () => 'tickets')
+  const sortStudent = useState('sortStudent', () => 'tickets')
 
   const filteredAndSortedStudents = computed(() => {
     let res = students.value
@@ -462,8 +503,8 @@ export const useAdmin = () => {
     }
     return [...res].sort((a, b) => {
       if (sortStudent.value === 'tickets') return b.tickets - a.tickets
-      if (sortStudent.value === 'streak')  return b.streak  - a.streak
-      if (sortStudent.value === 'name')    return a.name.localeCompare(b.name)
+      if (sortStudent.value === 'streak') return b.streak - a.streak
+      if (sortStudent.value === 'name') return a.name.localeCompare(b.name)
       return 0
     })
   })
@@ -472,11 +513,11 @@ export const useAdmin = () => {
   const announcementSubTab = useState<'creation' | 'history'>('announcementSubTab', () => 'creation')
 
   const announcements = useState<any[]>('announcements', () => [
-    { id: 1, title: 'Summer Reading Challenge!', content: 'Log 20 books this month to win a Super Sage badge!', icon: '🌟', startDate: '2026-03-01', endDate: '2026-03-31', weekStart: '2026-03-02', day: 'Monday'    },
-    { id: 2, title: 'New Badges Available',       content: 'Check the shop for new limited edition themes.',     icon: '🎉', startDate: '2026-03-05', endDate: '',           weekStart: '2026-03-02', day: 'Thursday'  },
-    { id: 3, title: 'Friday Game Night',          content: 'Join us in the library for board games and snacks!', icon: '🎲', startDate: '2026-03-06', endDate: '',           weekStart: '2026-03-02', day: 'Friday'    },
-    { id: 4, title: 'Week 10 Progress',           content: 'You are doing amazing! Keep up the streak.',         icon: '📈', startDate: '2026-03-09', endDate: '',           weekStart: '2026-03-09', day: 'Monday'    },
-    { id: 5, title: 'Author Visit',               content: 'Virtual session this Wednesday at 10 AM.',           icon: '✍️', startDate: '2026-03-11', endDate: '',           weekStart: '2026-03-09', day: 'Wednesday' },
+    { id: 1, title: 'Summer Reading Challenge!', content: 'Log 20 books this month to win a Super Sage badge!', icon: '🌟', startDate: '2026-03-01', endDate: '2026-03-31', weekStart: '2026-03-02', day: 'Monday' },
+    { id: 2, title: 'New Badges Available', content: 'Check the shop for new limited edition themes.', icon: '🎉', startDate: '2026-03-05', endDate: '', weekStart: '2026-03-02', day: 'Thursday' },
+    { id: 3, title: 'Friday Game Night', content: 'Join us in the library for board games and snacks!', icon: '🎲', startDate: '2026-03-06', endDate: '', weekStart: '2026-03-02', day: 'Friday' },
+    { id: 4, title: 'Week 10 Progress', content: 'You are doing amazing! Keep up the streak.', icon: '📈', startDate: '2026-03-09', endDate: '', weekStart: '2026-03-09', day: 'Monday' },
+    { id: 5, title: 'Author Visit', content: 'Virtual session this Wednesday at 10 AM.', icon: '✍️', startDate: '2026-03-11', endDate: '', weekStart: '2026-03-09', day: 'Wednesday' },
   ])
 
   const newAnnouncement = useState<any>('newAnnouncement', () => ({
@@ -495,7 +536,7 @@ export const useAdmin = () => {
 
   const isAnnouncementActive = (ann: any): boolean => {
     const now = new Date().toISOString().split('T')[0]
-    if(!now) return false // in case of invalid date
+    if (!now) return false // in case of invalid date
     if (ann.startDate > now) return false
     if (ann.endDate && ann.endDate < now) return false
     return true
