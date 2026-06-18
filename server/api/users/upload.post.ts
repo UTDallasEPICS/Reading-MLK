@@ -70,7 +70,7 @@ export default defineEventHandler(async (event) => {
     },
   })
 
-  console.log(addedImage)
+  //console.log('upload complete for user', addedImage.id)
 
   setResponseStatus(event, 201)
 
