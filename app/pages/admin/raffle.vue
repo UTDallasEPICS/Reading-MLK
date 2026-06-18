@@ -34,7 +34,7 @@ onMounted(() => {
     <div class="week-row">
       <div>
         <p class="field-hint">Selected Week</p>
-        <h4 class="week-label">{{ raffleWeekStart ? 'Week of ' + getLastMonday(raffleWeekStart) : 'Select a week' }}</h4>
+        <h4 class="week-label">{{ raffleWeekStart ? 'Week of ' + getLastMonday(raffleWeekStart.toLocaleString()) : 'Select a week' }}</h4>
       </div>
       <div>
         <label class="field-label">Change Week Starting (Mon)</label>

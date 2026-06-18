@@ -19,6 +19,25 @@ onMounted(() => {
 
     router.replace({ query: newQuery })
   }
+
+  if (route.query.emailChangeError) {
+    const errorMessages: Record<string, string> = {
+      invalid: 'The email change link is invalid or has already been used.',
+      expired: 'The email change link has expired. Please request a new one.',
+      conflict: 'That email address is already in use by another account.',
+    }
+
+    const code = route.query.emailChangeError as string
+    toast.add({
+      title: 'Email change failed',
+      description: errorMessages[code] || 'Something went wrong. Please try again.',
+      color: 'error',
+    })
+
+    const newQuery = { ...route.query }
+    delete newQuery.emailChangeError
+    router.replace({ query: newQuery })
+  }
 })
 
 const loginRole = computed(() => {
