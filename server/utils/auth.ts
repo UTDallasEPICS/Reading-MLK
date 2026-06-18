@@ -2,17 +2,7 @@ import { betterAuth } from 'better-auth'
 import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { prisma } from './prisma'
 import { magicLink } from 'better-auth/plugins'
-import nodemailer from 'nodemailer'
-
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_SERVER_HOST,
-  port: Number(process.env.EMAIL_SERVER_PORT),
-  secure: process.env.EMAIL_SERVER_SECURE === 'true',
-  auth: {
-    user: process.env.EMAIL_SERVER_USER,
-    pass: process.env.EMAIL_SERVER_PASSWORD,
-  },
-})
+import { mailer, fromAddress } from './email'
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -34,8 +24,8 @@ export const auth = betterAuth({
   plugins: [
     magicLink({
       async sendMagicLink({ email, url }) {
-        await transporter.sendMail({
-          from: process.env.EMAIL_FROM || process.env.EMAIL_SERVER_USER,
+        await mailer.sendMail({
+          from: fromAddress(),
           to: email,
           subject: 'Sign in to Reading Huddle',
           html: `
