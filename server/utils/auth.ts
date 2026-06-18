@@ -34,15 +34,20 @@ export const auth = betterAuth({
   plugins: [
     magicLink({
       async sendMagicLink({ email, url }) {
-        await transporter.sendMail({
-          from: process.env.EMAIL_FROM || process.env.EMAIL_SERVER_USER,
-          to: email,
-          subject: 'Sign in to Reading Huddle',
-          html: `
+        try {
+          await transporter.sendMail({
+            from: process.env.EMAIL_FROM || process.env.EMAIL_SERVER_USER,
+            to: email,
+            subject: 'Sign in to Reading Huddle',
+            html: `
             <p>Click the link below to sign in to Reading Huddle:</p>
             <p><a href="${url}">Sign in</a></p>
           `,
-        })
+          })
+        } catch (e) {
+          console.error('SMTP send failed', e)
+          throw createError({ statusCode: 500, statusMessage: 'Email delivery failed. Please try again later.' })
+        }
       },
     }),
   ],
