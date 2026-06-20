@@ -14,7 +14,7 @@ const {
   builderSubTab, formTitle, editingFormId, questions,
   formWeekStart, formDays, historyWeekStart, historyKeywordQuery, historyAdvancedFiltersOpen,
   historyStatusSelection, historyGroupStartDate, historyGroupEndDate, emptyFormPromptOpen,
-  toggleHistoryStatus, resetHistoryAdvancedFilters, resetHistoryFilters, formatDate, defaultQuestions,
+  toggleHistoryStatus, toggleHistorySort,resetHistoryAdvancedFilters, sortedForms, historySortSelection, resetHistoryFilters, formatDate, defaultQuestions,
   filteredPublishedForms, selectedFormDetails, viewFormDetails, publishSuccessInfo,
   draggedIdx, dragStart, onDrop,
   addQuestion, publishForm, saveEmptyFormDraft, editPublishedForm, toggleFormPublish, deleteStoredForm, loadPublishedForms,
@@ -560,6 +560,22 @@ onBeforeUnmount(() => {
                 <label class="field-label">Form Date (To)</label>
                 <input v-model="historyGroupEndDate" type="date" class="input-base" />
               </div>
+
+              <div>
+                <label class="field-label">Sort By</label>
+                <div class="status-filter-btns history-status-stack">
+                  <button
+                    class="status-filter-btn"
+                    :class="historySortSelection === 'newest' ? 'active' : ''"
+                    @click="toggleHistorySort('newest')"
+                  >Newest First</button>
+                  <button
+                    class="status-filter-btn"
+                    :class="historySortSelection === 'oldest' ? 'active' : ''"
+                    @click="toggleHistorySort('oldest')"
+                  >Oldest First</button>
+                </div>
+              </div>
             </div>
 
             <div class="history-drawer-footer">
@@ -573,7 +589,7 @@ onBeforeUnmount(() => {
       <!-- Form rows -->
       <div class="space-y-3">
         <div
-          v-for="form in filteredPublishedForms" :key="form.id"
+          v-for="form in sortedForms" :key="form.id"
           class="form-row cursor-pointer hover:shadow-lg transition-shadow"
           :class="form.status === 'Unpublished' ? 'opacity-60' : ''"
           @click="viewFormDetails(form)"

@@ -123,6 +123,7 @@ export const useAdmin = () => {
   const historyKeywordQuery = useState('historyKeywordQuery', () => '')
   const historyAdvancedFiltersOpen = useState('historyAdvancedFiltersOpen', () => false)
   const historyStatusSelection = useState<Array<'published' | 'unpublished'>>('historyStatusSelection', () => ['published', 'unpublished'])
+  const historySortSelection = useState<'newest' | 'oldest'>('historySortSelection', () => 'newest')
   const historyGroupStartDate = useState('historyGroupStartDate', () => '')
   const historyGroupEndDate = useState('historyGroupEndDate', () => '')
   const emptyFormPromptOpen = useState('emptyFormPromptOpen', () => false)
@@ -147,7 +148,9 @@ export const useAdmin = () => {
 
     historyStatusSelection.value = [...historyStatusSelection.value, value]
   }
-
+  const toggleHistorySort = (value: 'newest' | 'oldest') => {
+    historySortSelection.value = value
+  }
   const formatDate = (dateStr: string): string => {
     if (!dateStr) return ''
 
@@ -217,6 +220,21 @@ export const useAdmin = () => {
       return matchesStatus && matchesKeyword && matchesGroupStart && matchesGroupEnd
     })
   )
+
+  const sortedForms = computed(() => {
+    const forms = [...filteredPublishedForms.value]
+
+    return forms.sort((a,b) => {
+      const dateA = new Date(a.startDate || a.weekStart || '').getTime() || 0
+      const dateB = new Date(b.startDate || b.weekStart || '').getTime() || 0
+
+      if (historySortSelection.value === 'newest') {
+        return dateB - dateA
+      } else {
+        return dateA - dateB
+      }
+    })
+  })
 
   const loadPublishedForms = async () => {
     try {
@@ -600,7 +618,7 @@ export const useAdmin = () => {
     builderSubTab, formTitle, editingFormId, questions,
     formWeekStart, formDays, historyWeekStart, historyKeywordQuery, historyAdvancedFiltersOpen,
     historyStatusSelection, historyGroupStartDate, historyGroupEndDate, emptyFormPromptOpen,
-    toggleHistoryStatus, resetHistoryAdvancedFilters, resetHistoryFilters, formatDate, defaultQuestions,
+    toggleHistoryStatus, toggleHistorySort, historySortSelection, sortedForms, resetHistoryAdvancedFilters, resetHistoryFilters, formatDate, defaultQuestions,
     publishedForms, filteredPublishedForms,
     selectedFormDetails, viewFormDetails, publishSuccessInfo,
     draggedIdx, dragStart, onDrop,
