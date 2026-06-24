@@ -17,9 +17,9 @@ model User {
   publicityConsent    Boolean              @default(false)
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
+  admin               Boolean              @default(false)
   sessions            Session[]
   accounts            Account[]
-  admin               Admin?
   students            Student[]
   pendingEmailChanges PendingEmailChange?
 
@@ -72,14 +72,21 @@ model Verification {
   @@map("verification")
 }
 
-model Admin {
-  id       String @id @default(cuid())
-  settings Json?
-  userId   String @unique
+model Poster {
+  id          String      @id @default(uuid())
+  tag         String      @default("other") //enum: "teacher", "personal", "studygroup", "other"
+  verified    Boolean     @default(false)
+  school      String?           
+  district    String?
+  zipcode     String?
 
-  User                  User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  authoredAnnouncements Announcement[]
-  authoredForms         Form[]
+  Classes       Class[]
+  announcements Announcement[]
+  @@index([tag])
+  @@index([verified])
+  @@index([school])
+  @@index([district])
+  @@index([zipcode])
 }
 
 model Student {
@@ -90,20 +97,34 @@ model Student {
   parentUserId String
 
   Parent                User       @relation(fields: [parentUserId], references: [id], onDelete: Cascade)
+  Classes               Class[]
   Submissions           FormSubmission[]
   WinnerOf              FormGroup[]   @relation("RaffleWinner")
   unlockedShopItems     ShopItem[]
   @@index([parentUserId])
 }
 
+model Class {
+  id              String    @id @default(uuid())
+  joinToken       String    @unique @default(uuid())
+  name            String
+
+  Students        Student[]
+  Posters         Poster[]
+  Announcements   Announcement[]
+  FormGroups      FormGroup[]
+}
+
 model Announcement {
   id          Int     @id @default(autoincrement())
-  author      String?
   postDate    DateTime
   expiryDate  DateTime?
   content     Json?
+  author      String
+  class       String
 
-  Author Admin? @relation(fields: [author], references: [id], onDelete: SetNull)
+  Author      Poster    @relation(fields: [author], references: [id], onDelete: Cascade)
+  Class       Class     @relation(fields: [class], references: [id], onDelete: Cascade)
   @@index([postDate])
   @@index([expiryDate])
 }
@@ -112,10 +133,13 @@ model FormGroup {
   id           Int       @id @default(autoincrement())
   startDate    DateTime
   endDate      DateTime?
+  class        String
   raffleWinner Int? // References the id of the Student who won the raffle for this form group
 
+  Class        Class    @relation(fields: [class], references: [id], onDelete: Cascade)
   RaffleWinner Student? @relation(name: "RaffleWinner", fields: [raffleWinner], references: [id], onDelete: SetNull)
   Forms        Form[]
+  @@index([class])
   @@index([startDate])
   @@index([endDate])
 }
@@ -126,11 +150,9 @@ model Form {
   startDate             DateTime
   endDate               DateTime?
   published             Boolean   @default(false)
-  author                String?
   formGroup             Int
   title                 String
 
-  Author      Admin?           @relation(fields: [author], references: [id], onDelete: SetNull)
   FormGroup   FormGroup        @relation(fields: [formGroup], references: [id], onDelete: Cascade)
   Submissions FormSubmission[]
   Components  FormComponent[]
