@@ -96,22 +96,6 @@ ALTER TABLE "new_FormGroup" RENAME TO "FormGroup";
 CREATE INDEX "FormGroup_class_idx" ON "FormGroup"("class");
 CREATE INDEX "FormGroup_startDate_idx" ON "FormGroup"("startDate");
 CREATE INDEX "FormGroup_endDate_idx" ON "FormGroup"("endDate");
-CREATE TABLE "new_user" (
-    "id" TEXT NOT NULL PRIMARY KEY,
-    "name" TEXT NOT NULL,
-    "email" TEXT NOT NULL,
-    "emailVerified" BOOLEAN NOT NULL DEFAULT false,
-    "role" TEXT NOT NULL DEFAULT 'reader',
-    "raffleOptIn" BOOLEAN NOT NULL DEFAULT true,
-    "publicityConsent" BOOLEAN NOT NULL DEFAULT false,
-    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
-    "admin" BOOLEAN NOT NULL DEFAULT false
-);
-INSERT INTO "new_user" ("createdAt", "email", "emailVerified", "id", "name", "publicityConsent", "raffleOptIn", "role", "updatedAt") SELECT "createdAt", "email", "emailVerified", "id", "name", "publicityConsent", "raffleOptIn", "role", "updatedAt" FROM "user";
-DROP TABLE "user";
-ALTER TABLE "new_user" RENAME TO "user";
-CREATE UNIQUE INDEX "user_email_key" ON "user"("email");
 PRAGMA foreign_keys=ON;
 PRAGMA defer_foreign_keys=OFF;
 

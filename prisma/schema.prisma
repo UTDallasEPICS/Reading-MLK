@@ -17,7 +17,6 @@ model User {
   publicityConsent    Boolean              @default(false)
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
-  admin               Boolean              @default(false)
   sessions            Session[]
   accounts            Account[]
   students            Student[]
