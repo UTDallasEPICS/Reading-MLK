@@ -126,6 +126,7 @@ model Announcement {
   Class       Class     @relation(fields: [class], references: [id], onDelete: Cascade)
   @@index([postDate])
   @@index([expiryDate])
+  @@index([class])
 }
 
 model FormGroup {
