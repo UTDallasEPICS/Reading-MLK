@@ -1,9 +1,14 @@
 <script setup lang="ts">
 definePageMeta({ ssr: false, layout: "admin" })
 
-const {
-  getLastMonday, formatDate,
-} = useAdmin()
+import dayjs from 'dayjs'
+import isoWeek from 'dayjs/plugin/isoWeek'
+import utc from 'dayjs/plugin/utc'
+
+dayjs.extend(isoWeek)
+dayjs.extend(utc)
+
+const { formatDate } = useAdmin()
 
 const {loadRaffleData, raffleWeekStart, raffleWinner, raffleFormGroup, raffleSubmissions, spinRaffle, spinCount} = useRaffleSpin()
 
@@ -34,7 +39,7 @@ onMounted(() => {
     <div class="week-row">
       <div>
         <p class="field-hint">Selected Week</p>
-        <h4 class="week-label">{{ raffleWeekStart ? 'Week of ' + getLastMonday(raffleWeekStart.toLocaleString()) : 'Select a week' }}</h4>
+        <h4 class="week-label">{{ raffleWeekStart ? 'Week of ' + dayjs.utc(raffleWeekStart).startOf('isoWeek').format('YYYY-MM-DD') : 'Select a week' }}</h4>
       </div>
       <div>
         <label class="field-label">Change Week Starting (Mon)</label>
