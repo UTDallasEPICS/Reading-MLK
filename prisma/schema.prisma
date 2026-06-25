@@ -112,6 +112,7 @@ model Class {
   Posters         Poster[]
   Announcements   Announcement[]
   FormGroups      FormGroup[]
+  @@index([joinToken])
 }
 
 model Announcement {
