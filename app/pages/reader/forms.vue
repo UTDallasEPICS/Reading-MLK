@@ -440,7 +440,7 @@ function getBadgeClass(type: string) {
 
                   <!-- Input area -->
                   <div v-if="['text','mcq'].includes(currentComponent.questionType)" class="mt-6">
-                    <!-- Not yet answered -->
+                    <!-- FRQ -->
                     <div v-if="!feedbackVisible[currentComponent.id]">
                       <textarea
                         v-if="currentComponent.questionType === 'text'"
