@@ -116,7 +116,8 @@ const isCurrentComponentCorrect = computed(() => {
   if (q.questionType !== 'mcq') return true
   const options = q.questionOptions as any
   if (!options || !options.choices) return true
-  const choice = options.choices.find((c: any) => c.text === answers.value[q.id])
+  const choiceIndex = Number(answers.value[q.id])
+  const choice = options.choices[choiceIndex]
   return choice ? choice.correct : false
 })
 
@@ -452,14 +453,14 @@ function getBadgeClass(type: string) {
                       <div v-else-if="currentComponent.questionType === 'mcq'" class="space-y-3">
                         <button
                           v-for="(choice, ci) in (currentComponent.questionOptions as any)?.choices" :key="ci"
-                          @click="answers[currentComponent.id] = (choice as any).text"
+                          @click="answers[currentComponent.id] = String(ci)"
                           class="w-full text-left p-5 rounded-2xl font-bold text-lg border-2 transition-all"
-                          :style="answers[currentComponent.id] === (choice as any).text
+                          :style="answers[currentComponent.id] === String(ci)
                             ? 'border-color:var(--brand-indigo); background:rgba(224,96,77,0.1); color:var(--brand-indigo); transform:scale(1.02)'
                             : 'border-color:#f1f5f9; background:white; color:#374151'"
                         >
                           <span class="inline-flex items-center justify-center w-8 h-8 rounded-full mr-3 text-sm font-black"
-                            :style="answers[currentComponent.id] === (choice as any).text
+                            :style="answers[currentComponent.id] === String(ci)
                               ? 'background:var(--brand-indigo); color:white'
                               : 'background:#f1f5f9; color:#6b7280'"
                           >{{ String.fromCharCode(65 + Number(ci)) }}</span>
