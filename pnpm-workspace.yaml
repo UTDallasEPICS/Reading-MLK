@@ -6,10 +6,5 @@ allowBuilds:
   prisma: true
   sharp: true
   vue-demi: true
-onlyBuiltDependencies:
-  - '@parcel/watcher'
-  - '@prisma/engines'
-  - better-sqlite3
-  - esbuild
-  - prisma
-  - vue-demi
+publicHoistPattern:
+  - '*tailwind*'
