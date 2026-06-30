@@ -36,8 +36,8 @@ export default defineEventHandler(async (event) => {
     return await prisma.announcement.create({
       data: {
         content: body.data.content,
-        postDate: new Date(body.data.postDate),
-        expiryDate: body.data.expiryDate ? new Date(body.data.expiryDate) : null,
+        postDate: body.data.postDate,
+        expiryDate: body.data.expiryDate ?? body.data.expiryDate,
         author: body.data.author,
       }
     })

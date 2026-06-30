@@ -42,26 +42,33 @@ export const announcementCreateSchema = z.object({
 
 export const formGroupCreateSchema = z.object({
   startDate: z.coerce.date(),
-  endDate: z.coerce.date(),
+  endDate: z.coerce.date().nullish(),
 })
 
-export const formGroupGETSchema = formGroupCreateSchema.extend({
-  id: z.int(),   
-  raffleWinner: z.int().nullish()
+export const formGroupUpdateSchema = z.object({
+  startDate: z.coerce.date().optional(),
+  endDate: z.coerce.date().nullish(),
+  raffleWinner: z.int().optional()
 })
 
 export const formCreateSchema = z.object({
-  order: z.int(),
+  order: z.int().nullish(),
   startDate: z.coerce.date(), 
-  endDate: z.coerce.date(),
+  endDate: z.coerce.date().nullish(),
   published: z.boolean(),
-  author: z.cuid2(),
+  author: z.cuid2().nullish(),
   formGroup: z.int(),
   title: z.string().min(1).max(250),
 })
 
-export const formGETSchema = formCreateSchema.extend({
-  id: z.int()
+export const formUpdateSchema = z.object({
+  order: z.int().optional(),
+  startDate: z.coerce.date().optional(), 
+  endDate: z.coerce.date().nullish(),
+  published: z.boolean().optional(),
+  author: z.cuid2().nullish(),
+  formGroup: z.int().optional(),
+  title: z.string().min(1).max(250).optional(),
 })
 
 export const formComponentCreateSchema = z.object({
@@ -72,7 +79,11 @@ export const formComponentCreateSchema = z.object({
   questionOptions: z.object({
     choices: z.array(z.object({text: z.string().min(1), correct: z.boolean()})).optional(),
     video: z.string().optional()
-  })
+  }).nullish()
+})
+
+export const formComponentUpdateSchema = z.object({
+
 })
 
 export const formSubmissionCreateSchema = z.object({
@@ -94,9 +105,10 @@ export type StudentCreate = z.infer<typeof studentCreateSchema>
 export type StudentUpdate = z.infer<typeof studentUpdateSchema>
 export type AnnouncementCreate = z.infer<typeof announcementCreateSchema>
 export type FormCreate = z.infer<typeof formCreateSchema>
-export type FormGET = z.infer<typeof formGETSchema>
-export type FormGroupGET = z.infer<typeof formGroupGETSchema>
+export type FormUpdate = z.infer<typeof formUpdateSchema>
 export type FormGroupCreate = z.infer<typeof formGroupCreateSchema>
+export type FormGroupUpdate = z.infer<typeof formGroupUpdateSchema>
 export type FormComponentCreate = z.infer<typeof formComponentCreateSchema>
+export type FormComponentUpdate = z.infer<typeof formComponentUpdateSchema>
 export type FormSubmissionCreate = z.infer<typeof formSubmissionCreateSchema>
 export type SubmissionResponseCreate = z.infer<typeof submissionResponseCreateSchema>

@@ -2,6 +2,7 @@
 // Place this at: app/composables/useAdmin.ts
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
+import type { Form } from '~~/prisma/generated/client'
 
 dayjs.extend(utc)
 export const useAdmin = () => {
@@ -77,19 +78,21 @@ export const useAdmin = () => {
   }
 
   const mapApiFormToUi = (form: any) => {
-    const questionList = Array.isArray(form.questions) ? form.questions : []
+    const questionList = Array.isArray(form.Components) ? form.Components : []
+    questionList.slice().sort((left: any, right: any) => left.order - right.order)
 
+   //replace direct type casting with better alternative, maybe zod coercing?
     return {
       id: Number(form.id),
-      weekStart: parseDateToYmd(form.weekStart || form.startDate || ''),
-      day: form.day || 'Monday',
-      title: form.title || `Form ${form.id}`,
-      date: form.date || formatDate(form.startDate || ''),
-      status: form.status || (form.published ? 'Active' : 'Unpublished'),
-      questions: questionList.map((question: any, index: number) => ({
-        id: Number(question.id ?? index + 1),
-        type: question.type || question.questionType || 'text',
-        text: question.text || question.questionText || '',
+      weekStart: parseDateToYmd(form.startDate), //update to dayjs format function
+      day: dayjs(form.startDate).format('dddd'),
+      title: form.title,
+      date: formatDate(form.startDate || ''), //update to dayjs format function
+      status: form.published ? 'Active' : 'Unpublished',
+      questions: questionList.map((question: any) => ({
+        id: question.id,
+        type: question.questionType || 'text',
+        text: question.questionText || '',
         textEs: question.questionOptions?.textEs || '',
         reference: question.questionOptions?.reference || '',
         referenceEs: question.questionOptions?.referenceEs || '',
@@ -216,10 +219,8 @@ export const useAdmin = () => {
 
   const loadPublishedForms = async () => {
     try {
-      const forms = await callFormApi<any[]>('GET', {
-        action: 'listForms',
-        weeklyDate: historyWeekStart.value || undefined,
-      })
+      const forms = await $fetch<any[]>('/api/form/list', 
+        { query: { weeklyDate: historyWeekStart.value || undefined} })
       publishedForms.value = (forms ?? []).map(mapApiFormToUi)
     } catch (error) {
       console.error('Failed to load forms', error)
@@ -237,23 +238,20 @@ export const useAdmin = () => {
     const fallbackWeekEnd = dayjs.utc(fallbackWeekStart).add(6, 'day').format('YYYY-MM-DD')
 
     try {
-      const result = await callFormApi<{
-        found: boolean
-        startDate: string | null
-        endDate: string | null
-      }>('GET', {
-        action: 'resolveFormGroupRangeByDate',
-        weeklyDate: historyWeekStart.value,
+      const result = await useFetch('/api/formGroup/matchByDate', {
+        method: 'GET',
+        query: {date: historyWeekStart.value}
       })
 
-      if (!result?.found) {
+      if (!result.data.value) {
         historyGroupStartDate.value = fallbackWeekStart
         historyGroupEndDate.value = fallbackWeekEnd
         return
       }
+      result.data.value
 
-      historyGroupStartDate.value = parseDateToYmd(result.startDate || '')
-      historyGroupEndDate.value = parseDateToYmd(result.endDate || '') || fallbackWeekEnd
+      historyGroupStartDate.value = parseDateToYmd(result.data.value.startDate || '')
+      historyGroupEndDate.value = parseDateToYmd(result.data.value.endDate || '') || fallbackWeekEnd
     } catch (error) {
       console.error('Failed to resolve form group range', error)
       historyGroupStartDate.value = fallbackWeekStart
@@ -320,12 +318,13 @@ export const useAdmin = () => {
         if (!startDate) throw new Error('Invalid week start date')
         startDate.setDate(startDate.getDate() + dayIndex)
 
-        await callFormApi('PUT', {}, {
-          action: 'updateForm',
-          id: editingFormId.value,
-          startDate: formatYmdLocal(startDate),
-          published: true,
-          title: formTitle.value,
+        await useFetch(`/api/form/${editingFormId.value}`, {
+          method: 'PUT',
+          body: {
+            startDate: formatYmdLocal(startDate), //swap to dayjs 
+            published: true,
+            title: formTitle.value,
+          }
         })
 
         const existingForm = publishedForms.value.find((form) => Number(form.id) === Number(editingFormId.value))
@@ -390,15 +389,16 @@ export const useAdmin = () => {
         }
 
         startDate.setDate(startDate.getDate() + dayIndex)
-
-          const createdFormResponse = await callFormApi<any>('POST', {}, {
-            action: 'createForm',
-            startDate: formatYmdLocal(startDate),
-            published: true,
-            title: formTitle.value,
+          const createdFormResponse: any = await useFetch('api/form', {
+            method: 'POST',
+            body: {
+              startDate: dayjs(startDate).toISOString(),
+              published: true,
+              title: formTitle.value,
+            }
           })
 
-        const createdForm = createdFormResponse?.data
+        const createdForm: Form = createdFormResponse?.data.value
 
         if (!createdForm?.id) {
           continue
