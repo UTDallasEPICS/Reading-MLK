@@ -3,7 +3,7 @@ definePageMeta({ ssr: false })
 
 const { student, settings, updateExp, restoreStudent } = useCurrentStudent()
 const { FormGroup, loadActiveFormGroup } = useCurrentFormGroup()
-const { tickets, completedFormIds, logFormSubmission, logSubmissionResponse, loadProgress } = useCurrentStudentProgress()
+const { tickets, completedFormIds, logFormSubmission, loadProgress } = useCurrentStudentProgress()
 
 const dataLoaded = ref(false)
 
@@ -182,11 +182,13 @@ async function submitChallenge() {
   const formId = activeForm.value.id
   
   // Persist completion and XP
-  const submission  = await logFormSubmission(formId)
+  const submission  = await logFormSubmission(formId, answers.value)
+  const submissionID = Number(submission?.id)
+
   await updateExp(100)
 
   // grab newly posted submission ID
-  const submissionID = Number(submission?.id)
+
 
   showRaffleReward.value = true
   ticketDropped.value    = false
