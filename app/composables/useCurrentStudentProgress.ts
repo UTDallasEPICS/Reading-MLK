@@ -36,6 +36,7 @@ export const useCurrentStudentProgress = () => {
 
     try {
       const response = await $fetch<FormSubmission[]>('/api/formSubmission', {
+        method: 'GET',
         query: { student: student.value.id }
       })
       submissions.value = Array.isArray(response) ? response : []
