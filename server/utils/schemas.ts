@@ -18,7 +18,8 @@ export const studentCreateSchema = z.object({
   name: z.string("Invalid Name").min(1).max(35)
 })
 
-export const studentUpdateSchema = studentCreateSchema.extend({
+export const studentUpdateSchema = z.object({
+  name: z.string("Invalid Name").min(1).max(35).optional(),
   settings: z.object({
     dyslexiaFont: z.boolean().optional(), 
     fontSize: z.number().min(1).max(1.5).optional(),
