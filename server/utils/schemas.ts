@@ -78,13 +78,11 @@ export const formComponentCreateSchema = z.object({
 export const formSubmissionCreateSchema = z.object({
   student: z.int(),
   form: z.int(),
-  submissionDate: z.coerce.date().optional()
-})
-
-export const submissionResponseCreateSchema = z.object({
-  submission: z.int(),
-  formComponent: z.int(),
-  response: z.string().min(1).max(5000)
+  submissionDate: z.coerce.date().optional(),
+  Responses: z.array(z.object({
+    formComponent: z.int(),
+    response: z.string().min(1).max(2500)
+  }))
 })
 
 export type Email = z.infer<typeof emailSchema>
@@ -98,5 +96,3 @@ export type FormGET = z.infer<typeof formGETSchema>
 export type FormGroupGET = z.infer<typeof formGroupGETSchema>
 export type FormGroupCreate = z.infer<typeof formGroupCreateSchema>
 export type FormComponentCreate = z.infer<typeof formComponentCreateSchema>
-export type FormSubmissionCreate = z.infer<typeof formSubmissionCreateSchema>
-export type SubmissionResponseCreate = z.infer<typeof submissionResponseCreateSchema>
