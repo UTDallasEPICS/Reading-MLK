@@ -45,7 +45,6 @@ export const useCurrentStudentProgress = () => {
     }
   }
 
-  // Log a new form submission to track progress
   const logFormSubmission = async (formId: number, responses: Record<number, string>) => {
     if (!student.value?.id) {
       console.error('Cannot log form submission: No student is currently active.')
@@ -58,9 +57,9 @@ export const useCurrentStudentProgress = () => {
         body: {
           student: student.value.id,
           form: formId,
-          responses: Object.entries(responses).map(([questionId, answer]) => ({
-            questionId: Number(questionId),
-            answer
+          Responses: Object.entries(responses).map(([formComponentId, response]) => ({
+            formComponent: Number(formComponentId),
+            response
           }))
         }
       })
