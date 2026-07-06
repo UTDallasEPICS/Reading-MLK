@@ -327,12 +327,11 @@ async function postAnnouncement () {
                 <label class="block text-xs font-medium text-gray-400 uppercase tracking-widest mb-3">
                   Message Content
                 </label>
-                <textarea
+                <RichTextEditor
                   v-model="form.content"
-                  rows="4"
                   placeholder="eg., Attend the book fair to broaden your reading!"
-                  class="w-full text-lg font-medium text-gray-800 border-2 border-gray-50 rounded-lg px-5 py-4 focus:border-indigo-500 focus:outline-none transition resize-none"
-                ></textarea>
+                  :rows="4"
+                />
               </div>
 
               <!-- Submit -->
@@ -369,7 +368,8 @@ async function postAnnouncement () {
                     </div>
                   </div>
                   <p class="text-gray-500 font-medium leading-relaxed">
-                    {{ form.content || 'Your message will appear here...' }}
+                    <span v-if="form.content" v-html="form.content"></span>
+                    <span v-else>Your message will appear here...</span>
                   </p>
                 </div>
               </div>
