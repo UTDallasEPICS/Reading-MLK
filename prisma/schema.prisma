@@ -15,6 +15,7 @@ model User {
   role                String               @default("reader")
   raffleOptIn         Boolean              @default(true)
   publicityConsent    Boolean              @default(false)
+  admin               Boolean              @default(false)
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
   sessions            Session[]
