@@ -1,10 +1,10 @@
 <script setup lang="ts">
 definePageMeta({ ssr: false })
 
-const { student, updateExp, restoreStudent } = useCurrentStudent()
+const { student, settings, saveSettings, updateExp, restoreStudent } = useCurrentStudent()
 const { tickets, loadProgress } = useCurrentStudentProgress()
 
-const settings = reactive({ theme: 'light', dyslexiaFont: false, language: 'en', fontSize: 1 })
+
 
 const stats = computed(() => ({
   xp: student.value ? student.value.exp : 0,
@@ -21,8 +21,8 @@ onMounted(async () => {
 })
 
 const themeClass = computed(() => {
-  const t = settings.theme !== 'light' ? `theme-${settings.theme}` : ''
-  const d = settings.dyslexiaFont ? 'dyslexia-font' : ''
+  const t = settings.value.theme !== 'light' ? `theme-${settings.value.theme}` : ''
+  const d = settings.value.dyslexiaFont ? 'dyslexia-font' : ''
   return `reader-app ${t} ${d}`.trim()
 })
 
@@ -50,7 +50,7 @@ function triggerTicketClick() {
 // ── Shop items — themes ──
 const shopItems = ref([
   { id: 1,  type:'theme', name:'Light Bloom',   cost:0,   class:'light',  owned:true,  previewBg:'#f5ede3',  previewGrad:'radial-gradient(at 0% 0%, hsla(25,95%,75%,0.3) 0px, transparent 50%)' },
-  { id: 2,  type:'theme', name:'Galaxy Night',  cost:500, class:'blue',   owned:false, previewBg:'#1f3b7c',  previewGrad:'radial-gradient(at 0% 0%, hsla(250,20%,20%,0.5) 0px, transparent 50%)' },
+  { id: 2,  type:'theme', name:'Galaxy Night',  cost:500, class:'dark',   owned:false, previewBg:'#1f3b7c',  previewGrad:'radial-gradient(at 0% 0%, hsla(250,20%,20%,0.5) 0px, transparent 50%)' },
   { id: 3,  type:'theme', name:'Old Parchment', cost:300, class:'sepia',  owned:false, previewBg:'#f4ecd8',  previewGrad:'none' },
   { id: 10, type:'theme', name:'Sunset',        cost:100, class:'sunset', owned:false, previewBg:'#fff5f5',  previewGrad:'radial-gradient(at 0% 0%, hsla(10,90%,75%,0.25) 0px, transparent 50%)' },
   { id: 11, type:'theme', name:'Ocean',         cost:100, class:'ocean',  owned:false, previewBg:'#f0f9ff',  previewGrad:'radial-gradient(at 0% 0%, hsla(200,90%,75%,0.25) 0px, transparent 50%)' },
@@ -76,7 +76,7 @@ async function buyItem(item: any) {
       item.owned = true
       showShopCelebration.value = item.name
       setTimeout(() => { showShopCelebration.value = '' }, 2500)
-      applyItem(item)
+      await applyItem(item)
     } catch (e) {
       console.error('Failed to purchase item', e)
       alert('Purchase failed. Please try again.')
@@ -86,9 +86,10 @@ async function buyItem(item: any) {
   }
 }
 
-function applyItem(item: any) {
+async function applyItem(item: any) {
   if (item.type === 'theme') {
-    settings.theme = item.class
+    await saveSettings({ theme: item.class })
+    return
   } else if (item.type === 'animation') {
     if (activeAnimations.value.includes(item.name)) {
       activeAnimations.value = activeAnimations.value.filter(a => a !== item.name)

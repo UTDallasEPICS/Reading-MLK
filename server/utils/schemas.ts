@@ -24,6 +24,7 @@ export const studentUpdateSchema = z.object({
     dyslexiaFont: z.boolean().optional(), 
     fontSize: z.number().min(1).max(1.5).optional(),
     language: z.enum(["en", "es"]).optional(),
+    theme: z.string().optional(),
     raffleOptIn: z.boolean().optional(),
     publicityConsent: z.boolean().optional()
     }, "Invalid Settings").optional(),

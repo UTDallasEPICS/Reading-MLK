@@ -4,6 +4,7 @@ export type StudentSettings = {
   dyslexiaFont: boolean
   language: string
   fontSize: number
+  theme: string
 }
 
 export const useCurrentStudent = () => {
@@ -13,6 +14,7 @@ export const useCurrentStudent = () => {
     const raw = (student.value?.settings as Partial<StudentSettings>) || {}
 
     return {
+      theme: typeof raw.theme === 'string' && raw.theme !== 'light' ? raw.theme : 'light',
       dyslexiaFont: Boolean(raw.dyslexiaFont),
       language: raw.language || 'en',
       fontSize: Number(raw.fontSize) || 1,
