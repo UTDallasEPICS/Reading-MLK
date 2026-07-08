@@ -135,9 +135,9 @@ function applyItem(item: any) {
           <span v-for="id in flyTickets" :key="id" class="absolute text-lg animate-ticket-fly pointer-events-none"
                 style="left:50%;top:50%;transform:translateX(-50%) translateY(-50%)">🎟️</span>
         </div>
-        <NuxtLink to="/reader"
+        <NuxtLink to="/reader/settings"
           class="w-14 h-14 bg-white/90 backdrop-blur-md rounded-xl flex items-center justify-center text-2xl border-2 border-white shadow-xl hover:scale-110 active:scale-95 transition-all"
-          style="text-decoration:none">🏠</NuxtLink>
+          style="text-decoration:none">⚙️</NuxtLink>
       </div>
     </header>
 
