@@ -1,11 +1,5 @@
-// composables/useAdmin.ts
-// Place this at: app/composables/useAdmin.ts
-import dayjs from 'dayjs'
-import isoWeek from 'dayjs/plugin/isoWeek'
-import utc from 'dayjs/plugin/utc'
+import * as dateLogic from '../utils/dateLogic'
 
-dayjs.extend(isoWeek)
-dayjs.extend(utc)
 export const useAdmin = () => {
   const callFormApi = async <T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', params: Record<string, unknown> = {}, body?: Record<string, unknown>): Promise<T> => {
     const queryString = method === 'GET' || method === 'DELETE'
@@ -22,37 +16,6 @@ export const useAdmin = () => {
       method,
       body: method === 'GET' ? undefined : body,
     })
-  }
-
-  const parseLocalDate = (value: string) => {
-    if (!value) return null
-
-    const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/)
-    if (!match) return null
-
-    const [, year, month, day] = match
-    const parsed = new Date(Number(year), Number(month) - 1, Number(day))
-
-    return Number.isNaN(parsed.getTime()) ? null : parsed
-  }
-
-  const formatYmdLocal = (date: Date) => {
-    return dayjs(date).format('YYYY-MM-DD')
-  }
-
-  const parseDateToYmd = (value: string) => {
-    const parsed = parseLocalDate(value)
-
-    if (parsed) {
-      return formatYmdLocal(parsed)
-    }
-
-    const fallback = new Date(value)
-    if (Number.isNaN(fallback.getTime())) {
-      return ''
-    }
-
-    return formatYmdLocal(fallback)
   }
 
   const buildQuestionOptions = (question: any) => ({
@@ -81,15 +44,15 @@ export const useAdmin = () => {
 
   const mapApiFormToUi = (form: any) => {
     const questionList = Array.isArray(form.questions) ? form.questions : []
-    const formDate = parseDateToYmd(form.startDate || form.weekStart || '')
+    const formDate = dateLogic.parseDateToYmd(form.startDate || form.weekStart || '')
 
     return {
       id: Number(form.id),
-      weekStart: parseDateToYmd(form.weekStart || form.startDate || ''),
+      weekStart: dateLogic.parseDateToYmd(form.weekStart || form.startDate || ''),
       day: form.day || 'Monday',
       title: form.title || `Form ${form.id}`,
       startDate: formDate,
-      date: form.date || formatDate(form.startDate || ''),
+      date: form.date || dateLogic.formatYmdUtcDateString(form.startDate || ''),
       status: form.status || (form.published ? 'Active' : 'Unpublished'),
       questions: questionList.map((question: any, index: number) => ({
         id: Number(question.id ?? index + 1),
@@ -115,7 +78,7 @@ export const useAdmin = () => {
   const dayOff = (todayDate.getDay() + 6) % 7
   const mon = new Date(todayDate)
   mon.setDate(todayDate.getDate() - dayOff)
-  const monStr = formatYmdLocal(mon)
+  const monStr = dateLogic.formatYmdLocal(mon)
 
   const formWeekStart    = useState('formWeekStart', () => monStr)
   const formDays         = useState<string[]>('formDays', () => ['Monday'])
@@ -148,11 +111,7 @@ export const useAdmin = () => {
     historyStatusSelection.value = [...historyStatusSelection.value, value]
   }
 
-  const formatDate = (dateStr: string): string => {
-    if (!dateStr) return ''
 
-    return dayjs.utc(dateStr).format('MMM D, YYYY')
-  }
 
   const defaultQuestions = (): any[] => [
     { id: Date.now(),     type: 'video',   text: '', textEs: '', reference: '', referenceEs: '', url: '' },
@@ -237,8 +196,8 @@ export const useAdmin = () => {
       return
     }
 
-    const fallbackWeekStart = dayjs.utc(historyWeekStart.value).startOf('isoWeek').format('YYYY-MM-DD')
-    const fallbackWeekEnd = dayjs.utc(fallbackWeekStart).endOf('isoWeek').format('YYYY-MM-DD')
+    const fallbackWeekStart = dateLogic.startOfWeekString(historyWeekStart.value)
+    const fallbackWeekEnd = dateLogic.endOfWeekString(fallbackWeekStart)
 
     try {
       const result = await callFormApi<{
@@ -256,8 +215,8 @@ export const useAdmin = () => {
         return
       }
 
-      historyGroupStartDate.value = parseDateToYmd(result.startDate || '')
-      historyGroupEndDate.value = parseDateToYmd(result.endDate || '') || fallbackWeekEnd
+      historyGroupStartDate.value = dateLogic.parseDateToYmd(result.startDate || '')
+      historyGroupEndDate.value = dateLogic.parseDateToYmd(result.endDate || '') || fallbackWeekEnd
     } catch (error) {
       console.error('Failed to resolve form group range', error)
       historyGroupStartDate.value = fallbackWeekStart
@@ -308,7 +267,7 @@ export const useAdmin = () => {
     if (!formTitle.value)       { alert('Please enter a title!');           return false }
     if (!formDays.value.length) { alert('Please select at least one day!'); return false }
 
-    const weekStart = dayjs.utc(formWeekStart.value || '').startOf('isoWeek').format('YYYY-MM-DD')
+    const weekStart = dateLogic.startOfWeekString(formWeekStart.value || '')
     const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
 
     if (editingFormId.value) {
@@ -319,12 +278,12 @@ export const useAdmin = () => {
         throw new Error('Invalid day selected for update')
       }
 
-      const startDate = dayjs.utc(weekStart).add(dayIndex, 'day')
+      const startDate = dateLogic.add(weekStart, dayIndex, 'day')
 
       await callFormApi('PUT', {}, {
         action: 'updateForm',
         id: editingFormId.value,
-        startDate: startDate.format('YYYY-MM-DD'),
+        startDate: dateLogic.formatYmdLocal(startDate),
         published,
         title: formTitle.value,
       })
@@ -377,7 +336,7 @@ export const useAdmin = () => {
         publishSuccessInfo.value = {
           title: formTitle.value,
           days: formDays.value,
-          weekStart: dayjs.utc(weekStart).startOf('isoWeek').format('YYYY-MM-DD'),
+          weekStart: dateLogic.startOfWeekString(weekStart),
           isUpdate: true,
           questionCount: questions.value.length,
         }
@@ -390,7 +349,7 @@ export const useAdmin = () => {
 
     const createdFormResponse = await callFormApi<any>('POST', {}, {
       action: 'createForm',
-      startDate: weekStart || dayjs.utc().startOf('isoWeek').format('YYYY-MM-DD'),
+      startDate: weekStart || dateLogic.startOfCurrentWeekString(),
       published,
       title: formTitle.value,
     })
@@ -411,13 +370,13 @@ export const useAdmin = () => {
           continue
         }
 
-        const startDate = dayjs.utc(weekStart).add(dayIndex, 'day')
-        publishedDates.push(dayjs.utc(weekStart).add(dayIndex, 'day').format('dddd, MMM D, YYYY'))
+        const startDate = dateLogic.add(weekStart, dayIndex, 'day')
+        publishedDates.push(dateLogic.formatDayMDY(startDate))
 
         await callFormApi('PUT', {}, {
           action: 'updateForm',
           id: createdForm.id,
-          startDate: startDate.format('YYYY-MM-DD'),
+          startDate: dateLogic.formatYmdLocal(startDate),
           published: true,
           title: formTitle.value,
         })
@@ -443,7 +402,7 @@ export const useAdmin = () => {
       publishSuccessInfo.value = {
         title: formTitle.value,
         days: formDays.value,
-        weekStart: dayjs.utc(weekStart).startOf('isoWeek').format('YYYY-MM-DD'),
+        weekStart: dateLogic.startOfWeekString(weekStart),
         publishedDates,
         questionCount: questions.value.length,
         isUpdate: false,
@@ -524,11 +483,7 @@ export const useAdmin = () => {
   }
 
   // ── Students / Progress ──
-  const students = useState<any[]>('adminStudents', () => [
-    { id: 1, name: 'Aiden Smith', initials: 'AS', email: 'aiden@school.edu', tickets: 12, streak: 4, lastActive: '2 hours ago' },
-    { id: 2, name: 'Nevin Kumar', initials: 'NK', email: 'nevin@school.edu', tickets: 14, streak: 5, lastActive: 'Just now'     },
-    { id: 3, name: 'Swarna Jay',  initials: 'SJ', email: 'swarna@school.edu',tickets: 8,  streak: 2, lastActive: 'Yesterday'   },
-  ])
+  const students = useState<any[]>('adminStudents', () => [])
 
   const searchStudent = useState('searchStudent', () => '')
   const sortStudent   = useState('sortStudent',   () => 'tickets')
@@ -550,13 +505,7 @@ export const useAdmin = () => {
   // ── Announcements ──
   const announcementSubTab = useState<'creation' | 'history'>('announcementSubTab', () => 'creation')
 
-  const announcements = useState<any[]>('announcements', () => [
-    { id: 1, title: 'Summer Reading Challenge!', content: 'Log 20 books this month to win a Super Sage badge!', icon: '🌟', startDate: '2026-03-01', endDate: '2026-03-31', weekStart: '2026-03-02', day: 'Monday'    },
-    { id: 2, title: 'New Badges Available',       content: 'Check the shop for new limited edition themes.',     icon: '🎉', startDate: '2026-03-05', endDate: '',           weekStart: '2026-03-02', day: 'Thursday'  },
-    { id: 3, title: 'Friday Game Night',          content: 'Join us in the library for board games and snacks!', icon: '🎲', startDate: '2026-03-06', endDate: '',           weekStart: '2026-03-02', day: 'Friday'    },
-    { id: 4, title: 'Week 10 Progress',           content: 'You are doing amazing! Keep up the streak.',         icon: '📈', startDate: '2026-03-09', endDate: '',           weekStart: '2026-03-09', day: 'Monday'    },
-    { id: 5, title: 'Author Visit',               content: 'Virtual session this Wednesday at 10 AM.',           icon: '✍️', startDate: '2026-03-11', endDate: '',           weekStart: '2026-03-09', day: 'Wednesday' },
-  ])
+  const announcements = useState<any[]>('announcements', () => [])
 
   const newAnnouncement = useState<any>('newAnnouncement', () => ({
     title: '', content: '', icon: '🌟',
@@ -600,7 +549,7 @@ export const useAdmin = () => {
     builderSubTab, formTitle, editingFormId, questions,
     formWeekStart, formDays, historyWeekStart, historyKeywordQuery, historyAdvancedFiltersOpen,
     historyStatusSelection, historyGroupStartDate, historyGroupEndDate, emptyFormPromptOpen,
-    toggleHistoryStatus, resetHistoryAdvancedFilters, resetHistoryFilters, formatDate, defaultQuestions,
+    toggleHistoryStatus, resetHistoryAdvancedFilters, resetHistoryFilters, defaultQuestions,
     publishedForms, filteredPublishedForms,
     selectedFormDetails, viewFormDetails, publishSuccessInfo,
     draggedIdx, dragStart, onDrop,
