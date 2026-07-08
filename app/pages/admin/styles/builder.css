@@ -178,8 +178,6 @@
 .step-code    { font-size: 0.75rem; background: #f3f4f6; padding: 0.25rem 0.5rem; border-radius: 0.375rem; color: #6b7280; word-break: break-all; }
 .empty-form-copy { margin: 0; color: #374151; font-weight: 500; line-height: 1.5; }
 
- .empty-form-copy { margin: 0; color: #374151; font-weight: 500; line-height: 1.5; }
-
 /* ── Success Modal ── */
 .modal-box.success-modal { border-bottom: 8px solid #10b981; }
 .success-header {
