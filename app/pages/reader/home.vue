@@ -165,11 +165,11 @@ const completionMessage = computed(() => {
           <div class="flex items-center gap-3">
             <span class="text-lg shrink-0">{{ parseContent(mostRecent.content).icon }}</span>
             <div class="flex-grow overflow-hidden">
-              <p class="text-sm font-bold truncate" style="color: var(--brand-dark)">
+              <div class="text-sm font-bold truncate flex items-center" style="color: var(--brand-dark)">
                 <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase mr-2 text-gray-900" style="background: var(--brand-gold)">New</span>
-                {{ parseContent(mostRecent.content).title }}
-              </p>
-              <p class="text-xs text-gray-400 mt-0.5 truncate"><span v-html="parseContent(mostRecent.content).body"></span></p>
+                <span class="truncate [&>p]:inline [&>p]:m-0" v-html="parseContent(mostRecent.content).title"></span>
+              </div>
+              <div class="text-xs text-gray-400 mt-0.5 truncate break-words [&>p]:inline [&>p]:m-0" v-html="parseContent(mostRecent.content).body"></div>
             </div>
             <!-- "View All" button always visible when there's at least one announcement -->
             <button
@@ -272,14 +272,14 @@ const completionMessage = computed(() => {
                 {{ parseContent(ann.content).icon }}
               </div>
               <!-- Body -->
-              <div class="flex-grow">
+              <div class="flex-grow min-w-0">
                 <div class="flex flex-col gap-0.5 mb-2">
-                  <h4 class="text-base font-bold text-gray-800">{{ parseContent(ann.content).title }}</h4>
+                  <h4 class="text-base font-bold text-gray-800 break-words [&>p]:inline [&>p]:m-0" v-html="parseContent(ann.content).title"></h4>
                   <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400">
                     {{ fmtDate(ann.postDate) }}{{ ann.expiryDate ? ' → ' + fmtDate(ann.expiryDate) : ' (Ongoing)' }}
                   </span>
                 </div>
-                <p class="text-sm text-gray-500 font-medium leading-relaxed"><span v-html="parseContent(ann.content).body"></span></p>
+                <div class="text-sm text-gray-500 font-medium leading-relaxed break-words [&>p]:inline [&>p]:m-0" v-html="parseContent(ann.content).body"></div>
               </div>
             </div>
           </div>

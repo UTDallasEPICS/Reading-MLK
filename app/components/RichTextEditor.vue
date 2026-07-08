@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
+import { useEditor, EditorContent, Extension } from '@tiptap/vue-3'
+import { StarterKit } from '@tiptap/starter-kit'
+import { Underline } from '@tiptap/extension-underline'
+import { TextStyle } from '@tiptap/extension-text-style'
+import { FontFamily } from '@tiptap/extension-font-family'
+import { Color } from '@tiptap/extension-color'
+import { Placeholder } from '@tiptap/extension-placeholder'
 
 const props = defineProps<{
   modelValue: string
@@ -11,17 +18,91 @@ const emit = defineEmits<{
   'update:modelValue': [value: string]
 }>()
 
-// ── Refs ──
-const editorRef = ref<HTMLDivElement | null>(null)
+// ── Custom FontSize Extension ──
+const FontSize = Extension.create({
+  name: 'fontSize',
+  addOptions() {
+    return {
+      types: ['textStyle'],
+    }
+  },
+  addGlobalAttributes() {
+    return [
+      {
+        types: this.options.types,
+        attributes: {
+          fontSize: {
+            default: null,
+            parseHTML: element => element.style.fontSize?.replace(/['"]+/g, ''),
+            renderHTML: attributes => {
+              if (!attributes.fontSize) {
+                return {}
+              }
+              return {
+                style: `font-size: ${attributes.fontSize}`,
+              }
+            },
+          },
+        },
+      },
+    ]
+  },
+  addCommands() {
+    return {
+      setFontSize: fontSize => ({ chain }) => {
+        return chain()
+          .setMark('textStyle', { fontSize })
+          .run()
+      },
+      unsetFontSize: () => ({ chain }) => {
+        return chain()
+          .setMark('textStyle', { fontSize: null })
+          .removeEmptyTextStyle()
+          .run()
+      },
+    }
+  },
+})
+
+// ── Editor Setup ──
+const editor = useEditor({
+  content: props.modelValue,
+  extensions: [
+    StarterKit,
+    Underline,
+    TextStyle,
+    FontFamily,
+    Color,
+    FontSize,
+    Placeholder.configure({
+      placeholder: props.placeholder || 'Start typing...',
+    }),
+  ],
+  onUpdate: ({ editor }) => {
+    emit('update:modelValue', editor.getHTML())
+  },
+  onSelectionUpdate: ({ editor }) => {
+    // Keep fontSizeInput synced when cursor moves to text with a specific font size
+    const attrs = editor.getAttributes('textStyle')
+    if (attrs.fontSize) {
+      fontSizeInput.value = attrs.fontSize.replace('px', '')
+    } else {
+      fontSizeInput.value = '16'
+    }
+  }
+})
+
+// Sync incoming value from external source (like form resets)
+watch(() => props.modelValue, (value) => {
+  if (editor.value && editor.value.getHTML() !== value) {
+    editor.value.commands.setContent(value, false)
+  }
+})
+
+// ── Refs & UI State ──
 const colorWrapRef = ref<HTMLElement | null>(null)
 const showColorPicker = ref(false)
 const fontSizeInput = ref('16')
-const isComposing = ref(false)
-
-// ── Active formatting state ──
-const isBold = ref(false)
-const isItalic = ref(false)
-const isUnderlined = ref(false)
 
 // ── Font options ──
 const fonts = [
@@ -44,151 +125,37 @@ const presetColors = [
   '#3182CE', '#5A67D8', '#805AD5', '#D53F8C',
 ]
 
-// ── Saved selection ──
-// We save/restore the selection so that toolbar interactions
-// (which steal focus from the contenteditable) don't lose the
-// user's cursor position.
-let savedRange: Range | null = null
-
-function saveSelection() {
-  const sel = window.getSelection()
-  if (sel && sel.rangeCount > 0 && editorRef.value?.contains(sel.anchorNode)) {
-    savedRange = sel.getRangeAt(0).cloneRange()
-  }
+// ── Formatting Commands ──
+function applyBold() {
+  editor.value?.chain().focus().toggleBold().run()
 }
 
-function restoreSelection() {
-  if (savedRange && editorRef.value) {
-    editorRef.value.focus()
-    const sel = window.getSelection()
-    if (sel) {
-      sel.removeAllRanges()
-      sel.addRange(savedRange)
-    }
-  }
+function applyItalic() {
+  editor.value?.chain().focus().toggleItalic().run()
 }
 
-// ── Sync content ──
-watch(() => props.modelValue, (newVal) => {
-  if (editorRef.value && editorRef.value.innerHTML !== newVal) {
-    editorRef.value.innerHTML = newVal || ''
-  }
-})
-
-onMounted(() => {
-  if (editorRef.value && props.modelValue) {
-    editorRef.value.innerHTML = props.modelValue
-  }
-})
-
-function onInput() {
-  if (isComposing.value) return
-  if (editorRef.value) {
-    emit('update:modelValue', editorRef.value.innerHTML)
-  }
-  updateActiveStates()
+function applyUnderline() {
+  editor.value?.chain().focus().toggleUnderline().run()
 }
-
-function onCompositionStart() { isComposing.value = true }
-function onCompositionEnd() {
-  isComposing.value = false
-  onInput()
-}
-
-// ── Update active formatting indicators ──
-function updateActiveStates() {
-  isBold.value = document.queryCommandState('bold')
-  isItalic.value = document.queryCommandState('italic')
-  isUnderlined.value = document.queryCommandState('underline')
-}
-
-function onSelectionChange() {
-  if (editorRef.value?.contains(document.activeElement)) {
-    updateActiveStates()
-    saveSelection()
-  }
-}
-
-onMounted(() => {
-  document.addEventListener('selectionchange', onSelectionChange)
-})
-onUnmounted(() => {
-  document.removeEventListener('selectionchange', onSelectionChange)
-})
-
-// ── Formatting commands ──
-function execCmd(command: string, value?: string) {
-  restoreSelection()
-  document.execCommand('styleWithCSS', false, 'true')
-  document.execCommand(command, false, value)
-  saveSelection()
-  onInput()
-}
-
-function applyBold() { execCmd('bold') }
-function applyItalic() { execCmd('italic') }
-function applyUnderline() { execCmd('underline') }
 
 function applyFont(font: string) {
-  execCmd('fontName', font)
+  if (!font) {
+    editor.value?.chain().focus().unsetFontFamily().run()
+    return
+  }
+  editor.value?.chain().focus().setFontFamily(font).run()
 }
 
 function applyFontSize(size: string) {
   const num = parseInt(size, 10)
   if (!num || num < 1 || num > 200) return
   fontSizeInput.value = String(num)
-
-  restoreSelection()
-  document.execCommand('styleWithCSS', false, 'true')
-
-  const selection = window.getSelection()
-  if (!selection || selection.rangeCount === 0) return
-
-  const range = selection.getRangeAt(0)
-
-  if (range.collapsed) {
-    // If no text is selected, create a span with a zero-width space
-    // and place the cursor inside it so subsequent typing uses the size.
-    const span = document.createElement('span')
-    span.style.fontSize = `${num}px`
-    span.innerHTML = '&#8203;' // Zero-width space
-    range.insertNode(span)
-    
-    // Move cursor inside the span after the zero-width space
-    range.setStart(span.childNodes[0], 1)
-    range.collapse(true)
-    selection.removeAllRanges()
-    selection.addRange(range)
-    saveSelection()
-    onInput()
-    return
-  }
-
-  // Use execCommand fontSize with a marker value, then replace the
-  // generated tags with <span style="font-size:Npx">
-  document.execCommand('fontSize', false, '7')
-
-  if (editorRef.value) {
-    // Depending on the browser and styleWithCSS, it might generate <font size="7"> or <span style="font-size: xxx">
-    // We look for elements that have font-size or size=7
-    const fontElements = Array.from(editorRef.value.querySelectorAll('font[size="7"], span[style*="font-size"]'))
-    fontElements.forEach((el) => {
-      // Only replace if it matches the marker we just injected
-      if (el.getAttribute('size') === '7' || (el as HTMLElement).style.fontSize === '-webkit-xxx-large' || (el as HTMLElement).style.fontSize === '48px') {
-        const replacement = document.createElement('span')
-        replacement.style.fontSize = `${num}px`
-        replacement.innerHTML = el.innerHTML
-        el.parentNode?.replaceChild(replacement, el)
-      }
-    })
-  }
-
-  saveSelection()
-  onInput()
+  // Casting to any to avoid TypeScript complaints about our custom extension
+  ;(editor.value?.chain().focus() as any).setFontSize(`${num}px`).run()
 }
 
 function applyColor(color: string) {
-  execCmd('foreColor', color)
+  editor.value?.chain().focus().setColor(color).run()
   showColorPicker.value = false
 }
 
@@ -230,6 +197,9 @@ watch(showColorPicker, (open) => {
 
 onUnmounted(() => {
   document.removeEventListener('mousedown', onDocumentClick)
+  if (editor.value) {
+    editor.value.destroy()
+  }
 })
 
 // ── Computed height ──
@@ -242,14 +212,14 @@ const editorMinHeight = computed(() => {
 <template>
   <div class="rte-wrapper">
     <!-- ── Toolbar ── -->
-    <div class="rte-toolbar">
+    <div class="rte-toolbar" v-if="editor">
       <!-- Font Family -->
       <select
         class="rte-select rte-font-select"
         @change="applyFont(($event.target as HTMLSelectElement).value)"
         title="Font Family"
       >
-        <option value="" disabled selected>Font</option>
+        <option value="">Default Font</option>
         <option v-for="f in fonts" :key="f" :value="f" :style="{ fontFamily: f }">{{ f }}</option>
       </select>
 
@@ -262,7 +232,6 @@ const editorMinHeight = computed(() => {
           title="Font Size"
           @keydown="onFontSizeKeydown"
           @blur="onFontSizeBlur"
-          @focus="saveSelection"
         />
         <div class="rte-size-dropdown">
           <button
@@ -280,24 +249,27 @@ const editorMinHeight = computed(() => {
       <!-- Bold / Italic / Underline with active state -->
       <button
         class="rte-btn"
-        :class="{ 'rte-btn-active': isBold }"
+        :class="{ 'rte-btn-active': editor.isActive('bold') }"
         @mousedown.prevent="applyBold"
+        tabindex="-1"
         title="Bold"
       >
         <span style="font-weight: 800;">B</span>
       </button>
       <button
         class="rte-btn"
-        :class="{ 'rte-btn-active': isItalic }"
+        :class="{ 'rte-btn-active': editor.isActive('italic') }"
         @mousedown.prevent="applyItalic"
+        tabindex="-1"
         title="Italic"
       >
         <span style="font-style: italic; font-family: serif; font-weight: 600; font-size: 16px;">I</span>
       </button>
       <button
         class="rte-btn"
-        :class="{ 'rte-btn-active': isUnderlined }"
+        :class="{ 'rte-btn-active': editor.isActive('underline') }"
         @mousedown.prevent="applyUnderline"
+        tabindex="-1"
         title="Underline"
       >
         <span style="text-decoration: underline; font-weight: 600;">U</span>
@@ -309,7 +281,8 @@ const editorMinHeight = computed(() => {
       <div class="rte-color-wrap" ref="colorWrapRef">
         <button
           class="rte-btn rte-color-btn"
-          @mousedown.prevent.stop="saveSelection(); showColorPicker = !showColorPicker"
+          @mousedown.prevent.stop="showColorPicker = !showColorPicker"
+          tabindex="-1"
           title="Text Color"
         >
           <span class="rte-color-icon">A</span>
@@ -339,18 +312,7 @@ const editorMinHeight = computed(() => {
     </div>
 
     <!-- ── Editable area ── -->
-    <div
-      ref="editorRef"
-      class="rte-editor"
-      contenteditable="true"
-      :data-placeholder="placeholder || 'Start typing...'"
-      :style="{ minHeight: editorMinHeight }"
-      @input="onInput"
-      @compositionstart="onCompositionStart"
-      @compositionend="onCompositionEnd"
-      @mouseup="updateActiveStates"
-      @keyup="updateActiveStates"
-    />
+    <editor-content :editor="editor" :style="{ minHeight: editorMinHeight }" class="rte-editor-container" />
   </div>
 </template>
 
@@ -361,6 +323,8 @@ const editorMinHeight = computed(() => {
   overflow: visible;
   transition: border-color 0.2s;
   background: #fff;
+  display: flex;
+  flex-direction: column;
 }
 .rte-wrapper:focus-within {
   border-color: #6366f1;
@@ -579,8 +543,13 @@ const editorMinHeight = computed(() => {
   background: none;
 }
 
-/* ── Editor area ── */
-.rte-editor {
+/* ── Editor area (Tiptap) ── */
+.rte-editor-container {
+  display: flex;
+  flex-direction: column;
+}
+:deep(.tiptap) {
+  flex-grow: 1;
   padding: 16px 20px;
   font-size: 16px;
   font-weight: 400;
@@ -593,9 +562,11 @@ const editorMinHeight = computed(() => {
   overflow-wrap: anywhere;
   white-space: pre-wrap;
 }
-.rte-editor:empty::before {
+:deep(.tiptap p.is-editor-empty:first-child::before) {
   content: attr(data-placeholder);
+  float: left;
   color: #9ca3af;
   pointer-events: none;
+  height: 0;
 }
 </style>

@@ -256,18 +256,18 @@ async function postAnnouncement () {
             <div class="bg-white p-5 rounded-lg border border-slate-200 shadow-sm space-y-5">
               <div class="grid grid-cols-1 gap-5">
 
-                <!-- Title + Icon -->
                 <div>
                   <label class="block text-xs font-medium text-gray-400 uppercase tracking-widest mb-3">
                     Announcement Title
                   </label>
-                  <div class="flex gap-2">
-                    <input
-                      v-model="form.title"
-                      type="text"
-                      placeholder="e.g., Book Fair Next Week!"
-                      class="flex-grow text-lg font-medium text-gray-800 border-2 border-gray-50 rounded-lg px-5 py-3 focus:border-indigo-500 focus:outline-none transition"
-                    />
+                  <div class="flex gap-2 items-start">
+                    <div class="flex-grow">
+                      <RichTextEditor
+                        v-model="form.title"
+                        placeholder="e.g., Book Fair Next Week!"
+                        :rows="1"
+                      />
+                    </div>
                     <!-- Emoji picker trigger + emoji-mart popup -->
                     <div class="relative shrink-0" ref="emojiTriggerRef">
                       <!-- Trigger: displays selected emoji, toggles picker -->
@@ -355,10 +355,11 @@ async function postAnnouncement () {
                 <div class="p-4 bg-indigo-50 rounded-2xl text-4xl shrink-0 border border-indigo-100 shadow-sm flex items-center justify-center min-w-[80px] min-h-[80px]">
                   {{ form.icon }}
                 </div>
-                <div class="flex-grow mt-1">
+                <div class="flex-grow mt-1 min-w-0">
                   <div class="flex flex-col gap-1 mb-3">
-                    <h4 class="text-xl font-bold text-gray-800">
-                      {{ form.title || 'Your Title Here' }}
+                    <h4 class="text-xl font-bold text-gray-800 break-words [&>p]:inline [&>p]:m-0">
+                      <span v-if="form.title" v-html="form.title"></span>
+                      <span v-else class="text-gray-400">Your Title Here</span>
                     </h4>
                     <div class="flex gap-2 items-center">
                       <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-[10px] font-bold uppercase tracking-widest">
@@ -367,10 +368,10 @@ async function postAnnouncement () {
                       </span>
                     </div>
                   </div>
-                  <p class="text-gray-500 font-medium leading-relaxed">
+                  <div class="text-gray-500 font-medium leading-relaxed break-words">
                     <span v-if="form.content" v-html="form.content"></span>
                     <span v-else>Your message will appear here...</span>
-                  </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -427,10 +428,10 @@ async function postAnnouncement () {
                   </div>
 
                   <!-- Body -->
-                  <div class="flex-grow mt-1">
+                  <div class="flex-grow mt-1 min-w-0">
                     <div class="flex justify-between items-start mb-2 flex-wrap gap-2">
                       <!-- Title -->
-                      <h4 class="text-xl font-bold text-gray-800">{{ parseContent(ann.content).title }}</h4>
+                      <h4 class="text-xl font-bold text-gray-800 break-words [&>p]:inline [&>p]:m-0" v-html="parseContent(ann.content).title"></h4>
 
                       <!-- Metadata badges -->
                       <div class="flex gap-2 items-center flex-wrap">
@@ -487,10 +488,10 @@ async function postAnnouncement () {
                   </div>
 
                   <!-- Body -->
-                  <div class="flex-grow mt-1">
+                  <div class="flex-grow mt-1 min-w-0">
                     <div class="flex justify-between items-start mb-2 flex-wrap gap-2">
                       <!-- Title -->
-                      <h4 class="text-xl font-bold text-gray-500">{{ parseContent(ann.content).title }}</h4>
+                      <h4 class="text-xl font-bold text-gray-500 break-words [&>p]:inline [&>p]:m-0" v-html="parseContent(ann.content).title"></h4>
 
                       <!-- Metadata badges -->
                       <div class="flex gap-2 items-center flex-wrap">
