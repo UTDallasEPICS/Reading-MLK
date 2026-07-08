@@ -443,7 +443,7 @@ async function postAnnouncement () {
                         </span>
 
                         <!-- Delete button -->
-                             announcement's database integer ID. The icon-only
+                        <!-- Passes the announcement's database integer ID. The icon-only
                              button is intentionally subtle (gray) until hovered
                              (red) to prevent accidental clicks. A confirm() dialog
                              inside deleteAnnouncement() provides a second safety
@@ -455,6 +455,9 @@ async function postAnnouncement () {
                         >✕</button>
                       </div>
                     </div>
+                    <p class="text-gray-500 font-medium leading-relaxed mt-2" v-if="parseContent(ann.content).body">
+                      <span v-html="parseContent(ann.content).body"></span>
+                    </p>
                   </div>
                 </div>
               </div>
@@ -510,6 +513,9 @@ async function postAnnouncement () {
                         >✕</button>
                       </div>
                     </div>
+                    <p class="text-gray-500 font-medium leading-relaxed mt-2" v-if="parseContent(ann.content).body">
+                      <span v-html="parseContent(ann.content).body"></span>
+                    </p>
                   </div>
                 </div>
               </div>
