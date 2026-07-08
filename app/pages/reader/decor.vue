@@ -1,8 +1,24 @@
 <script setup lang="ts">
 definePageMeta({ ssr: false })
 
+const { student, updateExp, restoreStudent } = useCurrentStudent()
+const { tickets, loadProgress } = useCurrentStudentProgress()
+
 const settings = reactive({ theme: 'light', dyslexiaFont: false, language: 'en', fontSize: 1 })
-const stats = reactive({ xp: 1250, booksRead: 14, streak: 5, tickets: 3 })
+
+const stats = computed(() => ({
+  xp: student.value ? student.value.exp : 0,
+  tickets: tickets.value ? tickets.value : 0,
+}))
+
+onMounted(async () => {
+  if (!student.value) {
+    await restoreStudent()
+  }
+  if (student.value) {
+    await loadProgress()
+  }
+})
 
 const themeClass = computed(() => {
   const t = settings.theme !== 'light' ? `theme-${settings.theme}` : ''
@@ -53,13 +69,18 @@ const shopItems = ref([
 const activeAnimations = ref<string[]>([])
 const showShopCelebration = ref('')
 
-function buyItem(item: any) {
-  if (stats.xp >= item.cost) {
-    stats.xp -= item.cost
-    item.owned = true
-    showShopCelebration.value = item.name
-    setTimeout(() => { showShopCelebration.value = '' }, 2500)
-    applyItem(item)
+async function buyItem(item: any) {
+  if (stats.value.xp >= item.cost) {
+    try {
+      await updateExp(-item.cost)
+      item.owned = true
+      showShopCelebration.value = item.name
+      setTimeout(() => { showShopCelebration.value = '' }, 2500)
+      applyItem(item)
+    } catch (e) {
+      console.error('Failed to purchase item', e)
+      alert('Purchase failed. Please try again.')
+    }
   } else {
     alert('Not enough XP!')
   }
