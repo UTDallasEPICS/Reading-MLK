@@ -17,18 +17,23 @@ jobs:
     steps:
     - uses: actions/checkout@v6
 
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 10
+
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v6
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'pnpm'
 
-    - name: Install Dependencies from Package-Lock
-      run: pnpm install
+    - name: Install Dependencies
+      run: pnpm install --frozen-lockfile
 
     - name: Generate Prisma Client
-      run: pnpm run prisma:generate
+      run: pnpm prisma generate
 
     - name: Build Project
-      run: pnpm run build
+      run: pnpm build
 
