@@ -309,10 +309,22 @@ onBeforeUnmount(() => {
               <button class="btn-add-choice" @click="q.choices.push({ text: '', correct: false })">+ Add Choice</button>
             </div>
 
-            <!-- Video URL -->
-            <div v-if="q.type === 'video'">
-              <label class="field-label">YouTube URL</label>
-              <input v-model="q.url" type="text" placeholder="https://youtu.be/..." class="input-field" data-builder-field="true" @keydown.enter.prevent="handleBuilderEnter" />
+            <!-- Video fields -->
+            <div v-if="q.type === 'video'" class="space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="field-label">Text (English)</label>
+                  <textarea v-model="q.text" rows="3" placeholder="Provide context for the video..." class="textarea-field" data-builder-field="true" @keydown.enter.prevent="handleBuilderEnter" />
+                </div>
+                <div>
+                  <label class="field-label">Text (Spanish)</label>
+                  <textarea v-model="q.textEs" rows="3" placeholder="Proporcione contexto para el video..." class="textarea-field" data-builder-field="true" @keydown.enter.prevent="handleBuilderEnter" />
+                </div>
+              </div>
+              <div>
+                <label class="field-label">YouTube URL</label>
+                <input v-model="q.url" type="text" placeholder="https://youtu.be/..." class="input-field" data-builder-field="true" @keydown.enter.prevent="handleBuilderEnter" />
+              </div>
             </div>
 
             <!-- Context block -->
