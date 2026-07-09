@@ -5,6 +5,83 @@ function makeLocalDate(dateString: string) {
   return new Date(year, month - 1, day)
 }
 
+const shopThemes = [
+  { id: 1,  name: 'Light Bloom',   cost: 0,   class: 'light',  color: '#f5ede3', grad: 'radial-gradient(at 0% 0%, hsla(25,95%,75%,0.3) 0px, transparent 50%)' },
+  { id: 2,  name: 'Galaxy Night',  cost: 500, class: 'dark',   color: '#1f3b7c', grad: 'radial-gradient(at 0% 0%, hsla(250,20%,20%,0.5) 0px, transparent 50%)' },
+  { id: 3,  name: 'Old Parchment', cost: 300, class: 'sepia',  color: '#f4ecd8', grad: 'none' },
+  { id: 4, name: 'Sunset',        cost: 100, class: 'sunset', color: '#fff5f5', grad: 'radial-gradient(at 0% 0%, hsla(10,90%,75%,0.25) 0px, transparent 50%)' },
+  { id: 5, name: 'Ocean',         cost: 100, class: 'ocean',  color: '#f0f9ff', grad: 'radial-gradient(at 0% 0%, hsla(200,90%,75%,0.25) 0px, transparent 50%)' },
+  { id: 6, name: 'Forest',        cost: 150, class: 'forest', color: '#f0fdf4', grad: 'radial-gradient(at 0% 0%, hsla(140,80%,70%,0.25) 0px, transparent 50%)' },
+  { id: 7, name: 'Candy',         cost: 150, class: 'candy',  color: '#fdf2f8', grad: 'radial-gradient(at 0% 0%, hsla(330,90%,85%,0.35) 0px, transparent 50%)' },
+  { id: 8, name: 'Fire',          cost: 150, class: 'fire',   color: '#fff7ed', grad: 'radial-gradient(at 30% 40%, hsla(20,95%,65%,0.3) 0px, transparent 50%)' },
+  { id: 9, name: 'Ice',           cost: 150, class: 'ice',    color: '#f0f9ff', grad: 'radial-gradient(at 0% 0%, hsla(200,100%,95%,0.4) 0px, transparent 50%)' },
+]
+
+const shopAnimations = [
+  { id: 20, name: 'Twinkling Stars',        cost: 200 },
+  { id: 21, name: 'Confetti Rain',          cost: 1000 },
+  { id: 22, name: 'Magic Sparkles',         cost: 400 },
+  { id: 23, name: 'Fireflies',              cost: 400 },
+  { id: 24, name: 'Fluttering Butterflies', cost: 500 },
+  { id: 25, name: 'Falling Leaves',         cost: 800 },
+]
+
+async function seedShopItems() {
+  for (const t of shopThemes) {
+    await prisma.shopItem.upsert({
+      where: { id: t.id },
+      update: {
+        type: 'theme',
+        name: t.name,
+        cost: t.cost,
+        Theme: {
+          upsert: {
+            update: { themeColor: t.color, themeEffect: { class: t.class, previewGrad: t.grad } },
+            create: { themeColor: t.color, themeEffect: { class: t.class, previewGrad: t.grad } },
+          },
+        },
+      },
+      create: {
+        id: t.id,
+        type: 'theme',
+        name: t.name,
+        cost: t.cost,
+        dateAvailable: new Date(),
+        Theme: {
+          create: { themeColor: t.color, themeEffect: { class: t.class, previewGrad: t.grad } },
+        },
+      },
+    })
+  }
+
+  for (const a of shopAnimations) {
+    await prisma.shopItem.upsert({
+      where: { id: a.id },
+      update: {
+        type: 'animation',
+        name: a.name,
+        cost: a.cost,
+        Animation: {
+          upsert: {
+            update: { animationType: a.name },
+            create: { animationType: a.name },
+          },
+        },
+      },
+      create: {
+        id: a.id,
+        type: 'animation',
+        name: a.name,
+        cost: a.cost,
+        dateAvailable: new Date(),
+        Animation: {
+          create: { animationType: a.name },
+        },
+      },
+    })
+  }
+}
+
 async function main() {
   const seededEmails = [
     'parent1@example.com',
@@ -166,6 +243,7 @@ async function main() {
       },
     },
   })
+
 
   // Clean old progress-testing data
   await prisma.submissionResponse.deleteMany()

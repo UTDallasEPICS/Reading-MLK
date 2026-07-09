@@ -1,15 +1,64 @@
 <script setup lang="ts">
 definePageMeta({ ssr: false })
 
-const { student, settings, saveSettings, updateExp, restoreStudent } = useCurrentStudent()
+const { student, settings, saveSettings, restoreStudent } = useCurrentStudent()
 const { tickets, loadProgress } = useCurrentStudentProgress()
 
-
+type ShopItemUi = {
+  id: number
+  type: string
+  name: string
+  cost: number
+  owned: boolean
+  class: string
+  previewBg?: string
+  previewGrad?: string
+}
 
 const stats = computed(() => ({
   xp: student.value ? student.value.exp : 0,
   tickets: tickets.value ? tickets.value : 0,
 }))
+
+async function loadShopItems() {
+  if (!student.value?.id) return
+
+  const rawItems = await $fetch<any[]>('/api/shop', {
+    query: { studentId: student.value.id },
+  })
+
+  // Fallback mapping keeps current visual cards while moving source of truth to DB.
+  const styleMap: Record<string, { class: string; previewBg: string; previewGrad: string }> = {
+    'Light Bloom': { class: 'light', previewBg: '#f5ede3', previewGrad: 'radial-gradient(at 0% 0%, hsla(25,95%,75%,0.3) 0px, transparent 50%)' },
+    'Galaxy Night': { class: 'dark', previewBg: '#1f3b7c', previewGrad: 'radial-gradient(at 0% 0%, hsla(250,20%,20%,0.5) 0px, transparent 50%)' },
+    'Old Parchment': { class: 'sepia', previewBg: '#f4ecd8', previewGrad: 'none' },
+    Sunset: { class: 'sunset', previewBg: '#fff5f5', previewGrad: 'radial-gradient(at 0% 0%, hsla(10,90%,75%,0.25) 0px, transparent 50%)' },
+    Ocean: { class: 'ocean', previewBg: '#f0f9ff', previewGrad: 'radial-gradient(at 0% 0%, hsla(200,90%,75%,0.25) 0px, transparent 50%)' },
+    Forest: { class: 'forest', previewBg: '#f0fdf4', previewGrad: 'radial-gradient(at 0% 0%, hsla(140,80%,70%,0.25) 0px, transparent 50%)' },
+    Candy: { class: 'candy', previewBg: '#fdf2f8', previewGrad: 'radial-gradient(at 0% 0%, hsla(330,90%,85%,0.35) 0px, transparent 50%)' },
+    Fire: { class: 'fire', previewBg: '#fff7ed', previewGrad: 'radial-gradient(at 30% 40%, hsla(20,95%,65%,0.3) 0px, transparent 50%)' },
+    Ice: { class: 'ice', previewBg: '#f0f9ff', previewGrad: 'radial-gradient(at 0% 0%, hsla(200,100%,95%,0.4) 0px, transparent 50%)' },
+  }
+
+  shopItems.value = rawItems.map((item) => {
+    const mapped = styleMap[item.name] || {
+      class: item.type === 'theme' ? 'light' : '',
+      previewBg: '#f5ede3',
+      previewGrad: 'none',
+    }
+
+    return {
+      id: item.id,
+      type: item.type,
+      name: item.name,
+      cost: item.cost,
+      owned: Boolean(item.owned) || item.cost === 0,
+      class: mapped.class,
+      previewBg: mapped.previewBg,
+      previewGrad: mapped.previewGrad,
+    } as ShopItemUi
+  })
+}
 
 onMounted(async () => {
   if (!student.value) {
@@ -17,6 +66,7 @@ onMounted(async () => {
   }
   if (student.value) {
     await loadProgress()
+    await loadShopItems()
   }
 })
 
@@ -48,23 +98,7 @@ function triggerTicketClick() {
 //
 
 // ── Shop items — themes ──
-const shopItems = ref([
-  { id: 1,  type:'theme', name:'Light Bloom',   cost:0,   class:'light',  owned:true,  previewBg:'#f5ede3',  previewGrad:'radial-gradient(at 0% 0%, hsla(25,95%,75%,0.3) 0px, transparent 50%)' },
-  { id: 2,  type:'theme', name:'Galaxy Night',  cost:500, class:'dark',   owned:false, previewBg:'#1f3b7c',  previewGrad:'radial-gradient(at 0% 0%, hsla(250,20%,20%,0.5) 0px, transparent 50%)' },
-  { id: 3,  type:'theme', name:'Old Parchment', cost:300, class:'sepia',  owned:false, previewBg:'#f4ecd8',  previewGrad:'none' },
-  { id: 10, type:'theme', name:'Sunset',        cost:100, class:'sunset', owned:false, previewBg:'#fff5f5',  previewGrad:'radial-gradient(at 0% 0%, hsla(10,90%,75%,0.25) 0px, transparent 50%)' },
-  { id: 11, type:'theme', name:'Ocean',         cost:100, class:'ocean',  owned:false, previewBg:'#f0f9ff',  previewGrad:'radial-gradient(at 0% 0%, hsla(200,90%,75%,0.25) 0px, transparent 50%)' },
-  { id: 12, type:'theme', name:'Forest',        cost:150, class:'forest', owned:false, previewBg:'#f0fdf4',  previewGrad:'radial-gradient(at 0% 0%, hsla(140,80%,70%,0.25) 0px, transparent 50%)' },
-  { id: 13, type:'theme', name:'Candy',         cost:150, class:'candy',  owned:false, previewBg:'#fdf2f8',  previewGrad:'radial-gradient(at 0% 0%, hsla(330,90%,85%,0.35) 0px, transparent 50%)' },
-  { id: 14, type:'theme', name:'Fire',          cost:150, class:'fire',   owned:false, previewBg:'#fff7ed',  previewGrad:'radial-gradient(at 30% 40%, hsla(20,95%,65%,0.3) 0px, transparent 50%)' },
-  { id: 15, type:'theme', name:'Ice',           cost:150, class:'ice',    owned:false, previewBg:'#f0f9ff',  previewGrad:'radial-gradient(at 0% 0%, hsla(200,100%,95%,0.4) 0px, transparent 50%)' },
-  { id: 4,  type:'animation', name:'Twinkling Stars',      cost:200,  owned:false },
-  { id: 5,  type:'animation', name:'Confetti Rain',        cost:1000, owned:false },
-  { id: 6,  type:'animation', name:'Magic Sparkles',       cost:400,  owned:false },
-  { id: 7,  type:'animation', name:'Fireflies',            cost:400,  owned:false },
-  { id: 8,  type:'animation', name:'Fluttering Butterflies', cost:500, owned:false },
-  { id: 9,  type:'animation', name:'Falling Leaves',       cost:800,  owned:false },
-])
+const shopItems = ref<ShopItemUi[]>([])
 
 const activeAnimations = ref<string[]>([])
 const showShopCelebration = ref('')
@@ -72,11 +106,22 @@ const showShopCelebration = ref('')
 async function buyItem(item: any) {
   if (stats.value.xp >= item.cost) {
     try {
-      await updateExp(-item.cost)
+      if (student.value?.id) {
+        await $fetch('/api/shop/unlock', {
+          method: 'POST',
+          body: {
+            studentId: student.value.id,
+            shopItemId: item.id,
+          },
+        })
+      }
+
+      await loadShopItems()
       item.owned = true
       showShopCelebration.value = item.name
       setTimeout(() => { showShopCelebration.value = '' }, 2500)
       await applyItem(item)
+      await restoreStudent()
     } catch (e) {
       console.error('Failed to purchase item', e)
       alert('Purchase failed. Please try again.')

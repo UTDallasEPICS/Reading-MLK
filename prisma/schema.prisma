@@ -89,10 +89,11 @@ model Student {
   exp          Int    @default(0)
   parentUserId String
 
-  Parent                User       @relation(fields: [parentUserId], references: [id], onDelete: Cascade)
-  Submissions           FormSubmission[]
-  WinnerOf              FormGroup[]   @relation("RaffleWinner")
-  unlockedShopItems     ShopItem[]
+  Parent      User              @relation(fields: [parentUserId], references: [id], onDelete: Cascade)
+  Submissions FormSubmission[]
+  WinnerOf    FormGroup[]       @relation("RaffleWinner")
+  ShopItems   StudentShopItem[]
+
   @@index([parentUserId])
 }
 
@@ -176,15 +177,15 @@ model SubmissionResponse {
 }
 
 model ShopItem {
-  id              Int     @id @default(autoincrement()) 
-  type            String
-  name            String
-  dateAvailable   DateTime
-  cost            Int     @default(0)
+  id            Int      @id @default(autoincrement())
+  type          String
+  name          String
+  dateAvailable DateTime
+  cost          Int      @default(0)
 
-  Theme           ShopTheme?
-  Animation       ShopAnimation?
-  unlockedByStudents Student[]
+  Theme          ShopTheme?
+  Animation      ShopAnimation?
+  StudentUnlocks StudentShopItem[]
 }
 
 model ShopTheme {
@@ -203,6 +204,20 @@ model ShopAnimation {
   animationEffect Json?
 
   ShopItem ShopItem @relation(fields: [shopItem], references: [id], onDelete: Cascade)
+}
+
+model StudentShopItem {
+  id         Int      @id @default(autoincrement())
+  studentId  Int
+  shopItemId Int
+  unlockedAt DateTime @default(now())
+
+  Student  Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  ShopItem ShopItem @relation(fields: [shopItemId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, shopItemId])
+  @@index([studentId])
+  @@index([shopItemId])
 }
 
 model PendingEmailChange {
