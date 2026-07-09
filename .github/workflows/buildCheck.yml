@@ -21,14 +21,14 @@ jobs:
       uses: actions/setup-node@v6
       with:
         node-version: ${{ matrix.node-version }}
-        cache: 'npm'
+        cache: 'pnpm'
 
     - name: Install Dependencies from Package-Lock
-      run: npm ci
+      run: pnpm install
 
     - name: Generate Prisma Client
-      run: npx prisma generate
+      run: pnpm run prisma:generate
 
     - name: Build Project
-      run: npm run build
+      run: pnpm run build
 
