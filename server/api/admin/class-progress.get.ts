@@ -113,6 +113,15 @@ async function getGroupedRecords(queryState: any) {
   const submissionWhere: any = {}
 
   if (selectedDate) {
+    if(selectedDate.trim() === '') {
+      throw createError({ statusCode: 400, statusMessage: 'Date missing' })
+    }
+    if(!dateRegex.test(selectedDate)) {
+      throw createError({ statusCode: 400, statusMessage: 'Invalid date format' })
+    }
+    if(dayjs(selectedDate).isValid() === false) {
+      throw createError({ statusCode: 400, statusMessage: 'Invalid date' })
+    }
     const mondayDate = dayjs.utc(selectedDate).startOf('isoWeek').toDate()
     const sundayDate = dayjs.utc(selectedDate).endOf('isoWeek').toDate()
     submissionWhere.Form = { FormGroup: { startDate: { gte: mondayDate, lte: sundayDate } } }
