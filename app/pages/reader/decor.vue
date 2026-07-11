@@ -106,7 +106,7 @@ const showShopCelebration = ref('')
 async function buyItem(item: any) {
   if (stats.value.xp >= item.cost) {
     try {
-      await updateExp(-item.cost)
+      // await updateExp(-item.cost)
       if (student.value?.id) {
         await $fetch('/api/shop/unlock', {
           method: 'POST',

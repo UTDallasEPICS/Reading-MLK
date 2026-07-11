@@ -53,9 +53,15 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Not enough XP' })
   }
 
-  const unlock = await prisma.studentShopItem.create({
+  const [unlock] = await prisma.$transaction([
+  prisma.studentShopItem.create({
     data: { studentId, shopItemId },
-  })
+  }),
+  prisma.student.update({
+    where: { id: studentId },
+    data: { exp: { decrement: item.cost } },
+  }),
+  ])
 
   return { success: true, alreadyOwned: false, unlockedAt: unlock.unlockedAt }
 })
