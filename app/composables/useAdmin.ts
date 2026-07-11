@@ -443,8 +443,16 @@ export const useAdmin = () => {
     navigateTo('/admin/builder')
   }
 
-  const toggleFormPublish = (form: any) => {
+  const toggleFormPublish = async (form: any) => {
+// "unpublished" = "nonactive"  b
+// a form being "published" is measured with True and False - boolean value
     form.status = form.status === 'Active' ? 'Unpublished' : 'Active'
+    const newStatus = form.status === 'Active' ? true : false
+
+    await useFetch(`/api/form/${form.id}`, {
+      method: 'PUT',
+      body: {published: newStatus}
+    })
   }
 
   const deleteStoredForm = async (form: any, skipConfirm = false) => {
