@@ -43,7 +43,7 @@ async function getCompletedRecords(queryState: any) {
     if(selectedDate != dayjs(selectedDate).format('YYYY-MM-DD')) {
       throw createError({ statusCode: 400, statusMessage: 'Invalid date format' })
     }
-    if(selectedDate.isvalid() === false) {
+    if(dayjs(selectedDate).isValid() === false) {
       throw createError({ statusCode: 400, statusMessage: 'Invalid date' })
     }
     const mondayDate = dayjs.utc(selectedDate).startOf('isoWeek').toDate()
