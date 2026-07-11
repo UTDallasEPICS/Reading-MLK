@@ -37,6 +37,15 @@ async function getCompletedRecords(queryState: any) {
 
   // Filter timeframe (week)
   if (selectedDate) {
+    if(selectedDate.trim() === '') {
+      throw createError({ statusCode: 400, statusMessage: 'Date missing' })
+    }
+    if(selectedDate != dayjs(selectedDate).format('YYYY-MM-DD')) {
+      throw createError({ statusCode: 400, statusMessage: 'Invalid date format' })
+    }
+    if(selectedDate.isvalid() === false) {
+      throw createError({ statusCode: 400, statusMessage: 'Invalid date' })
+    }
     const mondayDate = dayjs.utc(selectedDate).startOf('isoWeek').toDate()
     const sundayDate = dayjs.utc(selectedDate).endOf('isoWeek').toDate()
     where.Form = {
