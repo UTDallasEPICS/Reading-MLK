@@ -466,8 +466,7 @@ export default defineEventHandler(async (event) => {
       const where: Prisma.FormWhereInput = {}
 
       if (query.formGroup !== null) { where.formGroup = Number(query.formGroup) }
-
-      if (query.published) { where.published = toBoolean(query.published) }
+      where.published = true
 
       return await prisma.form.findMany({
         where,
