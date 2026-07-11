@@ -7,6 +7,7 @@ import utc from 'dayjs/plugin/utc'
 
 dayjs.extend(isoWeek)
 dayjs.extend(utc)
+const dateRegex = /^\d{4}-\d{2}-\d{2}$/
 
 // Formats a UTC date for friendly frontend display (e.g., Nov 4, 2024)
 const formatDisplayDateUtc = (date: Date) => {
@@ -40,7 +41,7 @@ async function getCompletedRecords(queryState: any) {
     if(selectedDate.trim() === '') {
       throw createError({ statusCode: 400, statusMessage: 'Date missing' })
     }
-    if(selectedDate != dayjs(selectedDate).format('YYYY-MM-DD')) {
+    if(!dateRegex.test(selectedDate)) {
       throw createError({ statusCode: 400, statusMessage: 'Invalid date format' })
     }
     if(dayjs(selectedDate).isValid() === false) {
