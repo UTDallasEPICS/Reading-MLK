@@ -1,7 +1,7 @@
 <script setup lang="ts">
 definePageMeta({ ssr: false })
 
-const { student, settings, saveSettings, restoreStudent } = useCurrentStudent()
+const { student, settings, saveSettings, restoreStudent, updateExp } = useCurrentStudent()
 const { tickets, loadProgress } = useCurrentStudentProgress()
 
 type ShopItemUi = {
@@ -106,6 +106,7 @@ const showShopCelebration = ref('')
 async function buyItem(item: any) {
   if (stats.value.xp >= item.cost) {
     try {
+      await updateExp(-item.cost)
       if (student.value?.id) {
         await $fetch('/api/shop/unlock', {
           method: 'POST',
