@@ -1,0 +1,260 @@
+html,
+body,
+#__nuxt {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: #eef2f7;
+  color: #1e293b;
+  font-family: Quicksand, system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.portal-layout {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background: #eef2f7;
+}
+
+.portal-sidebar {
+  width: 18rem;
+  height: 100vh;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  background: #f8fafc;
+  border-right: 1px solid #dbe3ec;
+}
+
+.portal-sidebar-content {
+  padding: 1.5rem;
+}
+
+.portal-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.portal-logo-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: #4f46e5;
+  border-radius: 0.5rem;
+  color: #ffffff;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.portal-logo-title {
+  color: #0f172a;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.portal-logo-title span {
+  color: #4f46e5;
+}
+
+.portal-logo-subtitle {
+  margin-top: 0.2rem;
+  color: #14b8a6;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.portal-nav-label {
+  margin: 0 0 1rem;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.portal-navigation {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.portal-nav-link {
+  padding: 0.75rem 1rem;
+  border-left: 4px solid transparent;
+  border-radius: 0 0.75rem 0.75rem 0;
+  color: #64748b;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.portal-nav-link:hover {
+  background: #eef2f7;
+  color: #334155;
+}
+
+.portal-nav-link-active {
+  background: #e7eafe;
+  border-left-color: #4f46e5;
+  color: #4338ca;
+}
+
+.portal-sidebar-footer {
+  padding: 1.5rem;
+}
+
+.portal-logout {
+  color: #94a3b8;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.portal-logout:hover {
+  color: #64748b;
+}
+
+.portal-workspace {
+  min-width: 0;
+  height: 100vh;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #eef2f7;
+}
+
+.portal-header {
+  min-height: 5.5rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1rem 2rem;
+  background: #f8fafc;
+  border-bottom: 1px solid #dbe3ec;
+}
+
+.portal-header-label {
+  margin: 0 0 0.2rem;
+  color: #94a3b8;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.portal-header-title {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1.35rem;
+  font-weight: 600;
+}
+
+.portal-context {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.portal-context label {
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.portal-context select {
+  min-width: 15rem;
+  padding: 0.7rem 0.9rem;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.65rem;
+  color: #1e293b;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.portal-context select:focus {
+  border-color: #4f46e5;
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(79 70 229 / 12%);
+}
+
+.portal-main {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding: 1.5rem 2rem;
+  background: #eef2f7;
+}
+
+@media (max-width: 800px) {
+  .portal-layout {
+    display: block;
+    overflow-y: auto;
+  }
+
+  .portal-sidebar {
+    width: 100%;
+    height: auto;
+  }
+
+  .portal-navigation {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .portal-sidebar-footer {
+    display: none;
+  }
+
+  .portal-workspace {
+    height: auto;
+    min-height: calc(100vh - 12rem);
+  }
+
+  .portal-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .portal-context {
+    width: 100%;
+  }
+
+  .portal-context select {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .portal-main {
+    overflow: visible;
+    padding: 1rem;
+  }
+}
