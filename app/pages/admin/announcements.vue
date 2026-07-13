@@ -443,11 +443,6 @@ async function postAnnouncement () {
                         </span>
 
                         <!-- Delete button -->
-                        <!-- Passes the announcement's database integer ID. The icon-only
-                             button is intentionally subtle (gray) until hovered
-                             (red) to prevent accidental clicks. A confirm() dialog
-                             inside deleteAnnouncement() provides a second safety
-                             gate before the database record is permanently removed. -->
                         <button
                           @click="deleteAnnouncement(ann.id)"
                           class="ml-1 text-gray-300 hover:text-red-500 transition-colors duration-200"
