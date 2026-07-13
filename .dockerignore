@@ -1,0 +1,9 @@
+.git/
+.env
+node_modules/
+.nuxt/
+.output/
+README.md
+dockerfile
+.dockerignore
+prisma/generated
