@@ -113,7 +113,7 @@ const formatDayName = (value: Date | null | undefined) => {
     return ''
   }
 
-  return WEEKDAY_NAMES[value.getUTCDay()]
+  return WEEKDAY_NAMES[value.getDay()]
 }
 
 const formatDisplayDate = (value: Date | null | undefined) => {
