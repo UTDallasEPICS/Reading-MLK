@@ -104,11 +104,20 @@ function triggerTicketClick() {
 
 // Flow state
 const activeForm         = ref<any>(null)
+const selectedClass      = ref<string|null>(null)
 const preFormStep        = ref<string|null>(null)   // 'ask' | 'has-book' | 'no-book' | null
 const hasOwnBook         = ref(false)
 const currentComponentID        = ref(0)
 const answers            = ref<Record<number,string>>({})
 const feedbackVisible    = ref<Record<number,boolean>>({})
+const showJoinClassroomModal = ref(false)
+const roomCode           = ref('')
+
+function joinClassroom() {
+  // Mock function
+  showJoinClassroomModal.value = false
+  roomCode.value = ''
+}
 
 const isCurrentComponentCorrect = computed(() => {
   const q = currentComponent.value
@@ -169,16 +178,39 @@ function checkAnswer() {
   if (q) feedbackVisible.value[q.id] = true
 }
 
+const isProcessingNext = ref(false)
+
 function nextStep() {
+  if (isProcessingNext.value) return
+  isProcessingNext.value = true
+
   const qs = currentFormComponents.value
+  const q = qs[currentComponentID.value]
+  
+  if (q && ['text', 'mcq'].includes(q.questionType)) {
+    const ans = answers.value[q.id]
+    if (ans === undefined || ans === null || String(ans).trim() === '') {
+      isProcessingNext.value = false
+      return
+    }
+  }
+
   if (currentComponentID.value < qs.length - 1) {
     currentComponentID.value++
   } else {
     submitChallenge()
   }
+
+  setTimeout(() => {
+    isProcessingNext.value = false
+  }, 100)
 }
 
+const isSubmitting = ref(false)
+
 async function submitChallenge() {
+  if (isSubmitting.value) return
+  isSubmitting.value = true
   const formId = activeForm.value.id
   
   // Persist completion and XP
@@ -197,6 +229,7 @@ async function submitChallenge() {
     currentComponentID.value     = 0
     feedbackVisible.value = {}
     answers.value         = {}
+    isSubmitting.value    = false
   }, 500)
 }
 
@@ -235,6 +268,9 @@ function getBadgeClass(type: string) {
           <span class="font-heading font-bold text-2xl tracking-tight leading-none" style="color:var(--brand-dark)">Reading<span style="color:var(--brand-indigo)">Huddle</span></span>
           <span class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--brand-mint)">Reading Buddy</span>
         </div>
+        <button @click="showJoinClassroomModal = true" class="ml-4 border-[3px] border-black rounded-full px-6 py-1.5 font-heading font-bold text-xl text-black hover:bg-gray-100 transition-colors">
+          Join a Classroom
+        </button>
       </div>
       <div class="flex items-center gap-3">
         <!-- XP + Tickets -->
@@ -280,8 +316,19 @@ function getBadgeClass(type: string) {
           <h2 class="font-heading text-4xl font-bold mb-4" style="color:var(--brand-dark)">Daily Forms 📝</h2>
         </div>
 
+        <!-- ── CLASS SELECTION (MOCK) ── -->
+        <div v-if="!selectedClass" class="grid gap-8 w-full">
+          <button @click="selectedClass = 'Friends of MLK'" class="bg-transparent border-[3px] border-black rounded-[3rem] p-10 text-left flex flex-col justify-start items-start h-72 w-full">
+            <h3 class="font-heading text-4xl font-bold text-black">Friends of MLK</h3>
+          </button>
+          <button @click="selectedClass = 'Mrs. Johnson'" class="bg-transparent border-[3px] border-black rounded-[3rem] p-10 text-left flex flex-col justify-start items-start h-72 w-full">
+            <h3 class="font-heading text-4xl font-bold text-black">Mrs. Johnson's class</h3>
+          </button>
+        </div>
+
         <!-- ── FORMS LIST ── -->
-        <div v-if="!activeForm" class="grid gap-3">
+        <div v-else-if="selectedClass === 'Friends of MLK' && !activeForm" class="grid gap-3">
+          <button @click="selectedClass = null" class="text-gray-400 font-bold hover:text-gray-700 transition text-sm mb-2 text-left w-max">← Back to Classes</button>
           <div
             v-for="form in FormGroup.forms" :key="form.id"
             @click="!completedFormIds.includes(form.id) && startChallenge(form)"
@@ -590,6 +637,32 @@ function getBadgeClass(type: string) {
               @click="showRaffleReward = false; ticketDropped = false"
               class="btn-fun text-white py-3 px-10 rounded-2xl font-bold text-lg shadow-lg hover:scale-105 mt-1"
               style="background:var(--brand-indigo)">Back to Home 🏠</button>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- JOIN CLASSROOM MODAL -->
+    <Transition name="fade">
+      <div v-if="showJoinClassroomModal" class="fixed inset-0 z-[150] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="showJoinClassroomModal = false" />
+        <div class="relative w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 flex flex-col items-center text-center">
+          <h2 class="font-heading text-3xl font-bold mb-4" style="color: var(--brand-dark)">Join a Classroom</h2>
+          <p class="text-gray-500 font-medium mb-6">Enter the room code provided by your teacher to join their class.</p>
+          <input 
+            v-model="roomCode" 
+            type="text" 
+            placeholder="Room Code (e.g. ABC-123)" 
+            class="w-full border-2 border-gray-200 rounded-2xl px-6 py-4 text-xl font-bold text-center mb-6 outline-none"
+            style="focus:border-[var(--brand-indigo)]"
+          />
+          <div class="flex gap-4 w-full">
+            <button @click="showJoinClassroomModal = false" class="flex-1 py-3 rounded-2xl font-bold text-lg text-gray-500 hover:bg-gray-100 transition-colors">
+              Cancel
+            </button>
+            <button @click="joinClassroom" class="flex-1 py-3 rounded-2xl font-bold text-lg text-white transition-colors shadow-md" style="background: var(--brand-indigo)">
+              Join
+            </button>
           </div>
         </div>
       </div>
