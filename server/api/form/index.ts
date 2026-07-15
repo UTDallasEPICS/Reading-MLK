@@ -2,6 +2,12 @@ import { Prisma } from '~~/prisma/generated/client'
 import { auth } from '~~/server/utils/auth'
 import { prisma } from '~~/server/utils/prisma'
 import { getQuery, setResponseStatus, type H3Event } from 'h3'
+import dayjs from 'dayjs'
+import isoWeek from 'dayjs/plugin/isoWeek'
+import utc from 'dayjs/plugin/utc'
+
+dayjs.extend(isoWeek)
+dayjs.extend(utc)
 
 type ActionName =
   | 'listFormGroups'
@@ -19,8 +25,6 @@ type ActionName =
   | 'deleteFormGroup'
   | 'deleteForm'
   | 'deleteComponent'
-
-const WEEKDAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
 const hasOwnField = (value: Record<string, unknown> | null, key: string) =>
   Object.prototype.hasOwnProperty.call(value ?? {}, key)
@@ -113,7 +117,7 @@ const formatDayName = (value: Date | null | undefined) => {
     return ''
   }
 
-  return WEEKDAY_NAMES[value.getUTCDay()]
+  return dayjs.utc(value).format('dddd')
 }
 
 const formatDisplayDate = (value: Date | null | undefined) => {
@@ -128,23 +132,9 @@ const formatDisplayDate = (value: Date | null | undefined) => {
   })
 }
 
-const getWeekBoundsUtc = (date: Date) => {
-  const normalizedDate = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()))
-  const daysSinceMonday = (normalizedDate.getUTCDay() + 6) % 7
-
-  const monday = new Date(normalizedDate)
-  monday.setUTCDate(normalizedDate.getUTCDate() - daysSinceMonday)
-  monday.setUTCHours(0, 0, 0, 0)
-
-  const sunday = new Date(monday)
-  sunday.setUTCDate(monday.getUTCDate() + 6)
-  sunday.setUTCHours(23, 59, 59, 999)
-
-  return { monday, sunday }
-}
-
 const findOrCreateWeeklyFormGroup = async (date: Date) => {
-  const { monday, sunday } = getWeekBoundsUtc(date)
+  const monday = dayjs.utc(date).startOf('isoWeek').toDate()
+  const sunday = dayjs.utc(date).endOf('isoWeek').toDate()
 
   const existingGroup = await prisma.formGroup.findFirst({
     where: {
