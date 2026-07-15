@@ -119,7 +119,7 @@ async function getGroupedRecords(queryState: any) {
     if(!dateRegex.test(selectedDate)) {
       throw createError({ statusCode: 400, statusMessage: 'Invalid date format' })
     }
-    if(dayjs(selectedDate).isValid() === false) {
+    if(!dayjs(selectedDate).isValid()) {
       throw createError({ statusCode: 400, statusMessage: 'Invalid date' })
     }
     const mondayDate = dayjs.utc(selectedDate).startOf('isoWeek').toDate()
