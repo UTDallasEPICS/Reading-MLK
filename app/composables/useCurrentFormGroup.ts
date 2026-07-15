@@ -29,7 +29,6 @@ export const useCurrentFormGroup = () => {
     try {
       const formGroupAPIResponse = await $fetch<FormGroup | FormGroup[]>('/api/formGroup?active=true')
 
-      // Handle if the API returns an array or single item
       const activeFg = Array.isArray(formGroupAPIResponse) ? formGroupAPIResponse[0] : formGroupAPIResponse
 
       if (activeFg) {
