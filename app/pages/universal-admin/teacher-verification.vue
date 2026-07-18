@@ -22,52 +22,7 @@ type TeacherApplication = {
   status: VerificationStatus
 }
 
-const applications = ref<TeacherApplication[]>([
-  {
-    id: 1,
-    name: 'Sarah Jenkins',
-    email: 'sarah.jenkins@example.com',
-    role: 'Teacher',
-    school: 'Lincoln High School',
-    district: 'Metro District',
-    zipcode: '75001',
-    requestedAt: '2 hours ago',
-    status: 'Pending',
-  },
-  {
-    id: 2,
-    name: 'David Ross',
-    email: 'david.ross@example.com',
-    role: 'Teacher',
-    school: 'Independent Tutor',
-    district: 'N/A',
-    zipcode: '75201',
-    requestedAt: '5 hours ago',
-    status: 'Pending',
-  },
-  {
-    id: 3,
-    name: 'Marcus Johnson',
-    email: 'marcus.johnson@example.com',
-    role: 'Teacher',
-    school: 'Jefferson Middle School',
-    district: 'Metro District',
-    zipcode: '75080',
-    requestedAt: '1 day ago',
-    status: 'Pending',
-  },
-  {
-    id: 4,
-    name: 'Lisa Wang',
-    email: 'lisa.wang@example.com',
-    role: 'Study Group',
-    school: 'Community After-School Program',
-    district: 'Suburban District',
-    zipcode: '75024',
-    requestedAt: '2 days ago',
-    status: 'Pending',
-  },
-])
+const applications = ref<TeacherApplication[]>([])
 
 const searchQuery = ref('')
 const roleFilter = ref('All')
@@ -237,9 +192,13 @@ function saveApplicationChanges() {
             </span>
           </div>
 
-          <div class="application-detail organization-detail">
+          <div class="application-detail">
             <span class="detail-label">Organization</span>
             <strong>{{ application.school }}</strong>
+          </div>
+
+          <div class="application-detail">
+            <span class="detail-label">District</span>
             <span>{{ application.district }}</span>
           </div>
 
@@ -282,7 +241,6 @@ function saveApplicationChanges() {
       <div
         v-if="modalOpen && selectedApplication"
         class="modal-backdrop"
-        @click.self="closeModal"
       >
         <section
           class="review-modal"
@@ -404,8 +362,9 @@ function saveApplicationChanges() {
 .verification-page {
   width: 100%;
   height: 100%;
-  max-width: 72rem;
-  margin: 0 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
 }
 
@@ -435,7 +394,10 @@ function saveApplicationChanges() {
 }
 
 .verification-card {
-  height: calc(100% - 3.5rem);
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   background: #ffffff;
   border: 1px solid #dbe3ec;
@@ -516,7 +478,8 @@ function saveApplicationChanges() {
 }
 
 .application-list {
-  height: calc(100% - 4.1rem);
+  min-height: 0;
+  flex: 1;
   overflow-y: auto;
   padding: 0.4rem 1rem 1rem;
 }
@@ -527,7 +490,8 @@ function saveApplicationChanges() {
     auto
     minmax(10rem, 1.2fr)
     minmax(6rem, 0.7fr)
-    minmax(11rem, 1fr)
+    minmax(9rem, 1fr)
+    minmax(7rem, 0.8fr)
     minmax(6rem, 0.6fr)
     auto
     auto;
@@ -832,16 +796,22 @@ function saveApplicationChanges() {
       minmax(10rem, 1fr)
       minmax(6rem, 0.6fr)
       minmax(9rem, 0.8fr)
+      minmax(7rem, 0.7fr)
       auto
       auto;
   }
 
-  .application-row > :nth-child(5) {
+  .application-row > :nth-child(6) {
     display: none;
   }
 }
 
 @media (max-width: 850px) {
+  .verification-page {
+    height: auto;
+    overflow: visible;
+  }
+
   .toolbar {
     align-items: stretch;
     flex-direction: column;
@@ -855,6 +825,14 @@ function saveApplicationChanges() {
 
   .application-row {
     grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .verification-card {
+    overflow: visible;
+  }
+
+  .application-list {
+    overflow: visible;
   }
 
   .application-detail,

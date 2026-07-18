@@ -207,8 +207,11 @@ body,
 }
 
 .portal-main {
+  width: 100%;
+  min-width: 0;
   flex: 1;
   min-height: 0;
+  display: flex;
   overflow: hidden;
   padding: 1.5rem 2rem;
   background: #eef2f7;

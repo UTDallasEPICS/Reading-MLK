@@ -15,6 +15,36 @@ type EditableRecord = {
   data: Record<string, string | number | boolean>
 }
 
+type PosterRecord = {
+  name: string
+  role: string
+  school: string
+  district: string
+  forms: number
+}
+
+type TeacherRecord = {
+  name: string
+  school: string
+  district: string
+  classes: number
+  verified: boolean
+}
+
+type ClassRecord = {
+  name: string
+  teacher: string
+  school: string
+  students: number
+}
+
+type StudentRecord = {
+  name: string
+  className: string
+  teacher: string
+  readingLevel: string
+}
+
 const activeTab = ref<DataTab>('Teachers')
 const searchQuery = ref('')
 const editModalOpen = ref(false)
@@ -27,114 +57,10 @@ const tabs: DataTab[] = [
   'Students',
 ]
 
-const posters = ref([
-  {
-    name: 'Ms. Smith English',
-    role: 'Teacher',
-    school: 'Lincoln High School',
-    district: 'Metro District',
-    forms: 42,
-  },
-  {
-    name: 'Downtown Youth Center',
-    role: 'Study Group',
-    school: 'N/A',
-    district: 'Suburban District',
-    forms: 8,
-  },
-  {
-    name: 'Reading Huddle Events',
-    role: 'Other',
-    school: 'N/A',
-    district: 'Metro District',
-    forms: 3,
-  },
-])
-
-const teachers = ref([
-  {
-    name: 'Sarah Jenkins',
-    school: 'Lincoln High School',
-    district: 'Metro District',
-    classes: 3,
-    verified: true,
-  },
-  {
-    name: 'David Ross',
-    school: 'Independent Tutor',
-    district: 'N/A',
-    classes: 1,
-    verified: false,
-  },
-  {
-    name: 'Anita Patel',
-    school: 'Jefferson Middle School',
-    district: 'Metro District',
-    classes: 4,
-    verified: true,
-  },
-  {
-    name: 'Michael Chen',
-    school: 'Lincoln High School',
-    district: 'Metro District',
-    classes: 2,
-    verified: true,
-  },
-])
-
-const classes = ref([
-  {
-    name: 'Honors English 9',
-    teacher: 'Sarah Jenkins',
-    school: 'Lincoln High School',
-    students: 28,
-  },
-  {
-    name: 'AP Literature',
-    teacher: 'Sarah Jenkins',
-    school: 'Lincoln High School',
-    students: 15,
-  },
-  {
-    name: 'Reading Intervention',
-    teacher: 'David Ross',
-    school: 'Independent Tutor',
-    students: 8,
-  },
-  {
-    name: 'World History',
-    teacher: 'Anita Patel',
-    school: 'Jefferson Middle School',
-    students: 32,
-  },
-])
-
-const students = ref([
-  {
-    name: 'Ava Johnson',
-    className: 'Honors English 9',
-    teacher: 'Sarah Jenkins',
-    readingLevel: 'Level B',
-  },
-  {
-    name: 'Noah Williams',
-    className: 'AP Literature',
-    teacher: 'Sarah Jenkins',
-    readingLevel: 'Level E',
-  },
-  {
-    name: 'Mia Garcia',
-    className: 'Reading Intervention',
-    teacher: 'David Ross',
-    readingLevel: 'Level A',
-  },
-  {
-    name: 'Liam Brown',
-    className: 'World History',
-    teacher: 'Anita Patel',
-    readingLevel: 'Level C',
-  },
-])
+const posters = ref<PosterRecord[]>([])
+const teachers = ref<TeacherRecord[]>([])
+const classes = ref<ClassRecord[]>([])
+const students = ref<StudentRecord[]>([])
 
 const normalizedSearch = computed(() =>
   searchQuery.value.trim().toLowerCase(),
@@ -353,9 +279,6 @@ function saveEdit() {
 
         <select class="filter-select">
           <option>All Schools</option>
-          <option>Lincoln High School</option>
-          <option>Jefferson Middle School</option>
-          <option>Independent Tutor</option>
         </select>
 
         <select
@@ -546,7 +469,7 @@ function saveEdit() {
           v-if="currentRecordCount === 0"
           class="empty-state"
         >
-          No matching records found.
+          No records are available.
         </div>
       </div>
     </section>
@@ -555,7 +478,6 @@ function saveEdit() {
       <div
         v-if="editModalOpen && selectedRecord"
         class="modal-backdrop"
-        @click.self="closeEditModal"
       >
         <section
           class="edit-modal"
@@ -667,8 +589,9 @@ function saveEdit() {
 .data-page {
   width: 100%;
   height: 100%;
-  max-width: 72rem;
-  margin: 0 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
 }
 
@@ -694,7 +617,10 @@ function saveEdit() {
 }
 
 .data-card {
-  height: calc(100% - 3.5rem);
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   background: #ffffff;
   border: 1px solid #e2e8f0;
@@ -797,7 +723,8 @@ function saveEdit() {
 }
 
 .table-wrapper {
-  height: calc(100% - 7.8rem);
+  min-height: 0;
+  flex: 1;
   overflow: auto;
   padding: 0 1rem 1rem;
 }
@@ -1036,6 +963,11 @@ tbody tr:hover {
 }
 
 @media (max-width: 900px) {
+  .data-page {
+    height: auto;
+    overflow: visible;
+  }
+
   .toolbar {
     align-items: stretch;
     flex-direction: column;
@@ -1049,6 +981,7 @@ tbody tr:hover {
 
   .data-card {
     height: auto;
+    overflow: visible;
   }
 
   .table-wrapper {

@@ -8,79 +8,63 @@ useHead({
   title: 'Universal Admin Dashboard',
 })
 
-const statistics = [
+type DashboardStatistic = {
+  label: string
+  value: string
+  detail: string
+  icon: 'teacher' | 'group' | 'class' | 'student'
+  positive: boolean
+}
+
+type Activity = {
+  title: string
+  detail: string
+  time: string
+}
+
+type PendingApplication = {
+  name: string
+  organization: string
+}
+
+const statistics: DashboardStatistic[] = [
   {
     label: 'Total Teachers',
-    value: '142',
-    detail: '+12 this month',
+    value: '0',
+    detail: 'No data available',
     icon: 'teacher',
-    positive: true,
+    positive: false,
   },
   {
     label: 'Total Study Groups',
-    value: '38',
-    detail: '+3 this month',
+    value: '0',
+    detail: 'No data available',
     icon: 'group',
-    positive: true,
+    positive: false,
   },
   {
     label: 'Active Classes',
-    value: '86',
-    detail: 'No change this week',
+    value: '0',
+    detail: 'No data available',
     icon: 'class',
     positive: false,
   },
   {
     label: 'Total Students',
-    value: '1,248',
-    detail: '+47 this month',
+    value: '0',
+    detail: 'No data available',
     icon: 'student',
-    positive: true,
+    positive: false,
   },
 ]
-
-const recentActivity = [
-  {
-    title: 'New teacher application submitted',
-    detail: 'Sarah Jenkins · Lincoln High School',
-    time: '2 hours ago',
-  },
-  {
-    title: 'New class created',
-    detail: 'Reading Intervention · David Ross',
-    time: '5 hours ago',
-  },
-  {
-    title: 'Teacher verification completed',
-    detail: 'Anita Patel · Jefferson Middle School',
-    time: 'Yesterday',
-  },
-]
-
-const pendingApplications = [
-  {
-    name: 'Sarah Jenkins',
-    organization: 'Lincoln High School',
-  },
-  {
-    name: 'David Ross',
-    organization: 'Independent Tutor',
-  },
-  {
-    name: 'Lisa Wang',
-    organization: 'Community After-School Program',
-  },
-]
+const recentActivity: Activity[] = []
+const pendingApplications: PendingApplication[] = []
 </script>
 
 <template>
   <div class="dashboard-page">
     <section class="dashboard-heading">
       <h2>Platform Overview</h2>
-
-      <span class="updated-label">
-        Updated just now
-      </span>
     </section>
 
     <section class="statistics-grid">
@@ -137,6 +121,7 @@ const pendingApplications = [
           {{ statistic.label }}
         </span>
       </article>
+
     </section>
 
     <section class="content-grid">
@@ -170,6 +155,13 @@ const pendingApplications = [
 
             <time>{{ activity.time }}</time>
           </div>
+
+          <div
+            v-if="recentActivity.length === 0"
+            class="dashboard-empty-state"
+          >
+            No recent activity is available.
+          </div>
         </div>
       </article>
 
@@ -200,6 +192,13 @@ const pendingApplications = [
               <span>{{ application.organization }}</span>
             </div>
           </div>
+
+          <div
+            v-if="pendingApplications.length === 0"
+            class="dashboard-empty-state"
+          >
+            No pending applications are available.
+          </div>
         </div>
 
         <NuxtLink
@@ -217,8 +216,9 @@ const pendingApplications = [
 .dashboard-page {
   width: 100%;
   height: 100%;
-  max-width: 72rem;
-  margin: 0 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
 }
 
@@ -237,17 +237,19 @@ const pendingApplications = [
   font-weight: 600;
 }
 
-.updated-label {
-  color: #059669;
-  font-size: 0.78rem;
-  font-weight: 700;
-}
-
 .statistics-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.85rem;
   margin-bottom: 0.85rem;
+}
+
+.dashboard-empty-state {
+  padding: 2rem 1rem;
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 500;
+  text-align: center;
 }
 
 .statistic-card {
@@ -316,6 +318,8 @@ const pendingApplications = [
 }
 
 .content-grid {
+  min-height: 0;
+  flex: 1;
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(16rem, 1fr);
   gap: 0.85rem;
@@ -330,6 +334,8 @@ const pendingApplications = [
 
 .activity-card,
 .verification-card {
+  min-height: 0;
+  overflow-y: auto;
   padding: 1rem;
 }
 
@@ -467,6 +473,28 @@ const pendingApplications = [
 @media (max-width: 1050px) {
   .statistics-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 800px) {
+  .dashboard-page {
+    height: auto;
+    overflow: visible;
+  }
+
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .activity-card,
+  .verification-card {
+    overflow: visible;
+  }
+}
+
+@media (max-width: 550px) {
+  .statistics-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>

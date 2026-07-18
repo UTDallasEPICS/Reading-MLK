@@ -10,16 +10,6 @@ const contexts = [
     route: '/universal-admin',
   },
   {
-    label: 'English 9',
-    value: 'english-9',
-    route: '/admin',
-  },
-  {
-    label: 'Reading Club',
-    value: 'reading-club',
-    route: '/admin',
-  },
-  {
     label: '+ Create New Class',
     value: 'create-class',
     route: '/universal-admin/create-class',

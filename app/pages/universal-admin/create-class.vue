@@ -69,7 +69,7 @@ function cancel() {
             <input
               v-model="form.name"
               type="text"
-              placeholder="Example: English 9"
+              placeholder="Enter a class name"
               required
             >
           </label>
@@ -103,7 +103,7 @@ function cancel() {
               <input
                 v-model="form.school"
                 type="text"
-                placeholder="Example: Lincoln High School"
+                placeholder="Enter a school or organization"
                 required
               >
             </label>
@@ -114,7 +114,7 @@ function cancel() {
               <input
                 v-model="form.district"
                 type="text"
-                placeholder="Example: Metro District"
+                placeholder="Enter a school district"
                 required
               >
             </label>
@@ -127,7 +127,7 @@ function cancel() {
                 type="text"
                 inputmode="numeric"
                 maxlength="10"
-                placeholder="Example: 75080"
+                placeholder="Enter a ZIP code"
                 required
               >
             </label>
@@ -176,8 +176,9 @@ function cancel() {
 .create-class-page {
   width: 100%;
   height: 100%;
-  max-width: 54rem;
-  margin: 0 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
 }
 
@@ -194,7 +195,10 @@ function cancel() {
 }
 
 .form-card {
-  height: calc(100% - 3.5rem);
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   background: #f8fafc;
   border: 1px solid #cbd5e1;
@@ -215,9 +219,11 @@ function cancel() {
 }
 
 .class-form {
+  min-height: 0;
   display: flex;
-  height: calc(100% - 3.25rem);
+  flex: 1;
   flex-direction: column;
+  overflow-y: auto;
   padding: 1.15rem 1.25rem;
   background: #f8fafc;
 }
