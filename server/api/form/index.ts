@@ -323,14 +323,13 @@ export default defineEventHandler(async (event) => {
   const body = method === 'GET' ? null : ((await readBody(event).catch(() => null)) as Record<string, unknown> | null)
   const action = getAction(event, body)
   const query = getQuery(event)
-  const rawClassId = normalizeScalar(query.classId ?? body?.classId)
-  const classId = typeof rawClassId === 'string' && rawClassId.trim() ? rawClassId.trim() : null
+  const rawClassToken = normalizeScalar(query.classId ?? body?.classId)
+  const classToken = typeof rawClassToken === 'string' && rawClassToken.trim() ? rawClassToken.trim() : null
+  const classId = classToken ? (await requireClassAccess(event, classToken)).classId : null
 
   if (method !== 'GET' && !action) { throw createError({ statusCode: 400, statusMessage: 'Missing action' }) }
 
-  if (classId) {
-    await requireClassAccess(event, classId)
-  } else if (method !== 'GET') {
+  if (!classId && method !== 'GET') {
     throw createError({ statusCode: 400, statusMessage: 'classId is required' })
   }
 

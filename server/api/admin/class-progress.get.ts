@@ -288,13 +288,13 @@ async function getMissingRecords(queryState: any) {
 export default defineEventHandler(async (event) => {
   // Parse Filters and Configs from Frontend
   const query = getQuery(event)
-  const classId = typeof query.classId === 'string' ? query.classId.trim() : ''
+  const classToken = typeof query.classId === 'string' ? query.classId.trim() : ''
 
-  if (!classId) {
+  if (!classToken) {
     throw createError({ statusCode: 400, statusMessage: 'classId is required' })
   }
 
-  await requireClassAccess(event, classId)
+  const { classId } = await requireClassAccess(event, classToken)
   const mode = query.mode === 'missing' ? 'missing' : 'completed'
   const selectedDate = typeof query.date === 'string' && query.date.trim() ? query.date.trim() : ''
   const search = typeof query.search === 'string' ? query.search.trim().toLowerCase() : ''

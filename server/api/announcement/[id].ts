@@ -7,13 +7,13 @@ export default defineEventHandler(async (event) => {
 
   if (method === 'DELETE') {
     const query = getQuery(event)
-    const classId = typeof query.classId === 'string' ? query.classId : ''
+    const classToken = typeof query.classId === 'string' ? query.classId : ''
 
-    if (!classId) {
+    if (!classToken) {
       throw createError({ statusCode: 400, statusMessage: 'classId is required' })
     }
 
-    await requireClassAccess(event, classId)
+    const { classId } = await requireClassAccess(event, classToken)
 
     const id = event.context.params?.id
 

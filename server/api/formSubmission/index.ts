@@ -11,10 +11,10 @@ export default defineEventHandler(async (event) => {
 
   if (method === 'GET') {
     const where: Prisma.FormSubmissionWhereInput = {}
-    const classId = typeof query.classId === 'string' ? query.classId : null
+    const classToken = typeof query.classId === 'string' ? query.classId : null
 
-    if (classId) {
-      await requireClassAccess(event, classId)
+    if (classToken) {
+      const { classId } = await requireClassAccess(event, classToken)
       where.Form = { FormGroup: { class: classId } }
       where.Student = { Classes: { some: { id: classId } } }
     }

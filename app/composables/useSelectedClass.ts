@@ -1,6 +1,6 @@
 export const useSelectedClass = () => {
   const route = useRoute()
-  const storedClassId = useCookie<string | null>('selected-class-id', {
+  const storedClassId = useCookie<string | null>('selected-class-token', {
     sameSite: 'lax',
   })
 

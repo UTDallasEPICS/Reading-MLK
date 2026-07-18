@@ -42,21 +42,17 @@ export async function requireClassManager(event: H3Event) {
   return session
 }
 
-export async function requireClassAccess(event: H3Event, classId: string) {
+export async function requireClassAccess(event: H3Event, classToken: string) {
   const session = await requireClassManager(event)
 
   const classroom = await prisma.class.findFirst({
     where: {
-      id: classId,
-      ...(session.user.role === 'admin'
-        ? {}
-        : {
-            Posters: {
-              some: {
-                userId: session.user.id,
-              },
-            },
-          }),
+      joinToken: classToken,
+      Posters: {
+        some: {
+          userId: session.user.id,
+        },
+      },
     },
     select: {
       id: true,
@@ -70,5 +66,5 @@ export async function requireClassAccess(event: H3Event, classId: string) {
     })
   }
 
-  return session
+  return { session, classId: classroom.id }
 }

@@ -6,13 +6,15 @@ export default defineEventHandler(async (event) => {
   const method = event.node.req.method
   const query = getQuery(event)
   const now = new Date()
-  const classId = typeof query.classId === 'string' ? query.classId : null
+  const classToken = typeof query.classId === 'string' ? query.classId : null
 
 
   //Get /api/formGroup?active=true to get only active form groups
   if (method === 'GET') {
-    if (classId) {
-      await requireClassAccess(event, classId)
+    let classId: string | null = null
+
+    if (classToken) {
+      classId = (await requireClassAccess(event, classToken)).classId
     } else {
       await requireSession(event)
     }
@@ -59,7 +61,7 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 400, statusMessage: 'classId is required' })
     }
 
-    await requireClassAccess(event, requestedClassId)
+    const { classId } = await requireClassAccess(event, requestedClassId)
 
     if (!body.id) {
       throw createError({
@@ -69,7 +71,7 @@ export default defineEventHandler(async (event) => {
     }
 
     const formGroup = await prisma.formGroup.findFirst({
-      where: { id: Number(body.id), class: requestedClassId },
+      where: { id: Number(body.id), class: classId },
       select: { id: true },
     })
 
@@ -81,7 +83,7 @@ export default defineEventHandler(async (event) => {
       const studentInClass = await prisma.student.findFirst({
         where: {
           id: Number(body.raffleWinner),
-          Classes: { some: { id: requestedClassId } },
+          Classes: { some: { id: classId } },
         },
         select: { id: true },
       })

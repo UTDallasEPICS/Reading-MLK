@@ -8,11 +8,13 @@ export default defineEventHandler(async (event) => {
   const method = event.node.req.method
   const query = getQuery(event)
   const now = new Date()
-  const classId = typeof query.classId === 'string' ? query.classId : null
+  const classToken = typeof query.classId === 'string' ? query.classId : null
 
   if (method === 'GET') {
-    if (classId) {
-      await requireClassAccess(event, classId)
+    let classId: string | null = null
+
+    if (classToken) {
+      classId = (await requireClassAccess(event, classToken)).classId
     } else {
       await requireSession(event)
     }
@@ -41,7 +43,7 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 400, statusMessage: 'classId is required' })
     }
 
-    const session = await requireClassAccess(event, requestedClassId)
+    const { session, classId } = await requireClassAccess(event, requestedClassId)
     const body = announcementCreateSchema.safeParse(rawBody)
     
     if (!body.success) {
@@ -62,7 +64,7 @@ export default defineEventHandler(async (event) => {
           postDate: body.data.postDate,
           expiryDate: body.data.expiryDate ?? null,
           author: poster.id,
-          class: requestedClassId,
+          class: classId,
         },
       })
     })
