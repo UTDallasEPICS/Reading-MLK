@@ -191,7 +191,7 @@ function applyItem(item: any) {
     </main>
 
     <!-- ── LEFT / RIGHT ARROWS ── -->
-    <NuxtLink to="/reader/home"
+    <NuxtLink to="/reader"
       class="fixed right-2 top-1/2 -translate-y-1/2 z-[100] p-2 flex items-center gap-1 transition-all cursor-pointer group"
       style="color:rgba(224,96,77,0.6); text-decoration:none">
       <span class="text-sm font-bold uppercase tracking-wide">Home</span>

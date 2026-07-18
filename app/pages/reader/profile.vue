@@ -51,7 +51,7 @@ function getCardColor(index: number) {
 
 async function selectStudent(selectedStudent: Student) {
   setStudent(selectedStudent)
-  await navigateTo('/reader/home')
+  await navigateTo('/reader')
 }
 
 async function createStudent() {
@@ -74,7 +74,7 @@ async function createStudent() {
     name.value = ''
     newStudentLanguage.value = 'en'
     showCreateForm.value = false
-    await navigateTo('/reader/home')
+    await navigateTo('/reader')
   } catch (error) {
     console.error('Failed to create student', error)
   } finally {

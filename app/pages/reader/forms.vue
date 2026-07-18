@@ -530,7 +530,7 @@ function getBadgeClass(type: string) {
     </main>
 
     <!-- ── LEFT ARROW ── -->
-    <NuxtLink to="/reader/home"
+    <NuxtLink to="/reader"
       class="fixed left-2 top-1/2 -translate-y-1/2 z-[100] p-2 flex items-center gap-1 transition-all cursor-pointer group"
       style="color:rgba(224,96,77,0.6); text-decoration:none">
       <svg class="w-12 h-16 group-hover:-translate-x-1 transition-transform drop-shadow-md" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
