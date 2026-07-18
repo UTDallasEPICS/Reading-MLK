@@ -17,7 +17,6 @@ model User {
   publicityConsent    Boolean              @default(false)
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
-  posterId            String?
 
   sessions            Session[]
   poster              Poster?

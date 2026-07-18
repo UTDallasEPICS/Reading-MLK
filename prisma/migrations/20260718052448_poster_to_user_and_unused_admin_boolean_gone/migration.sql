@@ -36,8 +36,7 @@ CREATE TABLE "new_user" (
     "raffleOptIn" BOOLEAN NOT NULL DEFAULT true,
     "publicityConsent" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" DATETIME NOT NULL,
-    "posterId" TEXT
+    "updatedAt" DATETIME NOT NULL
 );
 INSERT INTO "new_user" ("createdAt", "email", "emailVerified", "id", "name", "publicityConsent", "raffleOptIn", "role", "updatedAt") SELECT "createdAt", "email", "emailVerified", "id", "name", "publicityConsent", "raffleOptIn", "role", "updatedAt" FROM "user";
 DROP TABLE "user";
