@@ -84,7 +84,7 @@ async function sendMagicLink(callbackURL: string) {
 }
 
 async function handleSubmit(_event: FormSubmitEvent<any>) {
-  const callbackURL = loginRole.value === 'admin' ? '/admin' : '/reader/profile'
+  const callbackURL = loginRole.value === 'admin' ? '/auth?role=admin' : '/reader/profile'
 
   // New users entering through Faculty become Posters; Reading Buddies remain readers.
   if (isNewUser.value) {
