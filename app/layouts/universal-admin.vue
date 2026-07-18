@@ -47,7 +47,7 @@ const navigation = [
       </div>
 
       <div class="portal-sidebar-footer">
-        <NuxtLink to="/auth" class="portal-logout"> ← Log out </NuxtLink>
+        <LogoutButton class="portal-logout">← Log out</LogoutButton>
       </div>
     </aside>
 

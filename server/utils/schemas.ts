@@ -10,6 +10,14 @@ export const userCreateSchema = z.object({
   publicityConsent: z.boolean().optional().default(false),
 })
 
+export const classCreateSchema = z.object({
+  name: z.string().trim().min(1).max(120),
+  type: z.enum(['Teacher', 'Study Group', 'Community Group', 'Other']),
+  school: z.string().trim().max(160).optional(),
+  district: z.string().trim().max(160).optional(),
+  zipcode: z.string().trim().max(10).optional(),
+})
+
 export const adminCreateSchema = z.object({
   settings: z.object({}).optional(),
 })

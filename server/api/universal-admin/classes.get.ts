@@ -5,21 +5,18 @@ export default defineEventHandler(async (event) => {
   const session = await requireClassManager(event)
 
   return await prisma.class.findMany({
-    where:
-      session.user.role === 'admin'
-        ? undefined
-        : {
-            Posters: {
-              some: {
-                userId: session.user.id,
-              },
-            },
-          },
+    where: {
+      Posters: {
+        some: {
+          userId: session.user.id,
+        },
+      },
+    },
     orderBy: {
       name: 'asc',
     },
     select: {
-      id: true,
+      joinToken: true,
       name: true,
     },
   })

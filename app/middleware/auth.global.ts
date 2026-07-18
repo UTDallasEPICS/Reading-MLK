@@ -27,29 +27,29 @@ export default defineNuxtRouteMiddleware(async (to) => {
         return navigateTo('/universal-admin')
       }
 
-      return navigateTo(userRole === 'poster' ? '/admin' : '/reader/profile')
+      return navigateTo(userRole === 'poster' ? '/admin' : '/reader')
     }
 
     if (requestedRole === 'reader') {
-      return navigateTo('/reader/profile')
+      return navigateTo('/reader')
     }
 
     if (userRole === 'admin') {
       return navigateTo('/universal-admin')
     }
 
-    return navigateTo(userRole === 'poster' ? '/admin' : '/reader/profile')
+    return navigateTo(userRole === 'poster' ? '/admin' : '/reader')
   }
 
   if (isUniversalAdminRoute && !isCreateClassRoute && userRole !== 'admin') {
-    return navigateTo(userRole === 'poster' ? '/admin' : '/reader/profile')
+    return navigateTo(userRole === 'poster' ? '/admin' : '/reader')
   }
 
   if (isCreateClassRoute && userRole !== 'admin' && userRole !== 'poster') {
-    return navigateTo('/reader/profile')
+    return navigateTo('/reader')
   }
 
   if (isAdminRoute && userRole !== 'admin' && userRole !== 'poster') {
-    return navigateTo('/reader/profile')
+    return navigateTo('/reader')
   }
 })

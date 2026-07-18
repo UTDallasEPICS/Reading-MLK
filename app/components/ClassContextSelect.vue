@@ -2,13 +2,13 @@
 import { authClient } from '../utils/auth-client'
 
 type ClassOption = {
-  id: string
+  joinToken: string
   name: string
 }
 
 const route = useRoute()
 const router = useRouter()
-const selectedClassId = useCookie<string | null>('selected-class-id', {
+const selectedClassToken = useCookie<string | null>('selected-class-token', {
   sameSite: 'lax',
 })
 const { data: session } = await authClient.useSession(useFetch)
@@ -21,7 +21,7 @@ const { data: classes, status: classesStatus } = await useFetch<ClassOption[]>(
   }
 )
 
-function getRouteClassId() {
+function getRouteClassToken() {
   const classQuery = route.query.class
   return Array.isArray(classQuery) ? classQuery[0] : classQuery
 }
@@ -32,8 +32,8 @@ function getCurrentContext() {
   }
 
   if (route.path.startsWith('/admin')) {
-    const classId = getRouteClassId() || selectedClassId.value
-    return classId ? `class:${classId}` : 'admin'
+    const classToken = getRouteClassToken() || selectedClassToken.value
+    return classToken ? `class:${classToken}` : 'admin'
   }
 
   return 'admin'
@@ -47,7 +47,7 @@ const canManageClasses = computed(
 )
 
 watch(
-  () => [route.path, route.query.class, selectedClassId.value],
+  () => [route.path, route.query.class, selectedClassToken.value],
   () => {
     selectedContext.value = getCurrentContext()
   }
@@ -59,7 +59,7 @@ watch(
     () => classes.value.length,
     () => route.path,
     () => route.query.class,
-    () => selectedClassId.value,
+    () => selectedClassToken.value,
     canAccessUniversalAdmin,
     canManageClasses,
   ],
@@ -76,17 +76,17 @@ watch(
       }
 
       if (classes.value.length === 0 && route.path !== '/universal-admin/create-class') {
-        selectedClassId.value = null
+        selectedClassToken.value = null
         await router.replace('/universal-admin/create-class')
         return
       }
 
       if (route.path.startsWith('/admin')) {
-        const classId = getRouteClassId() || selectedClassId.value
-        const classExists = classes.value.some((classroom) => classroom.id === classId)
+        const classToken = getRouteClassToken() || selectedClassToken.value
+        const classExists = classes.value.some((classroom) => classroom.joinToken === classToken)
 
-        if (!classId || !classExists) {
-          selectedClassId.value = null
+        if (!classToken || !classExists) {
+          selectedClassToken.value = null
 
           if (canAccessUniversalAdmin.value) {
             await router.replace('/universal-admin')
@@ -96,10 +96,10 @@ watch(
           const firstClass = classes.value[0]
 
           if (firstClass) {
-            selectedClassId.value = firstClass.id
+            selectedClassToken.value = firstClass.joinToken
             await router.replace({
               path: '/admin',
-              query: { class: firstClass.id },
+              query: { class: firstClass.joinToken },
             })
           }
         }
@@ -118,7 +118,7 @@ async function changeContext() {
       return
     }
 
-    selectedClassId.value = null
+    selectedClassToken.value = null
     await router.push('/universal-admin')
     return
   }
@@ -128,11 +128,11 @@ async function changeContext() {
     return
   }
 
-  const classId = selectedContext.value.replace(/^class:/, '')
-  selectedClassId.value = classId
+  const classToken = selectedContext.value.replace(/^class:/, '')
+  selectedClassToken.value = classToken
   await router.push({
     path: '/admin',
-    query: { class: classId },
+    query: { class: classToken },
   })
 }
 </script>
@@ -146,7 +146,7 @@ async function changeContext() {
 
       <option v-if="classesStatus === 'pending'" disabled>Loading classes…</option>
 
-      <option v-for="classroom in classes" :key="classroom.id" :value="`class:${classroom.id}`">
+      <option v-for="classroom in classes" :key="classroom.joinToken" :value="`class:${classroom.joinToken}`">
         {{ classroom.name }}
       </option>
 
