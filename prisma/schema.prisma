@@ -15,10 +15,12 @@ model User {
   role                String               @default("reader")
   raffleOptIn         Boolean              @default(true)
   publicityConsent    Boolean              @default(false)
-  admin               Boolean              @default(false)
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
+  posterId            String?
+
   sessions            Session[]
+  poster              Poster?
   accounts            Account[]
   students            Student[]
   pendingEmailChanges PendingEmailChange?
@@ -79,7 +81,9 @@ model Poster {
   school      String?           
   district    String?
   zipcode     String?
+  userId      String      @unique
 
+  User          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   Classes       Class[]
   announcements Announcement[]
   @@index([tag])
