@@ -351,12 +351,12 @@ function getBadgeClass(type: string) {
             <h3 class="font-heading text-xl font-bold" style="color:var(--brand-dark)">📺 Let's read a story together!</h3>
             <p class="text-gray-500 font-medium text-sm">Use this provided resource, then we'll do the form.</p>
             <div v-if="firstVideoContext" class="p-5 rounded-2xl bg-amber-50 border border-amber-100 space-y-2 text-left max-w-2xl mx-auto">
-              <p class="text-xl font-heading font-bold leading-snug" style="color:var(--brand-dark)">{{ firstVideoContext }}</p>
+              <p class="text-xl font-heading font-bold leading-snug" style="color:var(--brand-dark)"><span v-html="firstVideoContext"></span></p>
               <p
                 v-if="settings.language === 'es' && firstVideoContextEs"
                 class="text-base italic text-gray-500 leading-snug border-t border-amber-200 pt-2"
               >
-                {{ firstVideoContextEs }}
+                <span v-html="firstVideoContextEs"></span>
               </p>
             </div>
             <div class="max-w-2xl mx-auto aspect-video w-full rounded-2xl overflow-hidden shadow-lg border-4 border-white">
@@ -401,25 +401,25 @@ function getBadgeClass(type: string) {
 
                   <!-- Context block -->
                   <div v-if="currentComponent.questionType === 'context'" class="p-5 rounded-2xl bg-amber-50 border border-amber-100 space-y-2">
-                    <p class="text-xl font-heading font-bold leading-snug" style="color:var(--brand-dark)">{{ currentComponent.questionText }}</p>
+                    <p class="text-xl font-heading font-bold leading-snug" style="color:var(--brand-dark)"><span v-html="currentComponent.questionText"></span></p>
                     <!-- Spanish translation shown below English when language is set to Spanish -->
                     <p
                       v-if="settings.language === 'es' && (currentComponent.questionOptions as any)?.textEs"
                       class="text-base italic text-gray-500 leading-snug border-t border-amber-200 pt-2"
                     >
-                      {{ (currentComponent.questionOptions as any).textEs }}
+                      <span v-html="(currentComponent.questionOptions as any).textEs"></span>
                     </p>
                   </div>
 
                   <!-- Video -->
                   <div v-else-if="currentComponent.questionType === 'video'" class="space-y-3">
                     <div v-if="currentComponent.questionText" class="p-5 rounded-2xl bg-amber-50 border border-amber-100 space-y-2">
-                      <p class="text-xl font-heading font-bold leading-snug" style="color:var(--brand-dark)">{{ currentComponent.questionText }}</p>
+                      <p class="text-xl font-heading font-bold leading-snug" style="color:var(--brand-dark)"><span v-html="currentComponent.questionText"></span></p>
                       <p
                         v-if="settings.language === 'es' && (currentComponent.questionOptions as any)?.textEs"
                         class="text-base italic text-gray-500 leading-snug border-t border-amber-200 pt-2"
                       >
-                        {{ (currentComponent.questionOptions as any).textEs }}
+                        <span v-html="(currentComponent.questionOptions as any).textEs"></span>
                       </p>
                     </div>
                     <div class="max-w-2xl mx-auto aspect-video w-full rounded-2xl overflow-hidden shadow-lg border-4 border-white">
@@ -429,13 +429,13 @@ function getBadgeClass(type: string) {
 
                   <!-- Text / MCQ question -->
                   <div v-else class="space-y-1">
-                    <h4 class="text-xl font-heading font-bold" style="color:var(--brand-dark)">&quot;{{ currentComponent.questionText }}&quot;</h4>
+                    <h4 class="text-xl font-heading font-bold" style="color:var(--brand-dark)">&quot;<span v-html="currentComponent.questionText"></span>&quot;</h4>
                     <!-- Spanish translation shown below English when language is set to Spanish -->
                     <p
                       v-if="settings.language === 'es' && (currentComponent.questionOptions as any)?.textEs"
                       class="text-base italic text-gray-500"
                     >
-                      &quot;{{ (currentComponent.questionOptions as any).textEs }}&quot;
+                      &quot;<span v-html="(currentComponent.questionOptions as any).textEs"></span>&quot;
                     </p>
                   </div>
 
@@ -464,7 +464,7 @@ function getBadgeClass(type: string) {
                               ? 'background:var(--brand-indigo); color:white'
                               : 'background:#f1f5f9; color:#6b7280'"
                           >{{ String.fromCharCode(65 + Number(ci)) }}</span>
-                          {{ (choice as any).text }}
+                          <span v-html="(choice as any).text"></span>
                         </button>
                       </div>
 
@@ -486,14 +486,14 @@ function getBadgeClass(type: string) {
                       </div>
                       <div class="text-gray-700 font-medium space-y-2">
                         <template v-if="feedbackReferenceText">
-                          <p class="italic">{{ feedbackReferenceText }}</p>
-                          <p v-if="settings.language === 'es' && feedbackReferenceTextEs" class="italic text-gray-500">{{ feedbackReferenceTextEs }}</p>
+                          <p class="italic"><span v-html="feedbackReferenceText"></span></p>
+                          <p v-if="settings.language === 'es' && feedbackReferenceTextEs" class="italic text-gray-500"><span v-html="feedbackReferenceTextEs"></span></p>
                         </template>
                         <p v-else-if="isCurrentComponentCorrect">
                           Keep going! You're doing awesome!
                         </p>
                         <p v-if="!isCurrentComponentCorrect">
-                          The correct answer was: <span class="font-bold">{{ correctAnswerText }}</span> You'll get it next time!
+                          The correct answer was: <span class="font-bold" v-html="correctAnswerText"></span> You'll get it next time!
                         </p>
                       </div>
                     </div>
