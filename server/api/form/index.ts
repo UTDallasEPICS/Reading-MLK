@@ -1,6 +1,6 @@
 import { Prisma } from '~~/prisma/generated/client'
-import { auth } from '~~/server/utils/auth'
 import { prisma } from '~~/server/utils/prisma'
+import { requireClassAccess } from '~~/server/utils/require-session'
 import { getQuery, setResponseStatus, type H3Event } from 'h3'
 
 type ActionName =
@@ -143,11 +143,12 @@ const getWeekBoundsUtc = (date: Date) => {
   return { monday, sunday }
 }
 
-const findOrCreateWeeklyFormGroup = async (date: Date) => {
+const findOrCreateWeeklyFormGroup = async (date: Date, classId: string) => {
   const { monday, sunday } = getWeekBoundsUtc(date)
 
   const existingGroup = await prisma.formGroup.findFirst({
     where: {
+      class: classId,
       OR: [
         {
           startDate: monday,
@@ -170,6 +171,7 @@ const findOrCreateWeeklyFormGroup = async (date: Date) => {
     data: {
       startDate: monday,
       endDate: sunday,
+      class: classId,
     },
     select: { id: true },
   })
@@ -177,9 +179,10 @@ const findOrCreateWeeklyFormGroup = async (date: Date) => {
   return createdGroup.id
 }
 
-const findMatchingFormGroupByDate = async (date: Date) => {
+const findMatchingFormGroupByDate = async (date: Date, classId?: string) => {
   return await prisma.formGroup.findFirst({
     where: {
+      ...(classId ? { class: classId } : {}),
       startDate: { lte: date },
       OR: [
         { endDate: null },
@@ -194,49 +197,6 @@ const findMatchingFormGroupByDate = async (date: Date) => {
 const getAction = (event: H3Event, body: Record<string, unknown> | null) => {
   const query = getQuery(event)
   return (query.action ?? body?.action) as ActionName | undefined
-}
-
-const isFormApiDevBypassEnabled = () =>
-  process.env.NODE_ENV !== 'production' || process.env.FORM_API_DEV_BYPASS === 'true'
-
-const requireAdminSession = async (event: H3Event) => {
-  const session = await auth.api.getSession({
-    headers: event.headers,
-  })
-
-  if (!session) {
-    if (isFormApiDevBypassEnabled()) {
-      return { session: null, userId: null, admin: null, bypassed: true }
-    }
-
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'Unauthorized: no active session. Log in, or set FORM_API_DEV_BYPASS=true for local testing only.',
-    })
-  }
-
-  const userId = normalizeScalar(session.user.id)
-
-  if (!userId || typeof userId !== 'string') {
-    throw createError({ statusCode: 400, statusMessage: 'Invalid session user id' })
-  }
-
-  const admin = await prisma.admin.findUnique({
-    where: { userId },
-  })
-
-  if (!admin) {
-    if (isFormApiDevBypassEnabled()) {
-      return { session, userId, admin: null, bypassed: true }
-    }
-
-    throw createError({
-      statusCode: 403,
-      statusMessage: 'Forbidden: current user is not an admin.',
-    })
-  }
-
-  return { session, userId, admin, bypassed: false }
 }
 
 const mapComponent = (component: {
@@ -265,7 +225,6 @@ const mapForm = (
     startDate: Date
     endDate: Date | null
     published: boolean
-    author: string
     formGroup: number
     title: string
     Components?: Array<{
@@ -288,7 +247,6 @@ const mapForm = (
     startDate: formatIsoDate(startDate),
     endDate: formatIsoDate(form.endDate),
     published: form.published,
-    author: form.author,
     formGroup: form.formGroup,
     status: form.published ? 'Active' : 'Unpublished',
     day: formatDayName(startDate),
@@ -321,18 +279,67 @@ const formInclude = {
   FormGroup: true,
 }
 
+const requireFormGroupInClass = async (formGroupId: number, classId: string) => {
+  const formGroup = await prisma.formGroup.findFirst({
+    where: { id: formGroupId, class: classId },
+    select: { id: true },
+  })
+
+  if (!formGroup) {
+    throw createError({ statusCode: 404, statusMessage: 'Form group not found in this class' })
+  }
+
+  return formGroup
+}
+
+const requireFormInClass = async (formId: number, classId: string) => {
+  const form = await prisma.form.findFirst({
+    where: { id: formId, FormGroup: { class: classId } },
+    select: { id: true },
+  })
+
+  if (!form) {
+    throw createError({ statusCode: 404, statusMessage: 'Form not found in this class' })
+  }
+
+  return form
+}
+
+const requireComponentInClass = async (componentId: number, classId: string) => {
+  const component = await prisma.formComponent.findFirst({
+    where: { id: componentId, Form: { FormGroup: { class: classId } } },
+    select: { id: true },
+  })
+
+  if (!component) {
+    throw createError({ statusCode: 404, statusMessage: 'Form component not found in this class' })
+  }
+
+  return component
+}
+
 export default defineEventHandler(async (event) => {
   const method = event.node.req.method ?? 'GET'
   const body = method === 'GET' ? null : ((await readBody(event).catch(() => null)) as Record<string, unknown> | null)
   const action = getAction(event, body)
+  const query = getQuery(event)
+  const rawClassId = normalizeScalar(query.classId ?? body?.classId)
+  const classId = typeof rawClassId === 'string' && rawClassId.trim() ? rawClassId.trim() : null
 
   if (method !== 'GET' && !action) { throw createError({ statusCode: 400, statusMessage: 'Missing action' }) }
+
+  if (classId) {
+    await requireClassAccess(event, classId)
+  } else if (method !== 'GET') {
+    throw createError({ statusCode: 400, statusMessage: 'classId is required' })
+  }
 
   if (method === 'GET') {
     const selectedAction = action ?? 'listFormGroups'
 
     if (selectedAction === 'listFormGroups') {
       const groups = await prisma.formGroup.findMany({
+        where: classId ? { class: classId } : undefined,
         orderBy: [{ startDate: 'desc' }, { id: 'desc' }],
         include: formGroupInclude,
       })
@@ -350,8 +357,11 @@ export default defineEventHandler(async (event) => {
     if (selectedAction === 'getFormGroup') {
       const groupId = toInt(getQuery(event).id, 'id')
 
-      const group = await prisma.formGroup.findUnique({
-        where: { id: groupId as number },
+      const group = await prisma.formGroup.findFirst({
+        where: {
+          id: groupId as number,
+          ...(classId ? { class: classId } : {}),
+        },
         include: formGroupInclude,
       })
 
@@ -370,19 +380,20 @@ export default defineEventHandler(async (event) => {
     }
 
     if (selectedAction === 'listForms') {
-      const query = getQuery(event)
       const formGroupId = query.formGroup !== undefined ? toInt(query.formGroup, 'formGroup', false) : null
       const weeklyDate =
         !!query.weeklyDate
           ? (toDate(query.weeklyDate, 'weeklyDate') as Date)
           : null
 
-      const where: Prisma.FormWhereInput = {}
+      const where: Prisma.FormWhereInput = classId
+        ? { FormGroup: { class: classId } }
+        : {}
 
       if (formGroupId !== null) { where.formGroup = formGroupId }
 
       if (weeklyDate) {
-        const matchingGroup = await findMatchingFormGroupByDate(weeklyDate)
+        const matchingGroup = await findMatchingFormGroupByDate(weeklyDate, classId ?? undefined)
 
         if (!matchingGroup) {
           return []
@@ -407,7 +418,7 @@ export default defineEventHandler(async (event) => {
 
     if (selectedAction === 'resolveFormGroupRangeByDate') {
       const weeklyDate = toDate(getQuery(event).weeklyDate, 'weeklyDate') as Date
-      const matchingGroup = await findMatchingFormGroupByDate(weeklyDate)
+      const matchingGroup = await findMatchingFormGroupByDate(weeklyDate, classId ?? undefined)
 
       if (!matchingGroup) {
         return {
@@ -430,7 +441,10 @@ export default defineEventHandler(async (event) => {
       const formGroupId = toInt(getQuery(event).formGroupId, 'formGroupId')
 
       const forms = await prisma.form.findMany({
-        where: { formGroup: formGroupId as number },
+        where: {
+          formGroup: formGroupId as number,
+          ...(classId ? { FormGroup: { class: classId } } : {}),
+        },
         select: { id: true },
       })
 
@@ -462,8 +476,9 @@ export default defineEventHandler(async (event) => {
     }
 
     if (selectedAction === 'getOnlyActiveFormsinGroup') {
-      const query = getQuery(event)
-      const where: Prisma.FormWhereInput = {}
+      const where: Prisma.FormWhereInput = classId
+        ? { FormGroup: { class: classId } }
+        : {}
 
       if (query.formGroup !== null) { where.formGroup = Number(query.formGroup) }
       where.published = true
@@ -480,8 +495,6 @@ export default defineEventHandler(async (event) => {
 
 
 
-  const { admin } = await requireAdminSession(event)
-
   if (method === 'POST') {
     if (action === 'createFormGroup') {
       const startDate = toDate(body?.startDate, 'startDate')
@@ -489,8 +502,11 @@ export default defineEventHandler(async (event) => {
       const raffleWinner = hasOwnField(body, 'raffleWinner') ? toInt(body?.raffleWinner, 'raffleWinner', false) : null
 
       if (raffleWinner !== null) {
-        const student = await prisma.student.findUnique({
-          where: { id: raffleWinner },
+        const student = await prisma.student.findFirst({
+          where: {
+            id: raffleWinner,
+            Classes: { some: { id: classId as string } },
+          },
           select: { id: true },
         })
 
@@ -504,6 +520,7 @@ export default defineEventHandler(async (event) => {
           startDate: startDate as Date,
           endDate,
           raffleWinner,
+          class: classId as string,
         },
         include: formGroupInclude,
       })
@@ -537,16 +554,16 @@ export default defineEventHandler(async (event) => {
       let resolvedFormGroupId: number
 
       if (requestedGroupId !== null) {
-        const requestedGroup = await prisma.formGroup.findUnique({
-          where: { id: requestedGroupId },
+        const requestedGroup = await prisma.formGroup.findFirst({
+          where: { id: requestedGroupId, class: classId as string },
           select: { id: true },
         })
 
         resolvedFormGroupId = requestedGroup
           ? requestedGroup.id
-          : await findOrCreateWeeklyFormGroup(startDate)
+          : await findOrCreateWeeklyFormGroup(startDate, classId as string)
       } else {
-        resolvedFormGroupId = await findOrCreateWeeklyFormGroup(startDate)
+        resolvedFormGroupId = await findOrCreateWeeklyFormGroup(startDate, classId as string)
       }
 
       const existingMax = await prisma.form.aggregate({
@@ -560,7 +577,6 @@ export default defineEventHandler(async (event) => {
           endDate,
           published,
           order: explicitOrder ?? ((existingMax._max.order ?? -1) + 1),
-          author: admin?.id ?? null,
       }
 
       if (title) {
@@ -594,14 +610,7 @@ export default defineEventHandler(async (event) => {
         throw createError({ statusCode: 400, statusMessage: 'questionText is required' })
       }
 
-      const parentForm = await prisma.form.findUnique({
-        where: { id: form as number },
-        select: { id: true },
-      })
-
-      if (!parentForm) {
-        throw createError({ statusCode: 404, statusMessage: 'Form not found' })
-      }
+      await requireFormInClass(form as number, classId as string)
 
       const explicitOrder = hasOwnField(body, 'order') ? toInt(body?.order, 'order', false) : null
 
@@ -635,6 +644,7 @@ export default defineEventHandler(async (event) => {
   if (method === 'PUT') {
     if (action === 'updateFormGroup') {
       const id = toInt(body?.id, 'id')
+      await requireFormGroupInClass(id as number, classId as string)
       const data: {
         startDate?: Date
         endDate?: Date | null
@@ -653,8 +663,11 @@ export default defineEventHandler(async (event) => {
         const raffleWinner = toInt(body?.raffleWinner, 'raffleWinner', false)
 
         if (raffleWinner !== null) {
-          const student = await prisma.student.findUnique({
-            where: { id: raffleWinner },
+          const student = await prisma.student.findFirst({
+            where: {
+              id: raffleWinner,
+              Classes: { some: { id: classId as string } },
+            },
             select: { id: true },
           })
 
@@ -688,6 +701,7 @@ export default defineEventHandler(async (event) => {
 
     if (action === 'updateForm') {
       const id = toInt(body?.id, 'id')
+      await requireFormInClass(id as number, classId as string)
       const data: {
         formGroup?: number
         startDate?: Date
@@ -699,14 +713,7 @@ export default defineEventHandler(async (event) => {
 
       if (hasOwnField(body, 'formGroup')) {
         const formGroup = toInt(body?.formGroup, 'formGroup')
-        const group = await prisma.formGroup.findUnique({
-          where: { id: formGroup as number },
-          select: { id: true },
-        })
-
-        if (!group) {
-          throw createError({ statusCode: 404, statusMessage: 'Form group not found' })
-        }
+        await requireFormGroupInClass(formGroup as number, classId as string)
 
         data.formGroup = formGroup as number
       }
@@ -747,18 +754,12 @@ export default defineEventHandler(async (event) => {
 
     if (action === 'updateComponent') {
       const id = toInt(body?.id, 'id')
+      await requireComponentInClass(id as number, classId as string)
       const data: Prisma.FormComponentUpdateInput = {}
 
       if (hasOwnField(body, 'form')) {
         const form = toInt(body?.form, 'form')
-        const parentForm = await prisma.form.findUnique({
-          where: { id: form as number },
-          select: { id: true },
-        })
-
-        if (!parentForm) {
-          throw createError({ statusCode: 404, statusMessage: 'Form not found' })
-        }
+        await requireFormInClass(form as number, classId as string)
 
         data.Form = {
           connect: { id: form as number },
@@ -811,6 +812,7 @@ export default defineEventHandler(async (event) => {
   if (method === 'DELETE') {
     if (action === 'deleteFormGroup') {
       const id = toInt(body?.id ?? getQuery(event).id, 'id')
+      await requireFormGroupInClass(id as number, classId as string)
 
       await prisma.formGroup.delete({
         where: { id: id as number },
@@ -824,6 +826,7 @@ export default defineEventHandler(async (event) => {
 
     if (action === 'deleteForm') {
       const id = toInt(body?.id ?? getQuery(event).id, 'id')
+      await requireFormInClass(id as number, classId as string)
 
       await prisma.form.delete({
         where: { id: id as number },
@@ -837,6 +840,7 @@ export default defineEventHandler(async (event) => {
 
     if (action === 'deleteComponent') {
       const id = toInt(body?.id ?? getQuery(event).id, 'id')
+      await requireComponentInClass(id as number, classId as string)
 
       await prisma.formComponent.delete({
         where: { id: id as number },

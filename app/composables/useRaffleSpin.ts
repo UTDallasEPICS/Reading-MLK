@@ -1,5 +1,6 @@
 import type { Student, FormGroup, Form, FormSubmission } from '~~/prisma/generated/client'
 export const useRaffleSpin = () => {
+  const { classId } = useSelectedClass()
 
   const raffleWeekStart = ref<Date | string>(new Date())
 
@@ -10,9 +11,17 @@ export const useRaffleSpin = () => {
   const spinCount = ref(0)
 
   const loadRaffleFormGroup = async () => {
+    if (!classId.value) {
+      raffleFormGroup.value = null
+      return
+    }
+
     const val = raffleWeekStart.value
     const dateStr = val instanceof Date ? val.toISOString().split('T')[0] : String(val).split('T')[0]
-    const data = await $fetch<FormGroup>(`/api/formGroup?date=${dateStr}`, { method: 'GET' })
+    const data = await $fetch<FormGroup>('/api/formGroup', {
+      method: 'GET',
+      query: { date: dateStr, classId: classId.value },
+    })
     raffleFormGroup.value = data || null
   }
 
@@ -21,7 +30,14 @@ export const useRaffleSpin = () => {
       raffleForms.value = []
       return
     }
-    const data = await $fetch<Form[]>(`/api/form?action=listForms&formGroup=${raffleFormGroup.value.id}`, { method: 'GET' })
+    const data = await $fetch<Form[]>('/api/form', {
+      method: 'GET',
+      query: {
+        action: 'listForms',
+        formGroup: raffleFormGroup.value.id,
+        classId: classId.value,
+      },
+    })
     raffleForms.value = data || []
   }
 
@@ -30,7 +46,10 @@ export const useRaffleSpin = () => {
       raffleSubmissions.value = []
       return
     }
-    const data = await $fetch<FormSubmission[]>(`/api/formSubmission?formGroup=${raffleFormGroup.value.id}`, { method: 'GET' })
+    const data = await $fetch<FormSubmission[]>('/api/formSubmission', {
+      method: 'GET',
+      query: { formGroup: raffleFormGroup.value.id, classId: classId.value },
+    })
     raffleSubmissions.value = data || []
   }
 
@@ -63,7 +82,8 @@ export const useRaffleSpin = () => {
         method: 'PUT',
         body: {
           id: raffleFormGroup.value.id,
-          raffleWinner: studentId
+          raffleWinner: studentId,
+          classId: classId.value,
         }
       })
       await loadRaffleData()
@@ -72,6 +92,14 @@ export const useRaffleSpin = () => {
       console.error("Error setting winner", e)
     }
   }
+
+  watch(classId, async () => {
+    raffleFormGroup.value = null
+    raffleForms.value = []
+    raffleSubmissions.value = []
+    raffleWinner.value = null
+    await loadRaffleData()
+  })
 
   return {
     raffleWinner,

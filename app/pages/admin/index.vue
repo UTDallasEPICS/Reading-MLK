@@ -5,6 +5,7 @@ const {
   publishedForms,
   students,
 } = useAdmin()
+const { classId } = useSelectedClass()
 
 const activeForms = computed(
   () => publishedForms.value.filter((f: any) => f.status === 'Active').length
@@ -13,8 +14,15 @@ const activeForms = computed(
 // Fetch the real active-announcement count from the database.
 // Using ?active=true applies the same postDate/expiryDate filter the reader home uses,
 // so the number here always matches what students actually see.
-const { data: activeAnnouncementsData, refresh: refreshAnnouncements } = await useFetch<any[]>(
-  '/api/announcement?active=true'
+const { data: activeAnnouncementsData, refresh: refreshAnnouncements } = await useAsyncData(
+  'active-class-announcements',
+  () =>
+    classId.value
+      ? $fetch<any[]>('/api/announcement', {
+          query: { active: 'true', classId: classId.value },
+        })
+      : Promise.resolve([]),
+  { watch: [classId] }
 )
 
 const activeAnnouncements = computed(

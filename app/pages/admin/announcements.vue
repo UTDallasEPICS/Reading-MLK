@@ -16,6 +16,7 @@ const props = defineProps({
 
 
 const emit = defineEmits(['add', 'delete'])
+const { classId } = useSelectedClass()
 const subTab = ref('creation')
 const todayStr = new Date().toISOString().split('T')[0]
 
@@ -114,11 +115,18 @@ const inactiveAnnouncements = computed(() => allAnnouncements.value.filter(a => 
 //stores the error message in `historyError` for display. The `historyLoading` flag wraps the 
 //entire request so the template can show a spinner during the fetch.
 async function loadHistory () {
+  if (!classId.value) {
+    allAnnouncements.value = []
+    return
+  }
+
   historyLoading.value = true
   historyError.value = null
   try {
     // $fetch is Nuxt's HTTP utility (wraps native fetch with nice error handling).
-    allAnnouncements.value = await $fetch('/api/announcement')
+    allAnnouncements.value = await $fetch('/api/announcement', {
+      query: { classId: classId.value },
+    })
   } catch (e: any) {
     //Capture the error message; fall back to a generic string if none exists
     historyError.value = e?.message ?? 'Failed to load announcements.'
@@ -130,6 +138,10 @@ async function loadHistory () {
 
 //Watcher, triggers fetch on tab switch
 watch(subTab, (tab) => { if (tab === 'history') loadHistory() })
+watch(classId, () => {
+  allAnnouncements.value = []
+  if (subTab.value === 'history') loadHistory()
+})
 
 //Deletes an announcement
 async function deleteAnnouncement (id: number) {
@@ -138,7 +150,10 @@ async function deleteAnnouncement (id: number) {
 
   try {
     //Sends DELETE request and removes the record from the local `allAnnouncements` array
-    await $fetch(`/api/announcement/${id}`, { method: 'DELETE' })
+    await $fetch(`/api/announcement/${id}`, {
+      method: 'DELETE',
+      query: { classId: classId.value },
+    })
 
     //Find the deleted record's index in the reactive array and remove it.
     const idx = allAnnouncements.value.findIndex(a => a.id === id)
@@ -158,6 +173,10 @@ async function postAnnouncement () {
   }
 
   try {
+    if (!classId.value) {
+      throw new Error('Select a class before posting an announcement')
+    }
+
     //Format dates
     const postDate = new Date(form.startDate!).toISOString()
     const expiryDate = form.endDate ? new Date(form.endDate).toISOString() : null
@@ -176,7 +195,7 @@ async function postAnnouncement () {
         content,
         postDate,
         expiryDate,
-        author: null //Hardcoded author based on current functionality
+        classId: classId.value,
       }
     })
 
