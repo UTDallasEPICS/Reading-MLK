@@ -122,7 +122,7 @@ watch(settings, (newSettings) => {
       class="absolute top-4 left-0 right-0 w-full max-w-4xl mx-auto flex justify-end items-center px-6 z-[200]"
     >
       <NuxtLink
-        to="/reader/home"
+        to="/reader"
         class="w-14 h-14 bg-white rounded-xl flex items-center justify-center text-2xl transition-all border border-gray-200 shadow-lg hover:scale-110 active:scale-95"
       >
         🏠
