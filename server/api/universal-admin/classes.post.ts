@@ -1,14 +1,6 @@
-import { z } from 'zod'
 import { prisma } from '../../utils/prisma'
 import { requireClassManager } from '../../utils/require-session'
-
-const classCreateSchema = z.object({
-  name: z.string().trim().min(1).max(120),
-  type: z.enum(['Teacher', 'Study Group', 'Community Group', 'Other']),
-  school: z.string().trim().max(160).optional(),
-  district: z.string().trim().max(160).optional(),
-  zipcode: z.string().trim().max(10).optional(),
-})
+import { classCreateSchema } from '../../utils/schemas'
 
 const posterTagByClassType = {
   Teacher: 'teacher',
@@ -62,7 +54,7 @@ export default defineEventHandler(async (event) => {
         },
       },
       select: {
-        id: true,
+        joinToken: true,
         name: true,
       },
     })

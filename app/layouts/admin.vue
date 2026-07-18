@@ -1,42 +1,28 @@
 <!-- layouts/admin.vue -->
 <script setup lang="ts">
-import { authClient } from '~/utils/auth-client'
-
 const route = useRoute()
 
-async function logout() {
-  const confirmed = confirm('Are you sure you want to log out?')
-  if (!confirmed) return
-
-  try {
-    await authClient.signOut()
-    window.location.href = '/auth'
-  } catch (error) {
-    console.error('Logout failed:', error)
-  }
-}
-
-const selectedClassId = useCookie<string | null>('selected-class-id', {
+const selectedClassToken = useCookie<string | null>('selected-class-token', {
   sameSite: 'lax',
 })
 
-const routeClassId = computed(() => {
+const routeClassToken = computed(() => {
   const classQuery = route.query.class
   return Array.isArray(classQuery) ? classQuery[0] : classQuery
 })
 
 watchEffect(() => {
-  if (routeClassId.value) {
-    selectedClassId.value = routeClassId.value
+  if (routeClassToken.value) {
+    selectedClassToken.value = routeClassToken.value
   }
 })
 
 function navigateWithinClass(path: string) {
-  const classId = routeClassId.value || selectedClassId.value
+  const classToken = routeClassToken.value || selectedClassToken.value
 
   return navigateTo({
     path,
-    query: classId ? { class: classId } : {},
+    query: classToken ? { class: classToken } : {},
   })
 }
 </script>
@@ -95,7 +81,7 @@ function navigateWithinClass(path: string) {
 
       <div class="rh-sidebar-footer">
         <NuxtLink to="/" class="rh-back-link">← Back to Portal</NuxtLink>
-        <button class="rh-logout-link" @click="logout">⎋ Logout</button>
+        <LogoutButton class="rh-logout-link" />
       </div>
     </aside>
 
