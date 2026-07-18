@@ -31,3 +31,7 @@ prisma/generated
 
 prisma/dev.db
 prisma/dev.db-journal
+
+# non-pnpm lock files
+yarn.lock
+package-lock.json

@@ -169,7 +169,7 @@ const completionMessage = computed(() => {
                 <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase mr-2 text-gray-900" style="background: var(--brand-gold)">New</span>
                 {{ parseContent(mostRecent.content).title }}
               </p>
-              <p class="text-xs text-gray-400 mt-0.5 truncate">{{ parseContent(mostRecent.content).body }}</p>
+              <p class="text-xs text-gray-400 mt-0.5 truncate"><span v-html="parseContent(mostRecent.content).body"></span></p>
             </div>
             <!-- "View All" button always visible when there's at least one announcement -->
             <button
@@ -279,7 +279,7 @@ const completionMessage = computed(() => {
                     {{ fmtDate(ann.postDate) }}{{ ann.expiryDate ? ' → ' + fmtDate(ann.expiryDate) : ' (Ongoing)' }}
                   </span>
                 </div>
-                <p class="text-sm text-gray-500 font-medium leading-relaxed">{{ parseContent(ann.content).body }}</p>
+                <p class="text-sm text-gray-500 font-medium leading-relaxed"><span v-html="parseContent(ann.content).body"></span></p>
               </div>
             </div>
           </div>
