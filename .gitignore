@@ -32,6 +32,9 @@ prisma/generated
 prisma/dev.db
 prisma/dev.db-journal
 
+# Dev seed file
+prisma/seed.ts
+
 # non-pnpm lock files
 yarn.lock
 package-lock.json
