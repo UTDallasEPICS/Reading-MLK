@@ -29,7 +29,7 @@ onMounted(async () => {
 
 // ── Theme class ──
 const themeClass = computed(() => {
-  const t = 'light'
+  const t = settings.value.theme !== 'light' ? `theme-${settings.value.theme}` : ''
   const d = settings.value.dyslexiaFont ? 'dyslexia-font' : ''
   return `reader-app ${t} ${d}`.trim()
 })
@@ -141,7 +141,7 @@ const completionMessage = computed(() => {
         <NuxtLink
           to="/reader/settings"
           class="w-14 h-14 bg-white/90 backdrop-blur-md rounded-xl flex items-center justify-center text-2xl transition-all border-2 border-white shadow-xl hover:scale-110 active:scale-95"
-          style="hover:color: var(--brand-indigo)"
+          style="text-decoration: none;"
         >⚙️</NuxtLink>
       </div>
     </header>

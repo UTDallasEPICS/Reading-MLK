@@ -26,8 +26,9 @@ const stats = computed(() => ({
 }))
 
 const themeClass = computed(() => {
+  const t = settings.value.theme !== 'light' ? `theme-${settings.value.theme}` : ''
   const d = settings.value.dyslexiaFont ? 'dyslexia-font' : ''
-  return `reader-app ${d}`.trim()
+  return `reader-app ${t} ${d}`.trim()
 })
 
 const currentFormComponentsWithVideo = computed(() => {
