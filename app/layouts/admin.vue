@@ -15,6 +15,30 @@ async function logout() {
     console.error('Logout failed:', error)
   }
 }
+
+const selectedClassId = useCookie<string | null>('selected-class-id', {
+  sameSite: 'lax',
+})
+
+const routeClassId = computed(() => {
+  const classQuery = route.query.class
+  return Array.isArray(classQuery) ? classQuery[0] : classQuery
+})
+
+watchEffect(() => {
+  if (routeClassId.value) {
+    selectedClassId.value = routeClassId.value
+  }
+})
+
+function navigateWithinClass(path: string) {
+  const classId = routeClassId.value || selectedClassId.value
+
+  return navigateTo({
+    path,
+    query: classId ? { class: classId } : {},
+  })
+}
 </script>
 
 <template>
@@ -31,11 +55,41 @@ async function logout() {
 
         <p class="rh-nav-label">Admin Tools</p>
         <nav class="rh-nav">
-          <button @click="navigateTo('/admin')"               class="rh-nav-btn" :class="{ 'rh-nav-active': route.path === '/admin' }">Dashboard</button>
-          <button @click="navigateTo('/admin/builder')"       class="rh-nav-btn" :class="{ 'rh-nav-active': route.path === '/admin/builder' }">Form Builder</button>
-          <button @click="navigateTo('/admin/progress')"      class="rh-nav-btn" :class="{ 'rh-nav-active': route.path === '/admin/progress' }">Class Progress</button>
-          <button @click="navigateTo('/admin/raffle')"        class="rh-nav-btn" :class="{ 'rh-nav-active': route.path === '/admin/raffle' }">Raffle System</button>
-          <button @click="navigateTo('/admin/announcements')" class="rh-nav-btn" :class="{ 'rh-nav-active': route.path === '/admin/announcements' }">Announcements</button>
+          <button
+            @click="navigateWithinClass('/admin')"
+            class="rh-nav-btn"
+            :class="{ 'rh-nav-active': route.path === '/admin' }"
+          >
+            Dashboard
+          </button>
+          <button
+            @click="navigateWithinClass('/admin/builder')"
+            class="rh-nav-btn"
+            :class="{ 'rh-nav-active': route.path === '/admin/builder' }"
+          >
+            Form Builder
+          </button>
+          <button
+            @click="navigateWithinClass('/admin/progress')"
+            class="rh-nav-btn"
+            :class="{ 'rh-nav-active': route.path === '/admin/progress' }"
+          >
+            Class Progress
+          </button>
+          <button
+            @click="navigateWithinClass('/admin/raffle')"
+            class="rh-nav-btn"
+            :class="{ 'rh-nav-active': route.path === '/admin/raffle' }"
+          >
+            Raffle System
+          </button>
+          <button
+            @click="navigateWithinClass('/admin/announcements')"
+            class="rh-nav-btn"
+            :class="{ 'rh-nav-active': route.path === '/admin/announcements' }"
+          >
+            Announcements
+          </button>
         </nav>
       </div>
 
@@ -45,8 +99,19 @@ async function logout() {
       </div>
     </aside>
 
-    <div class="rh-main">
-      <slot />
+    <div class="rh-workspace">
+      <header class="rh-header">
+        <div>
+          <p class="rh-header-label">Reading Huddle</p>
+          <h1 class="rh-header-title">Administration</h1>
+        </div>
+
+        <ClassContextSelect />
+      </header>
+
+      <div class="rh-main">
+        <slot />
+      </div>
     </div>
   </div>
 </template>

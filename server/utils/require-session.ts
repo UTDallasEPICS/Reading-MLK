@@ -27,3 +27,16 @@ export async function requireAdmin(event: H3Event) {
 
   return session
 }
+
+export async function requireClassManager(event: H3Event) {
+  const session = await requireSession(event)
+
+  if (session.user.role !== 'admin' && session.user.role !== 'poster') {
+    throw createError({
+      statusCode: 403,
+      statusMessage: 'Forbidden',
+    })
+  }
+
+  return session
+}

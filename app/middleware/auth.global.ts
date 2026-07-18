@@ -7,9 +7,11 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const userRole = session.value?.user?.role
 
   const isAdminRoute = to.path.startsWith('/admin')
+  const isUniversalAdminRoute = to.path.startsWith('/universal-admin')
+  const isCreateClassRoute = to.path === '/universal-admin/create-class'
   const isReaderRoute = to.path.startsWith('/reader')
 
-  if (!isLoggedIn && (isAdminRoute || isReaderRoute)) {
+  if (!isLoggedIn && (isAdminRoute || isUniversalAdminRoute || isReaderRoute)) {
     return navigateTo('/auth')
   }
 
@@ -21,17 +23,33 @@ export default defineNuxtRouteMiddleware(async (to) => {
     const requestedRole = Array.isArray(to.query.role) ? to.query.role[0] : to.query.role
 
     if (requestedRole === 'admin') {
-      return navigateTo(userRole === 'admin' ? '/admin' : '/reader/profile')
+      if (userRole === 'admin') {
+        return navigateTo('/universal-admin')
+      }
+
+      return navigateTo(userRole === 'poster' ? '/admin' : '/reader/profile')
     }
 
     if (requestedRole === 'reader') {
       return navigateTo('/reader/profile')
     }
 
-    return navigateTo(userRole === 'admin' ? '/admin' : '/reader/profile')
+    if (userRole === 'admin') {
+      return navigateTo('/universal-admin')
+    }
+
+    return navigateTo(userRole === 'poster' ? '/admin' : '/reader/profile')
   }
 
-  if (isAdminRoute && userRole !== 'admin') {
+  if (isUniversalAdminRoute && !isCreateClassRoute && userRole !== 'admin') {
+    return navigateTo(userRole === 'poster' ? '/admin' : '/reader/profile')
+  }
+
+  if (isCreateClassRoute && userRole !== 'admin' && userRole !== 'poster') {
+    return navigateTo('/reader/profile')
+  }
+
+  if (isAdminRoute && userRole !== 'admin' && userRole !== 'poster') {
     return navigateTo('/reader/profile')
   }
 })

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 definePageMeta({
   ssr: false,
-  layout: 'universal-admin',
+  layout: 'admin',
 })
 
 useHead({
@@ -16,10 +16,13 @@ const form = reactive({
   school: '',
   district: '',
   zipcode: '',
-  description: '',
 })
 
-const submitted = ref(false)
+const isSubmitting = ref(false)
+const submissionError = ref('')
+const selectedClassId = useCookie<string | null>('selected-class-id', {
+  sameSite: 'lax',
+})
 
 const isTeacherClassroom = computed(() => form.type === 'Teacher')
 
@@ -31,15 +34,31 @@ watch(
       form.district = ''
       form.zipcode = ''
     }
-  },
+  }
 )
 
-function createClass() {
-  submitted.value = true
+async function createClass() {
+  submissionError.value = ''
+  isSubmitting.value = true
 
-  console.log('UI-only class creation:', {
-    ...form,
-  })
+  try {
+    const classroom = await $fetch<{ id: string; name: string }>('/api/universal-admin/classes', {
+      method: 'POST',
+      body: form,
+    })
+
+    selectedClassId.value = classroom.id
+    await refreshNuxtData('universal-admin-classes')
+    await router.push({
+      path: '/admin',
+      query: { class: classroom.id },
+    })
+  } catch (error) {
+    submissionError.value =
+      error instanceof Error ? error.message : 'The class could not be created. Please try again.'
+  } finally {
+    isSubmitting.value = false
+  }
 }
 
 function cancel() {
@@ -58,41 +77,25 @@ function cancel() {
         <h3>Class Information</h3>
       </div>
 
-      <form
-        class="class-form"
-        @submit.prevent="createClass"
-      >
+      <form class="class-form" @submit.prevent="createClass">
         <div class="form-grid">
           <label class="field field-wide">
             <span>Class name</span>
 
-            <input
-              v-model="form.name"
-              type="text"
-              placeholder="Enter a class name"
-              required
-            >
+            <input v-model="form.name" type="text" placeholder="Enter a class name" required />
           </label>
 
           <label class="field">
             <span>Class type</span>
 
             <select v-model="form.type">
-              <option value="Teacher">
-                Teacher Classroom
-              </option>
+              <option value="Teacher">Teacher Classroom</option>
 
-              <option value="Study Group">
-                Study Group
-              </option>
+              <option value="Study Group">Study Group</option>
 
-              <option value="Community Group">
-                Community Group
-              </option>
+              <option value="Community Group">Community Group</option>
 
-              <option value="Other">
-                Other
-              </option>
+              <option value="Other">Other</option>
             </select>
           </label>
 
@@ -105,7 +108,7 @@ function cancel() {
                 type="text"
                 placeholder="Enter a school or organization"
                 required
-              >
+              />
             </label>
 
             <label class="field">
@@ -116,7 +119,7 @@ function cancel() {
                 type="text"
                 placeholder="Enter a school district"
                 required
-              >
+              />
             </label>
 
             <label class="field">
@@ -129,42 +132,20 @@ function cancel() {
                 maxlength="10"
                 placeholder="Enter a ZIP code"
                 required
-              >
+              />
             </label>
           </template>
-
-          <label class="field field-wide">
-            <span>Description</span>
-
-            <textarea
-              v-model="form.description"
-              rows="5"
-              placeholder="Briefly describe the class or group."
-            />
-          </label>
         </div>
 
-        <div
-          v-if="submitted"
-          class="success-message"
-        >
-          The class information was submitted.
+        <div v-if="submissionError" class="error-message" role="alert">
+          {{ submissionError }}
         </div>
 
         <div class="form-actions">
-          <button
-            type="button"
-            class="cancel-button"
-            @click="cancel"
-          >
-            Cancel
-          </button>
+          <button type="button" class="cancel-button" @click="cancel">Cancel</button>
 
-          <button
-            type="submit"
-            class="create-button"
-          >
-            Create Class
+          <button type="submit" class="create-button" :disabled="isSubmitting">
+            {{ isSubmitting ? 'Creating…' : 'Create Class' }}
           </button>
         </div>
       </form>
@@ -250,8 +231,7 @@ function cancel() {
 }
 
 .field input,
-.field select,
-.field textarea {
+.field select {
   width: 100%;
   padding: 0.68rem 0.75rem;
   background: #ffffff;
@@ -262,31 +242,24 @@ function cancel() {
   font-size: 0.78rem;
 }
 
-.field textarea {
-  min-height: 7rem;
-  resize: none;
-}
-
-.field input::placeholder,
-.field textarea::placeholder {
+.field input::placeholder {
   color: #94a3b8;
 }
 
 .field input:focus,
-.field select:focus,
-.field textarea:focus {
+.field select:focus {
   border-color: #4f46e5;
   outline: none;
   box-shadow: 0 0 0 3px rgb(79 70 229 / 10%);
 }
 
-.success-message {
+.error-message {
   padding: 0.65rem 0.75rem;
   margin-top: 1rem;
-  background: #dcfce7;
-  border: 1px solid #bbf7d0;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
   border-radius: 0.5rem;
-  color: #15803d;
+  color: #b91c1c;
   font-size: 0.72rem;
   font-weight: 600;
 }
@@ -329,6 +302,11 @@ function cancel() {
 .create-button:hover {
   background: #4338ca;
   border-color: #4338ca;
+}
+
+.create-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
 }
 
 @media (max-width: 900px) {
