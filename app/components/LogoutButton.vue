@@ -11,7 +11,7 @@ async function logout() {
 
   try {
     await authClient.signOut()
-    window.location.href = '/auth'
+    window.location.href = '/'
   } catch (error) {
     isLoggingOut.value = false
     console.error('Logout failed:', error)
