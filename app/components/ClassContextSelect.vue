@@ -27,7 +27,7 @@ function getRouteClassToken() {
 }
 
 function getCurrentContext() {
-  if (route.path === '/universal-admin/create-class') {
+  if (route.path === '/create-class') {
     return 'create-class'
   }
 
@@ -75,9 +75,13 @@ watch(
         return
       }
 
-      if (classes.value.length === 0 && route.path !== '/universal-admin/create-class') {
+      if (
+        !canAccessUniversalAdmin.value &&
+        classes.value.length === 0 &&
+        route.path !== '/create-class'
+      ) {
         selectedClassToken.value = null
-        await router.replace('/universal-admin/create-class')
+        await router.replace('/create-class')
         return
       }
 
@@ -124,7 +128,7 @@ async function changeContext() {
   }
 
   if (selectedContext.value === 'create-class') {
-    await router.push('/universal-admin/create-class')
+    await router.push('/create-class')
     return
   }
 

@@ -8,10 +8,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   const isAdminRoute = to.path.startsWith('/admin')
   const isUniversalAdminRoute = to.path.startsWith('/universal-admin')
-  const isCreateClassRoute = to.path === '/universal-admin/create-class'
+  const isCreateClassRoute = to.path === '/create-class'
   const isReaderRoute = to.path.startsWith('/reader')
 
-  if (!isLoggedIn && (isAdminRoute || isUniversalAdminRoute || isReaderRoute)) {
+  if (!isLoggedIn && (isAdminRoute || isUniversalAdminRoute || isCreateClassRoute || isReaderRoute)) {
     return navigateTo('/auth')
   }
 
@@ -41,7 +41,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return navigateTo(userRole === 'poster' ? '/admin' : '/reader')
   }
 
-  if (isUniversalAdminRoute && !isCreateClassRoute && userRole !== 'admin') {
+  if (isUniversalAdminRoute && userRole !== 'admin') {
     return navigateTo(userRole === 'poster' ? '/admin' : '/reader')
   }
 
