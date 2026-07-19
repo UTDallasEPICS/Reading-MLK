@@ -41,14 +41,14 @@ onMounted(() => {
 })
 
 const loginRole = computed(() => {
-  return route.query.role === 'admin' ? 'admin' : 'reader'
+  return route.query.role === 'coach' ? 'coach' : 'reader'
 })
 
 const isNewUser = ref(false)
 const checkingEmail = ref(false)
 
 const schema = computed(() => {
-  if (isNewUser.value && loginRole.value === 'reader') {
+  if (isNewUser.value) {
     return z.object({
       email: z.string().email('Invalid email'),
       name: z.string().min(1, 'Name is required'),
@@ -84,15 +84,16 @@ async function sendMagicLink(callbackURL: string) {
 }
 
 async function handleSubmit(_event: FormSubmitEvent<any>) {
-  const callbackURL = loginRole.value === 'admin' ? '/admin' : '/reader/profile'
+  const callbackURL = loginRole.value === 'coach' ? '/auth?role=coach' : '/reader/profile'
 
-  // New reader flow: create account first, then send magic link
-  if (isNewUser.value && loginRole.value === 'reader') {
+  // New user flow: create account first, then send magic link
+  if (isNewUser.value) {
     const signupResult = await $fetch('/api/users/signup', {
       method: 'POST',
       body: {
         email: state.email,
         name: state.name,
+        role: loginRole.value,
       },
     }).catch((error) => {
       toast.add({
@@ -157,17 +158,7 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
     return
   }
 
-  // New admins are not allowed through public signup
-  if (loginRole.value === 'admin') {
-    toast.add({
-      title: 'Error',
-      description: 'Admin account not found.',
-      color: 'error',
-    })
-    return
-  }
-
-  // New reader: reveal name field
+  // New user: reveal name field
   isNewUser.value = true
 
   toast.add({
@@ -202,7 +193,7 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
 
           <p class="text-lg font-bold text-[#70798c] mb-8">
             Signing in as:
-            {{ loginRole === 'admin' ? 'Faculty & Admin' : 'Reading Buddy' }}
+            {{ loginRole === 'coach' ? 'Coach' : 'Reading Buddy' }}
           </p>
 
           <UForm :schema="schema" :state="state" @submit="handleSubmit" class="space-y-5 text-left">

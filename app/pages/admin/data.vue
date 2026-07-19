@@ -1,21 +1,21 @@
 <script setup lang="ts">
 definePageMeta({
   ssr: false,
-  layout: 'universal-admin',
+  layout: 'admin',
 })
 
 useHead({
-  title: 'Universal Admin Data',
+  title: 'Admin Data',
 })
 
-type DataTab = 'Posters' | 'Teachers' | 'Classes' | 'Students'
+type DataTab = 'Coach' | 'Teachers' | 'Classes' | 'Students'
 
 type EditableRecord = {
   type: DataTab
   data: Record<string, string | number | boolean>
 }
 
-type PosterRecord = {
+type CoachRecord = {
   name: string
   role: string
   school: string
@@ -51,13 +51,13 @@ const editModalOpen = ref(false)
 const selectedRecord = ref<EditableRecord | null>(null)
 
 const tabs: DataTab[] = [
-  'Posters',
+  'Coach',
   'Teachers',
   'Classes',
   'Students',
 ]
 
-const posters = ref<PosterRecord[]>([])
+const coach = ref<CoachRecord[]>([])
 const teachers = ref<TeacherRecord[]>([])
 const classes = ref<ClassRecord[]>([])
 const students = ref<StudentRecord[]>([])
@@ -66,13 +66,13 @@ const normalizedSearch = computed(() =>
   searchQuery.value.trim().toLowerCase(),
 )
 
-const filteredPosters = computed(() =>
-  posters.value.filter((poster) => {
+const filteredCoach = computed(() =>
+  coach.value.filter((coach) => {
     const searchable = [
-      poster.name,
-      poster.role,
-      poster.school,
-      poster.district,
+      coach.name,
+      coach.role,
+      coach.school,
+      coach.district,
     ]
       .join(' ')
       .toLowerCase()
@@ -125,8 +125,8 @@ const filteredStudents = computed(() =>
 )
 
 const currentRecordCount = computed(() => {
-  if (activeTab.value === 'Posters') {
-    return filteredPosters.value.length
+  if (activeTab.value === 'Coach') {
+    return filteredCoach.value.length
   }
 
   if (activeTab.value === 'Teachers') {
@@ -169,13 +169,13 @@ function saveEdit() {
 
   const { type, data } = selectedRecord.value
 
-  if (type === 'Posters') {
-    const index = posters.value.findIndex(
-      poster => poster.name === data.name,
+  if (type === 'Coach') {
+    const index = coach.value.findIndex(
+      coach => coach.name === data.name,
     )
 
     if (index !== -1) {
-      posters.value[index] = {
+      coach.value[index] = {
         name: String(data.name),
         role: String(data.role),
         school: String(data.school),
@@ -282,7 +282,7 @@ function saveEdit() {
         </select>
 
         <select
-          v-if="activeTab === 'Posters' || activeTab === 'Teachers'"
+          v-if="activeTab === 'Coach' || activeTab === 'Teachers'"
           class="filter-select"
         >
           <option>All Roles</option>
@@ -293,10 +293,10 @@ function saveEdit() {
       </div>
 
       <div class="table-wrapper">
-        <table v-if="activeTab === 'Posters'">
+        <table v-if="activeTab === 'Coach'">
           <thead>
             <tr>
-              <th>Poster Name</th>
+              <th>Coach Name</th>
               <th>Role</th>
               <th>School</th>
               <th>District</th>
@@ -307,35 +307,35 @@ function saveEdit() {
 
           <tbody>
             <tr
-              v-for="poster in filteredPosters"
-              :key="poster.name"
+              v-for="coach in filteredCoach"
+              :key="coach.name"
             >
               <td>
-                <strong>{{ poster.name }}</strong>
+                <strong>{{ coach.name }}</strong>
               </td>
 
               <td>
                 <span
                   class="status-badge"
                   :class="{
-                    teacher: poster.role === 'Teacher',
-                    group: poster.role === 'Study Group',
-                    other: poster.role === 'Other',
+                    teacher: coach.role === 'Teacher',
+                    group: coach.role === 'Study Group',
+                    other: coach.role === 'Other',
                   }"
                 >
-                  {{ poster.role }}
+                  {{ coach.role }}
                 </span>
               </td>
 
-              <td>{{ poster.school }}</td>
-              <td>{{ poster.district }}</td>
-              <td>{{ poster.forms }}</td>
+              <td>{{ coach.school }}</td>
+              <td>{{ coach.district }}</td>
+              <td>{{ coach.forms }}</td>
 
               <td>
                 <button
                   type="button"
                   class="edit-button"
-                  @click="openEditModal('Posters', poster)"
+                  @click="openEditModal('Coach', coach)"
                 >
                   Edit
                 </button>

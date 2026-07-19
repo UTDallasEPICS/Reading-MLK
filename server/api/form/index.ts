@@ -199,14 +199,14 @@ const getAction = (event: H3Event, body: Record<string, unknown> | null) => {
 const isFormApiDevBypassEnabled = () =>
   process.env.NODE_ENV !== 'production' || process.env.FORM_API_DEV_BYPASS === 'true'
 
-const requireAdminSession = async (event: H3Event) => {
+const requireCoachSession = async (event: H3Event) => {
   const session = await auth.api.getSession({
     headers: event.headers,
   })
 
   if (!session) {
     if (isFormApiDevBypassEnabled()) {
-      return { session: null, userId: null, admin: null, bypassed: true }
+      return { session: null, userId: null, bypassed: true }
     }
 
     throw createError({
@@ -221,22 +221,18 @@ const requireAdminSession = async (event: H3Event) => {
     throw createError({ statusCode: 400, statusMessage: 'Invalid session user id' })
   }
 
-  const admin = await prisma.admin.findUnique({
-    where: { userId },
-  })
-
-  if (!admin) {
+  if (session.user.role !== 'coach' && session.user.role !== 'admin') {
     if (isFormApiDevBypassEnabled()) {
-      return { session, userId, admin: null, bypassed: true }
+      return { session, userId, bypassed: true }
     }
 
     throw createError({
       statusCode: 403,
-      statusMessage: 'Forbidden: current user is not an admin.',
+      statusMessage: 'Forbidden: current user is not a coach.',
     })
   }
 
-  return { session, userId, admin, bypassed: false }
+  return { session, userId, bypassed: false }
 }
 
 const mapComponent = (component: {
@@ -480,7 +476,7 @@ export default defineEventHandler(async (event) => {
 
 
 
-  const { admin } = await requireAdminSession(event)
+  await requireCoachSession(event)
 
   if (method === 'POST') {
     if (action === 'createFormGroup') {
@@ -560,7 +556,6 @@ export default defineEventHandler(async (event) => {
           endDate,
           published,
           order: explicitOrder ?? ((existingMax._max.order ?? -1) + 1),
-          author: admin?.id ?? null,
       }
 
       if (title) {

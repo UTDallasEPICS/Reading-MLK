@@ -1,9 +1,9 @@
 <script setup lang="ts">
-definePageMeta({ ssr: false, layout: "admin" })
+definePageMeta({ ssr: false, layout: "coach" })
 
 const {
   getLastMonday, formatDate,
-} = useAdmin()
+} = useCoach()
 
 const {loadRaffleData, raffleWeekStart, raffleWinner, raffleFormGroup, raffleSubmissions, spinRaffle, spinCount} = useRaffleSpin()
 

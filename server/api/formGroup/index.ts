@@ -1,6 +1,6 @@
 import { prisma } from '../../utils/prisma'
 import { getQuery, createError } from 'h3'
-import { requireAdmin, requireSession } from '../../utils/require-session'
+import { requireCoach, requireSession } from '../../utils/require-session'
 
 export default defineEventHandler(async (event) => {
   const method = event.node.req.method
@@ -43,7 +43,7 @@ export default defineEventHandler(async (event) => {
   }
 
   if (method === 'PUT') {
-    await requireAdmin(event)
+    await requireCoach(event)
 
     const body = await readBody(event)
 

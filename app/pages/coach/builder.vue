@@ -1,5 +1,5 @@
 <script setup lang="ts">
-definePageMeta({ ssr: false, layout: "admin" })
+definePageMeta({ ssr: false, layout: "coach" })
 
 const builderSectionRef = ref<HTMLElement | null>(null)
 
@@ -10,7 +10,7 @@ const {
   filteredPublishedForms, selectedFormDetails, viewFormDetails,
   draggedIdx, dragStart, onDrop,
   addQuestion, publishForm, editPublishedForm, toggleFormPublish, loadPublishedForms,
-} = useAdmin()
+} = useCoach()
 
 const previewDates = computed(() => {
   if (!formDays.value.length) return []

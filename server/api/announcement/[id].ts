@@ -1,12 +1,12 @@
 import { prisma } from '../../utils/prisma'
-import { requireAdmin } from '../../utils/require-session'
+import { requireCoach } from '../../utils/require-session'
 import { createError } from 'h3'
 
 export default defineEventHandler(async (event) => {
   const method = event.node.req.method
 
   if (method === 'DELETE') {
-    await requireAdmin(event)
+    await requireCoach(event)
 
     const id = event.context.params?.id
 
