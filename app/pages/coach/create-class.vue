@@ -1,7 +1,7 @@
 <script setup lang="ts">
 definePageMeta({
   ssr: false,
-  layout: 'admin',
+  layout: 'coach',
 })
 
 useHead({
@@ -42,15 +42,15 @@ async function createClass() {
   isSubmitting.value = true
 
   try {
-    const classroom = await $fetch<{ joinToken: string; name: string }>('/api/universal-admin/classes', {
+    const classroom = await $fetch<{ joinToken: string; name: string }>('/api/admin/classes', {
       method: 'POST',
       body: form,
     })
 
     selectedClassToken.value = classroom.joinToken
-    await refreshNuxtData('universal-admin-classes')
+    await refreshNuxtData('admin-classes')
     await router.push({
-      path: '/admin',
+      path: '/coach',
       query: { class: classroom.joinToken },
     })
   } catch (error) {
@@ -62,7 +62,7 @@ async function createClass() {
 }
 
 function cancel() {
-  router.push('/universal-admin')
+  router.push('/admin')
 }
 </script>
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-definePageMeta({ ssr: false, layout: 'admin' })
+definePageMeta({ ssr: false, layout: 'coach' })
 
 type ProgressRecord = {
   id: number
@@ -195,7 +195,7 @@ async function loadWeekForms() {
     return
   }
 
-  const response = await $fetch<ApiResponse>('/api/admin/class-progress', {
+  const response = await $fetch<ApiResponse>('/api/coach/class-progress', {
     method: 'GET',
     query: {
       date: selectedDate.value,
@@ -216,7 +216,7 @@ async function loadClassProgress() {
   loading.value = true
 
   try {
-    const response = await $fetch<ApiResponse>('/api/admin/class-progress', {
+    const response = await $fetch<ApiResponse>('/api/coach/class-progress', {
       method: 'GET',
       query: {
         mode: viewMode.value,
@@ -297,7 +297,7 @@ function downloadCsv(filename: string, rows: Array<Array<string | number>>) {
 // CSV Export Logic
 async function exportCurrentTable() {
   try {
-    const response = await $fetch<ApiResponse>('/api/admin/class-progress', {
+    const response = await $fetch<ApiResponse>('/api/coach/class-progress', {
       method: 'GET',
       query: {
         mode: viewMode.value,

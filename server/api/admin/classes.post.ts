@@ -1,8 +1,8 @@
 import { prisma } from '../../utils/prisma'
-import { requireClassManager } from '../../utils/require-session'
+import { requireCoach } from '../../utils/require-session'
 import { classCreateSchema } from '../../utils/schemas'
 
-const posterTagByClassType = {
+const coachTagByClassType = {
   Teacher: 'teacher',
   'Study Group': 'studygroup',
   'Community Group': 'other',
@@ -10,7 +10,7 @@ const posterTagByClassType = {
 } as const
 
 export default defineEventHandler(async (event) => {
-  const session = await requireClassManager(event)
+  const session = await requireCoach(event)
 
   const parsed = classCreateSchema.safeParse(await readBody(event))
 
@@ -22,21 +22,21 @@ export default defineEventHandler(async (event) => {
   }
 
   const data = parsed.data
-  const posterData = {
-    tag: posterTagByClassType[data.type],
+  const coachData = {
+    tag: coachTagByClassType[data.type],
     school: data.school || null,
     district: data.district || null,
     zipcode: data.zipcode || null,
   }
 
   return await prisma.$transaction(async (transaction) => {
-    const poster = await transaction.poster.upsert({
+    const coach = await transaction.coach.upsert({
       where: {
         userId: session.user.id,
       },
-      update: posterData,
+      update: coachData,
       create: {
-        ...posterData,
+        ...coachData,
         userId: session.user.id,
       },
       select: {
@@ -47,9 +47,9 @@ export default defineEventHandler(async (event) => {
     return await transaction.class.create({
       data: {
         name: data.name,
-        Posters: {
+        Coach: {
           connect: {
-            id: poster.id,
+            id: coach.id,
           },
         },
       },

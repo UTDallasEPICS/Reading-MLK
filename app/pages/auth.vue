@@ -41,7 +41,7 @@ onMounted(() => {
 })
 
 const loginRole = computed(() => {
-  return route.query.role === 'admin' ? 'admin' : 'reader'
+  return route.query.role === 'coach' ? 'coach' : 'reader'
 })
 
 const isNewUser = ref(false)
@@ -84,16 +84,16 @@ async function sendMagicLink(callbackURL: string) {
 }
 
 async function handleSubmit(_event: FormSubmitEvent<any>) {
-  const callbackURL = loginRole.value === 'admin' ? '/auth?role=admin' : '/reader/profile'
+  const callbackURL = loginRole.value === 'coach' ? '/auth?role=coach' : '/reader/profile'
 
-  // New users entering through Faculty become Posters; Reading Buddies remain readers.
+  // New user flow: create account first, then send magic link
   if (isNewUser.value) {
     const signupResult = await $fetch('/api/users/signup', {
       method: 'POST',
       body: {
         email: state.email,
         name: state.name,
-        role: loginRole.value === 'admin' ? 'poster' : 'reader',
+        role: loginRole.value,
       },
     }).catch((error) => {
       toast.add({
@@ -157,7 +157,7 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
     return
   }
 
-  // New user: reveal the name field before creating the account.
+  // New user: reveal name field
   isNewUser.value = true
 
   toast.add({
@@ -196,7 +196,7 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
 
           <p class="mb-8 text-lg font-bold text-[#70798c]">
             Signing in as:
-            {{ loginRole === 'admin' ? 'Faculty & Admin' : 'Reading Buddy' }}
+            {{ loginRole === 'coach' ? 'Reading Coach' : 'Reading Buddy' }}
           </p>
 
           <UForm :schema="schema" :state="state" @submit="handleSubmit" class="space-y-5 text-left">

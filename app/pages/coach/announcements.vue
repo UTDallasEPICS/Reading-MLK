@@ -1,5 +1,5 @@
 <script setup lang="ts">
-definePageMeta({ ssr: false, layout: "admin" })
+definePageMeta({ ssr: false, layout: "coach" })
 
 //Import watch to see when tab switches between history and create
 import { ref, reactive, computed, watch, onMounted, onUnmounted } from 'vue'
@@ -144,7 +144,7 @@ async function deleteAnnouncement (id: number) {
     const idx = allAnnouncements.value.findIndex(a => a.id === id)
     if (idx !== -1) allAnnouncements.value.splice(idx, 1)
   } catch (e: any) {
-    //Surface the server's error message if available, otherwise show a generic fallback so the admin knows the operation did not succeed.
+    //Surface the server's error message if available, otherwise show a generic fallback so the coach knows the operation did not succeed.
     alert(e?.data?.error ?? 'Failed to delete announcement. Please try again.')
   }
 }

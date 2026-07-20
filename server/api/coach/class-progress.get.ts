@@ -270,7 +270,7 @@ async function getMissingRecords(queryState: any) {
 }
 
 export default defineEventHandler(async (event) => {
-  // Admin Authentication Check
+  // Coach Authentication Check
   const session = await auth.api.getSession({ headers: event.headers })
 
   if (!session?.user) {
@@ -282,7 +282,7 @@ export default defineEventHandler(async (event) => {
     select: { role: true },
   })
 
-  if (!user || user.role !== 'admin') {
+  if (!user || (user.role !== 'coach' && user.role !== 'admin')) {
     throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
   }
 

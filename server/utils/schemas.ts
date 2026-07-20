@@ -5,7 +5,7 @@ export const emailSchema = z.email({ pattern: z.regexes.html5Email }).trim().toL
 export const userCreateSchema = z.object({
   name: z.string().min(1).max(100),
   email: emailSchema,
-  role: z.enum(['poster', 'reader']).default('reader'),
+  role: z.enum(['coach', 'reader']).default('reader'),
   raffleOptIn: z.boolean().optional().default(false),
   publicityConsent: z.boolean().optional().default(false),
 })
@@ -18,7 +18,7 @@ export const classCreateSchema = z.object({
   zipcode: z.string().trim().max(10).optional(),
 })
 
-export const adminCreateSchema = z.object({
+export const coachCreateSchema = z.object({
   settings: z.object({}).optional(),
 })
 
@@ -104,7 +104,7 @@ export const submissionResponseCreateSchema = z.object({
 
 export type Email = z.infer<typeof emailSchema>
 export type UserCreate = z.infer<typeof userCreateSchema>
-export type AdminCreate = z.infer<typeof adminCreateSchema>
+export type CoachCreate = z.infer<typeof coachCreateSchema>
 export type StudentCreate = z.infer<typeof studentCreateSchema>
 export type StudentUpdate = z.infer<typeof studentUpdateSchema>
 export type AnnouncementCreate = z.infer<typeof announcementCreateSchema>

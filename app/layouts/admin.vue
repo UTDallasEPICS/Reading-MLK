@@ -1,107 +1,83 @@
-<!-- layouts/admin.vue -->
 <script setup lang="ts">
-const route = useRoute()
+import './admin.css'
 
-const selectedClassToken = useCookie<string | null>('selected-class-token', {
-  sameSite: 'lax',
-})
+const navigation = [
+  {
+    label: 'Dashboard',
+    route: '/admin',
+  },
+  {
+    label: 'Data',
+    route: '/admin/data',
+  },
+  {
+    label: 'Teacher Verification',
+    route: '/admin/teacher-verification',
+  },
+]
 
-const routeClassToken = computed(() => {
-  const classQuery = route.query.class
-  return Array.isArray(classQuery) ? classQuery[0] : classQuery
-})
-
-watchEffect(() => {
-  if (routeClassToken.value) {
-    selectedClassToken.value = routeClassToken.value
-  }
-})
-
-function navigateWithinClass(path: string) {
-  const classToken = routeClassToken.value || selectedClassToken.value
-
-  return navigateTo({
-    path,
-    query: classToken ? { class: classToken } : {},
-  })
-}
 </script>
 
 <template>
-  <div class="rh-admin-wrap">
-    <aside class="rh-sidebar">
-      <div class="rh-sidebar-inner">
-        <div class="rh-logo">
-          <div class="rh-logo-icon">L</div>
-          <div>
-            <div class="rh-logo-name">Reading<span class="rh-logo-accent">Huddle</span></div>
-            <div class="rh-logo-sub">Admin Portal</div>
+  <div class="portal-layout">
+    <aside class="portal-sidebar">
+      <div class="portal-sidebar-content">
+        <NuxtLink to="/admin" class="portal-logo">
+          <div class="portal-logo-icon">
+            L
           </div>
-        </div>
 
-        <p class="rh-nav-label">Admin Tools</p>
-        <nav class="rh-nav">
-          <button
-            @click="navigateWithinClass('/admin')"
-            class="rh-nav-btn"
-            :class="{ 'rh-nav-active': route.path === '/admin' }"
+          <div>
+            <div class="portal-logo-title">
+              Reading<span>Huddle</span>
+            </div>
+
+            <div class="portal-logo-subtitle">
+              Admin Portal
+            </div>
+          </div>
+        </NuxtLink>
+
+        <p class="portal-nav-label">
+          Navigation
+        </p>
+
+        <nav class="portal-navigation">
+          <NuxtLink
+            v-for="item in navigation"
+            :key="item.route"
+            :to="item.route"
+            class="portal-nav-link"
+            exact-active-class="portal-nav-link-active"
           >
-            Dashboard
-          </button>
-          <button
-            @click="navigateWithinClass('/admin/builder')"
-            class="rh-nav-btn"
-            :class="{ 'rh-nav-active': route.path === '/admin/builder' }"
-          >
-            Form Builder
-          </button>
-          <button
-            @click="navigateWithinClass('/admin/progress')"
-            class="rh-nav-btn"
-            :class="{ 'rh-nav-active': route.path === '/admin/progress' }"
-          >
-            Class Progress
-          </button>
-          <button
-            @click="navigateWithinClass('/admin/raffle')"
-            class="rh-nav-btn"
-            :class="{ 'rh-nav-active': route.path === '/admin/raffle' }"
-          >
-            Raffle System
-          </button>
-          <button
-            @click="navigateWithinClass('/admin/announcements')"
-            class="rh-nav-btn"
-            :class="{ 'rh-nav-active': route.path === '/admin/announcements' }"
-          >
-            Announcements
-          </button>
+            {{ item.label }}
+          </NuxtLink>
         </nav>
       </div>
 
-      <div class="rh-sidebar-footer">
-        <NuxtLink to="/" class="rh-back-link">← Back to Portal</NuxtLink>
-        <LogoutButton class="rh-logout-link" />
+      <div class="portal-sidebar-footer">
+        <LogoutButton class="portal-logout">← Log out</LogoutButton>
       </div>
     </aside>
 
-    <div class="rh-workspace">
-      <header class="rh-header">
+    <div class="portal-workspace">
+      <header class="portal-header">
         <div>
-          <p class="rh-header-label">Reading Huddle</p>
-          <h1 class="rh-header-title">Administration</h1>
+          <p class="portal-header-label">
+            Reading Huddle
+          </p>
+
+          <h1 class="portal-header-title">
+            Administration
+          </h1>
         </div>
 
         <ClassContextSelect />
       </header>
 
-      <div class="rh-main">
+      <main class="portal-main">
         <slot />
-      </div>
+      </main>
     </div>
   </div>
 </template>
-
-<style>
-@import './admin.css';
-</style>
