@@ -15,10 +15,11 @@ model User {
   role                String               @default("reader")
   raffleOptIn         Boolean              @default(true)
   publicityConsent    Boolean              @default(false)
-  admin               Boolean              @default(false)
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
+
   sessions            Session[]
+  coach               Coach?
   accounts            Account[]
   students            Student[]
   pendingEmailChanges PendingEmailChange?
@@ -79,7 +80,9 @@ model Coach {
   school      String?           
   district    String?
   zipcode     String?
+  userId      String      @unique
 
+  User          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   Classes       Class[]
   announcements Announcement[]
   @@index([tag])
@@ -110,7 +113,7 @@ model Class {
   name            String
 
   Students        Student[]
-  Coach         Coach[]
+  Coach           Coach[]
   Announcements   Announcement[]
   FormGroups      FormGroup[]
   @@index([joinToken])

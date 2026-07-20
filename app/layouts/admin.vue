@@ -1,23 +1,6 @@
 <script setup lang="ts">
 import './admin.css'
 
-const router = useRouter()
-
-const contexts = [
-  {
-    label: 'Admin',
-    value: 'admin',
-    route: '/admin',
-  },
-  {
-    label: '+ Create New Class',
-    value: 'create-class',
-    route: '/coach/create-class',
-  },
-]
-
-const selectedContext = ref('admin')
-
 const navigation = [
   {
     label: 'Dashboard',
@@ -33,27 +16,13 @@ const navigation = [
   },
 ]
 
-async function changeContext() {
-  const selected = contexts.find(
-    context => context.value === selectedContext.value,
-  )
-
-  if (!selected) {
-    return
-  }
-
-  await router.push(selected.route)
-}
 </script>
 
 <template>
   <div class="portal-layout">
     <aside class="portal-sidebar">
       <div class="portal-sidebar-content">
-        <NuxtLink
-          to="/admin"
-          class="portal-logo"
-        >
+        <NuxtLink to="/admin" class="portal-logo">
           <div class="portal-logo-icon">
             L
           </div>
@@ -87,12 +56,7 @@ async function changeContext() {
       </div>
 
       <div class="portal-sidebar-footer">
-        <NuxtLink
-          to="/auth"
-          class="portal-logout"
-        >
-          ← Log out
-        </NuxtLink>
+        <LogoutButton class="portal-logout">← Log out</LogoutButton>
       </div>
     </aside>
 
@@ -108,25 +72,7 @@ async function changeContext() {
           </h1>
         </div>
 
-        <div class="portal-context">
-          <label for="portal-context">
-            Managing
-          </label>
-
-          <select
-            id="portal-context"
-            v-model="selectedContext"
-            @change="changeContext"
-          >
-            <option
-              v-for="context in contexts"
-              :key="context.value"
-              :value="context.value"
-            >
-              {{ context.label }}
-            </option>
-          </select>
-        </div>
+        <ClassContextSelect />
       </header>
 
       <main class="portal-main">

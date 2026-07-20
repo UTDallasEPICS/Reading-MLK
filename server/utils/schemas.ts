@@ -1,33 +1,46 @@
-import { z } from "zod";
+import { z } from 'zod'
 
 export const emailSchema = z.email({ pattern: z.regexes.html5Email }).trim().toLowerCase()
 
 export const userCreateSchema = z.object({
   name: z.string().min(1).max(100),
   email: emailSchema,
-  role: z.enum(["coach", "reader"]).default("reader"),
-  raffleOptIn: z.boolean().optional().default(false), 
+  role: z.enum(['coach', 'reader']).default('reader'),
+  raffleOptIn: z.boolean().optional().default(false),
   publicityConsent: z.boolean().optional().default(false),
 })
 
+export const classCreateSchema = z.object({
+  name: z.string().trim().min(1).max(120),
+  type: z.enum(['Teacher', 'Study Group', 'Community Group', 'Other']),
+  school: z.string().trim().max(160).optional(),
+  district: z.string().trim().max(160).optional(),
+  zipcode: z.string().trim().max(10).optional(),
+})
+
 export const coachCreateSchema = z.object({
-  settings: z.object({}).optional()
+  settings: z.object({}).optional(),
 })
 
 export const studentCreateSchema = z.object({
-  name: z.string("Invalid Name").min(1).max(35)
+  name: z.string('Invalid Name').min(1).max(35),
 })
 
 export const studentUpdateSchema = z.object({
-  name: z.string("Invalid Name").min(1).max(35).optional(),
-  settings: z.object({
-    dyslexiaFont: z.boolean().optional(), 
-    fontSize: z.number().min(1).max(1.5).optional(),
-    language: z.enum(["en", "es"]).optional(),
-    raffleOptIn: z.boolean().optional(),
-    publicityConsent: z.boolean().optional()
-    }, "Invalid Settings").optional(),
-  exp: z.int("Invalid EXP").max(100000, "Max EXP").min(0, "Min EXP").optional(),
+  name: z.string('Invalid Name').min(1).max(35).optional(),
+  settings: z
+    .object(
+      {
+        dyslexiaFont: z.boolean().optional(),
+        fontSize: z.number().min(1).max(1.5).optional(),
+        language: z.enum(['en', 'es']).optional(),
+        raffleOptIn: z.boolean().optional(),
+        publicityConsent: z.boolean().optional(),
+      },
+      'Invalid Settings'
+    )
+    .optional(),
+  exp: z.int('Invalid EXP').max(100000, 'Max EXP').min(0, 'Min EXP').optional(),
 })
 
 export const announcementCreateSchema = z.object({
@@ -37,8 +50,8 @@ export const announcementCreateSchema = z.object({
   content: z.object({
     icon: z.string().max(8),
     title: z.string().min(1).max(250),
-    body: z.string().min(1).max(5000)
-  })
+    body: z.string().min(1).max(5000),
+  }),
 })
 
 export const formGroupCreateSchema = z.object({
@@ -48,7 +61,7 @@ export const formGroupCreateSchema = z.object({
 
 export const formCreateSchema = z.object({
   order: z.int(),
-  startDate: z.coerce.date(), 
+  startDate: z.coerce.date(),
   endDate: z.coerce.date(),
   published: z.boolean(),
   author: z.cuid2(),
@@ -58,7 +71,7 @@ export const formCreateSchema = z.object({
 
 export const formUpdateSchema = z.object({
   order: z.int().optional(),
-  startDate: z.coerce.date().optional(), 
+  startDate: z.coerce.date().optional(),
   endDate: z.coerce.date().nullish(),
   published: z.boolean().optional(),
   author: z.cuid2().nullish(),
@@ -69,24 +82,24 @@ export const formUpdateSchema = z.object({
 export const formComponentCreateSchema = z.object({
   form: z.int(),
   order: z.int().min(0),
-  questionType: z.enum(["mcq", "text", "context", "video"]),
+  questionType: z.enum(['mcq', 'text', 'context', 'video']),
   questionText: z.string().min(1).max(2500),
   questionOptions: z.object({
-    choices: z.array(z.object({text: z.string().min(1), correct: z.boolean()})).optional(),
-    video: z.string().optional()
-  })
+    choices: z.array(z.object({ text: z.string().min(1), correct: z.boolean() })).optional(),
+    video: z.string().optional(),
+  }),
 })
 
 export const formSubmissionCreateSchema = z.object({
   student: z.int(),
   form: z.int(),
-  submissionDate: z.coerce.date().optional()
+  submissionDate: z.coerce.date().optional(),
 })
 
 export const submissionResponseCreateSchema = z.object({
   submission: z.int(),
   formComponent: z.int(),
-  response: z.string().min(1).max(5000)
+  response: z.string().min(1).max(5000),
 })
 
 export type Email = z.infer<typeof emailSchema>
