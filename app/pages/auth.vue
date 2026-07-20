@@ -193,7 +193,7 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
 
           <p class="text-lg font-bold text-[#70798c] mb-8">
             Signing in as:
-            {{ loginRole === 'coach' ? 'Coach' : 'Reading Buddy' }}
+            {{ loginRole === 'coach' ? 'Reading Coach' : 'Reading Buddy' }}
           </p>
 
           <UForm :schema="schema" :state="state" @submit="handleSubmit" class="space-y-5 text-left">

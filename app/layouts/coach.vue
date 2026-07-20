@@ -25,11 +25,11 @@ async function logout() {
           <div class="rh-logo-icon">L</div>
           <div>
             <div class="rh-logo-name">Reading<span class="rh-logo-accent">Huddle</span></div>
-            <div class="rh-logo-sub">Coach Portal</div>
+            <div class="rh-logo-sub">Reading Coach Portal</div>
           </div>
         </div>
 
-        <p class="rh-nav-label">Coach Tools</p>
+        <p class="rh-nav-label">Reading Coach Tools</p>
         <nav class="rh-nav">
           <button @click="navigateTo('/coach')"               class="rh-nav-btn" :class="{ 'rh-nav-active': route.path === '/coach' }">Dashboard</button>
           <button @click="navigateTo('/coach/builder')"       class="rh-nav-btn" :class="{ 'rh-nav-active': route.path === '/coach/builder' }">Form Builder</button>

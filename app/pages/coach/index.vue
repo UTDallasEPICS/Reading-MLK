@@ -30,7 +30,7 @@ onMounted(() => refreshAnnouncements())
   <section class="coach-home">
     <header class="welcome-card">
       <p class="eyebrow">Welcome</p>
-      <h1>Coach</h1>
+      <h1>Reading Coach</h1>
       <p class="subtext">Use the left sidebar to manage forms, track progress, run raffles, and post announcements.</p>
       <div class="actions">
         <NuxtLink to="/coach/builder" class="primary-btn">Open Form Builder</NuxtLink>

@@ -57,6 +57,14 @@ const tabs: DataTab[] = [
   'Students',
 ]
 
+function getTabLabel(tab: DataTab) {
+  return tab === 'Coach' ? 'Reading Coach' : tab
+}
+
+function getRecordLabel(tab: DataTab) {
+  return tab === 'Coach' ? 'Reading Coach' : tab.slice(0, -1)
+}
+
 const coach = ref<CoachRecord[]>([])
 const teachers = ref<TeacherRecord[]>([])
 const classes = ref<ClassRecord[]>([])
@@ -242,7 +250,7 @@ function saveEdit() {
 
         <span class="record-summary">
             {{ currentRecordCount }}
-            {{ activeTab.toLowerCase() }}
+            {{ getTabLabel(activeTab).toLowerCase() }}
         </span>
     </section>
 
@@ -256,7 +264,7 @@ function saveEdit() {
           :class="{ active: activeTab === tab }"
           @click="changeTab(tab)"
         >
-          {{ tab }}
+          {{ getTabLabel(tab) }}
         </button>
       </div>
 
@@ -273,7 +281,7 @@ function saveEdit() {
           <input
             v-model="searchQuery"
             type="search"
-            :placeholder="`Search ${activeTab.toLowerCase()}...`"
+            :placeholder="`Search ${getTabLabel(activeTab).toLowerCase()}...`"
           >
         </div>
 
@@ -296,7 +304,7 @@ function saveEdit() {
         <table v-if="activeTab === 'Coach'">
           <thead>
             <tr>
-              <th>Coach Name</th>
+              <th>Reading Coach Name</th>
               <th>Role</th>
               <th>School</th>
               <th>District</th>
@@ -488,7 +496,7 @@ function saveEdit() {
           <div class="modal-header">
             <div>
               <h2 id="edit-modal-title">
-                Edit {{ selectedRecord.type.slice(0, -1) }}
+                Edit {{ getRecordLabel(selectedRecord.type) }}
               </h2>
 
               <p>
