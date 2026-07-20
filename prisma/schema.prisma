@@ -72,7 +72,7 @@ model Verification {
   @@map("verification")
 }
 
-model Poster {
+model Coach {
   id          String      @id @default(uuid())
   tag         String      @default("other") //enum: "teacher", "personal", "studygroup", "other"
   verified    Boolean     @default(false)
@@ -110,7 +110,7 @@ model Class {
   name            String
 
   Students        Student[]
-  Posters         Poster[]
+  Coach         Coach[]
   Announcements   Announcement[]
   FormGroups      FormGroup[]
   @@index([joinToken])
@@ -124,7 +124,7 @@ model Announcement {
   author      String
   class       String
 
-  Author      Poster    @relation(fields: [author], references: [id], onDelete: Cascade)
+  Author      Coach     @relation(fields: [author], references: [id], onDelete: Cascade)
   Class       Class     @relation(fields: [class], references: [id], onDelete: Cascade)
   @@index([postDate])
   @@index([expiryDate])

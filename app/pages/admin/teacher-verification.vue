@@ -1,7 +1,7 @@
 <script setup lang="ts">
 definePageMeta({
   ssr: false,
-  layout: 'universal-admin',
+  layout: 'admin',
 })
 
 useHead({

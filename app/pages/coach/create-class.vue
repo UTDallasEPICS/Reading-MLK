@@ -1,7 +1,7 @@
 <script setup lang="ts">
 definePageMeta({
   ssr: false,
-  layout: 'universal-admin',
+  layout: 'coach',
 })
 
 useHead({
@@ -43,7 +43,7 @@ function createClass() {
 }
 
 function cancel() {
-  router.push('/universal-admin')
+  router.push('/coach')
 }
 </script>
 
