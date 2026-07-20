@@ -48,7 +48,7 @@ async function createClass() {
     })
 
     selectedClassToken.value = classroom.joinToken
-    await refreshNuxtData('admin-classes')
+    await refreshNuxtData()
     await router.push({
       path: '/coach',
       query: { class: classroom.joinToken },

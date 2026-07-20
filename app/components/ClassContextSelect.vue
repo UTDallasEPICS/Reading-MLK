@@ -16,7 +16,7 @@ const { data: session } = await authClient.useSession(useFetch)
 const { data: classes, status: classesStatus } = await useFetch<ClassOption[]>(
   '/api/admin/classes',
   {
-    key: 'admin-classes',
+    key: `admin-classes-${session.value?.user?.id ?? 'anonymous'}`,
     default: () => [],
   }
 )
