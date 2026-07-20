@@ -85,7 +85,7 @@ watch(
         return
       }
 
-      if (route.path.startsWith('/coach')) {
+      if (route.path.startsWith('/coach') && route.path !== '/coach/create-class') {
         const classToken = getRouteClassToken() || selectedClassToken.value
         const classExists = classes.value.some((classroom) => classroom.joinToken === classToken)
 
