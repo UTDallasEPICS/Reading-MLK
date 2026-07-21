@@ -1,7 +1,5 @@
 <!-- layouts/coach.vue -->
 <script setup lang="ts">
-import { authClient } from '~/utils/auth-client'
-
 const route = useRoute()
 const selectedClassToken = useCookie<string | null>('selected-class-token', {
   sameSite: 'lax',
@@ -27,17 +25,6 @@ function navigateWithinClass(path: string) {
   })
 }
 
-async function logout() {
-  const confirmed = confirm('Are you sure you want to log out?')
-  if (!confirmed) return
-
-  try {
-    await authClient.signOut()
-    window.location.href = '/auth'
-  } catch (error) {
-    console.error('Logout failed:', error)
-  }
-}
 </script>
 
 <template>
@@ -64,7 +51,7 @@ async function logout() {
 
       <div class="rh-sidebar-footer">
         <NuxtLink to="/" class="rh-back-link">← Back to Portal</NuxtLink>
-        <button class="rh-logout-link" @click="logout">⎋ Logout</button>
+        <LogoutButton class="rh-logout-link" />
       </div>
     </aside>
 

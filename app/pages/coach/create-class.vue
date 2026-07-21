@@ -16,7 +16,6 @@ const form = reactive({
   school: '',
   district: '',
   zipcode: '',
-  description: '',
 })
 
 const isSubmitting = ref(false)
@@ -153,15 +152,6 @@ function cancel() {
             </label>
           </template>
 
-          <label class="field field-wide">
-            <span>Description</span>
-
-            <textarea
-              v-model="form.description"
-              rows="5"
-              placeholder="Briefly describe the class or group."
-            />
-          </label>
         </div>
 
         <div
