@@ -19,7 +19,11 @@ const form = reactive({
   description: '',
 })
 
-const submitted = ref(false)
+const isSubmitting = ref(false)
+const submissionError = ref('')
+const selectedClassToken = useCookie<string | null>('selected-class-token', {
+  sameSite: 'lax',
+})
 
 const isTeacherClassroom = computed(() => form.type === 'Teacher')
 
@@ -34,12 +38,28 @@ watch(
   },
 )
 
-function createClass() {
-  submitted.value = true
+async function createClass() {
+  submissionError.value = ''
+  isSubmitting.value = true
 
-  console.log('UI-only class creation:', {
-    ...form,
-  })
+  try {
+    const classroom = await $fetch<{ joinToken: string; name: string }>('/api/admin/classes', {
+      method: 'POST',
+      body: form,
+    })
+
+    selectedClassToken.value = classroom.joinToken
+    await refreshNuxtData()
+    await router.push({
+      path: '/coach',
+      query: { class: classroom.joinToken },
+    })
+  } catch (error) {
+    submissionError.value =
+      error instanceof Error ? error.message : 'The class could not be created. Please try again.'
+  } finally {
+    isSubmitting.value = false
+  }
 }
 
 function cancel() {
@@ -145,10 +165,11 @@ function cancel() {
         </div>
 
         <div
-          v-if="submitted"
-          class="success-message"
+          v-if="submissionError"
+          class="error-message"
+          role="alert"
         >
-          The class information was submitted.
+          {{ submissionError }}
         </div>
 
         <div class="form-actions">
@@ -163,8 +184,9 @@ function cancel() {
           <button
             type="submit"
             class="create-button"
+            :disabled="isSubmitting"
           >
-            Create Class
+            {{ isSubmitting ? 'Creating…' : 'Create Class' }}
           </button>
         </div>
       </form>
@@ -280,13 +302,13 @@ function cancel() {
   box-shadow: 0 0 0 3px rgb(79 70 229 / 10%);
 }
 
-.success-message {
+.error-message {
   padding: 0.65rem 0.75rem;
   margin-top: 1rem;
-  background: #dcfce7;
-  border: 1px solid #bbf7d0;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
   border-radius: 0.5rem;
-  color: #15803d;
+  color: #b91c1c;
   font-size: 0.72rem;
   font-weight: 600;
 }
