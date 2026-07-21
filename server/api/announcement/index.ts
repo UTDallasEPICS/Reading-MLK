@@ -51,7 +51,7 @@ export default defineEventHandler(async (event) => {
     }
 
     return await prisma.$transaction(async (transaction) => {
-      const poster = await transaction.poster.upsert({
+      const coach = await transaction.coach.upsert({
         where: { userId: session.user.id },
         update: {},
         create: { userId: session.user.id },
@@ -63,7 +63,7 @@ export default defineEventHandler(async (event) => {
           content: body.data.content,
           postDate: body.data.postDate,
           expiryDate: body.data.expiryDate ?? null,
-          author: poster.id,
+          author: coach.id,
           class: classId,
         },
       })

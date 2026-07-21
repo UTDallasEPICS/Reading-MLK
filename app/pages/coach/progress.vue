@@ -1,5 +1,5 @@
 <script setup lang="ts">
-definePageMeta({ ssr: false, layout: 'admin' })
+definePageMeta({ ssr: false, layout: 'coach' })
 
 const { classId } = useSelectedClass()
 
@@ -197,7 +197,7 @@ async function loadWeekForms() {
     return
   }
 
-  const response = await $fetch<ApiResponse>('/api/admin/class-progress', {
+  const response = await $fetch<ApiResponse>('/api/coach/class-progress', {
     method: 'GET',
     query: {
       date: selectedDate.value,
@@ -227,7 +227,7 @@ async function loadClassProgress() {
   loading.value = true
 
   try {
-    const response = await $fetch<ApiResponse>('/api/admin/class-progress', {
+    const response = await $fetch<ApiResponse>('/api/coach/class-progress', {
       method: 'GET',
       query: {
         mode: viewMode.value,
@@ -311,7 +311,7 @@ async function exportCurrentTable() {
   if (!classId.value) return
 
   try {
-    const response = await $fetch<ApiResponse>('/api/admin/class-progress', {
+    const response = await $fetch<ApiResponse>('/api/coach/class-progress', {
       method: 'GET',
       query: {
         mode: viewMode.value,

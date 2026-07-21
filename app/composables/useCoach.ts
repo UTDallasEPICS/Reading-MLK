@@ -1,12 +1,11 @@
-// composables/useAdmin.ts
-// Place this at: app/composables/useAdmin.ts
+// composables/useCoach.ts
+// Place this at: app/composables/useCoach.ts
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 
 dayjs.extend(utc)
-export const useAdmin = () => {
+export const useCoach = () => {
   const { classId } = useSelectedClass()
-
   const callFormApi = async <T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', params: Record<string, unknown> = {}, body?: Record<string, unknown>): Promise<T> => {
     if (!classId.value) {
       throw new Error('Select a class before managing forms')
@@ -459,7 +458,7 @@ export const useAdmin = () => {
     questions.value     = JSON.parse(JSON.stringify(form.questions))
     editingFormId.value = form.id
     builderSubTab.value = 'creation'
-    navigateTo({ path: '/admin/builder', query: { class: classId.value } })
+    navigateTo({ path: '/coach/builder', query: { class: classId.value } })
   }
 
   const toggleFormPublish = async (form: any) => {
@@ -480,7 +479,7 @@ export const useAdmin = () => {
   }
 
   // ── Students / Progress ──
-  const students = useState<any[]>('adminStudents', () => [])
+  const students = useState<any[]>('coachStudents', () => [])
 
   const loadStudents = async () => {
     if (!classId.value) {
@@ -489,7 +488,7 @@ export const useAdmin = () => {
     }
 
     const classStudents = await $fetch<Array<{ id: number; name: string; exp: number }>>(
-      `/api/universal-admin/classes/${classId.value}/students`
+      `/api/admin/classes/${classId.value}/students`
     )
 
     students.value = classStudents.map((student) => ({

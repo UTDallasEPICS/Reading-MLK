@@ -14,9 +14,9 @@ const selectedClassToken = useCookie<string | null>('selected-class-token', {
 const { data: session } = await authClient.useSession(useFetch)
 
 const { data: classes, status: classesStatus } = await useFetch<ClassOption[]>(
-  '/api/universal-admin/classes',
+  '/api/admin/classes',
   {
-    key: 'universal-admin-classes',
+    key: `admin-classes-${session.value?.user?.id ?? 'anonymous'}`,
     default: () => [],
   }
 )
@@ -27,11 +27,11 @@ function getRouteClassToken() {
 }
 
 function getCurrentContext() {
-  if (route.path === '/create-class') {
+  if (route.path === '/coach/create-class') {
     return 'create-class'
   }
 
-  if (route.path.startsWith('/admin')) {
+  if (route.path.startsWith('/coach')) {
     const classToken = getRouteClassToken() || selectedClassToken.value
     return classToken ? `class:${classToken}` : 'admin'
   }
@@ -43,7 +43,7 @@ const selectedContext = ref(getCurrentContext())
 const isRedirecting = ref(false)
 const canAccessUniversalAdmin = computed(() => session.value?.user?.role === 'admin')
 const canManageClasses = computed(
-  () => session.value?.user?.role === 'admin' || session.value?.user?.role === 'poster'
+  () => session.value?.user?.role === 'admin' || session.value?.user?.role === 'coach'
 )
 
 watch(
@@ -78,14 +78,14 @@ watch(
       if (
         !canAccessUniversalAdmin.value &&
         classes.value.length === 0 &&
-        route.path !== '/create-class'
+        route.path !== '/coach/create-class'
       ) {
         selectedClassToken.value = null
-        await router.replace('/create-class')
+        await router.replace('/coach/create-class')
         return
       }
 
-      if (route.path.startsWith('/admin')) {
+      if (route.path.startsWith('/coach') && route.path !== '/coach/create-class') {
         const classToken = getRouteClassToken() || selectedClassToken.value
         const classExists = classes.value.some((classroom) => classroom.joinToken === classToken)
 
@@ -93,7 +93,7 @@ watch(
           selectedClassToken.value = null
 
           if (canAccessUniversalAdmin.value) {
-            await router.replace('/universal-admin')
+            await router.replace('/admin')
             return
           }
 
@@ -102,7 +102,7 @@ watch(
           if (firstClass) {
             selectedClassToken.value = firstClass.joinToken
             await router.replace({
-              path: '/admin',
+              path: '/coach',
               query: { class: firstClass.joinToken },
             })
           }
@@ -123,19 +123,19 @@ async function changeContext() {
     }
 
     selectedClassToken.value = null
-    await router.push('/universal-admin')
+    await router.push('/admin')
     return
   }
 
   if (selectedContext.value === 'create-class') {
-    await router.push('/create-class')
+    await router.push('/coach/create-class')
     return
   }
 
   const classToken = selectedContext.value.replace(/^class:/, '')
   selectedClassToken.value = classToken
   await router.push({
-    path: '/admin',
+    path: '/coach',
     query: { class: classToken },
   })
 }

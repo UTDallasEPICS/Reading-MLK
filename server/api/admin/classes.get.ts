@@ -1,12 +1,12 @@
 import { prisma } from '../../utils/prisma'
-import { requireClassManager } from '../../utils/require-session'
+import { requireCoach } from '../../utils/require-session'
 
 export default defineEventHandler(async (event) => {
-  const session = await requireClassManager(event)
+  const session = await requireCoach(event)
 
   return await prisma.class.findMany({
     where: {
-      Posters: {
+      Coach: {
         some: {
           userId: session.user.id,
         },

@@ -7,11 +7,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const userRole = session.value?.user?.role
 
   const isAdminRoute = to.path.startsWith('/admin')
-  const isUniversalAdminRoute = to.path.startsWith('/universal-admin')
-  const isCreateClassRoute = to.path === '/create-class'
+  const isCoachRoute = to.path.startsWith('/coach')
   const isReaderRoute = to.path.startsWith('/reader')
 
-  if (!isLoggedIn && (isAdminRoute || isUniversalAdminRoute || isCreateClassRoute || isReaderRoute)) {
+  if (!isLoggedIn && (isAdminRoute || isCoachRoute || isReaderRoute)) {
     return navigateTo('/auth')
   }
 
@@ -20,36 +19,22 @@ export default defineNuxtRouteMiddleware(async (to) => {
   }
 
   if (to.path === '/auth') {
-    const requestedRole = Array.isArray(to.query.role) ? to.query.role[0] : to.query.role
-
-    if (requestedRole === 'admin') {
-      if (userRole === 'admin') {
-        return navigateTo('/universal-admin')
-      }
-
-      return navigateTo(userRole === 'poster' ? '/admin' : '/reader')
-    }
-
-    if (requestedRole === 'reader') {
-      return navigateTo('/reader')
-    }
-
     if (userRole === 'admin') {
-      return navigateTo('/universal-admin')
+      return navigateTo('/admin')
     }
 
-    return navigateTo(userRole === 'poster' ? '/admin' : '/reader')
+    if (userRole === 'coach') {
+      return navigateTo('/coach')
+    }
+
+    return navigateTo('/reader/profile')
   }
 
-  if (isUniversalAdminRoute && userRole !== 'admin') {
-    return navigateTo(userRole === 'poster' ? '/admin' : '/reader')
+  if (isAdminRoute && userRole !== 'admin') {
+    return navigateTo(userRole === 'coach' ? '/coach' : '/reader/profile')
   }
 
-  if (isCreateClassRoute && userRole !== 'admin' && userRole !== 'poster') {
-    return navigateTo('/reader')
-  }
-
-  if (isAdminRoute && userRole !== 'admin' && userRole !== 'poster') {
-    return navigateTo('/reader')
+  if (isCoachRoute && userRole !== 'admin' && userRole !== 'coach') {
+    return navigateTo('/reader/profile')
   }
 })

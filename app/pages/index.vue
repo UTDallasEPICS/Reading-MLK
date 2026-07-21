@@ -15,14 +15,14 @@
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl">
         <button
-          @click="navigateTo('/auth?role=admin')"
+          @click="navigateTo('/auth?role=coach')"
           class="group rounded-[2.25rem] bg-white/85 backdrop-blur border border-white shadow-[0_16px_45px_rgba(0,0,0,0.08)] p-8 sm:p-10 text-center transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_22px_60px_rgba(0,0,0,0.12)]"
         >
           <div class="mx-auto mb-5 flex h-24 w-24 items-center justify-center rounded-[1.75rem] bg-[#eef0fb] text-5xl shadow-inner">
             🏫
           </div>
 
-          <h3 class="text-3xl font-black text-[#11182f] mb-3">Faculty & Admin</h3>
+          <h3 class="text-3xl font-black text-[#11182f] mb-3">Reading Coach</h3>
           <p class="text-lg text-[#7f8798] font-semibold leading-relaxed">
             Manage students, curriculum & raffles.
           </p>
