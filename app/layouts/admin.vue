@@ -22,10 +22,7 @@ const navigation = [
   <div class="portal-layout">
     <aside class="portal-sidebar">
       <div class="portal-sidebar-content">
-        <NuxtLink
-          to="/admin"
-          class="portal-logo"
-        >
+        <NuxtLink to="/admin" class="portal-logo">
           <div class="portal-logo-icon">
             L
           </div>

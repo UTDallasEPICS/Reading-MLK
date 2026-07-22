@@ -4,7 +4,6 @@ const route = useRoute()
 const selectedClassToken = useCookie<string | null>('selected-class-token', {
   sameSite: 'lax',
 })
-
 const routeClassToken = computed(() => {
   const classQuery = route.query.class
   return Array.isArray(classQuery) ? classQuery[0] : classQuery
@@ -24,7 +23,6 @@ function navigateWithinClass(path: string) {
     query: classToken ? { class: classToken } : {},
   })
 }
-
 </script>
 
 <template>

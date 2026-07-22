@@ -43,4 +43,12 @@ export default defineNuxtRouteMiddleware(async (to) => {
   if (isCoachRoute && userRole !== 'admin' && userRole !== 'coach') {
     return navigateTo('/reader/profile')
   }
+  if (isCoachRoute && to.path !== '/coach/create-class' && userRole === 'coach') {
+    const requestFetch = useRequestFetch()
+    const classes = await requestFetch<Array<{ joinToken: string }>>('/api/admin/classes')
+
+    if (classes.length === 0) {
+      return navigateTo('/coach/create-class')
+    }
+  }
 })
