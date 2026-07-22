@@ -1,5 +1,5 @@
 <script setup lang="ts">
-definePageMeta({ ssr: false, layout: "admin" })
+definePageMeta({ ssr: false, layout: "coach" })
 
 //Import watch to see when tab switches between history and create
 import { ref, reactive, computed, watch, onMounted, onUnmounted } from 'vue'
@@ -144,7 +144,7 @@ async function deleteAnnouncement (id: number) {
     const idx = allAnnouncements.value.findIndex(a => a.id === id)
     if (idx !== -1) allAnnouncements.value.splice(idx, 1)
   } catch (e: any) {
-    //Surface the server's error message if available, otherwise show a generic fallback so the admin knows the operation did not succeed.
+    //Surface the server's error message if available, otherwise show a generic fallback so the coach knows the operation did not succeed.
     alert(e?.data?.error ?? 'Failed to delete announcement. Please try again.')
   }
 }
@@ -444,11 +444,6 @@ async function postAnnouncement () {
                         </span>
 
                         <!-- Delete button -->
-                             announcement's database integer ID. The icon-only
-                             button is intentionally subtle (gray) until hovered
-                             (red) to prevent accidental clicks. A confirm() dialog
-                             inside deleteAnnouncement() provides a second safety
-                             gate before the database record is permanently removed. -->
                         <button
                           @click="deleteAnnouncement(ann.id)"
                           class="ml-1 text-gray-300 hover:text-red-500 transition-colors duration-200"
@@ -456,6 +451,9 @@ async function postAnnouncement () {
                         >✕</button>
                       </div>
                     </div>
+                    <p class="text-gray-500 font-medium leading-relaxed mt-2" v-if="parseContent(ann.content).body">
+                      <span v-html="parseContent(ann.content).body"></span>
+                    </p>
                   </div>
                 </div>
               </div>
@@ -511,6 +509,9 @@ async function postAnnouncement () {
                         >✕</button>
                       </div>
                     </div>
+                    <p class="text-gray-500 font-medium leading-relaxed mt-2" v-if="parseContent(ann.content).body">
+                      <span v-html="parseContent(ann.content).body"></span>
+                    </p>
                   </div>
                 </div>
               </div>

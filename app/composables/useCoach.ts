@@ -1,10 +1,10 @@
-// composables/useAdmin.ts
-// Place this at: app/composables/useAdmin.ts
+// composables/useCoach.ts
+// Place this at: app/composables/useCoach.ts
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 
 dayjs.extend(utc)
-export const useAdmin = () => {
+export const useCoach = () => {
   const callFormApi = async <T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', params: Record<string, unknown> = {}, body?: Record<string, unknown>): Promise<T> => {
     const queryString = method === 'GET' || method === 'DELETE'
       ? `?${new URLSearchParams(Object.entries(params).reduce((acc, [key, value]) => {
@@ -433,11 +433,19 @@ export const useAdmin = () => {
     questions.value     = JSON.parse(JSON.stringify(form.questions))
     editingFormId.value = form.id
     builderSubTab.value = 'creation'
-    navigateTo('/admin/builder')
+    navigateTo('/coach/builder')
   }
 
-  const toggleFormPublish = (form: any) => {
+  const toggleFormPublish = async (form: any) => {
+// "unpublished" = "nonactive"  b
+// a form being "published" is measured with True and False - boolean value
     form.status = form.status === 'Active' ? 'Unpublished' : 'Active'
+    const newStatus = form.status === 'Active' ? true : false
+
+    await useFetch(`/api/form/${form.id}`, {
+      method: 'PUT',
+      body: {published: newStatus}
+    })
   }
 
   const viewFormDetails = (form: any) => {
@@ -445,7 +453,7 @@ export const useAdmin = () => {
   }
 
   // ── Students / Progress ──
-  const students = useState<any[]>('adminStudents', () => [
+  const students = useState<any[]>('coachStudents', () => [
     { id: 1, name: 'Aiden Smith', initials: 'AS', email: 'aiden@school.edu', tickets: 12, streak: 4, lastActive: '2 hours ago' },
     { id: 2, name: 'Nevin Kumar', initials: 'NK', email: 'nevin@school.edu', tickets: 14, streak: 5, lastActive: 'Just now'     },
     { id: 3, name: 'Swarna Jay',  initials: 'SJ', email: 'swarna@school.edu',tickets: 8,  streak: 2, lastActive: 'Yesterday'   },

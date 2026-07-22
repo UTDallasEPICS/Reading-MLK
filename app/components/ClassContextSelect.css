@@ -1,0 +1,43 @@
+.class-context-select {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+label {
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+select {
+  min-width: 15rem;
+  padding: 0.7rem 0.9rem;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.65rem;
+  color: #1e293b;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+select:focus {
+  border-color: #4f46e5;
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(79 70 229 / 12%);
+}
+
+@media (max-width: 800px) {
+  .class-context-select {
+    width: 100%;
+  }
+
+  select {
+    min-width: 0;
+    flex: 1;
+  }
+}
