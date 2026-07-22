@@ -215,7 +215,7 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
             </UFormField>
 
             <UFormField
-              v-if="isNewUser && loginRole === 'reader'"
+              v-if="isNewUser"
               name="name"
               label="Your Name"
               :ui="{ label: 'text-[#5c6475] font-bold text-sm tracking-wide' }"
@@ -239,7 +239,7 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
               size="xl"
               class="w-full justify-center rounded-2xl h-14 text-xl font-black bg-[#0d1735] hover:bg-[#132149] text-white shadow-xl"
             >
-              {{ isNewUser && loginRole === 'reader' ? 'Create Account ✨' : 'Send Magic Link 🪄' }}
+              {{ isNewUser ? 'Create Account ✨' : 'Send Magic Link 🪄' }}
             </UButton>
           </UForm>
 
