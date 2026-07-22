@@ -19,6 +19,13 @@ export default defineEventHandler(async (event) => {
       await requireSession(event)
     }
 
+    const activeWhere = query.active === 'true'
+      ? {
+          startDate: { lte: now },
+          OR: [{ endDate: null }, { endDate: { gte: now } }],
+        }
+      : {}
+
     if (query.date) {
       const targetDate = new Date(String(query.date))
       return await prisma.formGroup.findFirst({
@@ -42,13 +49,8 @@ export default defineEventHandler(async (event) => {
     
     return await prisma.formGroup.findMany({
       where: {
+        ...activeWhere,
         ...(classId ? { class: classId } : {}),
-        ...(query.active === 'true'
-          ? {
-              startDate: { lte: now },
-              OR: [{ endDate: null }, { endDate: { gte: now } }],
-            }
-          : {}),
       },
     })
   }
@@ -76,7 +78,7 @@ export default defineEventHandler(async (event) => {
     })
 
     if (!formGroup) {
-      throw createError({ statusCode: 404, statusMessage: 'Form group not found in this class' })
+      throw createError({ statusCode: 404, statusMessage: 'Form group not found' })
     }
 
     if (body.raffleWinner !== null) {

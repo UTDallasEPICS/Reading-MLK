@@ -1,6 +1,11 @@
 import { Prisma } from '~~/prisma/generated/client'
 import { prisma } from '~~/server/utils/prisma'
 import { requireClassAccess } from '~~/server/utils/require-session'
+import {
+  requireComponentInClass,
+  requireFormGroupInClass,
+  requireFormInClass,
+} from '~~/server/utils/require-form-resource'
 import { getQuery, setResponseStatus, type H3Event } from 'h3'
 
 type ActionName =
@@ -277,45 +282,6 @@ const formInclude = {
     orderBy: [{ order: 'asc' as const }, { id: 'asc' as const }],
   },
   FormGroup: true,
-}
-
-const requireFormGroupInClass = async (formGroupId: number, classId: string) => {
-  const formGroup = await prisma.formGroup.findFirst({
-    where: { id: formGroupId, class: classId },
-    select: { id: true },
-  })
-
-  if (!formGroup) {
-    throw createError({ statusCode: 404, statusMessage: 'Form group not found in this class' })
-  }
-
-  return formGroup
-}
-
-const requireFormInClass = async (formId: number, classId: string) => {
-  const form = await prisma.form.findFirst({
-    where: { id: formId, FormGroup: { class: classId } },
-    select: { id: true },
-  })
-
-  if (!form) {
-    throw createError({ statusCode: 404, statusMessage: 'Form not found in this class' })
-  }
-
-  return form
-}
-
-const requireComponentInClass = async (componentId: number, classId: string) => {
-  const component = await prisma.formComponent.findFirst({
-    where: { id: componentId, Form: { FormGroup: { class: classId } } },
-    select: { id: true },
-  })
-
-  if (!component) {
-    throw createError({ statusCode: 404, statusMessage: 'Form component not found in this class' })
-  }
-
-  return component
 }
 
 export default defineEventHandler(async (event) => {

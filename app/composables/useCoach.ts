@@ -488,7 +488,8 @@ export const useCoach = () => {
     }
 
     const classStudents = await $fetch<Array<{ id: number; name: string; exp: number }>>(
-      `/api/admin/classes/${classId.value}/students`
+      '/api/students',
+      { query: { classId: classId.value } }
     )
 
     students.value = classStudents.map((student) => ({

@@ -55,15 +55,22 @@ export async function requireClassAccess(event: H3Event, classToken: string) {
     },
     select: {
       id: true,
+      Coach: {
+        where: { userId: session.user.id },
+        select: { id: true },
+        take: 1,
+      },
     },
   })
 
-  if (!classroom) {
+  const coachId = classroom?.Coach[0]?.id
+
+  if (!classroom || !coachId) {
     throw createError({
       statusCode: 403,
       statusMessage: 'You do not have access to this class',
     })
   }
 
-  return { session, classId: classroom.id }
+  return { session, classId: classroom.id, coachId }
 }

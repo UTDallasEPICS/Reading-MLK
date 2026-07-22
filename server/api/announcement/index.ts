@@ -43,30 +43,21 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 400, statusMessage: 'classId is required' })
     }
 
-    const { session, classId } = await requireClassAccess(event, requestedClassId)
+    const { classId, coachId } = await requireClassAccess(event, requestedClassId)
     const body = announcementCreateSchema.safeParse(rawBody)
     
     if (!body.success) {
       throw createError({ statusCode: 400, message: body.error.message })
     }
 
-    return await prisma.$transaction(async (transaction) => {
-      const coach = await transaction.coach.upsert({
-        where: { userId: session.user.id },
-        update: {},
-        create: { userId: session.user.id },
-        select: { id: true },
-      })
-
-      return await transaction.announcement.create({
-        data: {
-          content: body.data.content,
-          postDate: body.data.postDate,
-          expiryDate: body.data.expiryDate ?? null,
-          author: coach.id,
-          class: classId,
-        },
-      })
+    return await prisma.announcement.create({
+      data: {
+        content: body.data.content,
+        postDate: body.data.postDate,
+        expiryDate: body.data.expiryDate ?? null,
+        author: coachId,
+        class: classId,
+      },
     })
   }
 })
