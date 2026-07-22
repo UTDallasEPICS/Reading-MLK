@@ -489,7 +489,10 @@ export const useCoach = () => {
 
     const classStudents = await $fetch<Array<{ id: number; name: string; exp: number }>>(
       '/api/student',
-      { query: { classId: classId.value } }
+      {
+        method: 'GET',
+        query: { classId: classId.value },
+      }
     )
 
     students.value = classStudents.map((student) => ({
