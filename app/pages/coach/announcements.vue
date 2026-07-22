@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { getUserErrorMessage } from '~/utils/user-error'
 definePageMeta({ ssr: false, layout: "coach" })
 
 //Import watch to see when tab switches between history and create
@@ -127,9 +128,11 @@ async function loadHistory () {
     allAnnouncements.value = await $fetch('/api/announcement', {
       query: { classId: classId.value },
     })
-  } catch (e: any) {
-    //Capture the error message; fall back to a generic string if none exists
-    historyError.value = e?.message ?? 'Failed to load announcements.'
+  } catch (error) {
+    historyError.value = getUserErrorMessage(
+      error,
+      'Announcements could not be loaded. Please try again.'
+    )
   } finally {
     // Always turn off the loading flag, even if the request failed
     historyLoading.value = false
@@ -158,9 +161,8 @@ async function deleteAnnouncement (id: number) {
     //Find the deleted record's index in the reactive array and remove it.
     const idx = allAnnouncements.value.findIndex(a => a.id === id)
     if (idx !== -1) allAnnouncements.value.splice(idx, 1)
-  } catch (e: any) {
-    //Surface the server's error message if available, otherwise show a generic fallback so the coach knows the operation did not succeed.
-    alert(e?.data?.error ?? 'Failed to delete announcement. Please try again.')
+  } catch (error) {
+    alert(getUserErrorMessage(error, 'The announcement could not be deleted. Please try again.'))
   }
 }
 

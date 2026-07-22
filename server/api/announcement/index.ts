@@ -47,7 +47,10 @@ export default defineEventHandler(async (event) => {
     const body = announcementCreateSchema.safeParse(rawBody)
     
     if (!body.success) {
-      throw createError({ statusCode: 400, message: body.error.message })
+      throw createError({
+        statusCode: 400,
+        statusMessage: body.error.issues[0]?.message ?? 'Invalid announcement information',
+      })
     }
 
     return await prisma.announcement.create({

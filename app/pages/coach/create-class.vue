@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { getUserErrorMessage } from '~/utils/user-error'
+
 definePageMeta({
   ssr: false,
   layout: 'coach',
@@ -54,8 +56,10 @@ async function createClass() {
       query: { class: classroom.joinToken },
     })
   } catch (error) {
-    submissionError.value =
-      error instanceof Error ? error.message : 'The class could not be created. Please try again.'
+    submissionError.value = getUserErrorMessage(
+      error,
+      'The class could not be created. Please try again.'
+    )
   } finally {
     isSubmitting.value = false
   }

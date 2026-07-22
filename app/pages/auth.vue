@@ -4,6 +4,7 @@ definePageMeta({ ssr: false })
 import { z } from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
 import { authClient } from '~/utils/auth-client'
+import { getUserErrorMessage } from '~/utils/user-error'
 import { onMounted } from 'vue'
 
 const toast = useToast()
@@ -74,7 +75,7 @@ async function sendMagicLink(callbackURL: string) {
   if (error) {
     toast.add({
       title: 'Error',
-      description: error.message,
+      description: 'We could not send the magic link. Please try again.',
       color: 'error',
     })
     return false
@@ -98,7 +99,7 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
     }).catch((error) => {
       toast.add({
         title: 'Error',
-        description: error?.data?.statusMessage || 'Failed to create account',
+        description: getUserErrorMessage(error, 'We could not create your account. Please try again.'),
         color: 'error',
       })
       return null
@@ -132,7 +133,7 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
   }).catch((error) => {
     toast.add({
       title: 'Error',
-      description: error?.data?.statusMessage || 'Failed to check email',
+      description: getUserErrorMessage(error, 'We could not check that email. Please try again.'),
       color: 'error',
     })
     return null
