@@ -19,6 +19,12 @@ export default defineNuxtRouteMiddleware(async (to) => {
   }
 
   if (to.path === '/auth') {
+    const requestedRole = Array.isArray(to.query.role) ? to.query.role[0] : to.query.role
+
+    if (requestedRole === 'reader') {
+      return navigateTo('/reader')
+    }
+
     if (userRole === 'admin') {
       return navigateTo('/admin')
     }
@@ -37,7 +43,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
   if (isCoachRoute && userRole !== 'admin' && userRole !== 'coach') {
     return navigateTo('/reader/profile')
   }
-
   if (isCoachRoute && to.path !== '/coach/create-class' && userRole === 'coach') {
     const requestFetch = useRequestFetch()
     const classes = await requestFetch<Array<{ joinToken: string }>>('/api/admin/classes')

@@ -27,19 +27,22 @@ export const useCurrentFormGroup = () => {
 
   const loadActiveFormGroup = async () => {
     try {
-      const formGroupAPIResponse = await $fetch<FormGroup | FormGroup[]>('/api/formGroup?active=true')
-
-      const activeFg = Array.isArray(formGroupAPIResponse) ? formGroupAPIResponse[0] : formGroupAPIResponse
+      const activeFormGroups = await $fetch<FormGroup[]>('/api/formGroup?active=true')
+      const activeFg = activeFormGroups[0]
 
       if (activeFg) {
         FormGroup.value.activeFormGroup = activeFg
 
         try {
-          const formsAPIResponse = await $fetch<Form[]>('/api/form', {
-            query: { action: 'getOnlyActiveFormsinGroup', formGroup: activeFg.id }
-          })
+          const formResponses = await Promise.all(
+            activeFormGroups.map((formGroup) =>
+              $fetch<Form[]>('/api/form', {
+                query: { action: 'getOnlyActiveFormsinGroup', formGroup: formGroup.id }
+              })
+            )
+          )
 
-          FormGroup.value.forms = Array.isArray(formsAPIResponse) ? formsAPIResponse : []
+          FormGroup.value.forms = formResponses.flat()
 
           // Load form components for each form in parallel
           FormGroup.value.formComponents = {}

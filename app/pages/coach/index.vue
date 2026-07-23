@@ -5,6 +5,7 @@ const {
   publishedForms,
   students,
 } = useCoach()
+const { classId } = useSelectedClass()
 
 const activeForms = computed(
   () => publishedForms.value.filter((f: any) => f.status === 'Active').length
@@ -13,17 +14,24 @@ const activeForms = computed(
 // Fetch the real active-announcement count from the database.
 // Using ?active=true applies the same postDate/expiryDate filter the reader home uses,
 // so the number here always matches what students actually see.
-const { data: activeAnnouncementsData, refresh: refreshAnnouncements } = await useFetch<any[]>(
-  '/api/announcement?active=true'
-)
+const activeAnnouncementsData = ref<any[]>([])
+
+const refreshAnnouncements = async () => {
+  if (!classId.value) {
+    activeAnnouncementsData.value = []
+    return
+  }
+
+  activeAnnouncementsData.value = await $fetch<any[]>('/api/announcement', {
+    query: { active: true, classId: classId.value },
+  })
+}
 
 const activeAnnouncements = computed(
   () => activeAnnouncementsData.value?.length ?? 0
 )
 
-// Re-fetch whenever the page is (re-)visited so the count stays current
-// without needing a full page reload after posting a new announcement.
-onMounted(() => refreshAnnouncements())
+watch(classId, refreshAnnouncements, { immediate: true })
 </script>
 
 <template>

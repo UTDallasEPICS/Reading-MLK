@@ -4,6 +4,7 @@ definePageMeta({ ssr: false })
 import { z } from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
 import { authClient } from '~/utils/auth-client'
+import { getUserErrorMessage } from '~/utils/user-error'
 import { onMounted } from 'vue'
 
 const toast = useToast()
@@ -74,7 +75,7 @@ async function sendMagicLink(callbackURL: string) {
   if (error) {
     toast.add({
       title: 'Error',
-      description: error.message,
+      description: 'We could not send the magic link. Please try again.',
       color: 'error',
     })
     return false
@@ -98,7 +99,7 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
     }).catch((error) => {
       toast.add({
         title: 'Error',
-        description: error?.data?.statusMessage || 'Failed to create account',
+        description: getUserErrorMessage(error, 'We could not create your account. Please try again.'),
         color: 'error',
       })
       return null
@@ -132,7 +133,7 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
   }).catch((error) => {
     toast.add({
       title: 'Error',
-      description: error?.data?.statusMessage || 'Failed to check email',
+      description: getUserErrorMessage(error, 'We could not check that email. Please try again.'),
       color: 'error',
     })
     return null
@@ -144,6 +145,7 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
 
   // Existing user
   if (result.exists) {
+
     const success = await sendMagicLink(callbackURL)
 
     if (success) {
@@ -169,32 +171,28 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
 </script>
 
 <template>
-  <div class="relative min-h-screen overflow-hidden bg-[#f8efe5] font-sans">
+  <div class="min-h-screen bg-[#f8efe5] relative overflow-hidden font-sans">
     <div class="absolute inset-0 bg-gradient-to-br from-[#faefe5] via-[#f7eee6] to-[#f5eadf]" />
-    <div class="pointer-events-none absolute inset-0 opacity-70">
+    <div class="absolute inset-0 pointer-events-none opacity-70">
       <div class="absolute top-16 left-16 h-36 w-36 rounded-full bg-orange-100 blur-3xl" />
-      <div class="absolute right-20 bottom-20 h-44 w-44 rounded-full bg-yellow-100 blur-3xl" />
+      <div class="absolute bottom-20 right-20 h-44 w-44 rounded-full bg-yellow-100 blur-3xl" />
       <div class="absolute top-1/3 right-1/4 h-28 w-28 rounded-full bg-pink-100 blur-2xl" />
     </div>
 
-    <main class="relative z-10 flex min-h-screen items-center justify-center px-4 py-6">
-      <div
-        class="w-full max-w-lg overflow-hidden rounded-[2.25rem] border border-white bg-white/80 shadow-[0_20px_60px_rgba(0,0,0,0.10)] backdrop-blur"
-      >
+    <main class="relative z-10 min-h-screen flex items-center justify-center px-4 py-6">
+      <div class="w-full max-w-lg rounded-[2.25rem] bg-white/80 backdrop-blur border border-white shadow-[0_20px_60px_rgba(0,0,0,0.10)] overflow-hidden">
         <div class="h-2 w-full bg-gradient-to-r from-[#6b6ee8] via-[#f0a446] to-[#ffb400]" />
 
-        <div class="px-8 py-8 text-center sm:px-12">
-          <div
-            class="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-[#eef0fb] text-5xl shadow-inner"
-          >
+        <div class="px-8 sm:px-12 py-8 text-center">
+          <div class="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-[#eef0fb] text-5xl shadow-inner">
             🪄
           </div>
 
-          <h1 class="mb-3 text-4xl font-black tracking-tight text-[#0f1730] sm:text-5xl">
+          <h1 class="text-4xl sm:text-5xl font-black text-[#0f1730] mb-3 tracking-tight">
             Magic Login
           </h1>
 
-          <p class="mb-8 text-lg font-bold text-[#70798c]">
+          <p class="text-lg font-bold text-[#70798c] mb-8">
             Signing in as:
             {{ loginRole === 'coach' ? 'Reading Coach' : 'Reading Buddy' }}
           </p>
@@ -212,7 +210,7 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
                 size="xl"
                 class="w-full"
                 :ui="{
-                  base: 'rounded-2xl h-14 px-4 text-lg bg-white border border-gray-200 text-gray-900 placeholder:text-gray-300 shadow-sm',
+                  base: 'rounded-2xl h-14 px-4 text-lg bg-white border border-gray-200 text-gray-900 placeholder:text-gray-300 shadow-sm'
                 }"
               />
             </UFormField>
@@ -230,7 +228,7 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
                 size="xl"
                 class="w-full"
                 :ui="{
-                  base: 'rounded-2xl h-14 px-4 text-lg bg-white border border-gray-200 text-gray-900 placeholder:text-gray-300 shadow-sm',
+                  base: 'rounded-2xl h-14 px-4 text-lg bg-white border border-gray-200 text-gray-900 placeholder:text-gray-300 shadow-sm'
                 }"
               />
             </UFormField>
@@ -240,7 +238,7 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
               loading-auto
               type="submit"
               size="xl"
-              class="h-14 w-full justify-center rounded-2xl bg-[#0d1735] text-xl font-black text-white shadow-xl hover:bg-[#132149]"
+              class="w-full justify-center rounded-2xl h-14 text-xl font-black bg-[#0d1735] hover:bg-[#132149] text-white shadow-xl"
             >
               {{ isNewUser ? 'Create Account ✨' : 'Send Magic Link 🪄' }}
             </UButton>
@@ -248,7 +246,7 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
 
           <button
             @click="navigateTo('/')"
-            class="mt-6 text-sm font-black tracking-[0.25em] text-[#9aa3b4] uppercase transition-colors hover:text-[#6c7486]"
+            class="mt-6 text-sm font-black uppercase tracking-[0.25em] text-[#9aa3b4] hover:text-[#6c7486] transition-colors"
           >
             ← Back to Portal
           </button>
