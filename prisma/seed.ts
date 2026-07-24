@@ -9,7 +9,7 @@ function makeLocalDate(dateString: string) {
 
 
   const shopThemes = [
-  { id: 1,  name: 'Light Bloom',   cost: 0,   class: 'light',  color: '#f5ede3', grad: 'radial-gradient(at 0% 0%, hsla(25,95%,75%,0.3) 0px, transparent 50%)' },
+  { id: 1,  name: 'Light Bloom',   cost: 0,   class: 'default',  color: '#f5ede3', grad: 'radial-gradient(at 0% 0%, hsla(25,95%,75%,0.3) 0px, transparent 50%)' },
   { id: 2,  name: 'Galaxy Night',  cost: 500, class: 'dark',   color: '#1f3b7c', grad: 'radial-gradient(at 0% 0%, hsla(250,20%,20%,0.5) 0px, transparent 50%)' },
   { id: 3,  name: 'Old Parchment', cost: 300, class: 'sepia',  color: '#f4ecd8', grad: 'none' },
   { id: 4, name: 'Sunset',        cost: 100, class: 'sunset', color: '#fff5f5', grad: 'radial-gradient(at 0% 0%, hsla(10,90%,75%,0.25) 0px, transparent 50%)' },

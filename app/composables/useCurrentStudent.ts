@@ -14,7 +14,7 @@ export const useCurrentStudent = () => {
     const raw = (student.value?.settings as Partial<StudentSettings>) || {}
 
     return {
-      theme: typeof raw.theme === 'string' && raw.theme !== 'light' ? raw.theme : 'light',
+      theme: typeof raw.theme === 'string' && raw.theme !== 'default' ? raw.theme : 'default',
       dyslexiaFont: Boolean(raw.dyslexiaFont),
       language: raw.language || 'en',
       fontSize: Number(raw.fontSize) || 1,

@@ -9,13 +9,13 @@ const kidProfiles = ref([
 ])
 
 const settings = reactive({
-  theme:       'light',
+  theme:       'default',
   dyslexiaFont: false,
   fontSize:    1,
 })
 
 const themeClass = computed(() => {
-  const t = settings.theme !== 'light' ? `theme-${settings.theme}` : ''
+  const t = settings.theme !== 'default' ? `theme-${settings.theme}` : ''
   const d = settings.dyslexiaFont ? 'dyslexia-font' : ''
   return `reader-app ${t} ${d}`.trim()
 })

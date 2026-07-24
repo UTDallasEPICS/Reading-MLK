@@ -29,7 +29,7 @@ onMounted(async () => {
 
 // ── Theme class ──
 const themeClass = computed(() => {
-  const t = settings.value.theme !== 'light' ? `theme-${settings.value.theme}` : ''
+  const t = settings.value.theme !== 'default' ? `theme-${settings.value.theme}` : ''
   const d = settings.value.dyslexiaFont ? 'dyslexia-font' : ''
   return `reader-app ${t} ${d}`.trim()
 })

@@ -53,7 +53,7 @@ watch(showEmojiPicker, (open) => {
       pickerInstance = new Picker({
         data,
         onEmojiSelect: onEmojiSelect,
-        theme: 'light'
+        theme: 'default'
       })
       pickerContainerRef.value.appendChild(pickerInstance as any)
     }

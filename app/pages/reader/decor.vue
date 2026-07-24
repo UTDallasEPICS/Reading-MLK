@@ -29,7 +29,7 @@ async function loadShopItems() {
 
   // Fallback mapping keeps current visual cards while moving source of truth to DB.
   const styleMap: Record<string, { class: string; previewBg: string; previewGrad: string }> = {
-    'Light Bloom': { class: 'light', previewBg: '#f5ede3', previewGrad: 'radial-gradient(at 0% 0%, hsla(25,95%,75%,0.3) 0px, transparent 50%)' },
+    'Light Bloom': { class: 'default', previewBg: '#f5ede3', previewGrad: 'radial-gradient(at 0% 0%, hsla(25,95%,75%,0.3) 0px, transparent 50%)' },
     'Galaxy Night': { class: 'dark', previewBg: '#1f3b7c', previewGrad: 'radial-gradient(at 0% 0%, hsla(250,20%,20%,0.5) 0px, transparent 50%)' },
     'Old Parchment': { class: 'sepia', previewBg: '#f4ecd8', previewGrad: 'none' },
     Sunset: { class: 'sunset', previewBg: '#fff5f5', previewGrad: 'radial-gradient(at 0% 0%, hsla(10,90%,75%,0.25) 0px, transparent 50%)' },
@@ -42,7 +42,7 @@ async function loadShopItems() {
 
   shopItems.value = rawItems.map((item) => {
     const mapped = styleMap[item.name] || {
-      class: item.type === 'theme' ? 'light' : '',
+      class: item.type === 'theme' ? 'default' : '',
       previewBg: '#f5ede3',
       previewGrad: 'none',
     }
@@ -71,7 +71,7 @@ onMounted(async () => {
 })
 
 const themeClass = computed(() => {
-  const t = settings.value.theme !== 'light' ? `theme-${settings.value.theme}` : ''
+  const t = settings.value.theme !== 'default' ? `theme-${settings.value.theme}` : ''
   const d = settings.value.dyslexiaFont ? 'dyslexia-font' : ''
   return `reader-app ${t} ${d}`.trim()
 })

@@ -98,7 +98,7 @@ async function saveAccountSettings() {
 
 // ── Theme class ── 
 const themeClass = computed(() => {
-  const t = 'light'
+  const t = 'default'
   const d = settings.dyslexiaFont ? 'dyslexia-font' : ''
   return `reader-app ${t} ${d}`.trim()
 })

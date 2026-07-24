@@ -1869,7 +1869,7 @@
 
                 const settings = reactive({
                     dyslexiaFont: false,
-                    theme: 'light',
+                    theme: 'default',
                     language: 'en',
                     fontSize: 1
                 });
@@ -1885,7 +1885,7 @@
                 watchEffect(() => {
                     document.body.classList.remove('theme-dark', 'theme-sepia', 'theme-sunset', 'theme-ocean', 'theme-forest', 'theme-candy', 'theme-fire', 'theme-ice', 'dyslexia-font');
                     const themeClass = 'theme-' + settings.theme;
-                    if (settings.theme !== 'light') document.body.classList.add(themeClass);
+                    if (settings.theme !== 'default') document.body.classList.add(themeClass);
                     if (settings.dyslexiaFont) document.body.classList.add('dyslexia-font');
                     document.documentElement.style.fontSize = (settings.fontSize * 16) + 'px';
                 });
