@@ -1,6 +1,7 @@
 <!-- layouts/coach.vue -->
 <script setup lang="ts">
 const route = useRoute()
+const { data: coachProfile } = await useFetch<{ tag: string; verified: boolean } | null>('/api/coach/profile')
 const selectedClassToken = useCookie<string | null>('selected-class-token', {
   sameSite: 'lax',
 })
@@ -58,6 +59,8 @@ function navigateWithinClass(path: string) {
         <div>
           <p class="rh-header-label">Reading Huddle</p>
           <h1 class="rh-header-title">Reading Coach</h1>
+          <span v-if="coachProfile?.verified" class="rh-verified-badge">Verified Teacher</span>
+          <span v-else-if="coachProfile?.tag === 'teacher'" class="rh-pending-badge">Verification pending</span>
         </div>
 
         <ClassContextSelect />

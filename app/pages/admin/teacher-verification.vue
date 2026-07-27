@@ -11,7 +11,7 @@ useHead({
 type VerificationStatus = 'Pending' | 'Approved' | 'Denied'
 
 type TeacherApplication = {
-  id: number
+  id: string
   name: string
   email: string
   role: string
@@ -30,6 +30,23 @@ const statusFilter = ref<VerificationStatus | 'All'>('Pending')
 
 const selectedApplication = ref<TeacherApplication | null>(null)
 const modalOpen = ref(false)
+const loading = ref(true)
+
+async function loadApplications() {
+  loading.value = true
+
+  try {
+    const result = await $fetch<TeacherApplication[]>('/api/admin/teacher-verification')
+    applications.value = result.map(application => ({
+      ...application,
+      requestedAt: new Date(application.requestedAt).toLocaleDateString(),
+    }))
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(loadApplications)
 
 const filteredApplications = computed(() => {
   const query = searchQuery.value.trim().toLowerCase()
@@ -75,40 +92,35 @@ function closeModal() {
   selectedApplication.value = null
 }
 
-function updateStatus(status: VerificationStatus) {
+async function updateStatus(status: VerificationStatus) {
   if (!selectedApplication.value) {
     return
   }
 
-  const application = applications.value.find(
-    item => item.id === selectedApplication.value?.id,
-  )
+  await $fetch(`/api/admin/teacher-verification/${selectedApplication.value.id}`, {
+    method: 'PATCH',
+    body: { status },
+  })
 
-  if (!application) {
-    return
-  }
-
-  application.status = status
+  await loadApplications()
   closeModal()
 }
 
-function saveApplicationChanges() {
+async function saveApplicationChanges() {
   if (!selectedApplication.value) {
     return
   }
 
-  const index = applications.value.findIndex(
-    application => application.id === selectedApplication.value?.id,
-  )
+  await $fetch(`/api/admin/teacher-verification/${selectedApplication.value.id}`, {
+    method: 'PATCH',
+    body: {
+      school: selectedApplication.value.school,
+      district: selectedApplication.value.district,
+      zipcode: selectedApplication.value.zipcode,
+    },
+  })
 
-  if (index === -1) {
-    return
-  }
-
-  applications.value[index] = {
-    ...selectedApplication.value,
-  }
-
+  await loadApplications()
   closeModal()
 }
 </script>
@@ -163,8 +175,15 @@ function saveApplicationChanges() {
       </div>
 
       <div class="application-list">
+        <div
+          v-if="loading"
+          class="empty-state"
+        >
+          Loading teacher applications...
+        </div>
+
         <article
-          v-for="application in filteredApplications"
+          v-for="application in loading ? [] : filteredApplications"
           :key="application.id"
           class="application-row"
         >
@@ -229,7 +248,7 @@ function saveApplicationChanges() {
         </article>
 
         <div
-          v-if="filteredApplications.length === 0"
+          v-if="!loading && filteredApplications.length === 0"
           class="empty-state"
         >
           No matching teacher applications found.
@@ -293,18 +312,18 @@ function saveApplicationChanges() {
           <div class="modal-fields">
             <label>
               <span>Name</span>
-              <input v-model="selectedApplication.name" type="text">
+              <input v-model="selectedApplication.name" type="text" disabled>
             </label>
 
             <label>
               <span>Email</span>
-              <input v-model="selectedApplication.email" type="email">
+              <input v-model="selectedApplication.email" type="email" disabled>
             </label>
 
             <label>
               <span>Role</span>
 
-              <select v-model="selectedApplication.role">
+              <select v-model="selectedApplication.role" disabled>
                 <option value="Teacher">Teacher</option>
                 <option value="Study Group">Study Group</option>
                 <option value="Other">Other</option>
