@@ -77,7 +77,6 @@ async function main() {
       email: seededEmails[2],
       emailVerified: true,
       role: 'admin',
-      admin: true,
       accounts: {
         create: {
           id: 'seed_account_6',
