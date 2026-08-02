@@ -34,7 +34,7 @@ export default defineEventHandler(async (event) => {
       where: {
         userId: session.user.id,
       },
-      update: coachData,
+      update: {},
       create: {
         ...coachData,
         userId: session.user.id,
