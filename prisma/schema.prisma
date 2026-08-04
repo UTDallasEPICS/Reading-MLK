@@ -15,10 +15,11 @@ model User {
   role                String               @default("reader")
   raffleOptIn         Boolean              @default(true)
   publicityConsent    Boolean              @default(false)
-  admin               Boolean              @default(false)
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
+
   sessions            Session[]
+  coach               Coach?
   accounts            Account[]
   students            Student[]
   pendingEmailChanges PendingEmailChange?
@@ -72,14 +73,16 @@ model Verification {
   @@map("verification")
 }
 
-model Poster {
+model Coach {
   id          String      @id @default(uuid())
   tag         String      @default("other") //enum: "teacher", "personal", "studygroup", "other"
   verified    Boolean     @default(false)
   school      String?           
   district    String?
   zipcode     String?
+  userId      String      @unique
 
+  User          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   Classes       Class[]
   announcements Announcement[]
   @@index([tag])
@@ -110,7 +113,7 @@ model Class {
   name            String
 
   Students        Student[]
-  Posters         Poster[]
+  Coach           Coach[]
   Announcements   Announcement[]
   FormGroups      FormGroup[]
   @@index([joinToken])
@@ -124,7 +127,7 @@ model Announcement {
   author      String
   class       String
 
-  Author      Poster    @relation(fields: [author], references: [id], onDelete: Cascade)
+  Author      Coach     @relation(fields: [author], references: [id], onDelete: Cascade)
   Class       Class     @relation(fields: [class], references: [id], onDelete: Cascade)
   @@index([postDate])
   @@index([expiryDate])

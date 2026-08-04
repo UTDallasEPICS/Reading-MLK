@@ -1,0 +1,78 @@
+<!-- layouts/coach.vue -->
+<script setup lang="ts">
+const route = useRoute()
+const { data: coachProfile } = await useFetch<{ tag: string; verified: boolean } | null>('/api/coach/profile')
+const selectedClassToken = useCookie<string | null>('selected-class-token', {
+  sameSite: 'lax',
+})
+const routeClassToken = computed(() => {
+  const classQuery = route.query.class
+  return Array.isArray(classQuery) ? classQuery[0] : classQuery
+})
+
+watchEffect(() => {
+  if (routeClassToken.value) {
+    selectedClassToken.value = routeClassToken.value
+  }
+})
+
+function navigateWithinClass(path: string) {
+  const classToken = routeClassToken.value || selectedClassToken.value
+
+  return navigateTo({
+    path,
+    query: classToken ? { class: classToken } : {},
+  })
+}
+</script>
+
+<template>
+  <div class="rh-coach-wrap">
+    <aside class="rh-sidebar">
+      <div class="rh-sidebar-inner">
+        <div class="rh-logo">
+          <div class="rh-logo-icon">L</div>
+          <div>
+            <div class="rh-logo-name">Reading<span class="rh-logo-accent">Huddle</span></div>
+            <div class="rh-logo-sub">Reading Coach Portal</div>
+          </div>
+        </div>
+
+        <p class="rh-nav-label">Reading Coach Tools</p>
+        <nav class="rh-nav">
+          <button @click="navigateWithinClass('/coach')"               class="rh-nav-btn" :class="{ 'rh-nav-active': route.path === '/coach' }">Dashboard</button>
+          <button @click="navigateWithinClass('/coach/builder')"       class="rh-nav-btn" :class="{ 'rh-nav-active': route.path === '/coach/builder' }">Form Builder</button>
+          <button @click="navigateWithinClass('/coach/progress')"      class="rh-nav-btn" :class="{ 'rh-nav-active': route.path === '/coach/progress' }">Class Progress</button>
+          <button @click="navigateWithinClass('/coach/raffle')"        class="rh-nav-btn" :class="{ 'rh-nav-active': route.path === '/coach/raffle' }">Raffle System</button>
+          <button @click="navigateWithinClass('/coach/announcements')" class="rh-nav-btn" :class="{ 'rh-nav-active': route.path === '/coach/announcements' }">Announcements</button>
+        </nav>
+      </div>
+
+      <div class="rh-sidebar-footer">
+        <NuxtLink to="/" class="rh-back-link">← Back to Portal</NuxtLink>
+        <LogoutButton class="rh-logout-link" />
+      </div>
+    </aside>
+
+    <div class="rh-workspace">
+      <header class="rh-header">
+        <div>
+          <p class="rh-header-label">Reading Huddle</p>
+          <h1 class="rh-header-title">Reading Coach</h1>
+          <span v-if="coachProfile?.verified" class="rh-verified-badge">Verified Teacher</span>
+          <span v-else-if="coachProfile?.tag === 'teacher'" class="rh-pending-badge">Verification pending</span>
+        </div>
+
+        <ClassContextSelect />
+      </header>
+
+      <div class="rh-main">
+        <slot />
+      </div>
+    </div>
+  </div>
+</template>
+
+<style>
+@import './coach.css';
+</style>

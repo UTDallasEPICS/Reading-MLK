@@ -1,13 +1,24 @@
-// composables/useAdmin.ts
-// Place this at: app/composables/useAdmin.ts
+// composables/useCoach.ts
+// Place this at: app/composables/useCoach.ts
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 
 dayjs.extend(utc)
-export const useAdmin = () => {
+export const useCoach = () => {
+  const { classId } = useSelectedClass()
   const callFormApi = async <T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', params: Record<string, unknown> = {}, body?: Record<string, unknown>): Promise<T> => {
+    if (!classId.value) {
+      throw new Error('Select a class before managing forms')
+    }
+
+    const scopedParams = {
+      ...params,
+      ...(method === 'DELETE' ? body : {}),
+      classId: classId.value,
+    }
+    const scopedBody = { ...body, classId: classId.value }
     const queryString = method === 'GET' || method === 'DELETE'
-      ? `?${new URLSearchParams(Object.entries(params).reduce((acc, [key, value]) => {
+      ? `?${new URLSearchParams(Object.entries(scopedParams).reduce((acc, [key, value]) => {
           if (value !== undefined && value !== null) {
             acc[key] = String(value)
           }
@@ -18,7 +29,7 @@ export const useAdmin = () => {
 
     return await $fetch<T>(`/api/form${queryString}`, {
       method,
-      body: method === 'GET' ? undefined : body,
+      body: method === 'GET' || method === 'DELETE' ? undefined : scopedBody,
     })
   }
 
@@ -215,6 +226,11 @@ export const useAdmin = () => {
   )
 
   const loadPublishedForms = async () => {
+    if (!classId.value) {
+      publishedForms.value = []
+      return
+    }
+
     try {
       const forms = await callFormApi<any[]>('GET', {
         action: 'listForms',
@@ -227,6 +243,12 @@ export const useAdmin = () => {
   }
 
   const syncGroupRangeFromWeeklyDate = async () => {
+    if (!classId.value) {
+      historyGroupStartDate.value = ''
+      historyGroupEndDate.value = ''
+      return
+    }
+
     if (!historyWeekStart.value) {
       historyGroupStartDate.value = ''
       historyGroupEndDate.value = ''
@@ -262,8 +284,11 @@ export const useAdmin = () => {
   }
 
   watch(
-    historyWeekStart,
+    [historyWeekStart, classId],
     async () => {
+      publishedForms.value = []
+      selectedFormDetails.value = null
+      editingFormId.value = null
       await syncGroupRangeFromWeeklyDate()
       await loadPublishedForms()
     },
@@ -433,7 +458,7 @@ export const useAdmin = () => {
     questions.value     = JSON.parse(JSON.stringify(form.questions))
     editingFormId.value = form.id
     builderSubTab.value = 'creation'
-    navigateTo('/admin/builder')
+    navigateTo({ path: '/coach/builder', query: { class: classId.value } })
   }
 
   const toggleFormPublish = async (form: any) => {
@@ -442,9 +467,10 @@ export const useAdmin = () => {
     form.status = form.status === 'Active' ? 'Unpublished' : 'Active'
     const newStatus = form.status === 'Active' ? true : false
 
-    await useFetch(`/api/form/${form.id}`, {
-      method: 'PUT',
-      body: {published: newStatus}
+    await callFormApi('PUT', {}, {
+      action: 'updateForm',
+      id: form.id,
+      published: newStatus,
     })
   }
 
@@ -453,11 +479,49 @@ export const useAdmin = () => {
   }
 
   // ── Students / Progress ──
-  const students = useState<any[]>('adminStudents', () => [
-    { id: 1, name: 'Aiden Smith', initials: 'AS', email: 'aiden@school.edu', tickets: 12, streak: 4, lastActive: '2 hours ago' },
-    { id: 2, name: 'Nevin Kumar', initials: 'NK', email: 'nevin@school.edu', tickets: 14, streak: 5, lastActive: 'Just now'     },
-    { id: 3, name: 'Swarna Jay',  initials: 'SJ', email: 'swarna@school.edu',tickets: 8,  streak: 2, lastActive: 'Yesterday'   },
-  ])
+  const students = useState<any[]>('coachStudents', () => [])
+
+  const loadStudents = async () => {
+    if (!classId.value) {
+      students.value = []
+      return
+    }
+
+    const classStudents = await $fetch<Array<{ id: number; name: string; exp: number }>>(
+      '/api/student',
+      {
+        method: 'GET',
+        query: { classId: classId.value },
+      }
+    )
+
+    students.value = classStudents.map((student) => ({
+      ...student,
+      initials: student.name
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0]?.toUpperCase())
+        .join(''),
+      tickets: student.exp,
+      streak: 0,
+      lastActive: '',
+    }))
+  }
+
+  watch(
+    classId,
+    async () => {
+      students.value = []
+
+      try {
+        await loadStudents()
+      } catch (error) {
+        console.error('Failed to load class students', error)
+      }
+    },
+    { immediate: true }
+  )
 
   const searchStudent = useState('searchStudent', () => '')
   const sortStudent   = useState('sortStudent',   () => 'tickets')

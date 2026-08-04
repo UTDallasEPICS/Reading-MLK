@@ -1,12 +1,19 @@
 import { prisma } from '../../utils/prisma'
-import { requireAdmin } from '../../utils/require-session'
+import { requireClassAccess } from '../../utils/require-session'
 import { createError } from 'h3'
 
 export default defineEventHandler(async (event) => {
   const method = event.node.req.method
 
   if (method === 'DELETE') {
-    await requireAdmin(event)
+    const query = getQuery(event)
+    const classToken = typeof query.classId === 'string' ? query.classId : ''
+
+    if (!classToken) {
+      throw createError({ statusCode: 400, statusMessage: 'classId is required' })
+    }
+
+    const { classId } = await requireClassAccess(event, classToken)
 
     const id = event.context.params?.id
 
@@ -21,9 +28,22 @@ export default defineEventHandler(async (event) => {
     }
 
     try {
-      await prisma.announcement.delete({ where: { id: numericId } })
+      const announcement = await prisma.announcement.findFirst({
+        where: { id: numericId, class: classId },
+        select: { id: true },
+      })
+
+      if (!announcement) {
+        throw createError({ statusCode: 404, statusMessage: 'Announcement not found in this class' })
+      }
+
+      await prisma.announcement.delete({ where: { id: announcement.id } })
       return { success: true }
     } catch (e: any) {
+      if (e?.statusCode) {
+        throw e
+      }
+
       if (e?.code === 'P2025') {
         throw createError({
           statusCode: 404,

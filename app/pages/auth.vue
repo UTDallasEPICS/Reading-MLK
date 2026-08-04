@@ -4,6 +4,7 @@ definePageMeta({ ssr: false })
 import { z } from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
 import { authClient } from '~/utils/auth-client'
+import { getUserErrorMessage } from '~/utils/user-error'
 import { onMounted } from 'vue'
 
 const toast = useToast()
@@ -41,14 +42,14 @@ onMounted(() => {
 })
 
 const loginRole = computed(() => {
-  return route.query.role === 'admin' ? 'admin' : 'reader'
+  return route.query.role === 'coach' ? 'coach' : 'reader'
 })
 
 const isNewUser = ref(false)
 const checkingEmail = ref(false)
 
 const schema = computed(() => {
-  if (isNewUser.value && loginRole.value === 'reader') {
+  if (isNewUser.value) {
     return z.object({
       email: z.string().email('Invalid email'),
       name: z.string().min(1, 'Name is required'),
@@ -74,7 +75,7 @@ async function sendMagicLink(callbackURL: string) {
   if (error) {
     toast.add({
       title: 'Error',
-      description: error.message,
+      description: 'We could not send the magic link. Please try again.',
       color: 'error',
     })
     return false
@@ -84,20 +85,21 @@ async function sendMagicLink(callbackURL: string) {
 }
 
 async function handleSubmit(_event: FormSubmitEvent<any>) {
-  const callbackURL = loginRole.value === 'admin' ? '/admin' : '/reader/profile'
+  const callbackURL = loginRole.value === 'coach' ? '/auth?role=coach' : '/reader/profile'
 
-  // New reader flow: create account first, then send magic link
-  if (isNewUser.value && loginRole.value === 'reader') {
+  // New user flow: create account first, then send magic link
+  if (isNewUser.value) {
     const signupResult = await $fetch('/api/users/signup', {
       method: 'POST',
       body: {
         email: state.email,
         name: state.name,
+        role: loginRole.value,
       },
     }).catch((error) => {
       toast.add({
         title: 'Error',
-        description: error?.data?.statusMessage || 'Failed to create account',
+        description: getUserErrorMessage(error, 'We could not create your account. Please try again.'),
         color: 'error',
       })
       return null
@@ -131,7 +133,7 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
   }).catch((error) => {
     toast.add({
       title: 'Error',
-      description: error?.data?.statusMessage || 'Failed to check email',
+      description: getUserErrorMessage(error, 'We could not check that email. Please try again.'),
       color: 'error',
     })
     return null
@@ -157,17 +159,7 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
     return
   }
 
-  // New admins are not allowed through public signup
-  if (loginRole.value === 'admin') {
-    toast.add({
-      title: 'Error',
-      description: 'Admin account not found.',
-      color: 'error',
-    })
-    return
-  }
-
-  // New reader: reveal name field
+  // New user: reveal name field
   isNewUser.value = true
 
   toast.add({
@@ -202,7 +194,7 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
 
           <p class="text-lg font-bold text-[#70798c] mb-8">
             Signing in as:
-            {{ loginRole === 'admin' ? 'Faculty & Admin' : 'Reading Buddy' }}
+            {{ loginRole === 'coach' ? 'Reading Coach' : 'Reading Buddy' }}
           </p>
 
           <UForm :schema="schema" :state="state" @submit="handleSubmit" class="space-y-5 text-left">
@@ -224,7 +216,7 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
             </UFormField>
 
             <UFormField
-              v-if="isNewUser && loginRole === 'reader'"
+              v-if="isNewUser"
               name="name"
               label="Your Name"
               :ui="{ label: 'text-[#5c6475] font-bold text-sm tracking-wide' }"
@@ -248,7 +240,7 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
               size="xl"
               class="w-full justify-center rounded-2xl h-14 text-xl font-black bg-[#0d1735] hover:bg-[#132149] text-white shadow-xl"
             >
-              {{ isNewUser && loginRole === 'reader' ? 'Create Account ✨' : 'Send Magic Link 🪄' }}
+              {{ isNewUser ? 'Create Account ✨' : 'Send Magic Link 🪄' }}
             </UButton>
           </UForm>
 

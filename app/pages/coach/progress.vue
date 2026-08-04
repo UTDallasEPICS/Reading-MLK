@@ -1,5 +1,7 @@
 <script setup lang="ts">
-definePageMeta({ ssr: false, layout: 'admin' })
+definePageMeta({ ssr: false, layout: 'coach' })
+
+const { classId } = useSelectedClass()
 
 type ProgressRecord = {
   id: number
@@ -190,15 +192,16 @@ const activeSortDirection = computed(() => {
 
 // API Data Fetching
 async function loadWeekForms() {
-  if (!selectedDate.value) {
+  if (!classId.value || !selectedDate.value) {
     allWeekRecords.value = []
     return
   }
 
-  const response = await $fetch<ApiResponse>('/api/admin/class-progress', {
+  const response = await $fetch<ApiResponse>('/api/coach/class-progress', {
     method: 'GET',
     query: {
       date: selectedDate.value,
+      classId: classId.value,
       mode: 'completed',
       page: 1,
       pageSize: 1000,
@@ -213,13 +216,22 @@ async function loadWeekForms() {
 }
 
 async function loadClassProgress() {
+  if (!classId.value) {
+    visibleRecords.value = []
+    visibleGroupedRecords.value = []
+    visibleMissingRecords.value = []
+    totalCount.value = 0
+    return
+  }
+
   loading.value = true
 
   try {
-    const response = await $fetch<ApiResponse>('/api/admin/class-progress', {
+    const response = await $fetch<ApiResponse>('/api/coach/class-progress', {
       method: 'GET',
       query: {
         mode: viewMode.value,
+        classId: classId.value,
         date: selectedDate.value || undefined,
         formIds: selectedFormIds.value.length > 0 ? selectedFormIds.value.join(',') : undefined,
         search: searchStudent.value.trim() || undefined,
@@ -296,11 +308,14 @@ function downloadCsv(filename: string, rows: Array<Array<string | number>>) {
 
 // CSV Export Logic
 async function exportCurrentTable() {
+  if (!classId.value) return
+
   try {
-    const response = await $fetch<ApiResponse>('/api/admin/class-progress', {
+    const response = await $fetch<ApiResponse>('/api/coach/class-progress', {
       method: 'GET',
       query: {
         mode: viewMode.value,
+        classId: classId.value,
         date: selectedDate.value || undefined,
         formIds: selectedFormIds.value.length > 0 ? selectedFormIds.value.join(',') : undefined,
         search: searchStudent.value.trim() || undefined,
@@ -360,6 +375,14 @@ async function exportCurrentTable() {
 watch(selectedDate, async () => {
   selectedFormIds.value = []
   currentPage.value = 1
+  await loadWeekForms()
+  await loadClassProgress()
+})
+
+watch(classId, async () => {
+  selectedFormIds.value = []
+  currentPage.value = 1
+  allWeekRecords.value = []
   await loadWeekForms()
   await loadClassProgress()
 })

@@ -9,11 +9,9 @@ async function main() {
   const seededEmails = [
     'parent1@example.com',
     'parent2@gmail.com',
-    'rae@readinghuddle.com',
-    'asloran23@gmail.com',
-    'nevins321@gmail.com',
-    'sxg230203@utdallas.edu'
+    '[Admin email here]'
   ]
+  const seededAdminName = '[Admin name here]'
 
   await prisma.user.deleteMany({
     where: {
@@ -25,21 +23,20 @@ async function main() {
 
   await prisma.user.create({
     data: {
-      id: 'seed_user_1',
-      name: 'Oryx',
-      email: 'parent1@example.com',
+      name: 'Oryx (TEST PARENT)',
+      email: seededEmails[0],
       emailVerified: true,
       role: 'reader',
       accounts: {
         create: {
           id: 'seed_account_1',
-          accountId: 'parent1@example.com',
+          accountId: seededEmails[0],
           providerId: 'magic-link',
         },
       },
       students: {
         create: {
-          name: 'Crota',
+          name: 'Crota (TEST STUDENT)',
           exp: 5000,
           settings: {
             dyslexiaFont: true,
@@ -53,23 +50,22 @@ async function main() {
 
   await prisma.user.create({
     data: {
-      id: 'seed_user_2',
-      name: 'Richard Watterson',
-      email: 'parent2@gmail.com',
+      name: 'Richard Watterson (TEST PARENT)',
+      email: seededEmails[1],
       emailVerified: true,
       role: 'reader',
       accounts: {
         create: {
           id: 'seed_account_2',
-          accountId: 'parent2@gmail.com',
+          accountId: seededEmails[1],
           providerId: 'magic-link',
         },
       },
       students: {
         create: [
-          { name: 'Gumball' },
-          { name: 'Darwin' },
-          { name: 'Anais' },
+          { name: 'Gumball (TEST STUDENT)' },
+          { name: 'Darwin (TEST STUDENT)' },
+          { name: 'Anais (TEST STUDENT)' },
         ],
       },
     },
@@ -77,94 +73,18 @@ async function main() {
 
   await prisma.user.create({
     data: {
-      id: 'seed_user_3',
-      name: 'Rae',
-      email: 'rae@readinghuddle.com',
-      emailVerified: true,
-      role: 'admin',
-      accounts: {
-        create: {
-          id: 'seed_account_3',
-          accountId: 'rae@readinghuddle.com',
-          providerId: 'magic-link',
-        },
-      },
-      admin: {
-        create: {},
-      },
-    },
-  })
-
-  await prisma.user.create({
-    data: {
-      id: 'seed_user_4',
-      name: 'Nevin',
-      email: 'nevins321@gmail.com',
-      emailVerified: true,
-      role: 'admin',
-      accounts: {
-        create: {
-          id: 'seed_account_4',
-          accountId: 'nevins321@gmail.com',
-          providerId: 'magic-link',
-        },
-      },
-      admin: {
-        create: {},
-      },
-    },
-  })
-
-  await prisma.user.create({
-    data: {
-      id: 'seed_user_5',
-      name: 'Swarna',
-      email: 'sxg230203@utdallas.edu',
-      emailVerified: true,
-      role: 'admin',
-      accounts: {
-        create: {
-          id: 'seed_account_5',
-          accountId: 'sxg230203@utdallas.edu',
-          providerId: 'magic-link',
-        },
-      },
-      admin: {
-        create: {
-          settings: {
-            dyslexiaFont: true,
-            fontSize: 1,
-            language: 'en',
-          },
-        },
-      },
-    },
-  })
-
-  await prisma.user.create({
-    data: {
-      id: 'seed_user_6',
-      name: 'Aidan',
-      email: 'asloran23@gmail.com',
+      name: seededAdminName,
+      email: seededEmails[2],
       emailVerified: true,
       role: 'admin',
       accounts: {
         create: {
           id: 'seed_account_6',
-          accountId: 'asloran23@gmail.com',
+          accountId: seededEmails[2],
           providerId: 'magic-link',
-        },
-      },
-      admin: {
-        create: {
-          settings: {
-            dyslexiaFont: true,
-            fontSize: 1,
-            language: 'en',
-          },
-        },
-      },
-    },
+        }
+      }
+    }
   })
 
   // Clean old progress-testing data
@@ -173,31 +93,39 @@ async function main() {
   await prisma.formComponent.deleteMany()
   await prisma.form.deleteMany()
   await prisma.formGroup.deleteMany()
+  await prisma.class.deleteMany()
 
   // Pull seeded students
-  const crota = await prisma.student.findFirst({ where: { name: 'Crota' } })
-  const gumball = await prisma.student.findFirst({ where: { name: 'Gumball' } })
-  const darwin = await prisma.student.findFirst({ where: { name: 'Darwin' } })
-  const anais = await prisma.student.findFirst({ where: { name: 'Anais' } })
+  const crota = await prisma.student.findFirst({ where: { name: 'Crota (TEST STUDENT)' } })
+  const gumball = await prisma.student.findFirst({ where: { name: 'Gumball (TEST STUDENT)' } })
+  const darwin = await prisma.student.findFirst({ where: { name: 'Darwin (TEST STUDENT)' } })
+  const anais = await prisma.student.findFirst({ where: { name: 'Anais (TEST STUDENT)' } })
 
   if (!crota || !gumball || !darwin || !anais) {
     throw new Error('Seed students not found')
   }
 
-  // Get one admin to author forms
-  const nevinAdmin = await prisma.admin.findFirst({
-    where: { userId: 'seed_user_4' },
+  // Create a class for testing
+ const testClass = await prisma.class.create({
+    data: {
+      name: 'Reading Class (TEST)',
+      Students: {
+        connect: [
+          { id: crota.id },
+          { id: gumball.id },
+          { id: darwin.id },
+          { id: anais.id }
+        ]
+      }
+    }
   })
-
-  if (!nevinAdmin) {
-    throw new Error('Admin seed record for Nevin not found')
-  }
 
   // Form Groups (weeks)
   const week1 = await prisma.formGroup.create({
     data: {
       startDate: makeLocalDate('2026-04-20'),
       endDate: makeLocalDate('2026-04-26'),
+      class: testClass.id,
     },
   })
 
@@ -205,6 +133,7 @@ async function main() {
     data: {
       startDate: makeLocalDate('2026-04-27'),
       endDate: makeLocalDate('2026-05-03'),
+      class: testClass.id
     },
   })
 
@@ -212,6 +141,7 @@ async function main() {
     data: {
       startDate: makeLocalDate('2026-05-04'),
       endDate: makeLocalDate('2026-05-10'),
+      class: testClass.id
     },
   })
 
@@ -221,7 +151,6 @@ async function main() {
       order: 0,
       startDate: makeLocalDate('2026-04-20'),
       published: true,
-      author: nevinAdmin.id,
       formGroup: week1.id,
       title: 'Monday Story Reflection',
     },
@@ -232,7 +161,6 @@ async function main() {
       order: 1,
       startDate: makeLocalDate('2026-04-21'),
       published: true,
-      author: nevinAdmin.id,
       formGroup: week1.id,
       title: 'Tuesday Reading Check',
     },
@@ -243,7 +171,6 @@ async function main() {
       order: 2,
       startDate: makeLocalDate('2026-04-23'),
       published: true,
-      author: nevinAdmin.id,
       formGroup: week1.id,
       title: 'Thursday Comprehension',
     },
@@ -254,7 +181,6 @@ async function main() {
       order: 3,
       startDate: makeLocalDate('2026-04-25'),
       published: true,
-      author: nevinAdmin.id,
       formGroup: week1.id,
       title: 'Saturday Family Reading',
     },
@@ -266,7 +192,6 @@ async function main() {
       order: 0,
       startDate: makeLocalDate('2026-04-27'),
       published: true,
-      author: nevinAdmin.id,
       formGroup: week2.id,
       title: 'Monday Vocabulary Builder',
     },
@@ -277,7 +202,6 @@ async function main() {
       order: 1,
       startDate: makeLocalDate('2026-04-29'),
       published: true,
-      author: nevinAdmin.id,
       formGroup: week2.id,
       title: 'Wednesday Book Talk',
     },
@@ -288,7 +212,6 @@ async function main() {
       order: 2,
       startDate: makeLocalDate('2026-05-01'),
       published: true,
-      author: nevinAdmin.id,
       formGroup: week2.id,
       title: 'Friday Quiz Time',
     },
@@ -299,7 +222,6 @@ async function main() {
       order: 3,
       startDate: makeLocalDate('2026-05-03'),
       published: true,
-      author: nevinAdmin.id,
       formGroup: week2.id,
       title: 'Sunday Reading Wrap-Up',
     },
@@ -311,7 +233,6 @@ async function main() {
       order: 0,
       startDate: makeLocalDate('2026-05-04'),
       published: true,
-      author: nevinAdmin.id,
       formGroup: week3.id,
       title: 'Monday Reading Log',
     },
@@ -322,7 +243,6 @@ async function main() {
       order: 1,
       startDate: makeLocalDate('2026-05-06'),
       published: true,
-      author: nevinAdmin.id,
       formGroup: week3.id,
       title: 'Wednesday Critical Thinking',
     },
@@ -333,7 +253,6 @@ async function main() {
       order: 2,
       startDate: makeLocalDate('2026-05-08'),
       published: true,
-      author: nevinAdmin.id,
       formGroup: week3.id,
       title: 'Friday Reading Reflection',
     },
@@ -344,7 +263,6 @@ async function main() {
       order: 3,
       startDate: makeLocalDate('2026-05-10'),
       published: true,
-      author: nevinAdmin.id,
       formGroup: week3.id,
       title: 'Sunday Story Summary',
     },

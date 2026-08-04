@@ -1,5 +1,5 @@
 <script setup lang="ts">
-definePageMeta({ ssr: false, layout: "admin" })
+definePageMeta({ ssr: false, layout: "coach" })
 
 const builderSectionRef = ref<HTMLElement | null>(null)
 
@@ -10,7 +10,7 @@ const {
   filteredPublishedForms, selectedFormDetails, viewFormDetails,
   draggedIdx, dragStart, onDrop,
   addQuestion, publishForm, editPublishedForm, toggleFormPublish, loadPublishedForms,
-} = useAdmin()
+} = useCoach()
 
 const previewDates = computed(() => {
   if (!formDays.value.length) return []
@@ -147,11 +147,11 @@ onBeforeUnmount(() => {
           <div class="modal-body">
             <div v-for="(q, idx) in selectedFormDetails.questions" :key="q.id" class="modal-step">
               <span class="step-badge">Step {{ Number(idx) + 1 }} · {{ q.type }}</span>
-              <p class="step-text">{{ q.text }}</p>
-              <p v-if="q.textEs" class="step-text-es">{{ q.textEs }}</p>
+              <p class="step-text"><span v-html="q.text"></span></p>
+              <p v-if="q.textEs" class="step-text-es"><span v-html="q.textEs"></span></p>
               <div v-if="q.reference" class="step-ref">
                 <p class="step-ref-label">Answer / Reference</p>
-                <p class="step-ref-val">{{ q.reference }}</p>
+                <p class="step-ref-val"><span v-html="q.reference"></span></p>
               </div>
               <div v-if="q.choices" class="step-choices">
                 <div v-for="c in q.choices" :key="c.text"
@@ -272,21 +272,21 @@ onBeforeUnmount(() => {
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label class="field-label">Question (English)</label>
-                  <input v-model="q.text" type="text" placeholder="Enter question in English..." class="input-field" data-builder-field="true" @keydown.enter.prevent="handleBuilderEnter" />
+                  <RichTextEditor v-model="q.text" placeholder="Enter question in English..." :rows="2" />
                 </div>
                 <div>
                   <label class="field-label">Question (Spanish)</label>
-                  <input v-model="q.textEs" type="text" placeholder="Ingrese pregunta en Español..." class="input-field" data-builder-field="true" @keydown.enter.prevent="handleBuilderEnter" />
+                  <RichTextEditor v-model="q.textEs" placeholder="Ingrese pregunta en Español..." :rows="2" />
                 </div>
               </div>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                 <div>
                   <label class="field-label">Reference (English)</label>
-                  <textarea v-model="q.reference" rows="2" placeholder="Correct answer..." class="textarea-field" data-builder-field="true" @keydown.enter.prevent="handleBuilderEnter" />
+                  <RichTextEditor v-model="q.reference" placeholder="Correct answer..." :rows="2" />
                 </div>
                 <div>
                   <label class="field-label">Reference (Spanish)</label>
-                  <textarea v-model="q.referenceEs" rows="2" placeholder="Respuesta correcta..." class="textarea-field" data-builder-field="true" @keydown.enter.prevent="handleBuilderEnter" />
+                  <RichTextEditor v-model="q.referenceEs" placeholder="Respuesta correcta..." :rows="2" />
                 </div>
               </div>
             </div>
@@ -314,11 +314,11 @@ onBeforeUnmount(() => {
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label class="field-label">Text (English)</label>
-                  <textarea v-model="q.text" rows="3" placeholder="Provide context for the video..." class="textarea-field" data-builder-field="true" @keydown.enter.prevent="handleBuilderEnter" />
+                  <RichTextEditor v-model="q.text" placeholder="Provide context for the video..." :rows="3" />
                 </div>
                 <div>
                   <label class="field-label">Text (Spanish)</label>
-                  <textarea v-model="q.textEs" rows="3" placeholder="Proporcione contexto para el video..." class="textarea-field" data-builder-field="true" @keydown.enter.prevent="handleBuilderEnter" />
+                  <RichTextEditor v-model="q.textEs" placeholder="Proporcione contexto para el video..." :rows="3" />
                 </div>
               </div>
               <div>
@@ -331,11 +331,11 @@ onBeforeUnmount(() => {
             <div v-if="q.type === 'context'" class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label class="field-label">Context (English)</label>
-                <textarea v-model="q.text" rows="3" placeholder="Read this paragraph first..." class="textarea-field" data-builder-field="true" @keydown.enter.prevent="handleBuilderEnter" />
+                <RichTextEditor v-model="q.text" placeholder="Read this paragraph first..." :rows="3" />
               </div>
               <div>
                 <label class="field-label">Context (Spanish)</label>
-                <textarea v-model="q.textEs" rows="3" placeholder="Lea este párrafo primero..." class="textarea-field" data-builder-field="true" @keydown.enter.prevent="handleBuilderEnter" />
+                <RichTextEditor v-model="q.textEs" placeholder="Lea este párrafo primero..." :rows="3" />
               </div>
             </div>
           </div>

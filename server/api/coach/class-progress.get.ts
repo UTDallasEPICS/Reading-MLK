@@ -1,6 +1,6 @@
 import { prisma } from '../../utils/prisma'
-import { auth } from '../../utils/auth'
 import { getQuery } from 'h3'
+import { requireClassAccess } from '../../utils/require-session'
 
 /// Standardizes a UTC date into YYYY-MM-DD string
 const formatYmdUtc = (date: Date) => {
@@ -54,13 +54,16 @@ const getWeekBoundsDates = (dateString: string) => {
 // HELPER: Fetches a standard list of individual completed records.
 // Queries db directly without pulling extra arrays into memory.
 async function getCompletedRecords(queryState: any) {
-  const { search, selectedDate, selectedFormIds, sortKey, sortDirection, page, pageSize } = queryState
+  const { classId, search, selectedDate, selectedFormIds, sortKey, sortDirection, page, pageSize } = queryState
 
-  const where: any = {}
+  const where: any = {
+    Form: { FormGroup: { class: classId } },
+    Student: { Classes: { some: { id: classId } } },
+  }
 
   // Apply textual search filter directly in db
   if (search) {
-    where.Student = { name: { contains: search } }
+    where.Student = { ...where.Student, name: { contains: search } }
   }
 
   // Filter specific forms requested
@@ -130,13 +133,18 @@ async function getCompletedRecords(queryState: any) {
 // HELPER: Fetches aggregated count of completions per student.
 // Uses native Prisma groupBy over pulling all submissions to minimize overhead.
 async function getGroupedRecords(queryState: any) {
-  const { search, selectedDate, selectedFormIds, sortKey, sortDirection, page, pageSize } = queryState
+  const { classId, search, selectedDate, selectedFormIds, sortKey, sortDirection, page, pageSize } = queryState
 
-  const submissionWhere: any = {}
+  const submissionWhere: any = { Form: { FormGroup: { class: classId } } }
 
   if (selectedDate) {
     const { mondayDate, sundayDate } = getWeekBoundsDates(selectedDate)
-    submissionWhere.Form = { FormGroup: { startDate: { gte: mondayDate, lte: sundayDate } } }
+    submissionWhere.Form = {
+      FormGroup: {
+        class: classId,
+        startDate: { gte: mondayDate, lte: sundayDate },
+      },
+    }
   }
 
   if (selectedFormIds.length > 0) {
@@ -148,7 +156,10 @@ async function getGroupedRecords(queryState: any) {
     by: ['student'],
     where: {
       ...submissionWhere,
-      ...(search ? { Student: { name: { contains: search } } } : {})
+      Student: {
+        Classes: { some: { id: classId } },
+        ...(search ? { name: { contains: search } } : {}),
+      },
     },
     _count: { id: true },
     _max: { submissionDate: true },
@@ -193,7 +204,7 @@ async function getGroupedRecords(queryState: any) {
 
 // HELPER: Evaluates expected forms against submitted forms to find what is missing.
 async function getMissingRecords(queryState: any) {
-  const { search, selectedDate, sortKey, sortDirection, page, pageSize } = queryState
+  const { classId, search, selectedDate, sortKey, sortDirection, page, pageSize } = queryState
 
   if (!selectedDate) {
     return { mode: 'missing', rows: [], totalCount: 0 }
@@ -202,7 +213,12 @@ async function getMissingRecords(queryState: any) {
   // Calculate only forms that are expected in this specific week
   const { mondayDate, sundayDate } = getWeekBoundsDates(selectedDate)
   const expectedForms = await prisma.form.findMany({
-    where: { FormGroup: { startDate: { gte: mondayDate, lte: sundayDate } } },
+    where: {
+      FormGroup: {
+        class: classId,
+        startDate: { gte: mondayDate, lte: sundayDate },
+      },
+    },
     select: { id: true, title: true }
   })
 
@@ -212,7 +228,7 @@ async function getMissingRecords(queryState: any) {
 
   const expectedFormIds = expectedForms.map((f) => f.id)
 
-  const studentWhere: any = {}
+  const studentWhere: any = { Classes: { some: { id: classId } } }
   if (search) {
     studentWhere.name = { contains: search }
   }
@@ -270,24 +286,15 @@ async function getMissingRecords(queryState: any) {
 }
 
 export default defineEventHandler(async (event) => {
-  // Admin Authentication Check
-  const session = await auth.api.getSession({ headers: event.headers })
-
-  if (!session?.user) {
-    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { role: true },
-  })
-
-  if (!user || user.role !== 'admin') {
-    throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
-  }
-
   // Parse Filters and Configs from Frontend
   const query = getQuery(event)
+  const classToken = typeof query.classId === 'string' ? query.classId.trim() : ''
+
+  if (!classToken) {
+    throw createError({ statusCode: 400, statusMessage: 'classId is required' })
+  }
+
+  const { classId } = await requireClassAccess(event, classToken)
   const mode = query.mode === 'missing' ? 'missing' : 'completed'
   const selectedDate = typeof query.date === 'string' && query.date.trim() ? query.date.trim() : ''
   const search = typeof query.search === 'string' ? query.search.trim().toLowerCase() : ''
@@ -302,7 +309,7 @@ export default defineEventHandler(async (event) => {
     selectedFormIds = query.formIds.split(',').map((value) => Number(value.trim())).filter((value) => Number.isInteger(value))
   }
 
-  const queryState = { search, selectedDate, selectedFormIds, sortKey, sortDirection, page, pageSize }
+  const queryState = { classId, search, selectedDate, selectedFormIds, sortKey, sortDirection, page, pageSize }
 
   // Process Requests to Appropriate Flow
   let result

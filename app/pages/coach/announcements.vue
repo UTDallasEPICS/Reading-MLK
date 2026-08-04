@@ -1,5 +1,6 @@
 <script setup lang="ts">
-definePageMeta({ ssr: false, layout: "admin" })
+import { getUserErrorMessage } from '~/utils/user-error'
+definePageMeta({ ssr: false, layout: "coach" })
 
 //Import watch to see when tab switches between history and create
 import { ref, reactive, computed, watch, onMounted, onUnmounted } from 'vue'
@@ -16,6 +17,7 @@ const props = defineProps({
 
 
 const emit = defineEmits(['add', 'delete'])
+const { classId } = useSelectedClass()
 const subTab = ref('creation')
 const todayStr = new Date().toISOString().split('T')[0]
 
@@ -114,14 +116,23 @@ const inactiveAnnouncements = computed(() => allAnnouncements.value.filter(a => 
 //stores the error message in `historyError` for display. The `historyLoading` flag wraps the 
 //entire request so the template can show a spinner during the fetch.
 async function loadHistory () {
+  if (!classId.value) {
+    allAnnouncements.value = []
+    return
+  }
+
   historyLoading.value = true
   historyError.value = null
   try {
     // $fetch is Nuxt's HTTP utility (wraps native fetch with nice error handling).
-    allAnnouncements.value = await $fetch('/api/announcement')
-  } catch (e: any) {
-    //Capture the error message; fall back to a generic string if none exists
-    historyError.value = e?.message ?? 'Failed to load announcements.'
+    allAnnouncements.value = await $fetch('/api/announcement', {
+      query: { classId: classId.value },
+    })
+  } catch (error) {
+    historyError.value = getUserErrorMessage(
+      error,
+      'Announcements could not be loaded. Please try again.'
+    )
   } finally {
     // Always turn off the loading flag, even if the request failed
     historyLoading.value = false
@@ -130,6 +141,10 @@ async function loadHistory () {
 
 //Watcher, triggers fetch on tab switch
 watch(subTab, (tab) => { if (tab === 'history') loadHistory() })
+watch(classId, () => {
+  allAnnouncements.value = []
+  if (subTab.value === 'history') loadHistory()
+})
 
 //Deletes an announcement
 async function deleteAnnouncement (id: number) {
@@ -138,14 +153,16 @@ async function deleteAnnouncement (id: number) {
 
   try {
     //Sends DELETE request and removes the record from the local `allAnnouncements` array
-    await $fetch(`/api/announcement/${id}`, { method: 'DELETE' })
+    await $fetch(`/api/announcement/${id}`, {
+      method: 'DELETE',
+      query: { classId: classId.value },
+    })
 
     //Find the deleted record's index in the reactive array and remove it.
     const idx = allAnnouncements.value.findIndex(a => a.id === id)
     if (idx !== -1) allAnnouncements.value.splice(idx, 1)
-  } catch (e: any) {
-    //Surface the server's error message if available, otherwise show a generic fallback so the admin knows the operation did not succeed.
-    alert(e?.data?.error ?? 'Failed to delete announcement. Please try again.')
+  } catch (error) {
+    alert(getUserErrorMessage(error, 'The announcement could not be deleted. Please try again.'))
   }
 }
 
@@ -158,6 +175,10 @@ async function postAnnouncement () {
   }
 
   try {
+    if (!classId.value) {
+      throw new Error('Select a class before posting an announcement')
+    }
+
     //Format dates
     const postDate = new Date(form.startDate!).toISOString()
     const expiryDate = form.endDate ? new Date(form.endDate).toISOString() : null
@@ -176,7 +197,7 @@ async function postAnnouncement () {
         content,
         postDate,
         expiryDate,
-        author: null //Hardcoded author based on current functionality
+        classId: classId.value,
       }
     })
 
@@ -327,12 +348,11 @@ async function postAnnouncement () {
                 <label class="block text-xs font-medium text-gray-400 uppercase tracking-widest mb-3">
                   Message Content
                 </label>
-                <textarea
+                <RichTextEditor
                   v-model="form.content"
-                  rows="4"
                   placeholder="eg., Attend the book fair to broaden your reading!"
-                  class="w-full text-lg font-medium text-gray-800 border-2 border-gray-50 rounded-lg px-5 py-4 focus:border-indigo-500 focus:outline-none transition resize-none"
-                ></textarea>
+                  :rows="4"
+                />
               </div>
 
               <!-- Submit -->
@@ -369,7 +389,8 @@ async function postAnnouncement () {
                     </div>
                   </div>
                   <p class="text-gray-500 font-medium leading-relaxed">
-                    {{ form.content || 'Your message will appear here...' }}
+                    <span v-if="form.content" v-html="form.content"></span>
+                    <span v-else>Your message will appear here...</span>
                   </p>
                 </div>
               </div>
@@ -443,11 +464,6 @@ async function postAnnouncement () {
                         </span>
 
                         <!-- Delete button -->
-                             announcement's database integer ID. The icon-only
-                             button is intentionally subtle (gray) until hovered
-                             (red) to prevent accidental clicks. A confirm() dialog
-                             inside deleteAnnouncement() provides a second safety
-                             gate before the database record is permanently removed. -->
                         <button
                           @click="deleteAnnouncement(ann.id)"
                           class="ml-1 text-gray-300 hover:text-red-500 transition-colors duration-200"
@@ -455,6 +471,9 @@ async function postAnnouncement () {
                         >✕</button>
                       </div>
                     </div>
+                    <p class="text-gray-500 font-medium leading-relaxed mt-2" v-if="parseContent(ann.content).body">
+                      <span v-html="parseContent(ann.content).body"></span>
+                    </p>
                   </div>
                 </div>
               </div>
@@ -510,6 +529,9 @@ async function postAnnouncement () {
                         >✕</button>
                       </div>
                     </div>
+                    <p class="text-gray-500 font-medium leading-relaxed mt-2" v-if="parseContent(ann.content).body">
+                      <span v-html="parseContent(ann.content).body"></span>
+                    </p>
                   </div>
                 </div>
               </div>

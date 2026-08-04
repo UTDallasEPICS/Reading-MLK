@@ -3,6 +3,7 @@ import { prisma } from '../../utils/prisma'
 import { getQuery } from 'h3'
 import { z } from 'zod'
 import { formSubmissionCreateSchema } from '../../utils/schemas'
+import { requireClassAccess } from '../../utils/require-session'
 
 export default defineEventHandler(async (event) => {
   const method = event.node.req.method
@@ -10,6 +11,13 @@ export default defineEventHandler(async (event) => {
 
   if (method === 'GET') {
     const where: Prisma.FormSubmissionWhereInput = {}
+    const classToken = typeof query.classId === 'string' ? query.classId : null
+
+    if (classToken) {
+      const { classId } = await requireClassAccess(event, classToken)
+      where.Form = { FormGroup: { class: classId } }
+      where.Student = { Classes: { some: { id: classId } } }
+    }
     
     if (query.form) {
       where.form = Number(query.form)
@@ -19,7 +27,8 @@ export default defineEventHandler(async (event) => {
     }
     if (query.formGroup) {
       where.Form = {
-        formGroup: Number(query.formGroup)
+        ...where.Form,
+        formGroup: Number(query.formGroup),
       }
     }
 
