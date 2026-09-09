@@ -401,7 +401,7 @@ function getBadgeClass(type: string) {
 
                   <!-- Context block -->
                   <div v-if="currentComponent.questionType === 'context'" class="p-5 rounded-2xl bg-amber-50 border border-amber-100 space-y-2">
-                    <p class="text-xl font-heading font-bold leading-snug" style="color:var(--brand-dark)"><span v-html="currentComponent.questionText"></span></p>
+                    <p class="text-xl font-heading font-bold leading-snug" style="color:var(--brand-dark)"><span>{{ currentComponent.questionText }}</span></p>
                     <!-- Spanish translation shown below English when language is set to Spanish -->
                     <p
                       v-if="settings.language === 'es' && (currentComponent.questionOptions as any)?.textEs"
@@ -429,13 +429,15 @@ function getBadgeClass(type: string) {
 
                   <!-- Text / MCQ question -->
                   <div v-else class="space-y-1">
-                    <h4 class="text-xl font-heading font-bold" style="color:var(--brand-dark)">&quot;<span v-html="currentComponent.questionText"></span>&quot;</h4>
+                    <h4 class="text-xl font-heading font-bold" style="color:var(--brand-dark)"> 
+                    <span>{{ currentComponent.questionText }}</span>
+                    </h4>
                     <!-- Spanish translation shown below English when language is set to Spanish -->
                     <p
                       v-if="settings.language === 'es' && (currentComponent.questionOptions as any)?.textEs"
                       class="text-base italic text-gray-500"
                     >
-                      &quot;<span v-html="(currentComponent.questionOptions as any).textEs"></span>&quot;
+                      <span v-html="(currentComponent.questionOptions as any).textEs"></span>
                     </p>
                   </div>
 
@@ -489,11 +491,12 @@ function getBadgeClass(type: string) {
                           <p class="italic"><span v-html="feedbackReferenceText"></span></p>
                           <p v-if="settings.language === 'es' && feedbackReferenceTextEs" class="italic text-gray-500"><span v-html="feedbackReferenceTextEs"></span></p>
                         </template>
-                        <p v-else-if="isCurrentComponentCorrect">
-                          Keep going! You're doing awesome!
+                        <p v-if="isCurrentComponentCorrect"> 
+                          The correct answer was: <span class="font-bold" v-html="correctAnswerText"></span>
+
                         </p>
                         <p v-if="!isCurrentComponentCorrect">
-                          The correct answer was: <span class="font-bold" v-html="correctAnswerText"></span> You'll get it next time!
+                          The correct answer was: <span class="font-bold" v-html="correctAnswerText"></span>. You'll get it next time!
                         </p>
                       </div>
                     </div>

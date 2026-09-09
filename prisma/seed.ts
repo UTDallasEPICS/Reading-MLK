@@ -9,9 +9,9 @@ async function main() {
   const seededEmails = [
     'parent1@example.com',
     'parent2@gmail.com',
-    '[Admin email here]'
+    'srinidhisurabhi6@gmail.com'
   ]
-  const seededAdminName = '[Admin name here]'
+  const seededAdminName = 'Srinidhi Surabhi'
 
   await prisma.user.deleteMany({
     where: {
