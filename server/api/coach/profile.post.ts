@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { prisma } from '../../utils/prisma'
 import { requireCoach } from '../../utils/require-session'
 
+//split schema to solve zip code validation issue with zod
 const coachProfileSchema = z.object({
   purpose: z.enum(['teacher', 'studygroup', 'other']),
   school: z.string().trim().max(160).optional(),
