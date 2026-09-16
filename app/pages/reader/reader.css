@@ -284,3 +284,36 @@
 /* ── Question step fade ── */
 .step-fade-enter-active, .step-fade-leave-active { transition: opacity 0.25s ease; }
 .step-fade-enter-from,  .step-fade-leave-to     { opacity: 0; }
+
+/* ── Class header backgrounds ── */
+.class-header {
+  cursor: pointer;
+  user-select: none;
+}
+.class-header--normal {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(16px);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.08);
+  color: #0f172a;
+}
+.class-header--normal:hover {
+  border-color: var(--brand-indigo);
+  box-shadow: 0 6px 20px rgba(224, 96, 77, 0.15);
+}
+.class-header--mlk {
+  background: linear-gradient(135deg, #E0604D 0%, #c94a38 100%);
+  border: 2px solid rgba(255,255,255,0.2);
+  box-shadow: 0 4px 20px rgba(224, 96, 77, 0.35);
+  color: white;
+}
+.class-header--mlk:hover {
+  box-shadow: 0 8px 28px rgba(224, 96, 77, 0.45);
+  transform: translateY(-1px);
+}
+
+/* ── Class expand transition ── */
+.class-expand-enter-active { transition: all 0.25s cubic-bezier(0.23, 1, 0.32, 1); }
+.class-expand-leave-active { transition: all 0.18s ease-in; }
+.class-expand-enter-from,
+.class-expand-leave-to { opacity: 0; transform: translateY(-8px); }

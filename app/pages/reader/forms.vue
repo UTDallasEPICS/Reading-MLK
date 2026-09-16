@@ -2,88 +2,41 @@
 definePageMeta({ ssr: false })
 
 const { student, settings, updateExp, restoreStudent } = useCurrentStudent()
-const { FormGroup, loadActiveFormGroup } = useCurrentFormGroup()
-const { tickets, completedFormIds, logFormSubmission, logSubmissionResponse, loadProgress } = useCurrentStudentProgress()
+const { classes, loading, loadClasses, totalTickets, markFormCompleted } = useStudentClasses()
+const { logFormSubmission, logSubmissionResponse } = useCurrentStudentProgress()
 
+// ── Initialise ──────────────────────────────────────────────────────────────
 const dataLoaded = ref(false)
 
 onMounted(async () => {
-  if (!student.value) {
-    await restoreStudent()
-  }
-  if (!student.value) {
-    await navigateTo('/reader/profile')
-    return
-  }
-  await loadActiveFormGroup()
-  await loadProgress()
+  if (!student.value) await restoreStudent()
+  if (!student.value) { await navigateTo('/reader/profile'); return }
+  await loadClasses()
   dataLoaded.value = true
 })
 
-const stats = computed(() => ({
-  xp: student.value ? student.value.exp : 0,
-  tickets: tickets.value? tickets.value : 0,
-}))
+// ── Per-class form-component cache ───────────────────────────────────────────
+const formComponents = ref<Record<number, any[]>>({})
+
+async function ensureComponents(formId: number) {
+  if (formComponents.value[formId]) return
+  try {
+    const comps = await $fetch<any[]>('/api/formComponent', { query: { form: formId } })
+    formComponents.value[formId] = Array.isArray(comps) ? comps : []
+  } catch {
+    formComponents.value[formId] = []
+  }
+}
+
+// ── Stats ────────────────────────────────────────────────────────────────────
+const stats = computed(() => ({ xp: student.value?.exp ?? 0, tickets: totalTickets.value }))
 
 const themeClass = computed(() => {
   const d = settings.value.dyslexiaFont ? 'dyslexia-font' : ''
   return `reader-app ${d}`.trim()
 })
 
-const currentFormComponentsWithVideo = computed(() => {
-  if (!activeForm.value?.id) return []
-  return FormGroup.value.formComponents[activeForm.value.id] || []
-})
-
-function embedURL(rawUrl: string) {
-  const match = rawUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i)
-  if (match && match[1]) {
-    return `https://www.youtube.com/embed/${match[1]}`
-  }
-  return rawUrl
-}
-
-const firstVideoComponent = computed(() => {
-  return currentFormComponentsWithVideo.value.find(c => (c as any).questionType === 'video') as any || null
-})
-
-const firstVideoUrl = computed(() => {
-  const vc = firstVideoComponent.value
-  if (!vc) return null
-  const rawUrl = vc.questionOptions?.url || null
-  return rawUrl ? embedURL(rawUrl) : null
-})
-
-const firstVideoContext = computed(() => {
-  const vc = firstVideoComponent.value
-  if (!vc) return ''
-  return vc.questionText || ''
-})
-
-const firstVideoContextEs = computed(() => {
-  const vc = firstVideoComponent.value
-  if (!vc) return ''
-  return vc.questionOptions?.textEs || ''
-})
-
-const currentFormComponents = computed(() => {
-  const components = currentFormComponentsWithVideo.value
-  
-  // Find the first video component (the reading resource)
-  const firstVideoIndex = components.findIndex(c => c.questionType === 'video')
-  let filteredComponents = [...components]
-  
-  // Always remove the first video component so it doesn't appear in the form flow itself, only pre-form stage
-  if (firstVideoIndex !== -1) {
-    filteredComponents.splice(firstVideoIndex, 1)
-  }
-
-  return filteredComponents
-})
-
-const currentComponent = computed(() => currentFormComponents.value[currentComponentID.value])
-
-// Click badge animations
+// ── Badge click animations ────────────────────────────────────────────────────
 const xpClicked     = ref(false)
 const ticketClicked = ref(false)
 const burstCoins    = ref<{id:number;tx:number;ty:number}[]>([])
@@ -102,68 +55,81 @@ function triggerTicketClick() {
   setTimeout(() => { ticketClicked.value = false; flyTickets.value = [] }, 1000)
 }
 
-// Flow state
+// ── Collapsed state for each class section ────────────────────────────────────
+const collapsedClasses = ref<Record<string, boolean>>({})
+function toggleClass(classId: string) {
+  collapsedClasses.value[classId] = !collapsedClasses.value[classId]
+}
+
+// ── Active form flow ──────────────────────────────────────────────────────────
 const activeForm         = ref<any>(null)
-const preFormStep        = ref<string|null>(null)   // 'ask' | 'has-book' | 'no-book' | null
+const activeClassId      = ref<string | null>(null)
+const preFormStep        = ref<string|null>(null)   // 'ask' | 'no-book' | null
 const hasOwnBook         = ref(false)
-const currentComponentID        = ref(0)
+const currentComponentID = ref(0)
 const answers            = ref<Record<number,string>>({})
 const feedbackVisible    = ref<Record<number,boolean>>({})
+
+const currentFormComponents = computed(() => {
+  if (!activeForm.value?.id) return []
+  const all = formComponents.value[activeForm.value.id] || []
+  const firstVideoIdx = all.findIndex((c: any) => c.questionType === 'video')
+  const filtered = [...all]
+  if (firstVideoIdx !== -1) filtered.splice(firstVideoIdx, 1)
+  return filtered
+})
+
+const currentComponent = computed(() => currentFormComponents.value[currentComponentID.value])
+
+const firstVideoComponent = computed(() => {
+  if (!activeForm.value?.id) return null
+  const all = formComponents.value[activeForm.value.id] || []
+  return all.find((c: any) => c.questionType === 'video') || null
+})
+
+const firstVideoUrl = computed(() => {
+  const vc = firstVideoComponent.value
+  if (!vc) return null
+  const raw = vc.questionOptions?.url || null
+  return raw ? embedURL(raw) : null
+})
+const firstVideoContext = computed(() => firstVideoComponent.value?.questionText || '')
+const firstVideoContextEs = computed(() => firstVideoComponent.value?.questionOptions?.textEs || '')
+
+function embedURL(rawUrl: string) {
+  const match = rawUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i)
+  return match?.[1] ? `https://www.youtube.com/embed/${match[1]}` : rawUrl
+}
 
 const isCurrentComponentCorrect = computed(() => {
   const q = currentComponent.value
   if (!q || !answers.value[q.id]) return true
   if (q.questionType !== 'mcq') return true
   const options = q.questionOptions as any
-  if (!options || !options.choices) return true
-  const choiceIndex = Number(answers.value[q.id])
-  const choice = options.choices[choiceIndex]
+  if (!options?.choices) return true
+  const choice = options.choices[Number(answers.value[q.id])]
   return choice ? choice.correct : false
 })
-
 const correctAnswerText = computed(() => {
   const q = currentComponent.value
   if (!q || q.questionType !== 'mcq') return ''
   const options = q.questionOptions as any
-  if (!options || !options.choices) return ''
-  const correctChoice = options.choices.find((c: any) => c.correct)
-  return correctChoice ? correctChoice.text : ''
+  return options?.choices?.find((c: any) => c.correct)?.text ?? ''
 })
+const feedbackReferenceText   = computed(() => (currentComponent.value?.questionOptions as any)?.reference   || '')
+const feedbackReferenceTextEs = computed(() => (currentComponent.value?.questionOptions as any)?.referenceEs || '')
 
-const feedbackReferenceText = computed(() => {
-  const q = currentComponent.value
-  if (!q) return ''
-  const options = q.questionOptions as any
-  return options?.reference || ''
-})
-
-const feedbackReferenceTextEs = computed(() => {
-  const q = currentComponent.value
-  if (!q) return ''
-  const options = q.questionOptions as any
-  return options?.referenceEs || ''
-})
-
-// Raffle reward
-const showRaffleReward   = ref(false)
-const ticketDropped      = ref(false)
-const ticketOverBox      = ref(false)
-const ticketStyle        = ref<Record<string,string>>({})
-let touchStartY = 0
-
-function startChallenge(form: any) {
+async function startChallenge(form: any, classId: string) {
+  await ensureComponents(form.id)
   activeForm.value      = form
+  activeClassId.value   = classId
   preFormStep.value     = 'ask'
-  currentComponentID.value     = 0
+  currentComponentID.value = 0
   feedbackVisible.value = {}
-  //load answers
   answers.value         = {}
 }
 
-function preFormSkipToForm() {
-  hasOwnBook.value  = false
-  preFormStep.value = null
-}
+function preFormSkipToForm() { hasOwnBook.value = false; preFormStep.value = null }
 
 function checkAnswer() {
   const q = currentFormComponents.value[currentComponentID.value]
@@ -172,22 +138,22 @@ function checkAnswer() {
 
 function nextStep() {
   const qs = currentFormComponents.value
-  if (currentComponentID.value < qs.length - 1) {
-    currentComponentID.value++
-  } else {
-    submitChallenge()
-  }
+  if (currentComponentID.value < qs.length - 1) { currentComponentID.value++ }
+  else { submitChallenge() }
 }
+
+// ── Raffle reward ─────────────────────────────────────────────────────────────
+const showRaffleReward = ref(false)
+const ticketDropped    = ref(false)
+const ticketOverBox    = ref(false)
+const ticketStyle      = ref<Record<string,string>>({})
+let touchStartY = 0
 
 async function submitChallenge() {
   const formId = activeForm.value.id
-  
-  // Persist completion and XP
-  const submission  = await logFormSubmission(formId)
+  await logFormSubmission(formId)
   await updateExp(100)
-
-  // grab newly posted submission ID
-  const submissionID = Number(submission?.id)
+  markFormCompleted(formId)
 
   showRaffleReward.value = true
   ticketDropped.value    = false
@@ -195,7 +161,8 @@ async function submitChallenge() {
   ticketStyle.value      = {}
   setTimeout(() => {
     activeForm.value      = null
-    currentComponentID.value     = 0
+    activeClassId.value   = null
+    currentComponentID.value = 0
     feedbackVisible.value = {}
     answers.value         = {}
   }, 500)
@@ -218,9 +185,9 @@ function onTicketTouchMove(e: TouchEvent) {
 function onTicketTouchEnd() { ticketOverBox.value ? onTicketDrop() : (ticketStyle.value = {}) }
 
 function getBadgeClass(type: string) {
-  if (type === 'text')    return 'bg-blue-100 text-blue-700 border-2 border-blue-200'
-  if (type === 'mcq')     return 'bg-yellow-100 text-yellow-700 border-2 border-yellow-200'
-  if (type === 'video')   return 'bg-pink-100 text-pink-600 border-2 border-pink-200'
+  if (type === 'text')  return 'bg-blue-100 text-blue-700 border-2 border-blue-200'
+  if (type === 'mcq')   return 'bg-yellow-100 text-yellow-700 border-2 border-yellow-200'
+  if (type === 'video') return 'bg-pink-100 text-pink-600 border-2 border-pink-200'
   return 'bg-gray-100 text-gray-500 border-2 border-gray-200'
 }
 </script>
@@ -243,7 +210,7 @@ function getBadgeClass(type: string) {
              style="border-color:rgba(245,158,11,0.3)"
              :class="(xpClicked || ticketClicked) ? 'scale-90 transition-transform duration-100' : 'transition-transform duration-100'"
              @click="triggerXpClick">
-             <span class="text-lg" :class="xpClicked ? 'animate-star-spin' : ''">🪙</span>
+          <span class="text-lg" :class="xpClicked ? 'animate-star-spin' : ''">🪙</span>
           <span class="font-heading font-bold text-amber-600">{{ stats.xp }}</span>
           <span class="text-gray-300">|</span>
           <span class="text-lg" :class="ticketClicked ? 'animate-ticket-wobble' : ''" @click.stop="triggerTicketClick">🎟️</span>
@@ -251,16 +218,12 @@ function getBadgeClass(type: string) {
           <span v-for="c in burstCoins" :key="c.id" class="absolute text-sm animate-coin-burst"
                 :style="`--tx:${c.tx}px;--ty:${c.ty}px;left:50%;top:50%;`">🪙</span>
           <Transition name="box-pop">
-            <span 
-              v-if="ticketClicked"
-              class="absolute -bottom-15 left-1/2 -translate-x-1/2 text-2xl animate-box-shake pointer-events-none">
-              📦
-            </span>
+            <span v-if="ticketClicked" class="absolute -bottom-15 left-1/2 -translate-x-1/2 text-2xl animate-box-shake pointer-events-none">📦</span>
           </Transition>
           <span v-for="id in flyTickets" :key="id" class="absolute text-lg animate-ticket-fly pointer-events-none"
                 style="left:50%;top:50%;transform:translateX(-50%) translateY(-50%)">🎟️</span>
         </div>
-        <!-- Settings / Home -->
+        <!-- Settings -->
         <NuxtLink to="/reader/settings"
           class="w-14 h-14 bg-white/90 backdrop-blur-md rounded-xl flex items-center justify-center text-2xl border-2 border-white shadow-xl hover:scale-110 active:scale-95 transition-all"
           style="text-decoration:none">⚙️</NuxtLink>
@@ -269,60 +232,124 @@ function getBadgeClass(type: string) {
 
     <!-- ── MAIN ── -->
     <main class="max-w-4xl mx-auto min-h-[60vh]">
-      <!-- Loading state -->
-      <div v-if="!dataLoaded" class="flex flex-col items-center justify-center min-h-[40vh] gap-4">
+      <!-- Loading -->
+      <div v-if="!dataLoaded || loading" class="flex flex-col items-center justify-center min-h-[40vh] gap-4">
         <div class="text-6xl animate-bounce">📝</div>
         <p class="font-heading text-xl font-bold text-gray-400">Loading forms...</p>
       </div>
 
       <section v-else class="space-y-6">
-
         <div class="mb-2">
-          <h2 class="font-heading text-4xl font-bold mb-4" style="color:var(--brand-dark)">Daily Forms 📝</h2>
+          <h2 class="font-heading text-4xl font-bold mb-1" style="color:var(--brand-dark)">Daily Forms 📝</h2>
+          <p class="text-gray-500 font-medium text-sm">Your reading challenges, organized by class.</p>
         </div>
 
-        <!-- ── FORMS LIST ── -->
-        <div v-if="!activeForm" class="grid gap-3">
-          <div
-            v-for="form in FormGroup.forms" :key="form.id"
-            @click="!completedFormIds.includes(form.id) && startChallenge(form)"
-            class="premium-card p-5 flex items-center justify-between group transition-all"
-            :class="[
-              completedFormIds.includes(form.id) ? 'cursor-default' : 'cursor-pointer hover:scale-[1.01]',
-              completedFormIds.includes(form.id) ? '' : (new Date(form.startDate) < new Date() ? 'hover:!border-amber-400' : '')
-            ]"
-            :style="completedFormIds.includes(form.id)
-              ? 'border-color:rgba(45,212,191,0.4); background:rgba(45,212,191,0.05)'
-              : (new Date(form.startDate) < new Date() ? 'border-color:#fcd34d; background:rgba(251,191,36,0.05)' : '')"
-          >
-            <div class="flex items-center gap-5">
-              <div
-                class="w-14 h-14 rounded-xl flex flex-col items-center justify-center font-heading font-bold transition text-sm"
-                :style="completedFormIds.includes(form.id)
-                  ? 'background:var(--brand-mint); color:white'
-                  : (new Date(form.startDate) < new Date())
-                    ? 'background:#f59e0b; color:white'
-                    : 'background:rgba(224,96,77,0.1); color:var(--brand-indigo)'"
-              >
-                <span class="text-[9px] uppercase leading-none">{{ new Date(form.startDate).toLocaleDateString('en-US', {weekday:'short'}) }}</span>
-                <span class="text-lg font-black leading-tight">{{ new Date(form.startDate).getDate() }}</span>
+        <!-- ── CLASSES LIST ── -->
+        <div v-if="!activeForm" class="space-y-5">
+          <!-- Empty state: no classes at all -->
+          <div v-if="classes.length === 0" class="premium-card p-10 text-center space-y-3">
+            <div class="text-6xl">🏫</div>
+            <h3 class="font-heading text-2xl font-bold" style="color:var(--brand-dark)">No Classes Yet</h3>
+            <p class="text-gray-500 font-medium">You haven't been added to any classes yet. Check back later!</p>
+          </div>
+
+          <!-- Per-class section -->
+          <div v-for="cls in classes" :key="cls.id" class="class-section">
+            <!-- Class header bar -->
+            <button
+              class="class-header w-full flex items-center justify-between px-5 py-4 rounded-2xl transition-all duration-200 group"
+              :class="cls.isFriendsOfMLK ? 'class-header--mlk' : 'class-header--normal'"
+              @click="toggleClass(cls.id)"
+            >
+              <div class="flex items-center gap-3 min-w-0">
+                <!-- Chevron -->
+                <svg
+                  class="w-5 h-5 shrink-0 transition-transform duration-200"
+                  :class="collapsedClasses[cls.id] ? '' : 'rotate-90'"
+                  fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+                <!-- Class name -->
+                <span class="font-heading font-bold text-xl truncate" :class="cls.isFriendsOfMLK ? 'text-white' : ''">
+                  {{ cls.name }}
+                </span>
               </div>
-              <div>
-                <h4 class="font-heading text-lg font-bold" style="color:var(--brand-dark)">{{ form.title }}</h4>
-                <div class="flex items-center gap-2 mt-0.5">
-                  <p class="text-xs font-bold text-gray-400">
-                    {{ new Date(form.startDate).toLocaleDateString('en-US', {weekday:'long'}) }} • 
-                    {{ (FormGroup.formComponents[form.id] || []).length }} Steps
-                  </p>
-                  <span v-if="completedFormIds.includes(form.id)" class="text-xs font-black px-2 py-0.5 rounded-full" style="color:var(--brand-mint); background:rgba(45,212,191,0.15)">✓ Done</span>
+              <!-- Ticket count (right-justified) -->
+              <div class="flex items-center gap-1.5 shrink-0 ml-4">
+                <span class="text-lg">🎟️</span>
+                <span
+                  class="font-heading font-black text-xl tabular-nums"
+                  :class="cls.isFriendsOfMLK ? 'text-white' : ''"
+                  style="color: inherit"
+                >{{ cls.ticketCount }}</span>
+                <span
+                  class="text-xs font-bold opacity-70 hidden sm:block"
+                  :class="cls.isFriendsOfMLK ? 'text-white' : 'text-gray-500'"
+                >tickets</span>
+              </div>
+            </button>
+
+            <!-- Forms for this class -->
+            <Transition name="class-expand">
+              <div v-if="!collapsedClasses[cls.id]" class="mt-2 space-y-2 pl-1 pr-1">
+
+                <!-- No active form groups -->
+                <div
+                  v-if="cls.activeFormGroups.length === 0 || cls.activeFormGroups.every(fg => fg.forms.length === 0)"
+                  class="premium-card px-5 py-4 flex items-center gap-3"
+                  style="background:rgba(245,158,11,0.04); border-color:rgba(245,158,11,0.15);"
+                >
+                  <span class="text-xl">📭</span>
+                  <p class="text-sm font-medium text-gray-400">No active forms right now. Check back later!</p>
                 </div>
+
+                <!-- Form cards -->
+                <template v-for="fg in cls.activeFormGroups" :key="fg.id">
+                  <div
+                    v-for="form in fg.forms" :key="form.id"
+                    @click="!form.completed && startChallenge(form, cls.id)"
+                    class="premium-card p-5 flex items-center justify-between group transition-all"
+                    :class="[
+                      form.completed ? 'cursor-default' : 'cursor-pointer hover:scale-[1.01]',
+                      form.completed ? '' : (new Date(form.startDate) < new Date() ? 'hover:!border-amber-400' : '')
+                    ]"
+                    :style="form.completed
+                      ? 'border-color:rgba(45,212,191,0.4); background:rgba(45,212,191,0.05)'
+                      : (new Date(form.startDate) < new Date() ? 'border-color:#fcd34d; background:rgba(251,191,36,0.05)' : '')"
+                  >
+                    <div class="flex items-center gap-5">
+                      <!-- Day badge -->
+                      <div
+                        class="w-14 h-14 rounded-xl flex flex-col items-center justify-center font-heading font-bold transition text-sm"
+                        :style="form.completed
+                          ? 'background:var(--brand-mint); color:white'
+                          : (new Date(form.startDate) < new Date())
+                            ? 'background:#f59e0b; color:white'
+                            : 'background:rgba(224,96,77,0.1); color:var(--brand-indigo)'"
+                      >
+                        <span class="text-[9px] uppercase leading-none">{{ new Date(form.startDate).toLocaleDateString('en-US', {weekday:'short'}) }}</span>
+                        <span class="text-lg font-black leading-tight">{{ new Date(form.startDate).getDate() }}</span>
+                      </div>
+                      <div>
+                        <h4 class="font-heading text-lg font-bold" style="color:var(--brand-dark)">{{ form.title }}</h4>
+                        <div class="flex items-center gap-2 mt-0.5">
+                          <p class="text-xs font-bold text-gray-400">
+                            {{ new Date(form.startDate).toLocaleDateString('en-US', {weekday:'long'}) }}
+                          </p>
+                          <span v-if="form.completed" class="text-xs font-black px-2 py-0.5 rounded-full" style="color:var(--brand-mint); background:rgba(45,212,191,0.15)">✓ Done</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div v-if="!form.completed">
+                      <button class="btn-fun text-white px-5 py-2 rounded-xl font-bold text-sm"
+                              :style="(new Date(form.startDate) < new Date()) ? 'background:#f59e0b' : 'background:var(--brand-indigo)'">Start 🚀</button>
+                    </div>
+                    <div v-else><span class="text-2xl">✅</span></div>
+                  </div>
+                </template>
               </div>
-            </div>
-            <div v-if="!completedFormIds.includes(form.id)">
-              <button class="btn-fun text-white px-5 py-2 rounded-xl font-bold text-sm"
-                      :style="(new Date(form.startDate) < new Date()) ? 'background:#f59e0b' : 'background:var(--brand-indigo)'">Start 🚀</button>
-            </div>
-            <div v-else><span class="text-2xl">✅</span></div>
+            </Transition>
           </div>
         </div>
 
@@ -344,7 +371,6 @@ function getBadgeClass(type: string) {
           </div>
         </div>
 
-
         <!-- ── PRE-FORM: No book (watch video) ── -->
         <div v-else-if="activeForm && preFormStep === 'no-book'" class="space-y-4">
           <div class="premium-card p-5 bg-white/60 text-center space-y-3">
@@ -352,12 +378,7 @@ function getBadgeClass(type: string) {
             <p class="text-gray-500 font-medium text-sm">Use this provided resource, then we'll do the form.</p>
             <div v-if="firstVideoContext" class="p-5 rounded-2xl bg-amber-50 border border-amber-100 space-y-2 text-left max-w-2xl mx-auto">
               <p class="text-xl font-heading font-bold leading-snug" style="color:var(--brand-dark)"><span v-html="firstVideoContext"></span></p>
-              <p
-                v-if="settings.language === 'es' && firstVideoContextEs"
-                class="text-base italic text-gray-500 leading-snug border-t border-amber-200 pt-2"
-              >
-                <span v-html="firstVideoContextEs"></span>
-              </p>
+              <p v-if="settings.language === 'es' && firstVideoContextEs" class="text-base italic text-gray-500 leading-snug border-t border-amber-200 pt-2"><span v-html="firstVideoContextEs"></span></p>
             </div>
             <div class="max-w-2xl mx-auto aspect-video w-full rounded-2xl overflow-hidden shadow-lg border-4 border-white">
               <iframe v-if="firstVideoUrl" class="w-full h-full" :src="firstVideoUrl" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
@@ -402,11 +423,8 @@ function getBadgeClass(type: string) {
                   <!-- Context block -->
                   <div v-if="currentComponent.questionType === 'context'" class="p-5 rounded-2xl bg-amber-50 border border-amber-100 space-y-2">
                     <p class="text-xl font-heading font-bold leading-snug" style="color:var(--brand-dark)"><span v-html="currentComponent.questionText"></span></p>
-                    <!-- Spanish translation shown below English when language is set to Spanish -->
-                    <p
-                      v-if="settings.language === 'es' && (currentComponent.questionOptions as any)?.textEs"
-                      class="text-base italic text-gray-500 leading-snug border-t border-amber-200 pt-2"
-                    >
+                    <p v-if="settings.language === 'es' && (currentComponent.questionOptions as any)?.textEs"
+                       class="text-base italic text-gray-500 leading-snug border-t border-amber-200 pt-2">
                       <span v-html="(currentComponent.questionOptions as any).textEs"></span>
                     </p>
                   </div>
@@ -415,10 +433,8 @@ function getBadgeClass(type: string) {
                   <div v-else-if="currentComponent.questionType === 'video'" class="space-y-3">
                     <div v-if="currentComponent.questionText" class="p-5 rounded-2xl bg-amber-50 border border-amber-100 space-y-2">
                       <p class="text-xl font-heading font-bold leading-snug" style="color:var(--brand-dark)"><span v-html="currentComponent.questionText"></span></p>
-                      <p
-                        v-if="settings.language === 'es' && (currentComponent.questionOptions as any)?.textEs"
-                        class="text-base italic text-gray-500 leading-snug border-t border-amber-200 pt-2"
-                      >
+                      <p v-if="settings.language === 'es' && (currentComponent.questionOptions as any)?.textEs"
+                         class="text-base italic text-gray-500 leading-snug border-t border-amber-200 pt-2">
                         <span v-html="(currentComponent.questionOptions as any).textEs"></span>
                       </p>
                     </div>
@@ -430,11 +446,8 @@ function getBadgeClass(type: string) {
                   <!-- Text / MCQ question -->
                   <div v-else class="space-y-1">
                     <h4 class="text-xl font-heading font-bold" style="color:var(--brand-dark)">&quot;<span v-html="currentComponent.questionText"></span>&quot;</h4>
-                    <!-- Spanish translation shown below English when language is set to Spanish -->
-                    <p
-                      v-if="settings.language === 'es' && (currentComponent.questionOptions as any)?.textEs"
-                      class="text-base italic text-gray-500"
-                    >
+                    <p v-if="settings.language === 'es' && (currentComponent.questionOptions as any)?.textEs"
+                       class="text-base italic text-gray-500">
                       &quot;<span v-html="(currentComponent.questionOptions as any).textEs"></span>&quot;
                     </p>
                   </div>
@@ -477,10 +490,10 @@ function getBadgeClass(type: string) {
 
                     <!-- Feedback -->
                     <div v-else class="p-6 rounded-[2rem] animate-pop-bounce border-2"
-                         :style="isCurrentComponentCorrect 
-                           ? 'background:rgba(45,212,191,0.1); border-color:rgba(45,212,191,0.3)' 
+                         :style="isCurrentComponentCorrect
+                           ? 'background:rgba(45,212,191,0.1); border-color:rgba(45,212,191,0.3)'
                            : 'background:rgba(245,158,11,0.1); border-color:rgba(245,158,11,0.3)'">
-                      <div class="font-black mb-2 uppercase tracking-widest flex items-center gap-2" 
+                      <div class="font-black mb-2 uppercase tracking-widest flex items-center gap-2"
                            :style="isCurrentComponentCorrect ? 'color:var(--brand-mint)' : 'color:var(--brand-gold)'">
                         {{ isCurrentComponentCorrect ? '✨ Great job!' : '💡 Great Try!' }}
                       </div>
@@ -489,12 +502,8 @@ function getBadgeClass(type: string) {
                           <p class="italic"><span v-html="feedbackReferenceText"></span></p>
                           <p v-if="settings.language === 'es' && feedbackReferenceTextEs" class="italic text-gray-500"><span v-html="feedbackReferenceTextEs"></span></p>
                         </template>
-                        <p v-else-if="isCurrentComponentCorrect">
-                          Keep going! You're doing awesome!
-                        </p>
-                        <p v-if="!isCurrentComponentCorrect">
-                          The correct answer was: <span class="font-bold" v-html="correctAnswerText"></span> You'll get it next time!
-                        </p>
+                        <p v-else-if="isCurrentComponentCorrect">Keep going! You're doing awesome!</p>
+                        <p v-if="!isCurrentComponentCorrect">The correct answer was: <span class="font-bold" v-html="correctAnswerText"></span> You'll get it next time!</p>
                       </div>
                     </div>
                   </div>
@@ -505,14 +514,12 @@ function getBadgeClass(type: string) {
                       class="text-gray-400 font-bold hover:text-gray-700 transition text-lg">← Back</button>
                     <div v-else />
                     <div class="flex-grow" />
-                    <!-- Context / Video: always show Continue -->
                     <button
                       v-if="['context','video'].includes(currentComponent.questionType)"
                       @click="nextStep"
                       class="btn-fun text-white px-10 py-3 rounded-2xl font-bold text-lg shadow-lg"
                       style="background:var(--brand-dark)"
                     >{{ currentComponentID < currentFormComponents.length - 1 ? 'Continue ➡️' : 'Finish Challenge! 🎉' }}</button>
-                    <!-- Text/MCQ after answered -->
                     <button
                       v-else-if="feedbackVisible[currentComponent.id]"
                       @click="nextStep"

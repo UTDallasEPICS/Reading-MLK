@@ -43,6 +43,25 @@ export async function requireCoach(event: H3Event) {
 }
 export async function requireClassAccess(event: H3Event, classToken: string) {
   const session = await requireCoach(event)
+  const isAdmin = session.user.role === 'admin'
+
+  if (isAdmin) {
+    // Admins have full access to every class, including coach-less ones (e.g. Friends of MLK)
+    const classroom = await prisma.class.findFirst({
+      where: { joinToken: classToken },
+      select: { id: true },
+    })
+
+    if (!classroom) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'Class not found',
+      })
+    }
+
+    // Return a sentinel coachId so callers that destructure it don't break
+    return { session, classId: classroom.id, coachId: 'admin' as const }
+  }
 
   const classroom = await prisma.class.findFirst({
     where: {
