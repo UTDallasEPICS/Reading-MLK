@@ -2,8 +2,14 @@ import type { Student } from '~~/prisma/generated/client'
 
 export type StudentSettings = {
   dyslexiaFont: boolean
-  language: string
+  language: 'en' | 'es'
   fontSize: number
+}
+
+const normalizeLanguage = (value: unknown): 'en' | 'es' => {
+  const language = String(value || '').trim().toLowerCase()
+
+  return ['es', 'spanish'].includes(language) ? 'es' : 'en'
 }
 
 export const useCurrentStudent = () => {
@@ -14,7 +20,7 @@ export const useCurrentStudent = () => {
 
     return {
       dyslexiaFont: Boolean(raw.dyslexiaFont),
-      language: raw.language || 'en',
+      language: normalizeLanguage(raw.language),
       fontSize: Number(raw.fontSize) || 1,
     }
   })
