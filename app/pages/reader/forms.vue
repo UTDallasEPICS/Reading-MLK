@@ -429,13 +429,13 @@ function getBadgeClass(type: string) {
 
                   <!-- Text / MCQ question -->
                   <div v-else class="space-y-1">
-                    <h4 class="text-xl font-heading font-bold" style="color:var(--brand-dark)">&quot;<span v-html="currentComponent.questionText"></span>&quot;</h4>
+                    <h4 class="text-xl font-heading font-bold" style="color:var(--brand-dark)"><span v-html="currentComponent.questionText"></span></h4>
                     <!-- Spanish translation shown below English when language is set to Spanish -->
                     <p
                       v-if="settings.language === 'es' && (currentComponent.questionOptions as any)?.textEs"
                       class="text-base italic text-gray-500"
                     >
-                      &quot;<span v-html="(currentComponent.questionOptions as any).textEs"></span>&quot;
+                      <span v-html="(currentComponent.questionOptions as any).textEs"></span>
                     </p>
                   </div>
 
