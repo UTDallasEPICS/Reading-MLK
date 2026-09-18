@@ -109,7 +109,6 @@ const hasOwnBook         = ref(false)
 const currentComponentID        = ref(0)
 const answers            = ref<Record<number,string>>({})
 const feedbackVisible    = ref<Record<number,boolean>>({})
-
 const isCurrentComponentCorrect = computed(() => {
   const q = currentComponent.value
   if (!q || !answers.value[q.id]) return true
@@ -170,16 +169,39 @@ function checkAnswer() {
   if (q) feedbackVisible.value[q.id] = true
 }
 
+const isProcessingNext = ref(false)
+
 function nextStep() {
+  if (isProcessingNext.value) return
+  isProcessingNext.value = true
+
   const qs = currentFormComponents.value
+  const q = qs[currentComponentID.value]
+  
+  if (q && ['text', 'mcq'].includes(q.questionType)) {
+    const ans = answers.value[q.id]
+    if (ans === undefined || ans === null || String(ans).trim() === '') {
+      isProcessingNext.value = false
+      return
+    }
+  }
+
   if (currentComponentID.value < qs.length - 1) {
     currentComponentID.value++
   } else {
     submitChallenge()
   }
+
+  setTimeout(() => {
+    isProcessingNext.value = false
+  }, 100)
 }
 
+const isSubmitting = ref(false)
+
 async function submitChallenge() {
+  if (isSubmitting.value) return
+  isSubmitting.value = true
   const formId = activeForm.value.id
   
   // Persist completion and XP
@@ -198,6 +220,7 @@ async function submitChallenge() {
     currentComponentID.value     = 0
     feedbackVisible.value = {}
     answers.value         = {}
+    isSubmitting.value    = false
   }, 500)
 }
 
