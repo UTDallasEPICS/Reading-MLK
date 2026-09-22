@@ -20,7 +20,6 @@ const coachExtendProfileSchema = coachBasicProfileSchema.extend({
 })
 
 export default defineEventHandler(async (event) => {
-  console.log("Testing");
   const session = await requireCoach(event)
   const parsed = coachExtendProfileSchema.safeParse(await readBody(event))
 
