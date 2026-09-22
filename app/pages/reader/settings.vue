@@ -195,7 +195,7 @@ watch(settings, (newSettings) => {
             Dyslexia-Friendly Font
           </h4>
           <p class="text-xs text-gray-600">
-            Uses OpenDyslexic typeface
+            Uses Tahoma typeface
           </p>
         </div>
 
