@@ -25,7 +25,7 @@
 
 /* ---------- Body / Base ---------- */
 .reader-app {
-  font-family: 'Quicksand', sans-serif;
+  font-family: Arial, 'Quicksand';
   background-color: #f5ede3;
   background-image: var(--bg-gradient);
   background-attachment: fixed;
@@ -36,7 +36,7 @@
 .reader-app h1, .reader-app h2, .reader-app h3,
 .reader-app h4, .reader-app h5, .reader-app h6,
 .reader-app .font-heading {
-  font-family: 'Fredoka', sans-serif;
+  font-family: Arial, 'Quicksand';
 }
 
 /* ---------- Themes ---------- */
@@ -101,7 +101,7 @@
 /* ---------- Dyslexia Font ---------- */
 .reader-app.dyslexia-font,
 .reader-app.dyslexia-font * {
-  font-family: 'OpenDyslexic', sans-serif !important;
+  font-family: Tahoma, 'OpenDyslexic' !important;
 }
 
 /* ---------- Premium Card ---------- */
