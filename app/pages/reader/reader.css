@@ -6,6 +6,8 @@
    Imported in home.vue, forms.vue, decor.vue, index.vue
    ============================================================ */
 
+@import url('https://fonts.googleapis.com/css2?family=Arial:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Tahoma:wght@400;700&display=swap');
 
 /* ---------- CSS Variables ---------- */
 :root {
@@ -24,7 +26,7 @@
 
 /* ---------- Body / Base ---------- */
 .reader-app {
-  font-family: Arial, sans-serif;
+  font-family: 'Arial';
   background-color: #f5ede3;
   background-image: var(--bg-gradient);
   background-attachment: fixed;
@@ -35,7 +37,7 @@
 .reader-app h1, .reader-app h2, .reader-app h3,
 .reader-app h4, .reader-app h5, .reader-app h6,
 .reader-app .font-heading {
-  font-family: Arial, sans-serif;
+  font-family: 'Arial';
 }
 
 /* ---------- Themes ---------- */
@@ -100,7 +102,7 @@
 /* ---------- Dyslexia Font ---------- */
 .reader-app.dyslexia-font,
 .reader-app.dyslexia-font * {
-  font-family: Tahoma, Arial, sans-serif !important;
+  font-family: 'Tahoma', 'Arial' !important;
 }
 
 /* ---------- Premium Card ---------- */
