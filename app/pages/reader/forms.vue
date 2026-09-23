@@ -435,7 +435,7 @@ function getBadgeClass(type: string) {
                       v-if="settings.language === 'es' && (currentComponent.questionOptions as any)?.textEs"
                       class="text-base italic text-gray-500"
                     >
-                      &quot;<span v-html="(currentComponent.questionOptions as any).textEs"></span>&quot;
+                      <span v-html="(currentComponent.questionOptions as any).textEs"></span>
                     </p>
                   </div>
 
@@ -489,15 +489,18 @@ function getBadgeClass(type: string) {
                           <p class="italic"><span v-html="feedbackReferenceText"></span></p>
                           <p v-if="settings.language === 'es' && feedbackReferenceTextEs" class="italic text-gray-500"><span v-html="feedbackReferenceTextEs"></span></p>
                         </template>
+                        <div v-if="currentComponent.questionType === 'mcq'">
                         <p v-if="isCurrentComponentCorrect">
                           The correct answer was: <span class="font-bold" v-html="correctAnswerText"></span> 
                           Keep going! You're doing awesome!
                         </p>
-                        <p v-if="!isCurrentComponentCorrect">
+                        <p v-else>
                           The correct answer was: <span class="font-bold" v-html="correctAnswerText"></span> You'll get it next time!
                         </p>
                       </div>
                     </div>
+                  </div>
+
                   </div>
 
                   <!-- Navigation -->
