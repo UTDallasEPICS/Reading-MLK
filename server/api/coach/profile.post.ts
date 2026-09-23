@@ -2,11 +2,13 @@ import { z } from 'zod'
 import { prisma } from '../../utils/prisma'
 import { requireCoach } from '../../utils/require-session'
 
-const coachProfileSchema = z.object({
+const coachBaseSchema = z.object({
   purpose: z.enum(['teacher', 'studygroup', 'other']),
   school: z.string().trim().max(160).optional(),
-  district: z.string().trim().max(160).optional(),
-  zipcode: z.string().trim().regex(/^\d{5}(?:-\d{4})?$/).optional(),
+  district: z.string().trim().max(160).optional()
+})
+const coachExtendSchema = coachBaseSchema.extend({
+  zipcode: z.string().trim().regex(/^\d{5}(?:-\d{4})?$/).optional().or(z.literal(''))
 }).superRefine((data, context) => {
   if (data.purpose !== 'teacher') return
 
@@ -17,7 +19,7 @@ const coachProfileSchema = z.object({
 
 export default defineEventHandler(async (event) => {
   const session = await requireCoach(event)
-  const parsed = coachProfileSchema.safeParse(await readBody(event))
+  const parsed = coachExtendSchema.safeParse(await readBody(event))
 
   if (!parsed.success) {
     throw createError({
