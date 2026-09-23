@@ -30,8 +30,6 @@ const themeClass = computed(() => {
   return `reader-app ${d}`.trim()
 })
 
-const isSpanish = computed(() => settings.value.language === 'es')
-
 const currentFormComponentsWithVideo = computed(() => {
   if (!activeForm.value?.id) return []
   return FormGroup.value.formComponents[activeForm.value.id] || []
@@ -355,7 +353,7 @@ function getBadgeClass(type: string) {
             <div v-if="firstVideoContext" class="p-5 rounded-2xl bg-amber-50 border border-amber-100 space-y-2 text-left max-w-2xl mx-auto">
               <p class="text-xl font-heading font-bold leading-snug" style="color:var(--brand-dark)"><span v-html="firstVideoContext"></span></p>
               <p
-                v-if="isSpanish && firstVideoContextEs"
+                v-if="settings.language === 'es' && firstVideoContextEs"
                 class="text-base italic text-gray-500 leading-snug border-t border-amber-200 pt-2"
               >
                 <span v-html="firstVideoContextEs"></span>
@@ -406,7 +404,7 @@ function getBadgeClass(type: string) {
                     <p class="text-xl font-heading font-bold leading-snug" style="color:var(--brand-dark)"><span v-html="currentComponent.questionText"></span></p>
                     <!-- Spanish translation shown below English when language is set to Spanish -->
                     <p
-                      v-if="isSpanish && (currentComponent.questionOptions as any)?.textEs"
+                      v-if="settings.language === 'es' && (currentComponent.questionOptions as any)?.textEs"
                       class="text-base italic text-gray-500 leading-snug border-t border-amber-200 pt-2"
                     >
                       <span v-html="(currentComponent.questionOptions as any).textEs"></span>
@@ -418,7 +416,7 @@ function getBadgeClass(type: string) {
                     <div v-if="currentComponent.questionText" class="p-5 rounded-2xl bg-amber-50 border border-amber-100 space-y-2">
                       <p class="text-xl font-heading font-bold leading-snug" style="color:var(--brand-dark)"><span v-html="currentComponent.questionText"></span></p>
                       <p
-                        v-if="isSpanish && (currentComponent.questionOptions as any)?.textEs"
+                        v-if="settings.language === 'es' && (currentComponent.questionOptions as any)?.textEs"
                         class="text-base italic text-gray-500 leading-snug border-t border-amber-200 pt-2"
                       >
                         <span v-html="(currentComponent.questionOptions as any).textEs"></span>
@@ -434,7 +432,7 @@ function getBadgeClass(type: string) {
                     <h4 class="text-xl font-heading font-bold" style="color:var(--brand-dark)">&quot;<span v-html="currentComponent.questionText"></span>&quot;</h4>
                     <!-- Spanish translation shown below English when language is set to Spanish -->
                     <p
-                      v-if="isSpanish && (currentComponent.questionOptions as any)?.textEs"
+                      v-if="settings.language === 'es' && (currentComponent.questionOptions as any)?.textEs"
                       class="text-base italic text-gray-500"
                     >
                       &quot;<span v-html="(currentComponent.questionOptions as any).textEs"></span>&quot;
@@ -489,7 +487,7 @@ function getBadgeClass(type: string) {
                       <div class="text-gray-700 font-medium space-y-2">
                         <template v-if="feedbackReferenceText">
                           <p class="italic"><span v-html="feedbackReferenceText"></span></p>
-                          <p v-if="isSpanish && feedbackReferenceTextEs" class="italic text-gray-500"><span v-html="feedbackReferenceTextEs"></span></p>
+                          <p v-if="settings.language === 'es' && feedbackReferenceTextEs" class="italic text-gray-500"><span v-html="feedbackReferenceTextEs"></span></p>
                         </template>
                         <p v-else-if="isCurrentComponentCorrect">
                           Keep going! You're doing awesome!
