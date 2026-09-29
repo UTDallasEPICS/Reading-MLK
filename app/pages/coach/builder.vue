@@ -281,11 +281,11 @@ onBeforeUnmount(() => {
               </div>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                 <div>
-                  <label class="field-label">Reference (English)</label>
+                  <label class="field-label">Answer (English)</label>
                   <RichTextEditor v-model="q.reference" placeholder="Correct answer..." :rows="2" />
                 </div>
                 <div>
-                  <label class="field-label">Reference (Spanish)</label>
+                  <label class="field-label">Answer (Spanish)</label>
                   <RichTextEditor v-model="q.referenceEs" placeholder="Respuesta correcta..." :rows="2" />
                 </div>
               </div>
