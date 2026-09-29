@@ -491,7 +491,7 @@ function getBadgeClass(type: string) {
                         </template>
                         <div v-if="currentComponent.questionType === 'mcq'">
                         <p v-if="isCurrentComponentCorrect">
-                          The correct answer was: <span class="font-bold" v-html="correctAnswerText"></span> 
+                          The correct answer was: <span class="font-bold" v-html="correctAnswerText"></span>
                           Keep going! You're doing awesome!
                         </p>
                         <p v-else>
