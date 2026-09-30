@@ -164,24 +164,25 @@ function applyFontSize(size: string) {
     return
   }
 
-  // Use execCommand fontSize with a marker value, then replace the
-  // generated tags with <span style="font-size:Npx">
-  document.execCommand('fontSize', false, '7')
+// Remove any existing font-size styles or <font size> attributes from the selected content.
+// Applied the chosen size to the selected text by wrapping it in a <span> with the specified font-size.
+const fragment = range.extractContents() //removes content from orginal range 
+fragment.querySelectorAll<HTMLElement>("[style]").forEach((element) => {
+  element.style.removeProperty('font-size')
+})
+  fragment.querySelectorAll<HTMLElement>('font[size]').forEach((element) => {
+    element.removeAttribute('size')
+  })
 
-  if (editorRef.value) {
-    // Depending on the browser and styleWithCSS, it might generate <font size="7"> or <span style="font-size: xxx">
-    // We look for elements that have font-size or size=7
-    const fontElements = Array.from(editorRef.value.querySelectorAll('font[size="7"], span[style*="font-size"]'))
-    fontElements.forEach((el) => {
-      // Only replace if it matches the marker we just injected
-      if (el.getAttribute('size') === '7' || (el as HTMLElement).style.fontSize === '-webkit-xxx-large' || (el as HTMLElement).style.fontSize === '48px') {
-        const replacement = document.createElement('span')
-        replacement.style.fontSize = `${num}px`
-        replacement.innerHTML = el.innerHTML
-        el.parentNode?.replaceChild(replacement, el)
-      }
-    })
-  }
+  const replacement = document.createElement('span')
+  replacement.style.fontSize = `${num}px`
+  replacement.appendChild(fragment)
+  range.insertNode(replacement)
+
+  const updatedRange = document.createRange()
+  updatedRange.selectNodeContents(replacement)
+  selection.removeAllRanges()
+  selection.addRange(updatedRange)
 
   saveSelection()
   onInput()
@@ -582,7 +583,7 @@ const editorMinHeight = computed(() => {
 /* ── Editor area ── */
 .rte-editor {
   padding: 16px 20px;
-  font-size: 16px;
+  font-size: 10px;
   font-weight: 400;
   color: #1f2937;
   line-height: 1.7;
