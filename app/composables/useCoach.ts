@@ -461,6 +461,29 @@ export const useCoach = () => {
     navigateTo({ path: '/coach/builder', query: { class: classId.value } })
   }
 
+  const deletePublishedForm = async () => {
+    const formId = editingFormId.value
+    if (formId === null) return
+    if (!window.confirm('Are you sure you want to delete this form?')) return
+
+    try {
+      await callFormApi('DELETE', {}, {
+        action: 'deleteForm',
+        id: formId,
+      })
+
+      publishedForms.value = publishedForms.value.filter((form) => Number(form.id) !== formId)
+      editingFormId.value = null
+      formTitle.value = ''
+      formDays.value = ['Monday']
+      questions.value = defaultQuestions()
+      builderSubTab.value = 'history'
+    } catch (error) {
+      console.error('Failed to delete form', error)
+      alert('Failed to delete form. Please try again.')
+    }
+  }
+
   const toggleFormPublish = async (form: any) => {
 // "unpublished" = "nonactive"  b
 // a form being "published" is measured with True and False - boolean value
@@ -596,7 +619,7 @@ export const useCoach = () => {
     publishedForms, filteredPublishedForms,
     selectedFormDetails, viewFormDetails,
     draggedIdx, dragStart, onDrop,
-    addQuestion, publishForm, editPublishedForm, toggleFormPublish,
+    addQuestion, publishForm, editPublishedForm, deletePublishedForm, toggleFormPublish,
     loadPublishedForms,
     // progress
     students, searchStudent, sortStudent, filteredAndSortedStudents,

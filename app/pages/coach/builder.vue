@@ -9,7 +9,7 @@ const {
   getCalculatedDate, formatDate, defaultQuestions,
   filteredPublishedForms, selectedFormDetails, viewFormDetails,
   draggedIdx, dragStart, onDrop,
-  addQuestion, publishForm, editPublishedForm, toggleFormPublish, loadPublishedForms,
+  addQuestion, publishForm, editPublishedForm, deletePublishedForm, toggleFormPublish, loadPublishedForms,
 } = useCoach()
 
 const previewDates = computed(() => {
@@ -347,19 +347,21 @@ onBeforeUnmount(() => {
           <h4 class="preview-title">Form Structure Preview</h4>
           <p class="preview-subtitle">Drag items here to reorder questions in the form.</p>
 
-          <button
-            v-if="editingFormId"
-            class="btn-ghost preview-cancel-btn"
-            @click="editingFormId = null; formTitle = ''; formDays = ['Monday']; questions = defaultQuestions(); builderSubTab = 'history'"
-          >Cancel</button>
-          <button
-            v-else
-            class="btn-ghost preview-cancel-btn"
-            @click="formTitle = ''; formDays = ['Monday']; questions = defaultQuestions(); builderSubTab = 'history'"
-          >Discard</button>
-          <button class="btn-indigo preview-cancel-btn" @click="publishForm">
-            {{ editingFormId ? 'Update Form' : 'Publish Form' }}
-          </button>
+          <template v-if="editingFormId">
+            <button class="btn-indigo preview-cancel-btn" @click="publishForm">Update Form</button>
+            <button class="btn-danger preview-cancel-btn" @click="deletePublishedForm">Delete Form</button>
+            <button
+              class="btn-ghost preview-cancel-btn"
+              @click="editingFormId = null; formTitle = ''; formDays = ['Monday']; questions = defaultQuestions(); builderSubTab = 'history'"
+            >Cancel</button>
+          </template>
+          <template v-else>
+            <button
+              class="btn-ghost preview-cancel-btn"
+              @click="formTitle = ''; formDays = ['Monday']; questions = defaultQuestions(); builderSubTab = 'history'"
+            >Discard</button>
+            <button class="btn-indigo preview-cancel-btn" @click="publishForm">Publish Form</button>
+          </template>
 
           <div class="preview-list">
             <div v-if="questions.length === 0" class="preview-empty">No questions to preview yet.</div>
