@@ -52,20 +52,26 @@ let savedRange: Range | null = null
 
 function saveSelection() {
   const sel = window.getSelection()
-  if (sel && sel.rangeCount > 0 && editorRef.value?.contains(sel.anchorNode)) {
+  if (sel && sel.rangeCount > 0 && editorRef.value?.contains(sel.anchorNode) && 
+  editorRef.value.contains(sel.focusNode)) {
     savedRange = sel.getRangeAt(0).cloneRange()
   }
 }
 
 function restoreSelection() {
-  if (savedRange && editorRef.value) {
-    editorRef.value.focus()
-    const sel = window.getSelection()
-    if (sel) {
-      sel.removeAllRanges()
-      sel.addRange(savedRange)
-    }
+  const editor = editorRef.value
+  if (!editor || !savedRange || !editor.contains(savedRange.startContainer) || !editor.contains(savedRange.endContainer)) {
+    savedRange = null
+    return false
   }
+
+  editor.focus()
+  const sel = window.getSelection()
+  if (!sel) return false
+
+  sel.removeAllRanges()
+  sel.addRange(savedRange)
+  return editor.contains(sel.anchorNode) && editor.contains(sel.focusNode)
 }
 
 // ── Sync content ──
@@ -118,7 +124,7 @@ onUnmounted(() => {
 
 // ── Formatting commands ──
 function execCmd(command: string, value?: string) {
-  restoreSelection()
+  if (!restoreSelection()) return
   document.execCommand('styleWithCSS', false, 'true')
   document.execCommand(command, false, value)
   saveSelection()
@@ -138,11 +144,12 @@ function applyFontSize(size: string) {
   if (!num || num < 1 || num > 200) return
   fontSizeInput.value = String(num)
 
-  restoreSelection()
-  document.execCommand('styleWithCSS', false, 'true')
+  if (!restoreSelection()) return
+document.execCommand('styleWithCSS', false, 'true')
 
-  const selection = window.getSelection()
-  if (!selection || selection.rangeCount === 0) return
+const selection = window.getSelection()
+if (!selection || selection.rangeCount === 0 || !editorRef.value?.contains(selection.anchorNode) || !editorRef.value.contains(selection.focusNode)) 
+return
 
   const range = selection.getRangeAt(0)
 
@@ -164,24 +171,25 @@ function applyFontSize(size: string) {
     return
   }
 
-  // Use execCommand fontSize with a marker value, then replace the
-  // generated tags with <span style="font-size:Npx">
-  document.execCommand('fontSize', false, '7')
+// Remove any existing font-size styles or <font size> attributes from the selected content.
+// Applied the chosen size to the selected text by wrapping it in a <span> with the specified font-size.
+const fragment = range.extractContents() //removes content from orginal range 
+fragment.querySelectorAll<HTMLElement>("[style]").forEach((element) => {
+  element.style.removeProperty('font-size')
+})
+  fragment.querySelectorAll<HTMLElement>('font[size]').forEach((element) => {
+    element.removeAttribute('size')
+  })
 
-  if (editorRef.value) {
-    // Depending on the browser and styleWithCSS, it might generate <font size="7"> or <span style="font-size: xxx">
-    // We look for elements that have font-size or size=7
-    const fontElements = Array.from(editorRef.value.querySelectorAll('font[size="7"], span[style*="font-size"]'))
-    fontElements.forEach((el) => {
-      // Only replace if it matches the marker we just injected
-      if (el.getAttribute('size') === '7' || (el as HTMLElement).style.fontSize === '-webkit-xxx-large' || (el as HTMLElement).style.fontSize === '48px') {
-        const replacement = document.createElement('span')
-        replacement.style.fontSize = `${num}px`
-        replacement.innerHTML = el.innerHTML
-        el.parentNode?.replaceChild(replacement, el)
-      }
-    })
-  }
+  const replacement = document.createElement('span')
+  replacement.style.fontSize = `${num}px`
+  replacement.appendChild(fragment)
+  range.insertNode(replacement)
+
+  const updatedRange = document.createRange()
+  updatedRange.selectNodeContents(replacement)
+  selection.removeAllRanges()
+  selection.addRange(updatedRange)
 
   saveSelection()
   onInput()
@@ -582,7 +590,7 @@ const editorMinHeight = computed(() => {
 /* ── Editor area ── */
 .rte-editor {
   padding: 16px 20px;
-  font-size: 16px;
+  font-size: 10px;
   font-weight: 400;
   color: #1f2937;
   line-height: 1.7;
