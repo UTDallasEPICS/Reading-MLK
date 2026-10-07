@@ -233,34 +233,6 @@ watch(settings, (newSettings) => {
         </button>
       </div>
 
-      <!-- PUBLICITY -->
-      <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-        <div>
-          <h4 class="font-bold text-sm text-gray-800">
-            Publicity Consent
-          </h4>
-
-          <p class="text-xs text-gray-600">
-            Allow Friends of MLK to use responses for publicity
-          </p>
-        </div>
-
-        <button
-          @click="accountSettings.publicityConsent = !accountSettings.publicityConsent; saveAccountSettings()"
-          :class="[
-            'w-12 h-6 rounded-full transition-all relative',
-            accountSettings.publicityConsent ? 'bg-green-400' : 'bg-gray-300'
-          ]"
-        >
-          <div
-            :class="[
-              'w-5 h-5 bg-white rounded-full shadow absolute top-0.5 transition-all',
-              accountSettings.publicityConsent ? 'right-0.5' : 'left-0.5'
-            ]"
-          />
-        </button>
-      </div>
-
       <!-- CHANGE EMAIL -->
       <div>
         <label
