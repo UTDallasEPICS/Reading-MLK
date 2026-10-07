@@ -158,36 +158,6 @@ watch(settings, (newSettings) => {
         </NuxtLink>
       </div>
 
-      <!-- FONT SIZE -->
-      <div>
-        <label
-          class="block text-[10px] font-black text-gray-600 uppercase tracking-widest mb-1.5"
-        >
-          Text Size
-        </label>
-
-        <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-          <span class="text-sm font-bold text-gray-500">A</span>
-
-          <input
-            type="range"
-            min="1"
-            max="1.5"
-            step="0.1"
-            v-model.number="settings.fontSize"
-            class="flex-grow h-2 bg-gray-200 rounded-full appearance-none cursor-pointer accent-indigo-500"
-          />
-
-          <span class="text-lg font-bold text-gray-500">A</span>
-
-          <span
-            class="text-xs font-bold text-indigo-600 bg-indigo-100 px-2 py-1 rounded-lg"
-          >
-            {{ Math.round(settings.fontSize * 100) }}%
-          </span>
-        </div>
-      </div>
-
       <!-- DYSLEXIA -->
       <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
         <div>
@@ -258,34 +228,6 @@ watch(settings, (newSettings) => {
             :class="[
               'w-5 h-5 bg-white rounded-full shadow absolute top-0.5 transition-all',
               accountSettings.raffleOptIn ? 'right-0.5' : 'left-0.5'
-            ]"
-          />
-        </button>
-      </div>
-
-      <!-- PUBLICITY -->
-      <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-        <div>
-          <h4 class="font-bold text-sm text-gray-800">
-            Publicity Consent
-          </h4>
-
-          <p class="text-xs text-gray-600">
-            Allow Friends of MLK to use responses for publicity
-          </p>
-        </div>
-
-        <button
-          @click="accountSettings.publicityConsent = !accountSettings.publicityConsent; saveAccountSettings()"
-          :class="[
-            'w-12 h-6 rounded-full transition-all relative',
-            accountSettings.publicityConsent ? 'bg-green-400' : 'bg-gray-300'
-          ]"
-        >
-          <div
-            :class="[
-              'w-5 h-5 bg-white rounded-full shadow absolute top-0.5 transition-all',
-              accountSettings.publicityConsent ? 'right-0.5' : 'left-0.5'
             ]"
           />
         </button>
