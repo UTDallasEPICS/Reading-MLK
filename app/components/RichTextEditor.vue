@@ -52,20 +52,26 @@ let savedRange: Range | null = null
 
 function saveSelection() {
   const sel = window.getSelection()
-  if (sel && sel.rangeCount > 0 && editorRef.value?.contains(sel.anchorNode)) {
+  if (sel && sel.rangeCount > 0 && editorRef.value?.contains(sel.anchorNode) && 
+  editorRef.value.contains(sel.focusNode)) {
     savedRange = sel.getRangeAt(0).cloneRange()
   }
 }
 
 function restoreSelection() {
-  if (savedRange && editorRef.value) {
-    editorRef.value.focus()
-    const sel = window.getSelection()
-    if (sel) {
-      sel.removeAllRanges()
-      sel.addRange(savedRange)
-    }
+  const editor = editorRef.value
+  if (!editor || !savedRange || !editor.contains(savedRange.startContainer) || !editor.contains(savedRange.endContainer)) {
+    savedRange = null
+    return false
   }
+
+  editor.focus()
+  const sel = window.getSelection()
+  if (!sel) return false
+
+  sel.removeAllRanges()
+  sel.addRange(savedRange)
+  return editor.contains(sel.anchorNode) && editor.contains(sel.focusNode)
 }
 
 // ── Sync content ──
@@ -118,7 +124,7 @@ onUnmounted(() => {
 
 // ── Formatting commands ──
 function execCmd(command: string, value?: string) {
-  restoreSelection()
+  if (!restoreSelection()) return
   document.execCommand('styleWithCSS', false, 'true')
   document.execCommand(command, false, value)
   saveSelection()
@@ -138,11 +144,12 @@ function applyFontSize(size: string) {
   if (!num || num < 1 || num > 200) return
   fontSizeInput.value = String(num)
 
-  restoreSelection()
-  document.execCommand('styleWithCSS', false, 'true')
+  if (!restoreSelection()) return
+document.execCommand('styleWithCSS', false, 'true')
 
-  const selection = window.getSelection()
-  if (!selection || selection.rangeCount === 0) return
+const selection = window.getSelection()
+if (!selection || selection.rangeCount === 0 || !editorRef.value?.contains(selection.anchorNode) || !editorRef.value.contains(selection.focusNode)) 
+return
 
   const range = selection.getRangeAt(0)
 
