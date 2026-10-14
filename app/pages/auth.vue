@@ -47,12 +47,16 @@ const loginRole = computed(() => {
 
 const isNewUser = ref(false)
 const checkingEmail = ref(false)
+const tosCheck = ref(false)
 
 const schema = computed(() => {
   if (isNewUser.value) {
     return z.object({
       email: z.string().email('Invalid email'),
       name: z.string().min(1, 'Name is required'),
+      tosCheck: z.literal(true, {
+        message: 'You must accept the Terms of Service and Privacy Policy',
+      }),
     })
   }
 
@@ -64,6 +68,7 @@ const schema = computed(() => {
 const state = reactive({
   email: '',
   name: '',
+  tosCheck: false,
 })
 
 async function sendMagicLink(callbackURL: string) {
@@ -167,6 +172,18 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
     description: 'Please enter your name to create an account.',
     color: 'primary',
   })
+
+  //Ensure that user accepts tos before allowing submission
+  async function onSubmit(){
+    if (isNewUser.value && !state.tosCheck) {
+      toast.add({
+        title: 'Error',
+        description: 'You must accept the Terms of Service and Privacy Policy to create an account.',
+        color: 'error',
+      })
+      return
+    }
+  }
 }
 </script>
 
@@ -232,6 +249,30 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
                 }"
               />
             </UFormField>
+
+            <template 
+            v-if="isNewUser"
+            >
+              <div class="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="tos"
+                  v-model="state.tosCheck"
+                  class="w-4 h-4 text-[#0d1735] border-gray-300 rounded focus:ring-[#0d1735]"
+                />
+
+                <label for="tos" class="text-sm text-[#5c6475]">
+                  I agree to the
+                  <NuxtLink to="/terms" class="text-[#0d1735] font-bold hover:underline">
+                    Terms of Service
+                  </NuxtLink>
+                  and
+                  <NuxtLink to="/privacy" class="text-[#0d1735] font-bold hover:underline">
+                    Privacy Policy
+                  </NuxtLink>.
+                </label>
+              </div>
+            </template>
 
             <UButton
               :loading="checkingEmail"
