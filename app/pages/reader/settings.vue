@@ -12,7 +12,6 @@ if (!student.value) {
 const settings = reactive({ 
   dyslexiaFont: globalSettings.value.dyslexiaFont,
   language: globalSettings.value.language,
-  fontSize: globalSettings.value.fontSize,
 })
 
 const accountSettings = reactive({
@@ -113,7 +112,6 @@ watch(settings, (newSettings) => {
 <template>
   <div
     :class="themeClass"
-    :style="`font-size: ${settings.fontSize * 16}px`"
     class="pb-32 px-4 pt-4 min-h-screen relative text-gray-800"
   >
 
