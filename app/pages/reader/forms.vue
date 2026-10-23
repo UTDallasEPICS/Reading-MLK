@@ -6,6 +6,17 @@ const { FormGroup, loadActiveFormGroup } = useCurrentFormGroup()
 const { tickets, completedFormIds, logFormSubmission, logSubmissionResponse, loadProgress } = useCurrentStudentProgress()
 
 const dataLoaded = ref(false)
+const joinToken = ref('')
+const joiningClass = ref(false)
+const joinMessage = ref('')
+const joinError = ref('')
+const selectedClass = computed(() => {
+  if (FormGroup.value.selectedClassId === 'all') {
+    return { id: 'all', name: 'All Published Forms' }
+  }
+
+  return FormGroup.value.classes.find((classroom) => classroom.id === FormGroup.value.selectedClassId) ?? null
+})
 
 onMounted(async () => {
   if (!student.value) {
@@ -15,7 +26,7 @@ onMounted(async () => {
     await navigateTo('/reader/profile')
     return
   }
-  await loadActiveFormGroup()
+  await loadActiveFormGroup('all')
   await loadProgress()
   dataLoaded.value = true
 })
@@ -24,6 +35,41 @@ const stats = computed(() => ({
   xp: student.value ? student.value.exp : 0,
   tickets: tickets.value? tickets.value : 0,
 }))
+
+async function joinClass() {
+  if (!student.value?.id || joiningClass.value) return
+
+  joiningClass.value = true
+  joinMessage.value = ''
+  joinError.value = ''
+
+  try {
+    const classroom = await $fetch<{ id: string; name: string }>(`/api/student/${student.value.id}/join`, {
+      method: 'POST',
+      body: { joinToken: joinToken.value },
+    })
+    joinToken.value = ''
+    joinMessage.value = `Joined ${classroom.name}`
+    await loadActiveFormGroup(classroom.id)
+    await loadProgress()
+  } catch (error: any) {
+    joinError.value = error.data?.statusMessage || 'Could not join this class'
+  } finally {
+    joiningClass.value = false
+  }
+}
+
+async function enterClass(classId: string) {
+  await loadActiveFormGroup(classId)
+  await loadProgress()
+}
+
+async function returnToClasses() {
+  activeForm.value = null
+  preFormStep.value = null
+  await loadActiveFormGroup()
+  await loadProgress()
+}
 
 const themeClass = computed(() => {
   const d = settings.value.dyslexiaFont ? 'dyslexia-font' : ''
@@ -181,9 +227,11 @@ function nextStep() {
 
 async function submitChallenge() {
   const formId = activeForm.value.id
+  const classId = FormGroup.value.selectedClassId
   
   // Persist completion and XP
-  const submission  = await logFormSubmission(formId)
+  const submission  = await logFormSubmission(formId, classId === 'all' ? null : classId)
+  if (!submission) return
   await updateExp(100)
 
   // grab newly posted submission ID
@@ -282,7 +330,56 @@ function getBadgeClass(type: string) {
         </div>
 
         <!-- ── FORMS LIST ── -->
-        <div v-if="!activeForm" class="grid gap-3">
+        <div v-if="!activeForm && !selectedClass" class="grid gap-3">
+          <form class="premium-card p-4 flex flex-wrap items-center gap-3" @submit.prevent="joinClass">
+            <label for="class-code" class="font-bold" style="color:var(--brand-dark)">Join a class</label>
+            <input
+              id="class-code"
+              v-model="joinToken"
+              type="text"
+              minlength="5"
+              maxlength="5"
+              autocomplete="off"
+              placeholder="5-character code"
+              class="min-w-0 flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-950 placeholder:text-gray-400 uppercase"
+              aria-describedby="class-join-status"
+            />
+            <button
+              type="submit"
+              :disabled="joiningClass || joinToken.length !== 5"
+              class="btn-fun rounded-lg px-4 py-2 font-bold text-white disabled:opacity-50"
+              style="background:var(--brand-indigo)"
+            >{{ joiningClass ? 'Joining...' : 'Join' }}</button>
+            <p id="class-join-status" v-if="joinMessage || joinError" class="w-full text-sm font-semibold" :class="joinError ? 'text-red-600' : 'text-green-700'">
+              {{ joinError || joinMessage }}
+            </p>
+          </form>
+          <p v-if="FormGroup.classes.length === 0" class="py-8 text-center font-semibold text-gray-500">
+            Join a class with its code to see your class forms.
+          </p>
+          <h3 v-else class="mt-3 font-heading text-2xl font-bold" style="color:var(--brand-dark)">Choose a class</h3>
+          <button
+            v-for="classroom in FormGroup.classes"
+            :key="classroom.id"
+            type="button"
+            class="premium-card p-5 flex items-center justify-between text-left transition-all hover:scale-[1.01]"
+            @click="enterClass(classroom.id)"
+          >
+            <span class="font-heading text-xl font-bold" style="color:var(--brand-dark)">{{ classroom.name }}</span>
+            <span class="btn-fun rounded-xl px-5 py-2 font-bold text-white" style="background:var(--brand-indigo)">Enter class →</span>
+          </button>
+        </div>
+
+        <div v-else-if="!activeForm && selectedClass" class="grid gap-3">
+          <div>
+            <button type="button" class="font-bold text-sm text-gray-500 hover:text-gray-800" @click="returnToClasses">
+              ← Classes & join a class
+            </button>
+            <h3 class="mt-2 font-heading text-2xl font-bold" style="color:var(--brand-dark)">{{ selectedClass.name }}</h3>
+          </div>
+          <p v-if="FormGroup.forms.length === 0" class="py-8 text-center font-semibold text-gray-500">
+            No active forms for this class yet.
+          </p>
           <div
             v-for="form in FormGroup.forms" :key="form.id"
             @click="!completedFormIds.includes(form.id) && startChallenge(form)"

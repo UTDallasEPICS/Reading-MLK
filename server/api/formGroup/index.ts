@@ -1,6 +1,6 @@
 import { prisma } from '../../utils/prisma'
 import { getQuery, createError } from 'h3'
-import { requireClassAccess, requireSession } from '../../utils/require-session'
+import { requireClassAccess } from '../../utils/require-session'
 
 export default defineEventHandler(async (event) => {
   const method = event.node.req.method
@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
     if (classToken) {
       classId = (await requireClassAccess(event, classToken)).classId
     } else {
-      await requireSession(event)
+      throw createError({ statusCode: 403, statusMessage: 'Class access is required' })
     }
 
     const activeWhere = query.active === 'true'
