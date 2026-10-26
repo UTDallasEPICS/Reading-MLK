@@ -1,5 +1,6 @@
 import { prisma } from '../../../utils/prisma'
 import { requireSession } from '../../../utils/require-session'
+import { ensureMlkClassMembership } from '../../../utils/ensure-mlk-class-membership'
 
 export default defineEventHandler(async (event) => {
   const session = await requireSession(event)
@@ -18,10 +19,16 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, statusMessage: 'Student not found' })
   }
 
+  await ensureMlkClassMembership(session.user.id)
+  const enrolledStudent = await prisma.student.findFirstOrThrow({
+    where: { id: studentId, parentUserId: session.user.id },
+    select: { Classes: { select: { id: true, name: true } } },
+  })
+
   const now = new Date()
   const classId = typeof getQuery(event).classId === 'string' ? String(getQuery(event).classId) : null
 
-  if (classId && classId !== 'all' && !student.Classes.some((classroom) => classroom.id === classId)) {
+  if (classId && classId !== 'all' && !enrolledStudent.Classes.some((classroom) => classroom.id === classId)) {
     throw createError({ statusCode: 403, statusMessage: 'Student is not in this class' })
   }
 
@@ -32,7 +39,7 @@ export default defineEventHandler(async (event) => {
         : {
             class: classId
               ? classId
-              : { in: student.Classes.map((classroom) => classroom.id) },
+              : { in: enrolledStudent.Classes.map((classroom) => classroom.id) },
           }),
       startDate: { lte: now },
       OR: [{ endDate: null }, { endDate: { gte: now } }],
@@ -53,7 +60,7 @@ export default defineEventHandler(async (event) => {
   const forms = groups.flatMap((group) => group.Forms)
 
   return {
-    classes: student.Classes,
+    classes: enrolledStudent.Classes,
     selectedClassId: classId,
     activeFormGroup: groups[0] ?? null,
     forms,

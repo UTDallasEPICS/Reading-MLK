@@ -6,6 +6,7 @@ import {
   requireFormGroupInClass,
   requireFormInClass,
 } from '~~/server/utils/require-form-resource'
+import { findMlkClassForCoach } from '~~/server/utils/ensure-mlk-class-membership'
 import { getQuery, setResponseStatus, type H3Event } from 'h3'
 
 type ActionName =
@@ -291,7 +292,17 @@ export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   const rawClassToken = normalizeScalar(query.classId ?? body?.classId)
   const classToken = typeof rawClassToken === 'string' && rawClassToken.trim() ? rawClassToken.trim() : null
-  const classId = classToken ? (await requireClassAccess(event, classToken)).classId : null
+  let classId: string | null = null
+
+  if (classToken) {
+    const access = await requireClassAccess(event, classToken)
+    classId = access.classId
+    const mlkClass = await findMlkClassForCoach(access.session.user.id)
+
+    if (mlkClass) {
+      classId = mlkClass.id
+    }
+  }
 
   if (method !== 'GET' && !action) { throw createError({ statusCode: 400, statusMessage: 'Missing action' }) }
 

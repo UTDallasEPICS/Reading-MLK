@@ -2,6 +2,7 @@ import { prisma } from '../../utils/prisma'
 import { Prisma } from '~~/prisma/generated/client'
 import { auth } from '../../utils/auth'
 import { studentUpdateSchema } from '~~/server/utils/schemas'
+import { ensureMlkClassMembership } from '../../utils/ensure-mlk-class-membership'
 
 export default defineEventHandler(async (event) => {
   const method = event.node.req.method
@@ -41,6 +42,8 @@ export default defineEventHandler(async (event) => {
         statusMessage: 'Student not found',
       })
     }
+
+    await ensureMlkClassMembership(session.user.id)
 
     return student
   }
