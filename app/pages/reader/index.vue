@@ -8,9 +8,7 @@ definePageMeta({ ssr: false })
 // Retrieve the active student.
 const { student, settings: settings, restoreStudent } = useCurrentStudent()
 const { totalFormsInGroup: totalForms, loadActiveFormGroup} = useCurrentFormGroup()
-const { tickets: tickets, loadProgress} = useCurrentStudentProgress()
 await loadActiveFormGroup()
-await loadProgress()
 const checkingStudent = ref(true)
 
 onMounted(async () => {
@@ -37,7 +35,6 @@ const themeClass = computed(() => {
 // ── Click-triggered badge animations ──
 const xpClicked     = ref(false)
 const burstCoins    = ref<{id:number; tx:number; ty:number}[]>([])
-const flyTickets    = ref<number[]>([])
 
 function triggerXpClick() {
   xpClicked.value = true
@@ -101,7 +98,7 @@ const completionMessage = computed(() => {
         </div>
       </div>
 
-      <!-- XP + Tickets badge + settings -->
+      <!-- XP + settings -->
       <div class="flex items-center gap-3">
         <!-- XP badge — click triggers star spin + coin burst -->
         <div
@@ -182,7 +179,7 @@ const completionMessage = computed(() => {
               <p class="text-sm font-bold uppercase tracking-widest opacity-80 mb-1">Today's Challenge</p>
               <h3 class="font-heading text-3xl font-black">Start Your Daily Form 📝</h3>
               <p class="text-base opacity-80 mt-1 font-medium">
-                {{ tickets }} out of {{ totalForms }} completed this week.
+                {{ totalForms }} completed this week.
                 {{ completionMessage }}
               </p>
             </div>
