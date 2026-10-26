@@ -52,17 +52,29 @@ let savedRange: Range | null = null
 
 function saveSelection() {
   const sel = window.getSelection()
-  if (sel && sel.rangeCount > 0 && editorRef.value?.contains(sel.anchorNode) && 
-  editorRef.value.contains(sel.focusNode)) {
+  if (
+    sel &&
+    sel.rangeCount > 0 &&
+    editorRef.value?.contains(sel.anchorNode) &&
+    editorRef.value.contains(sel.focusNode)
+  ) {
     savedRange = sel.getRangeAt(0).cloneRange()
   }
 }
 
 function restoreSelection() {
   const editor = editorRef.value
-  if (!editor || !savedRange || !editor.contains(savedRange.startContainer) || !editor.contains(savedRange.endContainer)) {
+  if (!editor) return false
+
+  const range = savedRange &&
+    editor.contains(savedRange.startContainer) &&
+    editor.contains(savedRange.endContainer)
+    ? savedRange
+    : document.createRange()
+
+  if (range !== savedRange) {
     savedRange = null
-    return false
+    range.selectNodeContents(editor)
   }
 
   editor.focus()
@@ -70,7 +82,7 @@ function restoreSelection() {
   if (!sel) return false
 
   sel.removeAllRanges()
-  sel.addRange(savedRange)
+  sel.addRange(range)
   return editor.contains(sel.anchorNode) && editor.contains(sel.focusNode)
 }
 
@@ -92,6 +104,7 @@ function onInput() {
   if (editorRef.value) {
     emit('update:modelValue', editorRef.value.innerHTML)
   }
+  saveSelection()
   updateActiveStates()
 }
 
@@ -109,7 +122,13 @@ function updateActiveStates() {
 }
 
 function onSelectionChange() {
-  if (editorRef.value?.contains(document.activeElement)) {
+  const selection = window.getSelection()
+  if (
+    selection &&
+    selection.rangeCount > 0 &&
+    editorRef.value?.contains(selection.anchorNode) &&
+    editorRef.value.contains(selection.focusNode)
+  ) {
     updateActiveStates()
     saveSelection()
   }
@@ -124,9 +143,89 @@ onUnmounted(() => {
 
 // ── Formatting commands ──
 function execCmd(command: string, value?: string) {
+  saveSelection()
   if (!restoreSelection()) return
+
+  const editor = editorRef.value
+  const selection = window.getSelection()
+  if (
+    !editor ||
+    !selection ||
+    selection.rangeCount === 0 ||
+    !editor.contains(selection.anchorNode) ||
+    !editor.contains(selection.focusNode)
+  ) return
+
+  const range = selection.getRangeAt(0)
+  if (range.collapsed && editor.textContent) {
+    range.selectNodeContents(editor)
+    selection.removeAllRanges()
+    selection.addRange(range)
+  }
+
   document.execCommand('styleWithCSS', false, 'true')
   document.execCommand(command, false, value)
+  saveSelection()
+  onInput()
+}
+
+function applyInlineStyle(
+  property: 'fontFamily' | 'color',
+  value: string,
+  legacyAttribute: 'face' | 'color',
+) {
+  saveSelection()
+  if (!restoreSelection()) return
+
+  const editor = editorRef.value
+  const selection = window.getSelection()
+  if (
+    !editor ||
+    !selection ||
+    selection.rangeCount === 0 ||
+    !editor.contains(selection.anchorNode) ||
+    !editor.contains(selection.focusNode)
+  ) return
+
+  let range = selection.getRangeAt(0)
+  if (range.collapsed && editor.textContent) {
+    range = document.createRange()
+    range.selectNodeContents(editor)
+    selection.removeAllRanges()
+    selection.addRange(range)
+  }
+
+  if (range.collapsed) {
+    const span = document.createElement('span')
+    const placeholder = document.createTextNode('\u200B')
+    span.style[property] = value
+    span.append(placeholder)
+    range.insertNode(span)
+    range.setStart(placeholder, 1)
+    range.collapse(true)
+    selection.removeAllRanges()
+    selection.addRange(range)
+  } else {
+    const fragment = range.extractContents()
+    const cssProperty = property === 'fontFamily' ? 'font-family' : 'color'
+    fragment.querySelectorAll<HTMLElement>('[style]').forEach((element) => {
+      element.style.removeProperty(cssProperty)
+    })
+    fragment.querySelectorAll<HTMLElement>('font').forEach((element) => {
+      element.removeAttribute(legacyAttribute)
+    })
+
+    const replacement = document.createElement('span')
+    replacement.style[property] = value
+    replacement.append(fragment)
+    range.insertNode(replacement)
+
+    range = document.createRange()
+    range.selectNodeContents(replacement)
+    selection.removeAllRanges()
+    selection.addRange(range)
+  }
+
   saveSelection()
   onInput()
 }
@@ -136,7 +235,7 @@ function applyItalic() { execCmd('italic') }
 function applyUnderline() { execCmd('underline') }
 
 function applyFont(font: string) {
-  execCmd('fontName', font)
+  applyInlineStyle('fontFamily', font, 'face')
 }
 
 function applyFontSize(size: string) {
@@ -144,14 +243,28 @@ function applyFontSize(size: string) {
   if (!num || num < 1 || num > 200) return
   fontSizeInput.value = String(num)
 
+  saveSelection()
   if (!restoreSelection()) return
-document.execCommand('styleWithCSS', false, 'true')
+  document.execCommand('styleWithCSS', false, 'true')
 
-const selection = window.getSelection()
-if (!selection || selection.rangeCount === 0 || !editorRef.value?.contains(selection.anchorNode) || !editorRef.value.contains(selection.focusNode)) 
-return
+  const selection = window.getSelection()
+  const editor = editorRef.value
+  if (
+    !selection ||
+    selection.rangeCount === 0 ||
+    !editor ||
+    !editor.contains(selection.anchorNode) ||
+    !editor.contains(selection.focusNode)
+  ) return
 
-  const range = selection.getRangeAt(0)
+  let range = selection.getRangeAt(0)
+
+  if (range.collapsed && editor.textContent) {
+    range = document.createRange()
+    range.selectNodeContents(editor)
+    selection.removeAllRanges()
+    selection.addRange(range)
+  }
 
   if (range.collapsed) {
     // If no text is selected, create a span with a zero-width space
@@ -171,12 +284,12 @@ return
     return
   }
 
-// Remove any existing font-size styles or <font size> attributes from the selected content.
-// Applied the chosen size to the selected text by wrapping it in a <span> with the specified font-size.
-const fragment = range.extractContents() //removes content from orginal range 
-fragment.querySelectorAll<HTMLElement>("[style]").forEach((element) => {
-  element.style.removeProperty('font-size')
-})
+  // Replace existing font sizes within the selected content, then wrap it in a
+  // span so the chosen size overrides previous formatting.
+  const fragment = range.extractContents()
+  fragment.querySelectorAll<HTMLElement>('[style]').forEach((element) => {
+    element.style.removeProperty('font-size')
+  })
   fragment.querySelectorAll<HTMLElement>('font[size]').forEach((element) => {
     element.removeAttribute('size')
   })
@@ -196,7 +309,7 @@ fragment.querySelectorAll<HTMLElement>("[style]").forEach((element) => {
 }
 
 function applyColor(color: string) {
-  execCmd('foreColor', color)
+  applyInlineStyle('color', color, 'color')
   showColorPicker.value = false
 }
 
@@ -254,6 +367,7 @@ const editorMinHeight = computed(() => {
       <!-- Font Family -->
       <select
         class="rte-select rte-font-select"
+        @mousedown="saveSelection"
         @change="applyFont(($event.target as HTMLSelectElement).value)"
         title="Font Family"
       >
@@ -270,6 +384,7 @@ const editorMinHeight = computed(() => {
           title="Font Size"
           @keydown="onFontSizeKeydown"
           @blur="onFontSizeBlur"
+          @mousedown="saveSelection"
           @focus="saveSelection"
         />
         <div class="rte-size-dropdown">
@@ -354,10 +469,11 @@ const editorMinHeight = computed(() => {
       :data-placeholder="placeholder || 'Start typing...'"
       :style="{ minHeight: editorMinHeight }"
       @input="onInput"
+      @focus="saveSelection"
       @compositionstart="onCompositionStart"
       @compositionend="onCompositionEnd"
-      @mouseup="updateActiveStates"
-      @keyup="updateActiveStates"
+      @mouseup="saveSelection(); updateActiveStates()"
+      @keyup="saveSelection(); updateActiveStates()"
     />
   </div>
 </template>
