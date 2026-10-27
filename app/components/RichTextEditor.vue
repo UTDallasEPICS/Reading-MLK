@@ -583,7 +583,7 @@ const editorMinHeight = computed(() => {
 /* ── Editor area ── */
 .rte-editor {
   padding: 16px 20px;
-  font-size: 10px;
+  font-size: 16px;
   font-weight: 400;
   color: #1f2937;
   line-height: 1.7;
