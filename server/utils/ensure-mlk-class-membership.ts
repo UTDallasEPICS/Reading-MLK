@@ -14,17 +14,21 @@ export async function findMlkClass() {
     take: 2,
   })
 
-  if (classes.length !== 1) {
+  if (classes.length > 1) {
     throw createError({
       statusCode: 500,
-      statusMessage:
-        classes.length === 0
-          ? "Rae's MLK Class is not configured"
-          : "Multiple classes match Rae's MLK Class",
+      statusMessage: 'Multiple classes named MLK Class are configured',
     })
   }
 
-  return classes[0]
+  if (classes.length === 1) {
+    return classes[0]
+  }
+
+  return await prisma.class.create({
+    data: { name: 'MLK Class' },
+    select: { id: true },
+  })
 }
 
 export async function findMlkClassForCoach(userId: string) {
