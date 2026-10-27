@@ -1,15 +1,8 @@
 import { prisma } from './prisma'
 
-export async function findMlkClass() {
+export async function ensureMlkClassExists() {
   const classes = await prisma.class.findMany({
-    where: {
-      name: 'MLK Class',
-      Coach: {
-        some: {
-          User: { name: 'Rae' },
-        },
-      },
-    },
+    where: { name: 'MLK Class' },
     select: { id: true },
     take: 2,
   })
@@ -42,39 +35,27 @@ export async function findMlkClassForCoach(userId: string) {
 }
 
 export async function ensureMlkClassMembership(userId: string) {
-  const defaultClass = await findMlkClass()
+  const classroom = await ensureMlkClassExists()
   const students = await prisma.student.findMany({
     where: { parentUserId: userId },
-    select: { id: true, Classes: { where: { id: defaultClass.id }, select: { id: true } } },
+    select: {
+      id: true,
+      Classes: { where: { id: classroom.id }, select: { id: true } },
+    },
   })
 
-  if (students.length === 0) {
-    const user = await prisma.user.findUniqueOrThrow({
-      where: { id: userId },
-      select: { name: true, role: true },
-    })
+  const studentsToEnroll = students.filter((student) => student.Classes.length === 0)
 
-    if (user.role === 'reader') {
-      await prisma.student.create({
-        data: {
-          name: user.name,
-          parentUserId: userId,
-          settings: { dyslexiaFont: false, language: 'en', fontSize: 1 },
-          Classes: { connect: { id: defaultClass.id } },
-        },
-      })
-    }
-  } else {
-    const studentsToEnroll = students.filter((student) => student.Classes.length === 0)
+  if (studentsToEnroll.length > 0) {
     await prisma.$transaction(
       studentsToEnroll.map((student) =>
         prisma.student.update({
           where: { id: student.id },
-          data: { Classes: { connect: { id: defaultClass.id } } },
+          data: { Classes: { connect: { id: classroom.id } } },
         })
       )
     )
   }
 
-  return defaultClass
+  return classroom
 }

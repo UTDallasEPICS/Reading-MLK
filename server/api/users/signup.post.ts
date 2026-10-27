@@ -1,6 +1,6 @@
 import { prisma } from '../../utils/prisma'
 import { userCreateSchema } from '../../utils/schemas'
-import { findMlkClass } from '../../utils/ensure-mlk-class-membership'
+import { ensureMlkClassExists } from '../../utils/ensure-mlk-class-membership'
 
 export default defineEventHandler(async (event) => {
   const body = userCreateSchema.safeParse(await readBody(event))
@@ -23,7 +23,8 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const defaultClass = body.data.role === 'reader' ? await findMlkClass() : null
+  const defaultClass =
+    body.data.role === 'reader' ? await ensureMlkClassExists() : null
 
   const user = await prisma.user.create({
     data: {
@@ -31,13 +32,12 @@ export default defineEventHandler(async (event) => {
       name: body.data.name,
       role: body.data.role,
       emailVerified: false,
-      ...(defaultClass
+      ...(body.data.role === 'reader'
         ? {
             students: {
               create: {
                 name: body.data.name,
-                settings: { dyslexiaFont: false, language: 'en', fontSize: 1 },
-                Classes: { connect: { id: defaultClass.id } },
+                ...(defaultClass ? { Classes: { connect: { id: defaultClass.id } } } : {}),
               },
             },
           }

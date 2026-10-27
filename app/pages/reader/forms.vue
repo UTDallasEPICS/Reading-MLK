@@ -26,7 +26,7 @@ onMounted(async () => {
     await navigateTo('/reader/profile')
     return
   }
-  await loadActiveFormGroup('all')
+  await loadActiveFormGroup()
   await loadProgress()
   dataLoaded.value = true
 })

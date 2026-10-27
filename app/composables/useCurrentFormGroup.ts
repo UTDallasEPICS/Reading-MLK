@@ -1,7 +1,7 @@
 import type { FormGroup, Form, FormComponent } from '~~/prisma/generated/client'
 
 export type CurrentFormGroupState = {
-  classes: { id: string; name: string }[]
+  classes: { id: string; name: string; isEnrolled: boolean }[]
   selectedClassId: string | null
   activeFormGroup: FormGroup | null
   forms: Form[]
@@ -42,7 +42,7 @@ export const useCurrentFormGroup = () => {
 
     try {
       const data = await $fetch<{
-        classes: { id: string; name: string }[]
+        classes: { id: string; name: string; isEnrolled: boolean }[]
         selectedClassId: string | null
         activeFormGroup: FormGroup | null
         forms: Form[]
