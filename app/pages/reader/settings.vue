@@ -14,10 +14,6 @@ const settings = reactive({
   language: globalSettings.value.language,
 })
 
-const accountSettings = reactive({
-  publicityConsent: false,
-})
-
 async function logout() {
   try {
     clearStudent()
@@ -61,7 +57,6 @@ async function loadAccountSettings() {
       method: 'GET',
     })
 
-    accountSettings.publicityConsent = data.publicityConsent
   } catch (error) {
     console.error('Failed to load account settings:', error)
   }
@@ -70,26 +65,6 @@ async function loadAccountSettings() {
 onMounted(async () => {
   await loadAccountSettings()
 })
-
-
-//Saving aacount settings
-async function saveAccountSettings() {
-  try {
-    await $fetch<{
-      success: boolean
-      settings: {
-        publicityConsent: boolean
-      }
-    }>('/api/users/account-settings', {
-      method: 'PUT',
-      body: {
-        publicityConsent: accountSettings.publicityConsent,
-      },
-    })
-  } catch (error) {
-    console.error('Failed to save account settings:', error)
-  }
-}
 
 // ── Theme class ── 
 const themeClass = computed(() => {
@@ -202,29 +177,10 @@ watch(settings, (newSettings) => {
       <!-- PUBLICITY -->
       <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
         <div>
-          <h4 class="font-bold text-sm text-gray-800">
-            Publicity Consent
-          </h4>
-
           <p class="text-xs text-gray-600">
             Allow Friends of MLK to use responses for publicity
           </p>
         </div>
-
-        <button
-          @click="accountSettings.publicityConsent = !accountSettings.publicityConsent; saveAccountSettings()"
-          :class="[
-            'w-12 h-6 rounded-full transition-all relative',
-            accountSettings.publicityConsent ? 'bg-green-400' : 'bg-gray-300'
-          ]"
-        >
-          <div
-            :class="[
-              'w-5 h-5 bg-white rounded-full shadow absolute top-0.5 transition-all',
-              accountSettings.publicityConsent ? 'right-0.5' : 'left-0.5'
-            ]"
-          />
-        </button>
       </div>
 
       <!-- CHANGE EMAIL -->

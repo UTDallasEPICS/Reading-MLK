@@ -18,8 +18,6 @@ CREATE TABLE "new_user" (
     "email" TEXT NOT NULL,
     "emailVerified" BOOLEAN NOT NULL DEFAULT false,
     "role" TEXT NOT NULL DEFAULT 'reader',
-    "raffleOptIn" BOOLEAN NOT NULL DEFAULT true,
-    "publicityConsent" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL
 );

@@ -15,19 +15,7 @@ export default defineEventHandler(async (event) => {
 
   const body = await readBody(event)
 
-  const updatedUser = await prisma.user.update({
-    where: { id: session.user.id },
-    data: {
-      publicityConsent:
-        typeof body.publicityConsent === 'boolean' ? body.publicityConsent : undefined,
-    },
-    select: {
-      publicityConsent: true,
-    },
-  })
-
   return {
-    success: true,
-    settings: updatedUser,
+    success: true
   }
 })
