@@ -16,6 +16,8 @@ const editorRef = ref<HTMLDivElement | null>(null)
 const colorWrapRef = ref<HTMLElement | null>(null)
 const showColorPicker = ref(false)
 const fontSizeInput = ref('16')
+let editingFontSize = false
+let fontSizeDirty = false
 const isComposing = ref(false)
 
 // ── Active formatting state ──
@@ -119,6 +121,40 @@ function updateActiveStates() {
   isBold.value = document.queryCommandState('bold')
   isItalic.value = document.queryCommandState('italic')
   isUnderlined.value = document.queryCommandState('underline')
+  updateFontSizeInput()
+}
+
+function updateFontSizeInput() {
+  const editor = editorRef.value
+  const selection = window.getSelection()
+  if (editingFontSize || !editor || !selection?.rangeCount) return
+  const range = selection.getRangeAt(0)
+  if (!editor.contains(range.startContainer) || !editor.contains(range.endContainer)) return
+
+  const sizes = new Set<string>()
+  const addSize = (node: Node) => {
+    const element = node.nodeType === Node.ELEMENT_NODE ? node as Element : node.parentElement
+    if (element) sizes.add(String(parseFloat(getComputedStyle(element).fontSize)))
+  }
+
+  if (range.collapsed) {
+    let node = range.startContainer
+    if (node.nodeType === Node.ELEMENT_NODE && node.childNodes.length) {
+      node = node.childNodes[Math.max(0, range.startOffset - 1)] || node
+      while (node.lastChild) node = node.lastChild
+    }
+    addSize(node)
+  } else {
+    const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT)
+    let node: Node | null
+    while ((node = walker.nextNode())) {
+      if (!node.textContent || !range.intersectsNode(node)) continue
+      if (node === range.startContainer && range.startOffset === node.textContent.length) continue
+      if (node === range.endContainer && range.endOffset === 0) continue
+      addSize(node)
+    }
+  }
+  fontSizeInput.value = sizes.size === 1 ? [...sizes][0]! : ''
 }
 
 function onSelectionChange() {
@@ -169,73 +205,12 @@ function execCmd(command: string, value?: string) {
   onInput()
 }
 
-function applyInlineStyle(
-  property: 'fontFamily' | 'color',
-  value: string,
-  legacyAttribute: 'face' | 'color',
-) {
-  saveSelection()
-  if (!restoreSelection()) return
-
-  const editor = editorRef.value
-  const selection = window.getSelection()
-  if (
-    !editor ||
-    !selection ||
-    selection.rangeCount === 0 ||
-    !editor.contains(selection.anchorNode) ||
-    !editor.contains(selection.focusNode)
-  ) return
-
-  let range = selection.getRangeAt(0)
-  if (range.collapsed && editor.textContent) {
-    range = document.createRange()
-    range.selectNodeContents(editor)
-    selection.removeAllRanges()
-    selection.addRange(range)
-  }
-
-  if (range.collapsed) {
-    const span = document.createElement('span')
-    const placeholder = document.createTextNode('\u200B')
-    span.style[property] = value
-    span.append(placeholder)
-    range.insertNode(span)
-    range.setStart(placeholder, 1)
-    range.collapse(true)
-    selection.removeAllRanges()
-    selection.addRange(range)
-  } else {
-    const fragment = range.extractContents()
-    const cssProperty = property === 'fontFamily' ? 'font-family' : 'color'
-    fragment.querySelectorAll<HTMLElement>('[style]').forEach((element) => {
-      element.style.removeProperty(cssProperty)
-    })
-    fragment.querySelectorAll<HTMLElement>('font').forEach((element) => {
-      element.removeAttribute(legacyAttribute)
-    })
-
-    const replacement = document.createElement('span')
-    replacement.style[property] = value
-    replacement.append(fragment)
-    range.insertNode(replacement)
-
-    range = document.createRange()
-    range.selectNodeContents(replacement)
-    selection.removeAllRanges()
-    selection.addRange(range)
-  }
-
-  saveSelection()
-  onInput()
-}
-
 function applyBold() { execCmd('bold') }
 function applyItalic() { execCmd('italic') }
 function applyUnderline() { execCmd('underline') }
 
 function applyFont(font: string) {
-  applyInlineStyle('fontFamily', font, 'face')
+  execCmd('fontName', font)
 }
 
 function applyFontSize(size: string) {
@@ -286,6 +261,13 @@ function applyFontSize(size: string) {
 
   // Replace existing font sizes within the selected content, then wrap it in a
   // span so the chosen size overrides previous formatting.
+  let container = range.commonAncestorContainer
+  let wrapper = container.nodeType === Node.ELEMENT_NODE ? container as Element : container.parentElement
+  while (wrapper && wrapper !== editor && ['SPAN', 'FONT'].includes(wrapper.tagName)
+    && range.toString() === wrapper.textContent) {
+    range.selectNode(wrapper)
+    wrapper = wrapper.parentElement
+  }
   const fragment = range.extractContents()
   fragment.querySelectorAll<HTMLElement>('[style]').forEach((element) => {
     element.style.removeProperty('font-size')
@@ -309,7 +291,7 @@ function applyFontSize(size: string) {
 }
 
 function applyColor(color: string) {
-  applyInlineStyle('color', color, 'color')
+  execCmd('foreColor', color)
   showColorPicker.value = false
 }
 
@@ -321,15 +303,29 @@ function onCustomColor(e: Event) {
 function onFontSizeKeydown(e: KeyboardEvent) {
   if (e.key === 'Enter') {
     e.preventDefault()
-    applyFontSize(fontSizeInput.value)
+    commitFontSize()
   }
 }
 
-function onFontSizeBlur() {
+function commitFontSize() {
+  if (!fontSizeDirty) return
+  fontSizeDirty = false
   applyFontSize(fontSizeInput.value)
 }
 
+function onFontSizeFocus() {
+  saveSelection()
+  editingFontSize = true
+}
+
+function onFontSizeBlur() {
+  editingFontSize = false
+  commitFontSize()
+  updateFontSizeInput()
+}
+
 function selectPresetSize(size: string) {
+  fontSizeDirty = false
   fontSizeInput.value = size
   applyFontSize(size)
 }
@@ -385,7 +381,8 @@ const editorMinHeight = computed(() => {
           @keydown="onFontSizeKeydown"
           @blur="onFontSizeBlur"
           @mousedown="saveSelection"
-          @focus="saveSelection"
+          @focus="onFontSizeFocus"
+          @input="fontSizeDirty = true"
         />
         <div class="rte-size-dropdown">
           <button
@@ -706,7 +703,7 @@ const editorMinHeight = computed(() => {
 /* ── Editor area ── */
 .rte-editor {
   padding: 16px 20px;
-  font-size: 10px;
+  font-size: 16px;
   font-weight: 400;
   color: #1f2937;
   line-height: 1.7;
