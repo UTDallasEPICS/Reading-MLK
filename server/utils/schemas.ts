@@ -6,7 +6,6 @@ export const userCreateSchema = z.object({
   name: z.string().min(1).max(100),
   email: emailSchema,
   role: z.enum(['coach', 'reader']).default('reader'),
-  raffleOptIn: z.boolean().optional().default(false),
   publicityConsent: z.boolean().optional().default(false),
 })
 
@@ -33,7 +32,6 @@ export const studentUpdateSchema = z.object({
       {
         dyslexiaFont: z.boolean().optional(),
         language: z.enum(['en', 'es']).optional(),
-        raffleOptIn: z.boolean().optional(),
         publicityConsent: z.boolean().optional(),
       },
       'Invalid Settings'

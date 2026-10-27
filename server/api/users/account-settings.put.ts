@@ -18,13 +18,10 @@ export default defineEventHandler(async (event) => {
   const updatedUser = await prisma.user.update({
     where: { id: session.user.id },
     data: {
-      raffleOptIn:
-        typeof body.raffleOptIn === 'boolean' ? body.raffleOptIn : undefined,
       publicityConsent:
         typeof body.publicityConsent === 'boolean' ? body.publicityConsent : undefined,
     },
     select: {
-      raffleOptIn: true,
       publicityConsent: true,
     },
   })

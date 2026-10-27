@@ -15,7 +15,6 @@ const settings = reactive({
 })
 
 const accountSettings = reactive({
-  raffleOptIn: true,
   publicityConsent: false,
 })
 
@@ -62,7 +61,6 @@ async function loadAccountSettings() {
       method: 'GET',
     })
 
-    accountSettings.raffleOptIn = data.raffleOptIn
     accountSettings.publicityConsent = data.publicityConsent
   } catch (error) {
     console.error('Failed to load account settings:', error)
@@ -80,13 +78,11 @@ async function saveAccountSettings() {
     await $fetch<{
       success: boolean
       settings: {
-        raffleOptIn: boolean
         publicityConsent: boolean
       }
     }>('/api/users/account-settings', {
       method: 'PUT',
       body: {
-        raffleOptIn: accountSettings.raffleOptIn,
         publicityConsent: accountSettings.publicityConsent,
       },
     })
@@ -203,29 +199,29 @@ watch(settings, (newSettings) => {
         </button>
       </div>
 
-      <!-- RAFFLE -->
+      <!-- PUBLICITY -->
       <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
         <div>
           <h4 class="font-bold text-sm text-gray-800">
-            Raffle Participation
+            Publicity Consent
           </h4>
 
           <p class="text-xs text-gray-600">
-            Opt in or out of Friends of MLK raffles
+            Allow Friends of MLK to use responses for publicity
           </p>
         </div>
 
         <button
-          @click="accountSettings.raffleOptIn = !accountSettings.raffleOptIn; saveAccountSettings()"
+          @click="accountSettings.publicityConsent = !accountSettings.publicityConsent; saveAccountSettings()"
           :class="[
             'w-12 h-6 rounded-full transition-all relative',
-            accountSettings.raffleOptIn ? 'bg-green-400' : 'bg-gray-300'
+            accountSettings.publicityConsent ? 'bg-green-400' : 'bg-gray-300'
           ]"
         >
           <div
             :class="[
               'w-5 h-5 bg-white rounded-full shadow absolute top-0.5 transition-all',
-              accountSettings.raffleOptIn ? 'right-0.5' : 'left-0.5'
+              accountSettings.publicityConsent ? 'right-0.5' : 'left-0.5'
             ]"
           />
         </button>

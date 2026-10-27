@@ -199,44 +199,6 @@
   pointer-events: none;
 }
 
-/* ── Click-triggered Ticket badge: wobble ── */
-@keyframes ticketWobble {
-  0%   { transform: rotate(0deg) scale(1); }
-  20%  { transform: rotate(-22deg) scale(1.25); }
-  50%  { transform: rotate(16deg) scale(1.1); }
-  80%  { transform: rotate(-8deg) scale(1.05); }
-  100% { transform: rotate(0deg) scale(1); }
-}
-.animate-ticket-wobble { animation: ticketWobble 0.5s ease-in-out; }
-
-/* ── Click-triggered Ticket badge: ticket flies up into box ── */
-@keyframes ticketFly {
-  0% {opacity: 1; transform: translateX(-50%) translateY(-50%) scale(1);}
-  40% {opacity: 1; transform: translateX(-50%) translateY(40%) scale(0.95);}
-  100% {opacity: 0; transform: translateX(-50%) translateY(200%) scale(0.6);}
-}
-
-.animate-ticket-fly {
-  animation: ticketFly 0.85s cubic-bezier(0.3, 0.7, 0.4, 1) forwards;
-  pointer-events: none;
-}
-
-/* ── Box pops above ticket badge ── */
-@keyframes boxShake {
-  0%        { transform: translateX(-50%) rotate(0deg); }
-  20%       { transform: translateX(-50%) rotate(-10deg); }
-  50%       { transform: translateX(-50%) rotate(10deg); }
-  80%       { transform: translateX(-50%) rotate(-5deg); }
-  100%      { transform: translateX(-50%) rotate(0deg); }
-}
-.animate-box-shake { animation: boxShake 0.5s ease-in-out 0.3s; }
-
-/* ── Raffle ticket drag overlay ── */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
 /* ── Shop purchase celebration ── */
 @keyframes shopPop {
   0%   { transform: scale(0.5); opacity: 0; }
