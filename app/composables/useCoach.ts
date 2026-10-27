@@ -526,7 +526,6 @@ export const useCoach = () => {
         .slice(0, 2)
         .map((part) => part[0]?.toUpperCase())
         .join(''),
-      tickets: student.exp,
       streak: 0,
       lastActive: '',
     }))
@@ -547,7 +546,7 @@ export const useCoach = () => {
   )
 
   const searchStudent = useState('searchStudent', () => '')
-  const sortStudent   = useState('sortStudent',   () => 'tickets')
+  const sortStudent   = useState('sortStudent',   () => 'xp')
 
   const filteredAndSortedStudents = computed(() => {
     let res = students.value
@@ -556,7 +555,7 @@ export const useCoach = () => {
       res = res.filter(s => s.name.toLowerCase().includes(q))
     }
     return [...res].sort((a, b) => {
-      if (sortStudent.value === 'tickets') return b.tickets - a.tickets
+      if (sortStudent.value === 'xp') return b.exp - a.exp
       if (sortStudent.value === 'streak')  return b.streak  - a.streak
       if (sortStudent.value === 'name')    return a.name.localeCompare(b.name)
       return 0
