@@ -685,6 +685,9 @@ export default defineEventHandler(async (event) => {
 
       if (hasOwnField(body, 'startDate')) {
         data.startDate = toDate(body?.startDate, 'startDate') as Date
+        if (!hasOwnField(body, 'formGroup')) {
+          data.formGroup = await findOrCreateWeeklyFormGroup(data.startDate, classId as string)
+        }
       }
 
       if (hasOwnField(body, 'endDate')) {
