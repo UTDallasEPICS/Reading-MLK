@@ -2,7 +2,7 @@
 definePageMeta({ ssr: false })
 
 const settings = reactive({ theme: 'light', dyslexiaFont: false, language: 'en', fontSize: 1 })
-const stats = reactive({ xp: 1250, booksRead: 14, streak: 5, tickets: 3 })
+const stats = reactive({ xp: 1250, booksRead: 14, streak: 5 })
 
 const themeClass = computed(() => {
   const t = settings.theme !== 'light' ? `theme-${settings.theme}` : ''
@@ -90,13 +90,12 @@ function applyItem(item: any) {
              @click="triggerXpClick">
           <span class="text-lg" :class="xpClicked ? 'animate-star-spin' : ''">🪙</span>
           <span class="font-heading font-bold text-amber-600">{{ stats.xp }}</span>
-          <span class="text-gray-300">|</span>
           <span v-for="c in burstCoins" :key="c.id" class="absolute text-sm animate-coin-burst"
                 :style="`--tx:${c.tx}px;--ty:${c.ty}px;left:50%;top:50%;`">🪙</span>
+        </div>
         <NuxtLink to="/reader"
           class="w-14 h-14 bg-white/90 backdrop-blur-md rounded-xl flex items-center justify-center text-2xl border-2 border-white shadow-xl hover:scale-110 active:scale-95 transition-all"
           style="text-decoration:none">🏠</NuxtLink>
-        </div>
       </div>
     </header>
 

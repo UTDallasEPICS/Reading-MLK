@@ -166,22 +166,24 @@ function nextStep() {
   }
 }
 
+const showXpReward = ref(false)
+const submitting = ref(false)
+
 async function submitChallenge() {
-  const formId = activeForm.value.id
-  
-  // Persist completion and XP
-  const submission  = await logFormSubmission(formId)
-  await updateExp(100)
-
-  // grab newly posted submission ID
-  const submissionID = Number(submission?.id)
-
-  setTimeout(() => {
-    activeForm.value      = null
-    currentComponentID.value     = 0
+  if (submitting.value || !activeForm.value) return
+  submitting.value = true
+  try {
+    const submission = await logFormSubmission(activeForm.value.id)
+    if (!submission) return
+    await updateExp(500)
+    activeForm.value = null
+    currentComponentID.value = 0
     feedbackVisible.value = {}
-    answers.value         = {}
-  }, 500)
+    answers.value = {}
+    showXpReward.value = true
+  } finally {
+    submitting.value = false
+  }
 }
 
 function getBadgeClass(type: string) {
@@ -212,7 +214,6 @@ function getBadgeClass(type: string) {
              @click="triggerXpClick">
              <span class="text-lg" :class="xpClicked ? 'animate-star-spin' : ''">🪙</span>
           <span class="font-heading font-bold text-amber-600">{{ stats.xp }}</span>
-          <span class="text-gray-300">|</span>
           <span v-for="c in burstCoins" :key="c.id" class="absolute text-sm animate-coin-burst"
                 :style="`--tx:${c.tx}px;--ty:${c.ty}px;left:50%;top:50%;`">🪙</span>
         </div>
@@ -500,31 +501,17 @@ function getBadgeClass(type: string) {
     </NuxtLink>
 
     <Transition name="fade">
-      <div class="fixed inset-0 z-[200] flex items-center justify-center" style="width:100vw; height:100vh; left:0; top:0;">
-        <div class="absolute inset-0 backdrop-blur-md" style="background:rgba(15,23,42,0.6)" />
-        <div class="p-6 bg-white max-w-md w-[90%] relative z-10 animate-pop text-center space-y-5 overflow-auto"
-             style="border-radius:2.5rem; box-shadow:0 20px 60px rgba(0,0,0,0.3); border-bottom:8px solid var(--brand-gold);">
-
-          <!-- Drag zone --->>
-          <div
-            class="absolute left-1/2 -translate-x-1/2 cursor-grab active:cursor-grabbing hover:scale-110 select-none transition-transform"
-            :style="[{zIndex:10, touchAction:'none'}, ]">
-
-          </div>
-
-          <!-- After drop -->
-          <div class="flex flex-col items-center justify-center text-center space-y-4 py-4">
-            <div class="text-[72px] leading-none">🎉</div>
-            <p class="text-base text-gray-500 font-medium">Great job completing today's form!</p>
-            <div class="inline-flex items-center gap-2 px-5 py-2 rounded-full font-heading font-black text-lg" style="background:rgba(245,158,11,0.2); color:var(--brand-dark)">
-              <span class="text-2xl">🏆</span>
-              <span class="text-lg">You earned 100 XP!</span>
-            </div>
-            <button
-              @click="navigateTo('/reader')"
-              class="btn-fun text-white py-3 px-10 rounded-2xl font-bold text-lg shadow-lg hover:scale-105 mt-1"
-              style="background:var(--brand-indigo)">Back to Home 🏠</button>
-          </div>
+      <div v-if="showXpReward" role="dialog" aria-modal="true" aria-labelledby="xp-reward-title"
+           class="fixed inset-0 z-[200] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md" />
+        <div class="relative w-full max-w-sm rounded-[2.5rem] border-b-8 border-amber-400 bg-white p-8 text-center shadow-2xl animate-shop-pop">
+          <div class="text-7xl mb-4 animate-pop-bounce" aria-hidden="true">🌟</div>
+          <p class="text-sm font-black uppercase tracking-widest text-amber-600">Challenge complete!</p>
+          <h2 id="xp-reward-title" class="font-heading text-3xl font-black text-slate-800 mt-2">You earned 500 XP!</h2>
+          <p class="text-gray-500 mt-3">Great work! Keep your reading streak going.</p>
+          <button @click="showXpReward = false; navigateTo('/reader')"
+                  class="btn-fun text-white py-3 px-8 rounded-2xl font-bold mt-6 shadow-lg hover:scale-105 transition-transform"
+                  style="background:var(--brand-indigo)">Back to Home 🏠</button>
         </div>
       </div>
     </Transition>

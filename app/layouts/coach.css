@@ -184,16 +184,6 @@ html, body { margin: 0; padding: 0; height: 100%; }
 .rh-avatar { width:32px; height:32px; border-radius:9999px; background:#e0e7ff; color:#4338ca; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; box-shadow:0 1px 3px rgba(0,0,0,.1); flex-shrink:0; }
 .rh-badge-pill { display:inline-flex; align-items:center; gap:8px; padding:4px 12px; border-radius:8px; font-weight:500; background:#f3f4f6; color:#374151; }
 
-/* ── Raffle ── */
-.rh-raffle-card { background:white; border-radius:8px; box-shadow:0 25px 50px rgba(0,0,0,.12); padding:48px; max-width:36rem; margin:0 auto; border-bottom:8px solid #818cf8; }
-.rh-spin-btn { background:#4f46e5; color:white; font-size:1.5rem; font-weight:500; padding:20px 64px; border-radius:9999px; border:none; cursor:pointer; box-shadow:0 10px 25px rgba(99,102,241,.3); transition:all .2s; }
-.rh-spin-btn:hover  { background:#4338ca; }
-.rh-spin-btn:active { transform:scale(.95); }
-@keyframes rhSpin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
-.rh-spin-emoji { display:inline-block; font-size:6rem; animation:rhSpin .8s linear infinite; margin-bottom:24px; }
-@keyframes rhBounce { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-16px); } }
-.rh-bounce-emoji { display:inline-block; font-size:6rem; animation:rhBounce 1s ease-in-out infinite; margin-bottom:24px; }
-
 /* ── Announcements ── */
 .rh-subtab-switch { display:flex; background:#eef2ff; padding:6px; border-radius:8px; border:1px solid #e0e7ff; }
 .rh-subtab-btn { padding:10px 24px; border-radius:6px; font-weight:500; border:none; cursor:pointer; transition:all .3s; background:transparent; color:#818cf8; }

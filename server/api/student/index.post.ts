@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
     data: {
       name: body.data.name,
       parentUserId: session.user.id,
-      settings: { dyslexiaFont: false, language: 'en'},
+      settings: { dyslexiaFont: false, language: 'en', fontSize: 1 },
     },
   })
 })

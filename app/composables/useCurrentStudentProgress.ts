@@ -23,7 +23,7 @@ export const useCurrentStudentProgress = () => {
 
   // Computed progress metrics
   const isFormGroupCompleted = computed(() => {
-    return totalFormsInGroup.value > 0
+    return totalFormsInGroup.value > 0 && completedFormIds.value.length >= totalFormsInGroup.value
   })
 
   // Fetch student's progress (form submissions)

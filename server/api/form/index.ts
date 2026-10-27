@@ -266,7 +266,6 @@ const mapForm = (
 }
 
 const formGroupInclude = {
-  RaffleWinner: true,
   Forms: {
     orderBy: [{ order: 'asc' as const }, { id: 'asc' as const }],
     include: {
@@ -313,8 +312,6 @@ export default defineEventHandler(async (event) => {
         id: group.id,
         startDate: formatIsoDate(group.startDate),
         endDate: formatIsoDate(group.endDate),
-        raffleWinner: group.raffleWinner,
-        raffleWinnerStudent: group.RaffleWinner,
         forms: group.Forms.map((form) => mapForm(form, group.startDate)),
       }))
     }
@@ -338,8 +335,6 @@ export default defineEventHandler(async (event) => {
         id: group.id,
         startDate: formatIsoDate(group.startDate),
         endDate: formatIsoDate(group.endDate),
-        raffleWinner: group.raffleWinner,
-        raffleWinnerStudent: group.RaffleWinner,
         forms: group.Forms.map((form) => mapForm(form, group.startDate)),
       }
     }
@@ -464,27 +459,10 @@ export default defineEventHandler(async (event) => {
     if (action === 'createFormGroup') {
       const startDate = toDate(body?.startDate, 'startDate')
       const endDate = hasOwnField(body, 'endDate') ? toDate(body?.endDate, 'endDate', false) : null
-      const raffleWinner = hasOwnField(body, 'raffleWinner') ? toInt(body?.raffleWinner, 'raffleWinner', false) : null
-
-      if (raffleWinner !== null) {
-        const student = await prisma.student.findFirst({
-          where: {
-            id: raffleWinner,
-            Classes: { some: { id: classId as string } },
-          },
-          select: { id: true },
-        })
-
-        if (!student) {
-          throw createError({ statusCode: 404, statusMessage: 'Raffle winner student not found' })
-        }
-      }
-
       const created = await prisma.formGroup.create({
         data: {
           startDate: startDate as Date,
           endDate,
-          raffleWinner,
           class: classId as string,
         },
         include: formGroupInclude,
@@ -499,8 +477,6 @@ export default defineEventHandler(async (event) => {
           id: created.id,
           startDate: formatIsoDate(created.startDate),
           endDate: formatIsoDate(created.endDate),
-          raffleWinner: created.raffleWinner,
-          raffleWinnerStudent: created.RaffleWinner,
           forms: created.Forms.map((form) => mapForm(form, created.startDate)),
         },
       }
@@ -613,7 +589,6 @@ export default defineEventHandler(async (event) => {
       const data: {
         startDate?: Date
         endDate?: Date | null
-        raffleWinner?: number | null
       } = {}
 
       if (hasOwnField(body, 'startDate')) {
@@ -622,26 +597,6 @@ export default defineEventHandler(async (event) => {
 
       if (hasOwnField(body, 'endDate')) {
         data.endDate = toDate(body?.endDate, 'endDate', false)
-      }
-
-      if (hasOwnField(body, 'raffleWinner')) {
-        const raffleWinner = toInt(body?.raffleWinner, 'raffleWinner', false)
-
-        if (raffleWinner !== null) {
-          const student = await prisma.student.findFirst({
-            where: {
-              id: raffleWinner,
-              Classes: { some: { id: classId as string } },
-            },
-            select: { id: true },
-          })
-
-          if (!student) {
-            throw createError({ statusCode: 404, statusMessage: 'Raffle winner student not found' })
-          }
-        }
-
-        data.raffleWinner = raffleWinner
       }
 
       const updated = await prisma.formGroup.update({
@@ -657,8 +612,6 @@ export default defineEventHandler(async (event) => {
           id: updated.id,
           startDate: formatIsoDate(updated.startDate),
           endDate: formatIsoDate(updated.endDate),
-          raffleWinner: updated.raffleWinner,
-          raffleWinnerStudent: updated.RaffleWinner,
           forms: updated.Forms.map((form) => mapForm(form, updated.startDate)),
         },
       }

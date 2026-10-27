@@ -43,7 +43,6 @@ function navigateWithinClass(path: string) {
           <button @click="navigateWithinClass('/coach')"               class="rh-nav-btn" :class="{ 'rh-nav-active': route.path === '/coach' }">Dashboard</button>
           <button @click="navigateWithinClass('/coach/builder')"       class="rh-nav-btn" :class="{ 'rh-nav-active': route.path === '/coach/builder' }">Form Builder</button>
           <button @click="navigateWithinClass('/coach/progress')"      class="rh-nav-btn" :class="{ 'rh-nav-active': route.path === '/coach/progress' }">Class Progress</button>
-          <button @click="navigateWithinClass('/coach/raffle')"        class="rh-nav-btn" :class="{ 'rh-nav-active': route.path === '/coach/raffle' }">Raffle System</button>
           <button @click="navigateWithinClass('/coach/announcements')" class="rh-nav-btn" :class="{ 'rh-nav-active': route.path === '/coach/announcements' }">Announcements</button>
         </nav>
       </div>

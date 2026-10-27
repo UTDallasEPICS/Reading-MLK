@@ -8,6 +8,7 @@ definePageMeta({ ssr: false })
 // Retrieve the active student.
 const { student, settings: settings, restoreStudent } = useCurrentStudent()
 const { totalFormsInGroup: totalForms, loadActiveFormGroup} = useCurrentFormGroup()
+const { completedFormIds, loadProgress } = useCurrentStudentProgress()
 await loadActiveFormGroup()
 const checkingStudent = ref(true)
 
@@ -21,6 +22,7 @@ onMounted(async () => {
     return
   }
 
+  await loadProgress()
   checkingStudent.value = false
 })
 
@@ -78,7 +80,7 @@ const mostRecent = computed(() => {
 const showAllAnnouncements = ref(false)
 
 const completionMessage = computed(() => {
-  return ['', 'Nice!', 'Good Job!', 'Great Job!', 'Wow!', 'Awesome!', 'Amazing!'][0] ?? 'Spectacular!'
+  return ['', 'Nice!', 'Good Job!', 'Great Job!', 'Wow!', 'Awesome!', 'Amazing!'][completedFormIds.value.length] ?? 'Spectacular!'
 })
 </script>
 
@@ -179,7 +181,7 @@ const completionMessage = computed(() => {
               <p class="text-sm font-bold uppercase tracking-widest opacity-80 mb-1">Today's Challenge</p>
               <h3 class="font-heading text-3xl font-black">Start Your Daily Form 📝</h3>
               <p class="text-base opacity-80 mt-1 font-medium">
-                {{ totalForms }} completed this week.
+                {{ completedFormIds.length }} out of {{ totalForms }} completed this week.
                 {{ completionMessage }}
               </p>
             </div>
