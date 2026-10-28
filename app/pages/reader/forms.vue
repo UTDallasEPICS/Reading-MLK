@@ -3,7 +3,7 @@ definePageMeta({ ssr: false })
 
 const { student, settings, updateExp, restoreStudent } = useCurrentStudent()
 const { FormGroup, loadActiveFormGroup } = useCurrentFormGroup()
-const { tickets, completedFormIds, logFormSubmission, logSubmissionResponse, loadProgress } = useCurrentStudentProgress()
+const { completedFormIds, logFormSubmission, logSubmissionResponse, loadProgress } = useCurrentStudentProgress()
 
 const dataLoaded = ref(false)
 
@@ -22,7 +22,6 @@ onMounted(async () => {
 
 const stats = computed(() => ({
   xp: student.value ? student.value.exp : 0,
-  tickets: tickets.value? tickets.value : 0,
 }))
 
 const themeClass = computed(() => {
@@ -85,9 +84,8 @@ const currentComponent = computed(() => currentFormComponents.value[currentCompo
 
 // Click badge animations
 const xpClicked     = ref(false)
-const ticketClicked = ref(false)
 const burstCoins    = ref<{id:number;tx:number;ty:number}[]>([])
-const flyTickets    = ref<number[]>([])
+
 
 function triggerXpClick() {
   xpClicked.value = true
@@ -95,11 +93,6 @@ function triggerXpClick() {
     { id: Date.now(), tx: -32, ty: -40 }, { id: Date.now()+1, tx: 0, ty: -48 }, { id: Date.now()+2, tx: 32, ty: -40 },
   ]
   setTimeout(() => { xpClicked.value = false; burstCoins.value = [] }, 800)
-}
-function triggerTicketClick() {
-  ticketClicked.value = true
-  flyTickets.value = [Date.now()]
-  setTimeout(() => { ticketClicked.value = false; flyTickets.value = [] }, 1000)
 }
 
 // Flow state
@@ -144,12 +137,6 @@ const feedbackReferenceTextEs = computed(() => {
   return options?.referenceEs || ''
 })
 
-// Raffle reward
-const showRaffleReward   = ref(false)
-const ticketDropped      = ref(false)
-const ticketOverBox      = ref(false)
-const ticketStyle        = ref<Record<string,string>>({})
-let touchStartY = 0
 
 function startChallenge(form: any) {
   activeForm.value      = form
@@ -179,43 +166,25 @@ function nextStep() {
   }
 }
 
+const showXpReward = ref(false)
+const submitting = ref(false)
+
 async function submitChallenge() {
-  const formId = activeForm.value.id
-  
-  // Persist completion and XP
-  const submission  = await logFormSubmission(formId)
-  await updateExp(100)
-
-  // grab newly posted submission ID
-  const submissionID = Number(submission?.id)
-
-  showRaffleReward.value = true
-  ticketDropped.value    = false
-  ticketOverBox.value    = false
-  ticketStyle.value      = {}
-  setTimeout(() => {
-    activeForm.value      = null
-    currentComponentID.value     = 0
+  if (submitting.value || !activeForm.value) return
+  submitting.value = true
+  try {
+    const submission = await logFormSubmission(activeForm.value.id)
+    if (!submission) return
+    await updateExp(500)
+    activeForm.value = null
+    currentComponentID.value = 0
     feedbackVisible.value = {}
-    answers.value         = {}
-  }, 500)
-}
-
-function onTicketDragStart(e: DragEvent) { e.dataTransfer?.setData('text/plain', 'ticket') }
-function onTicketDrop() { ticketOverBox.value = false; ticketDropped.value = true }
-function onTicketTouchStart(e: TouchEvent) { touchStartY = e.touches[0].clientY }
-function onTicketTouchMove(e: TouchEvent) {
-  e.preventDefault()
-  const t  = e.touches[0]
-  const dy = t.clientY - touchStartY
-  ticketStyle.value = { transform: `translate(-50%, ${dy}px)` }
-  const box = document.getElementById('raffle-box')
-  if (box) {
-    const r = box.getBoundingClientRect()
-    ticketOverBox.value = t.clientX >= r.left && t.clientX <= r.right && t.clientY >= r.top && t.clientY <= r.bottom
+    answers.value = {}
+    showXpReward.value = true
+  } finally {
+    submitting.value = false
   }
 }
-function onTicketTouchEnd() { ticketOverBox.value ? onTicketDrop() : (ticketStyle.value = {}) }
 
 function getBadgeClass(type: string) {
   if (type === 'text')    return 'bg-blue-100 text-blue-700 border-2 border-blue-200'
@@ -226,7 +195,7 @@ function getBadgeClass(type: string) {
 </script>
 
 <template>
-  <div :class="themeClass" :style="`font-size:${settings.fontSize*16}px`" class="pb-32 px-4 pt-4 min-h-screen">
+  <div :class="themeClass" class="pb-32 px-4 pt-4 min-h-screen">
 
     <!-- ── TOP BAR ── -->
     <header class="max-w-4xl mx-auto flex justify-between items-center mb-8 px-2 relative z-[200]">
@@ -238,27 +207,15 @@ function getBadgeClass(type: string) {
         </div>
       </div>
       <div class="flex items-center gap-3">
-        <!-- XP + Tickets -->
+        <!-- XP -->
         <div class="relative bg-white/90 backdrop-blur-md px-4 py-2 rounded-xl shadow-xl border-2 flex items-center gap-3 cursor-pointer select-none"
              style="border-color:rgba(245,158,11,0.3)"
-             :class="(xpClicked || ticketClicked) ? 'scale-90 transition-transform duration-100' : 'transition-transform duration-100'"
+             :class="(xpClicked) ? 'scale-90 transition-transform duration-100' : 'transition-transform duration-100'"
              @click="triggerXpClick">
              <span class="text-lg" :class="xpClicked ? 'animate-star-spin' : ''">🪙</span>
           <span class="font-heading font-bold text-amber-600">{{ stats.xp }}</span>
-          <span class="text-gray-300">|</span>
-          <span class="text-lg" :class="ticketClicked ? 'animate-ticket-wobble' : ''" @click.stop="triggerTicketClick">🎟️</span>
-          <span class="font-heading font-bold" style="color:var(--brand-mint)">{{ stats.tickets }}</span>
           <span v-for="c in burstCoins" :key="c.id" class="absolute text-sm animate-coin-burst"
                 :style="`--tx:${c.tx}px;--ty:${c.ty}px;left:50%;top:50%;`">🪙</span>
-          <Transition name="box-pop">
-            <span 
-              v-if="ticketClicked"
-              class="absolute -bottom-15 left-1/2 -translate-x-1/2 text-2xl animate-box-shake pointer-events-none">
-              📦
-            </span>
-          </Transition>
-          <span v-for="id in flyTickets" :key="id" class="absolute text-lg animate-ticket-fly pointer-events-none"
-                style="left:50%;top:50%;transform:translateX(-50%) translateY(-50%)">🎟️</span>
         </div>
         <!-- Settings / Home -->
         <NuxtLink to="/reader/settings"
@@ -543,62 +500,22 @@ function getBadgeClass(type: string) {
       <span class="text-sm font-bold uppercase tracking-wide">Home</span>
     </NuxtLink>
 
-    <!-- ── RAFFLE TICKET DRAG-AND-DROP OVERLAY ── -->
     <Transition name="fade">
-      <div v-if="showRaffleReward" class="fixed inset-0 z-[200] flex items-center justify-center" style="width:100vw; height:100vh; left:0; top:0;">
-        <div class="absolute inset-0 backdrop-blur-md" style="background:rgba(15,23,42,0.6)" />
-        <div class="p-6 bg-white max-w-md w-[90%] relative z-10 animate-pop text-center space-y-5 overflow-auto"
-             style="border-radius:2.5rem; box-shadow:0 20px 60px rgba(0,0,0,0.3); border-bottom:8px solid var(--brand-gold);">
-
-          <!-- Drag zone -->
-          <div v-if="!ticketDropped" class="space-y-6">
-            <h2 class="font-heading text-2xl font-black" style="color:var(--brand-dark)">You earned a RAFFLE TICKET! 🎉</h2>
-            <p class="text-gray-500 font-medium">Drag your ticket into the raffle box!</p>
-
-            <div class="relative mx-auto" style="height:200px">
-              <div
-                draggable="true"
-                @dragstart="onTicketDragStart"
-                @touchstart="onTicketTouchStart"
-                @touchmove="onTicketTouchMove"
-                @touchend="onTicketTouchEnd"
-                class="absolute left-1/2 -translate-x-1/2 cursor-grab active:cursor-grabbing hover:scale-110 select-none transition-transform"
-                :style="[{zIndex:10, touchAction:'none'}, ticketStyle]"
-              >
-                <div class="text-[80px] leading-none drop-shadow-lg animate-bounce">🎟️</div>
-                <p class="text-xs font-bold text-gray-400 mt-1">Drag me! ↑</p>
-              </div>
-            </div>
-
-            <div
-              id="raffle-box"
-              @dragover.prevent="ticketOverBox = true"
-              @dragleave="ticketOverBox = false"
-              @drop.prevent="onTicketDrop"
-              class="mx-auto w-40 h-32 rounded-2xl border-4 border-dashed flex flex-col items-center justify-center transition-all duration-300"
-              :style="ticketOverBox ? 'border-color:var(--brand-gold); background:rgba(245,158,11,0.2); transform:scale(1.1)' : 'border-color:#d1d5db; background:#f9fafb'"
-            >
-              <span class="text-4xl">📦</span>
-              <span class="text-xs font-bold text-gray-400 uppercase mt-1">Raffle Box</span>
-            </div>
-          </div>
-
-          <!-- After drop -->
-          <div v-else class="flex flex-col items-center justify-center text-center space-y-4 py-4">
-            <div class="text-[72px] leading-none">🎉</div>
-            <h2 class="font-heading text-2xl font-black" style="color:var(--brand-dark)">Ticket Entered!</h2>
-            <p class="text-base text-gray-500 font-medium">Great job completing today's form!</p>
-            <div class="inline-flex items-center gap-2 px-5 py-2 rounded-full font-heading font-black text-lg" style="background:rgba(245,158,11,0.2); color:var(--brand-dark)">
-              🎟️ You now have {{ stats.tickets }} tickets!
-            </div>
-            <button
-              @click="showRaffleReward = false; ticketDropped = false"
-              class="btn-fun text-white py-3 px-10 rounded-2xl font-bold text-lg shadow-lg hover:scale-105 mt-1"
-              style="background:var(--brand-indigo)">Back to Home 🏠</button>
-          </div>
+      <div v-if="showXpReward" role="dialog" aria-modal="true" aria-labelledby="xp-reward-title"
+           class="fixed inset-0 z-[200] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md" />
+        <div class="relative w-full max-w-sm rounded-[2.5rem] border-b-8 border-amber-400 bg-white p-8 text-center shadow-2xl animate-shop-pop">
+          <div class="text-7xl mb-4 animate-pop-bounce" aria-hidden="true">🌟</div>
+          <p class="text-sm font-black uppercase tracking-widest text-amber-600">Challenge complete!</p>
+          <h2 id="xp-reward-title" class="font-heading text-3xl font-black text-slate-800 mt-2">You earned 500 XP!</h2>
+          <p class="text-gray-500 mt-3">Great work! Keep your reading streak going.</p>
+          <button @click="showXpReward = false; navigateTo('/reader')"
+                  class="btn-fun text-white py-3 px-8 rounded-2xl font-bold mt-6 shadow-lg hover:scale-105 transition-transform"
+                  style="background:var(--brand-indigo)">Back to Home 🏠</button>
         </div>
       </div>
     </Transition>
+
 
   </div>
 </template>

@@ -24,7 +24,7 @@
 
           <h3 class="text-3xl font-black text-[#11182f] mb-3">Reading Coach</h3>
           <p class="text-lg text-[#7f8798] font-semibold leading-relaxed">
-            Manage students, curriculum & raffles.
+            Manage students and curriculum.
           </p>
         </button>
 
