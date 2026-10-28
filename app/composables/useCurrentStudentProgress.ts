@@ -45,7 +45,7 @@ export const useCurrentStudentProgress = () => {
   }
 
   // Log a new form submission to track progress
-  const logFormSubmission = async (formId: number) => {
+  const logFormSubmission = async (formId: number, classId: string | null) => {
     if (!student.value?.id) {
       console.error('Cannot log form submission: No student is currently active.')
       return null
@@ -56,7 +56,8 @@ export const useCurrentStudentProgress = () => {
         method: 'POST',
         body: {
           student: student.value.id,
-          form: formId
+          form: formId,
+          ...(classId ? { classId } : {}),
         }
       })
 

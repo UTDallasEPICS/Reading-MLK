@@ -9,7 +9,6 @@ definePageMeta({ ssr: false })
 const { student, settings: settings, restoreStudent } = useCurrentStudent()
 const { totalFormsInGroup: totalForms, loadActiveFormGroup} = useCurrentFormGroup()
 const { completedFormIds, loadProgress } = useCurrentStudentProgress()
-await loadActiveFormGroup()
 const checkingStudent = ref(true)
 
 onMounted(async () => {
@@ -22,6 +21,7 @@ onMounted(async () => {
     return
   }
 
+  await loadActiveFormGroup()
   await loadProgress()
   checkingStudent.value = false
 })

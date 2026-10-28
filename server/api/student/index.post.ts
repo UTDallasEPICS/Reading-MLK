@@ -1,6 +1,7 @@
 import { prisma } from '../../utils/prisma'
 import { studentCreateSchema } from '../../utils/schemas'
 import { requireSession } from '../../utils/require-session'
+import { ensureMlkClassMembership } from '../../utils/ensure-mlk-class-membership'
 
 export default defineEventHandler(async (event) => {
   const session = await requireSession(event)
@@ -13,11 +14,14 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  const defaultClass = await ensureMlkClassMembership(session.user.id)
+
   return await prisma.student.create({
     data: {
       name: body.data.name,
       parentUserId: session.user.id,
-      settings: { dyslexiaFont: false, language: 'en'},
+      settings: { dyslexiaFont: false, language: 'en' },
+      Classes: { connect: { id: defaultClass.id } },
     },
   })
 })

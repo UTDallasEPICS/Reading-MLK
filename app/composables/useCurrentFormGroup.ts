@@ -1,13 +1,18 @@
 import type { FormGroup, Form, FormComponent } from '~~/prisma/generated/client'
 
 export type CurrentFormGroupState = {
+  classes: { id: string; name: string; isEnrolled: boolean }[]
+  selectedClassId: string | null
   activeFormGroup: FormGroup | null
   forms: Form[]
   formComponents: Record<number, FormComponent[]>
 }
 
 export const useCurrentFormGroup = () => {
+  const { student } = useCurrentStudent()
   const FormGroup = useState<CurrentFormGroupState>('currentFormGroupState', () => ({
+    classes: [],
+    selectedClassId: null,
     activeFormGroup: null,
     forms: [],
     formComponents: {}
@@ -25,42 +30,36 @@ export const useCurrentFormGroup = () => {
     }
   }
 
-  const loadActiveFormGroup = async () => {
+  const loadActiveFormGroup = async (classId: string | null = null) => {
+    if (!student.value?.id) {
+      FormGroup.value.classes = []
+      FormGroup.value.selectedClassId = null
+      FormGroup.value.activeFormGroup = null
+      FormGroup.value.forms = []
+      FormGroup.value.formComponents = {}
+      return
+    }
+
     try {
-      const activeFormGroups = await $fetch<FormGroup[]>('/api/formGroup?active=true')
-      const activeFg = activeFormGroups[0]
+      const data = await $fetch<{
+        classes: { id: string; name: string; isEnrolled: boolean }[]
+        selectedClassId: string | null
+        activeFormGroup: FormGroup | null
+        forms: Form[]
+        formComponents: Record<number, FormComponent[]>
+      }>(`/api/student/${student.value.id}/forms`, {
+        query: classId ? { classId } : undefined,
+      })
 
-      if (activeFg) {
-        FormGroup.value.activeFormGroup = activeFg
-
-        try {
-          const formResponses = await Promise.all(
-            activeFormGroups.map((formGroup) =>
-              $fetch<Form[]>('/api/form', {
-                query: { action: 'getOnlyActiveFormsinGroup', formGroup: formGroup.id }
-              })
-            )
-          )
-
-          FormGroup.value.forms = formResponses.flat()
-
-          // Load form components for each form in parallel
-          FormGroup.value.formComponents = {}
-          await Promise.all(
-            FormGroup.value.forms.map(form => loadFormComponents(form.id))
-          )
-        } catch (error) {
-          console.error('Failed to load forms for active form group:', error)
-          FormGroup.value.forms = []
-          FormGroup.value.formComponents = {}
-        }
-      } else {
-        FormGroup.value.activeFormGroup = null
-        FormGroup.value.forms = []
-        FormGroup.value.formComponents = {}
-      }
+      FormGroup.value.classes = data.classes
+      FormGroup.value.selectedClassId = data.selectedClassId
+      FormGroup.value.activeFormGroup = data.activeFormGroup
+      FormGroup.value.forms = data.forms
+      FormGroup.value.formComponents = data.formComponents
     } catch (error) {
       console.error('Failed to load active form group:', error)
+      FormGroup.value.classes = []
+      FormGroup.value.selectedClassId = null
       FormGroup.value.activeFormGroup = null
       FormGroup.value.forms = []
       FormGroup.value.formComponents = {}

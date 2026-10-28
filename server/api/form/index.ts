@@ -299,6 +299,10 @@ export default defineEventHandler(async (event) => {
   }
 
   if (method === 'GET') {
+    if (!classId) {
+      throw createError({ statusCode: 403, statusMessage: 'Class access is required' })
+    }
+
     const selectedAction = action ?? 'listFormGroups'
 
     if (selectedAction === 'listFormGroups') {
