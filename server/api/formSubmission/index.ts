@@ -84,9 +84,11 @@ export default defineEventHandler(async (event) => {
       where: {
         id: body.data.form,
         published: true,
-        ...(body.data.classId && body.data.classId !== 'all'
-          ? { FormGroup: { class: body.data.classId } }
-          : {}),
+        FormGroup: {
+          class: body.data.classId && body.data.classId !== 'all'
+            ? body.data.classId
+            : { in: student.Classes.map((classroom) => classroom.id) },
+        },
       },
       select: { id: true },
     })

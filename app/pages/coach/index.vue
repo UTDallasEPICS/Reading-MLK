@@ -6,14 +6,8 @@ const {
   students,
 } = useCoach()
 const { classId } = useSelectedClass()
-const route = useRoute()
-const router = useRouter()
-const selectedClassToken = useCookie<string | null>('selected-class-token', {
-  sameSite: 'lax',
-})
 const copiedCode = ref(false)
 const codeError = ref('')
-const regeneratingCode = ref(false)
 
 const hasFiveCharacterCode = computed(() => /^[A-Z0-9]{5}$/.test(classId.value || ''))
 
@@ -26,27 +20,6 @@ async function copyClassCode() {
     setTimeout(() => { copiedCode.value = false }, 2000)
   } catch {
     codeError.value = 'Copy failed. Select the code to copy it.'
-  }
-}
-
-async function regenerateClassCode() {
-  if (!classId.value || regeneratingCode.value) return
-
-  regeneratingCode.value = true
-  codeError.value = ''
-
-  try {
-    const classroom = await $fetch<{ joinToken: string }>('/api/admin/classes/regenerate-code', {
-      method: 'POST',
-      body: { classToken: classId.value },
-    })
-    selectedClassToken.value = classroom.joinToken
-    await router.replace({ path: route.path, query: { ...route.query, class: classroom.joinToken } })
-    await refreshNuxtData()
-  } catch (error: any) {
-    codeError.value = error.data?.statusMessage || 'Could not generate a class code'
-  } finally {
-    regeneratingCode.value = false
   }
 }
 
@@ -97,9 +70,6 @@ watch(classId, refreshAnnouncements, { immediate: true })
         </p>
         <button v-if="hasFiveCharacterCode" type="button" class="ghost-btn" @click="copyClassCode">
           {{ copiedCode ? 'Copied' : 'Copy code' }}
-        </button>
-        <button v-else type="button" class="ghost-btn disabled:opacity-50" :disabled="regeneratingCode" @click="regenerateClassCode">
-          {{ regeneratingCode ? 'Generating...' : 'Generate 5-character code' }}
         </button>
       </div>
       <p v-if="codeError" class="mt-2 text-sm text-red-700">{{ codeError }}</p>

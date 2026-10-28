@@ -98,7 +98,7 @@ watch(
           }
 
           const firstClass =
-            classes.value.find((classroom) => classroom.name === 'MLK Class') ?? classes.value[0]
+            classes.value.find((classroom) => classroom.joinToken === 'FOMLK') ?? classes.value[0]
 
           if (firstClass) {
             selectedClassToken.value = firstClass.joinToken

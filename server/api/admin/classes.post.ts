@@ -1,6 +1,7 @@
 import { prisma } from '../../utils/prisma'
 import { requireCoach } from '../../utils/require-session'
 import { classCreateSchema } from '../../utils/schemas'
+import { MLK_CLASS_CODE } from '../../utils/class-codes'
 
 const coachTagByClassType = {
   Teacher: 'teacher',
@@ -18,7 +19,7 @@ async function createClassCode() {
     code = Array.from({ length: 5 }, () =>
       classCodeCharacters[Math.floor(Math.random() * classCodeCharacters.length)]
     ).join('')
-  } while (await prisma.class.findUnique({ where: { joinToken: code } }))
+  } while (code === MLK_CLASS_CODE || await prisma.class.findUnique({ where: { joinToken: code } }))
 
   return code
 }

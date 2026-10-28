@@ -1,35 +1,11 @@
 import { prisma } from './prisma'
+import { MLK_CLASS_CODE } from './class-codes'
 
 export async function ensureMlkClassExists() {
-  const classes = await prisma.class.findMany({
-    where: { name: 'MLK Class' },
-    select: { id: true },
-    take: 2,
-  })
-
-  if (classes.length > 1) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: 'Multiple classes named MLK Class are configured',
-    })
-  }
-
-  if (classes.length === 1) {
-    return classes[0]
-  }
-
-  return await prisma.class.create({
-    data: { name: 'MLK Class' },
-    select: { id: true },
-  })
-}
-
-export async function findMlkClassForCoach(userId: string) {
-  return await prisma.class.findFirst({
-    where: {
-      name: 'MLK Class',
-      Coach: { some: { userId } },
-    },
+  return await prisma.class.upsert({
+    where: { joinToken: MLK_CLASS_CODE },
+    update: {},
+    create: { name: 'MLK', joinToken: MLK_CLASS_CODE },
     select: { id: true },
   })
 }

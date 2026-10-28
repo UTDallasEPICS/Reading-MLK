@@ -34,13 +34,9 @@ export default defineEventHandler(async (event) => {
 
   const groups = await prisma.formGroup.findMany({
     where: {
-      ...(classId === 'all'
-        ? {}
-        : {
-            class: classId
-              ? classId
-              : { in: student.Classes.map((classroom) => classroom.id) },
-          }),
+      class: classId && classId !== 'all'
+        ? classId
+        : { in: student.Classes.map((classroom) => classroom.id) },
       startDate: { lte: now },
       OR: [{ endDate: null }, { endDate: { gte: now } }],
     },
