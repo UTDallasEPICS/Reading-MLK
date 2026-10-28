@@ -6,22 +6,8 @@ const {
   students,
 } = useCoach()
 const { classId } = useSelectedClass()
-const copiedCode = ref(false)
-const codeError = ref('')
 
 const hasFiveCharacterCode = computed(() => /^[A-Z0-9]{5}$/.test(classId.value || ''))
-
-async function copyClassCode() {
-  if (!classId.value) return
-
-  try {
-    await navigator.clipboard.writeText(classId.value)
-    copiedCode.value = true
-    setTimeout(() => { copiedCode.value = false }, 2000)
-  } catch {
-    codeError.value = 'Copy failed. Select the code to copy it.'
-  }
-}
 
 const activeForms = computed(
   () => publishedForms.value.filter((f: any) => f.status === 'Active').length
@@ -68,11 +54,7 @@ watch(classId, refreshAnnouncements, { immediate: true })
         <p class="break-all font-mono text-2xl font-bold text-slate-900">
           {{ hasFiveCharacterCode ? classId : 'Code update required' }}
         </p>
-        <button v-if="hasFiveCharacterCode" type="button" class="ghost-btn" @click="copyClassCode">
-          {{ copiedCode ? 'Copied' : 'Copy code' }}
-        </button>
       </div>
-      <p v-if="codeError" class="mt-2 text-sm text-red-700">{{ codeError }}</p>
     </article>
 
     <div class="stats-grid">
