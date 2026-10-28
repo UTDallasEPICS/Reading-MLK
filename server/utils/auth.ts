@@ -23,6 +23,7 @@ export const auth = betterAuth({
 
   plugins: [
     magicLink({
+      disableSignUp: true,
       async sendMagicLink({ email, url }) {
         try {
           await mailer.sendMail({
