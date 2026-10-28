@@ -48,6 +48,9 @@ const loginRole = computed(() => {
 const isNewUser = ref(false)
 const checkingEmail = ref(false)
 const showTos = ref(false)
+const waiverDate = new Date().toLocaleDateString(undefined, {
+  year: 'numeric', month: 'long', day: 'numeric',
+})
 
 const schema = computed(() => {
   if (isNewUser.value) {
@@ -258,68 +261,69 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
               </div>
             </UFormField>
             
-            <Transition name="fade">
+            <Teleport to="body">
+              <Transition name="fade">
                 <div v-if="showTos"
-                    class="fixed inset-0 z-[200] flex items-center justify-center"
-                    @click.self="showTos = false">
+                  class="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm"
+                  @click.self="showTos = false"
+                  @keydown.esc="showTos = false"
+                >
+                  <div role="dialog" aria-modal="true" aria-labelledby="waiver-title"
+                    class="flex max-h-[85dvh] w-full max-w-2xl flex-col overflow-hidden rounded-3xl bg-white font-sans shadow-2xl"
+                  >
+                    <header class="flex shrink-0 items-start justify-between gap-4 border-b border-slate-100 px-6 py-5 sm:px-8">
+                      <div>
+                        <p class="mb-1 text-xs font-semibold uppercase tracking-widest text-indigo-600">Friends of MLK</p>
+                        <h2 id="waiver-title" class="text-xl font-bold leading-tight text-slate-900 sm:text-2xl">
+                          Release and Waiver of Liability
+                        </h2>
+                      </div>
+                      <button type="button" aria-label="Close waiver" @click="showTos = false"
+                        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xl text-slate-600 transition hover:bg-slate-200"
+                      >×</button>
+                    </header>
 
-                  <div class="absolute inset-0 backdrop-blur-md pointer-events-none"
-                      style="background:rgba(15,23,42,0.6)" />
-
-                  <div class="p-6 bg-white max-w-md w-[90%] max-h-[80vh] relative z-10 animate-pop flex flex-col gap-4"
-                      style="border-radius:2.5rem; box-shadow:0 20px 60px rgba(0,0,0,0.3); border-bottom:8px solid var(--brand-gold);">
-
-                    <h2 class="font-heading text-2xl text-black text-center font-bold text-lg">
-                      Release and Waiver of Liability
-                    </h2>
-
-                    <div class="flex-1 min-h-0 overflow-y-auto pr-2 text-left text-sm text-gray-500 space-y-3">
-                      <p>
-                        This Release and Waiver of Liability (the “Release”) executed on ___/___/___ (date) by
-                        __________________________ (“Participant”) releases Friends of MLK (“FOMLK”) and each of its directors,
-                        officers, employees, and agents from any and all liability, claims, demands, costs and damages of any kind.
-                        Participant understands that the scope of Participant’s relationship with FOMLK is limited to a Participant position
-                        and that no compensation is expected in return for services provided by Participant; that FOMLK will not provide
-                        any benefits traditionally associated with employment to Participant; and that Participant is responsible for his/her
-                        own insurance coverage in the event of personal injury or illness as a result of Participant’s services to FOMLK.
-                        1. Waiver and Release: I, the Participant, release and forever discharge and hold harmless FOMLK and its
-                        successors and assigns from any and all liability, claims, and demands of whatever kind of nature, either in law or in
-                        equity, which arise or may hereafter arise from the services I provide to FOMLK. I understand and acknowledge
-                        that this Release discharges FOMLK from any liability or claim that I may have against FOMLK with respect to
-                        bodily injury, personal injury, illness, death, or property damage that may result from the services I provide to
-                        FOMLK or occurring while I am providing Participant services.
-                        2. Insurance: Further I understand that FOMLK does not assume any responsibility for or obligation to
-                        provide me with financial or other assistance, including but not limited to medical, health, or disability benefits or
-                        insurance. I expressly waive any such claim for compensation or liability on the part of FOMLK beyond what may
-                        be offered freely by FOMLK in the event of injury or medical expenses incurred by me.
-                        3. Medical Treatment: I hereby Release and forever discharge FOMLK from any claim whatsoever which
-                        arises or may hereafter arise on account of any first-aid treatment or other medical services rendered in connection
-                        with an emergency during my tenure as a Participant with FOMLK.
-                        4. Assumption of Risk: I understand that the services I provide to FOMLK should not but may include
-                        activities that may be hazardous to me. As a Participant, I hereby expressly assume risk of injury or harm from these
-                        activities and Release FOMLK from all liability.
-                        5. Photographic Release: I grant and convey to FOMLK all right, title, and interests in any and all products,
-                        photographs, images, video, or audio recordings of me or my likeness or voice made by FOMLK in connection with
-                        my providing Participant services to FOMLK.
-                        6. Other: As a Participant, I expressly agree that this Release is intended to be as broad and inclusive as
-                        permitted. I agree that in the event that any clause or provision of this Release is deemed invalid, the enforceability
-                        of the remaining provisions of this Release shall not be affected. I agree to indemnify, defend, and hold harmless
-                        FOMLK, and its directors, officers, employees, agents, subsidiaries and affiliates from and against any and all
-                        losses, injuries, claims, demands, liabilities, obligations, suits, penalties, forfeitures, costs or expenses of every kind
-                        including but not limited to attorney’s fees, arising out of participation in FOMLK activities.
-                        By clicking the checkbox, I express my understanding and intent to enter into this Release and Waiver of Liability willingly
-                        and voluntarily.
-                      </p>
+                    <div class="min-h-0 overflow-y-auto px-6 py-6 text-left text-sm leading-7 text-slate-600 sm:px-8">
+                      <div class="space-y-6">
+                        <p>This Release and Waiver of Liability (the “Release”) executed on <strong class="font-semibold text-slate-900">{{ waiverDate }}</strong> by <strong class="font-semibold text-slate-900">{{ state.name.trim() || 'the person creating this account' }}</strong> (“Participant”) releases Friends of MLK (“FOMLK”) and each of its directors, officers, employees, and agents from any and all liability, claims, demands, costs and damages of any kind.</p>
+                        <p>Participant understands that the scope of Participant’s relationship with FOMLK is limited to a Participant position and that no compensation is expected in return for services provided by Participant; that FOMLK will not provide any benefits traditionally associated with employment to Participant; and that Participant is responsible for his/her own insurance coverage in the event of personal injury or illness as a result of Participant’s services to FOMLK.</p>
+                        <section>
+                          <h3 class="mb-2 font-semibold text-slate-900">1. Waiver and Release</h3>
+                          <p>I, the Participant, release and forever discharge and hold harmless FOMLK and its successors and assigns from any and all liability, claims, and demands of whatever kind of nature, either in law or in equity, which arise or may hereafter arise from the services I provide to FOMLK. I understand and acknowledge that this Release discharges FOMLK from any liability or claim that I may have against FOMLK with respect to bodily injury, personal injury, illness, death, or property damage that may result from the services I provide to FOMLK or occurring while I am providing Participant services.</p>
+                        </section>
+                        <section>
+                          <h3 class="mb-2 font-semibold text-slate-900">2. Insurance</h3>
+                          <p>Further I understand that FOMLK does not assume any responsibility for or obligation to provide me with financial or other assistance, including but not limited to medical, health, or disability benefits or insurance. I expressly waive any such claim for compensation or liability on the part of FOMLK beyond what may be offered freely by FOMLK in the event of injury or medical expenses incurred by me.</p>
+                        </section>
+                        <section>
+                          <h3 class="mb-2 font-semibold text-slate-900">3. Medical Treatment</h3>
+                          <p>I hereby Release and forever discharge FOMLK from any claim whatsoever which arises or may hereafter arise on account of any first-aid treatment or other medical services rendered in connection with an emergency during my tenure as a Participant with FOMLK.</p>
+                        </section>
+                        <section>
+                          <h3 class="mb-2 font-semibold text-slate-900">4. Assumption of Risk</h3>
+                          <p>I understand that the services I provide to FOMLK should not but may include activities that may be hazardous to me. As a Participant, I hereby expressly assume risk of injury or harm from these activities and Release FOMLK from all liability.</p>
+                        </section>
+                        <section>
+                          <h3 class="mb-2 font-semibold text-slate-900">5. Photographic Release</h3>
+                          <p>I grant and convey to FOMLK all right, title, and interests in any and all products, photographs, images, video, or audio recordings of me or my likeness or voice made by FOMLK in connection with my providing Participant services to FOMLK.</p>
+                        </section>
+                        <section>
+                          <h3 class="mb-2 font-semibold text-slate-900">6. Other</h3>
+                          <p>As a Participant, I expressly agree that this Release is intended to be as broad and inclusive as permitted. I agree that in the event that any clause or provision of this Release is deemed invalid, the enforceability of the remaining provisions of this Release shall not be affected. I agree to indemnify, defend, and hold harmless FOMLK, and its directors, officers, employees, agents, subsidiaries and affiliates from and against any and all losses, injuries, claims, demands, liabilities, obligations, suits, penalties, forfeitures, costs or expenses of every kind including but not limited to attorney’s fees, arising out of participation in FOMLK activities.</p>
+                        </section>
+                        <p class="rounded-xl bg-indigo-50 p-4 font-medium text-slate-700">By clicking the checkbox, I express my understanding and intent to enter into this Release and Waiver of Liability willingly and voluntarily.</p>
+                      </div>
                     </div>
 
-                    <button type="button" @click="showTos = false"
-                            class="btn-fun text-black py-3 px-10 rounded-2xl font-bold text-lg shadow-lg hover:scale-105 self-center"
-                            style="background:var(--brand-indigo)">
-                      Close
-                    </button>
+                    <footer class="flex shrink-0 justify-end border-t border-slate-100 bg-slate-50 px-6 py-4 sm:px-8">
+                      <button type="button" @click="showTos = false"
+                        class="rounded-xl bg-[#0d1735] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#132149]"
+                      >Back to signup</button>
+                    </footer>
                   </div>
                 </div>
               </Transition>
+            </Teleport>
 
             <UButton
               :loading="checkingEmail"
