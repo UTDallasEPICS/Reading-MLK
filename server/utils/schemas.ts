@@ -6,7 +6,6 @@ export const userCreateSchema = z.object({
   name: z.string().min(1).max(100),
   email: emailSchema,
   role: z.enum(['coach', 'reader']).default('reader'),
-  publicityConsent: z.boolean().optional().default(false),
 })
 
 export const classCreateSchema = z.object({
@@ -31,9 +30,7 @@ export const studentUpdateSchema = z.object({
     .object(
       {
         dyslexiaFont: z.boolean().optional(),
-        fontSize: z.number().min(1).max(1.5).optional(),
         language: z.enum(['en', 'es']).optional(),
-        publicityConsent: z.boolean().optional(),
       },
       'Invalid Settings'
     )
