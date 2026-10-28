@@ -7,7 +7,13 @@
       <div class="absolute top-1/3 right-1/4 h-32 w-32 rounded-full bg-pink-100 blur-2xl" />
     </div>
 
-    <main class="relative z-10 min-h-screen flex flex-col items-center justify-center px-6 py-10 text-center">
+    <main class="relative min-h-screen flex flex-col items-center justify-center px-6 py-10 text-center">
+      <img
+        src="/logo.jpg"
+        alt="Reading Huddle — For story time wins"
+        class="mb-8 h-48 w-48 object-contain mix-blend-multiply"
+      />
+
       <h1 class="text-5xl sm:text-6xl font-black tracking-tight mb-10">
         <span class="text-[#e0674c]">Welcome to</span>
         <span class="text-[#f0a11c]"> ReadingHuddle!</span>

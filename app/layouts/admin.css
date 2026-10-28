@@ -48,17 +48,12 @@ body,
 }
 
 .portal-logo-icon {
-  width: 2.5rem;
-  height: 2.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
   flex-shrink: 0;
-  background: #4f46e5;
   border-radius: 0.5rem;
-  color: #ffffff;
-  font-size: 1.25rem;
-  font-weight: 700;
+  background: #ffffff;
+  object-fit: contain;
 }
 
 .portal-logo-title {

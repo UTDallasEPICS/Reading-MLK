@@ -200,9 +200,12 @@ function getBadgeClass(type: string) {
     <!-- ── TOP BAR ── -->
     <header class="max-w-4xl mx-auto flex justify-between items-center mb-8 px-2 relative z-[200]">
       <div class="flex items-center gap-3">
-        <div class="w-12 h-12 rounded-xl flex items-center justify-center text-white font-heading font-bold text-2xl shadow-lg" style="background:var(--brand-indigo)">L</div>
+        <img
+          src="/logo.jpg"
+          alt="Reading Huddle"
+          class="h-16 w-16 rounded-xl bg-white object-contain shadow-lg"
+        />
         <div class="flex flex-col">
-          <span class="font-heading font-bold text-2xl tracking-tight leading-none" style="color:var(--brand-dark)">Reading<span style="color:var(--brand-indigo)">Huddle</span></span>
           <span class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--brand-mint)">Reading Buddy</span>
         </div>
       </div>
@@ -212,10 +215,10 @@ function getBadgeClass(type: string) {
              style="border-color:rgba(245,158,11,0.3)"
              :class="(xpClicked) ? 'scale-90 transition-transform duration-100' : 'transition-transform duration-100'"
              @click="triggerXpClick">
-             <span class="text-lg" :class="xpClicked ? 'animate-star-spin' : ''">🪙</span>
+             <span class="text-lg" :class="xpClicked ? 'animate-star-spin' : ''">⭐️</span>
           <span class="font-heading font-bold text-amber-600">{{ stats.xp }}</span>
           <span v-for="c in burstCoins" :key="c.id" class="absolute text-sm animate-coin-burst"
-                :style="`--tx:${c.tx}px;--ty:${c.ty}px;left:50%;top:50%;`">🪙</span>
+                :style="`--tx:${c.tx}px;--ty:${c.ty}px;left:50%;top:50%;`">⭐️</span>
         </div>
         <!-- Settings / Home -->
         <NuxtLink to="/reader/settings"
@@ -277,25 +280,40 @@ function getBadgeClass(type: string) {
             </div>
             <div v-if="!completedFormIds.includes(form.id)">
               <button class="btn-fun text-white px-5 py-2 rounded-xl font-bold text-sm"
-                      :style="(new Date(form.startDate) < new Date()) ? 'background:#f59e0b' : 'background:var(--brand-indigo)'">Start 🚀</button>
+                      :style="(new Date(form.startDate) < new Date()) ? 'background:#f59e0b' : 'background:var(--brand-indigo)'">Start</button>
             </div>
-            <div v-else><span class="text-2xl">✅</span></div>
+            <div v-else>
+              <span class="rounded-full bg-emerald-100 px-4 py-2 text-sm font-bold text-emerald-700">Completed</span>
+            </div>
           </div>
         </div>
 
         <!-- ── PRE-FORM: Ask ── -->
         <div v-else-if="activeForm && preFormStep === 'ask'" class="space-y-6">
           <div class="premium-card p-10 bg-white/60 text-center space-y-6">
-            <div class="text-8xl animate-bounce">📚</div>
+            <div class="mx-auto flex h-36 w-48 items-center justify-center rounded-[2rem] bg-gradient-to-br from-amber-100 via-orange-50 to-indigo-100 shadow-inner">
+              <svg
+                class="h-24 w-32 text-indigo-600"
+                viewBox="0 0 128 96"
+                fill="none"
+                role="img"
+                aria-label="An open book"
+              >
+                <path d="M64 24C51 13 34 12 13 18v52c21-6 38-5 51 6V24Z" fill="#fff" stroke="currentColor" stroke-width="4" stroke-linejoin="round" />
+                <path d="M64 24c13-11 30-12 51-6v52c-21-6-38-5-51 6V24Z" fill="#fff" stroke="currentColor" stroke-width="4" stroke-linejoin="round" />
+                <path d="M64 24v52M23 30c12-3 23-2 32 2M23 42c12-3 23-2 32 2M105 30c-12-3-23-2-32 2M105 42c-12-3-23-2-32 2" stroke="#f59e0b" stroke-width="3" stroke-linecap="round" />
+                <path d="m18 13 3-6m90 6-3-6" stroke="#f59e0b" stroke-width="4" stroke-linecap="round" />
+              </svg>
+            </div>
             <h3 class="font-heading text-3xl font-bold" style="color:var(--brand-dark)">Before we start...</h3>
             <p class="text-xl text-gray-500 font-medium">Do you already have a book to read?</p>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md mx-auto" :class="{ 'sm:grid-cols-1': !firstVideoUrl }">
               <button @click="hasOwnBook = true; preFormStep = null"
                 class="btn-fun text-white py-5 rounded-2xl font-bold text-xl shadow-lg hover:scale-105"
-                style="background:var(--brand-indigo)">Yes, I have a book! 📖</button>
+                style="background:var(--brand-indigo)">Yes, I have a book!</button>
               <button @click="preFormStep = 'no-book'"
                 class="btn-fun text-gray-900 py-5 rounded-2xl font-bold text-xl shadow-lg hover:scale-105"
-                style="background:var(--brand-gold)">No, I need one 📺</button>
+                style="background:var(--brand-gold)">No, I need one</button>
             </div>
             <button @click="activeForm = null; preFormStep = null" class="text-gray-400 font-bold hover:text-gray-700 transition text-sm">← Back to Forms</button>
           </div>
@@ -305,7 +323,7 @@ function getBadgeClass(type: string) {
         <!-- ── PRE-FORM: No book (watch video) ── -->
         <div v-else-if="activeForm && preFormStep === 'no-book'" class="space-y-4">
           <div class="premium-card p-5 bg-white/60 text-center space-y-3">
-            <h3 class="font-heading text-xl font-bold" style="color:var(--brand-dark)">📺 Let's read a story together!</h3>
+            <h3 class="font-heading text-xl font-bold" style="color:var(--brand-dark)">Let's read a story together!</h3>
             <p class="text-gray-500 font-medium text-sm">Use this provided resource, then we'll do the form.</p>
             <div v-if="firstVideoContext" class="p-5 rounded-2xl bg-amber-50 border border-amber-100 space-y-2 text-left max-w-2xl mx-auto">
               <p class="text-xl font-heading font-bold leading-snug" style="color:var(--brand-dark)"><span v-html="firstVideoContext"></span></p>

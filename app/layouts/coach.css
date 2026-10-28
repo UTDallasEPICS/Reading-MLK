@@ -24,7 +24,7 @@ html, body { margin: 0; padding: 0; height: 100%; }
 .rh-sidebar-inner { padding: 24px 24px 0; flex: 1; }
 
 .rh-logo { display:flex; align-items:center; gap:12px; margin-bottom:32px; }
-.rh-logo-icon { width:40px; height:40px; background:#4f46e5; border-radius:8px; display:flex; align-items:center; justify-content:center; color:white; font-weight:700; font-size:1.25rem; }
+.rh-logo-image { width:56px; height:56px; flex-shrink:0; border-radius:8px; background:#fff; object-fit:contain; }
 .rh-logo-name  { font-weight:700; font-size:1.1rem; color:#0f172a; line-height:1; }
 .rh-logo-accent { color:#4f46e5; }
 .rh-logo-sub   { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:#2dd4bf; margin-top:2px; }

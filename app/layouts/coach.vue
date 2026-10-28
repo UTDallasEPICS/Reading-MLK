@@ -31,7 +31,7 @@ function navigateWithinClass(path: string) {
     <aside class="rh-sidebar">
       <div class="rh-sidebar-inner">
         <div class="rh-logo">
-          <div class="rh-logo-icon">L</div>
+          <img src="/logo.jpg" alt="Reading Huddle" class="rh-logo-image" />
           <div>
             <div class="rh-logo-name">Reading<span class="rh-logo-accent">Huddle</span></div>
             <div class="rh-logo-sub">Reading Coach Portal</div>
