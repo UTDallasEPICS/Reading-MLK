@@ -1,7 +1,7 @@
 <script setup lang="ts">
 definePageMeta({ ssr: false })
 
-const settings = reactive({ theme: 'light', dyslexiaFont: false, language: 'en', fontSize: 1 })
+const settings = reactive({ theme: 'light', dyslexiaFont: false, language: 'en' })
 const stats = reactive({ xp: 1250, booksRead: 14, streak: 5 })
 
 const themeClass = computed(() => {

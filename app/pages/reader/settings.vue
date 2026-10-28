@@ -1,7 +1,6 @@
 <script setup lang="ts">
 
 import { authClient } from '~/utils/auth-client'
-import { onMounted } from 'vue'
 
 const { student, settings: globalSettings, saveSettings: pushSettings, clearStudent } = useCurrentStudent()
 
@@ -49,22 +48,6 @@ async function changeEmail() {
     savingEmail.value = false
   }
 }
-
-//Loading accont settings
-async function loadAccountSettings() {
-  try {
-    const data = await $fetch('/api/users/account-settings', {
-      method: 'GET',
-    })
-
-  } catch (error) {
-    console.error('Failed to load account settings:', error)
-  }
-}
-
-onMounted(async () => {
-  await loadAccountSettings()
-})
 
 // ── Theme class ── 
 const themeClass = computed(() => {
@@ -172,15 +155,6 @@ watch(settings, (newSettings) => {
         >
           {{ settings.language === 'en' ? '🇪🇸 Español' : '🇺🇸 English' }}
         </button>
-      </div>
-
-      <!-- PUBLICITY -->
-      <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-        <div>
-          <p class="text-xs text-gray-600">
-            Allow Friends of MLK to use responses for publicity
-          </p>
-        </div>
       </div>
 
       <!-- CHANGE EMAIL -->
