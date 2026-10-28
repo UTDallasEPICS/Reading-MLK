@@ -48,6 +48,12 @@ const loginRole = computed(() => {
 const isNewUser = ref(false)
 const checkingEmail = ref(false)
 const showTos = ref(false)
+const waiverTrigger = ref<HTMLAnchorElement | null>(null)
+
+function restoreWaiverFocus(event: Event) {
+  event.preventDefault()
+  waiverTrigger.value?.focus()
+}
 const waiverDate = new Date().toLocaleDateString(undefined, {
   year: 'numeric', month: 'long', day: 'numeric',
 })
@@ -255,22 +261,20 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
 
                 <label for="tos" class="text-sm text-[#5c6475]">
                   I agree to the
-                  <a href="/terms" class="text-[#0d1735] font-bold hover:underline"
+                  <a ref="waiverTrigger" href="/terms" class="text-[#0d1735] font-bold hover:underline"
                   @click.prevent="showTos = true">Release and Waiver of Liability</a>
                 </label>
               </div>
             </UFormField>
             
-            <Teleport to="body">
-              <Transition name="fade">
-                <div v-if="showTos"
-                  class="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm"
-                  @click.self="showTos = false"
-                  @keydown.esc="showTos = false"
-                >
-                  <div role="dialog" aria-modal="true" aria-labelledby="waiver-title"
-                    class="flex max-h-[85dvh] w-full max-w-2xl flex-col overflow-hidden rounded-3xl bg-white font-sans shadow-2xl"
-                  >
+            <UModal v-model:open="showTos" title="Release and Waiver of Liability"
+              :content="{ onCloseAutoFocus: restoreWaiverFocus }"
+              :ui="{
+                overlay: 'bg-slate-900/50 backdrop-blur-sm',
+                content: 'flex max-h-[85dvh] w-full max-w-2xl flex-col overflow-hidden rounded-3xl bg-white font-sans shadow-2xl',
+              }"
+            >
+              <template #content>
                     <header class="flex shrink-0 items-start justify-between gap-4 border-b border-slate-100 px-6 py-5 sm:px-8">
                       <div>
                         <p class="mb-1 text-xs font-semibold uppercase tracking-widest text-indigo-600">Friends of MLK</p>
@@ -320,10 +324,8 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
                         class="rounded-xl bg-[#0d1735] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#132149]"
                       >Back to signup</button>
                     </footer>
-                  </div>
-                </div>
-              </Transition>
-            </Teleport>
+              </template>
+            </UModal>
 
             <UButton
               :loading="checkingEmail"
