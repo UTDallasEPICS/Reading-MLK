@@ -1,7 +1,7 @@
 <script setup lang="ts">
 definePageMeta({ ssr: false })
 
-const settings = reactive({ theme: 'light', dyslexiaFont: false, language: 'en', fontSize: 1 })
+const settings = reactive({ theme: 'light', dyslexiaFont: false, language: 'en' })
 const stats = reactive({ xp: 1250, booksRead: 14, streak: 5 })
 
 const themeClass = computed(() => {
@@ -71,7 +71,7 @@ function applyItem(item: any) {
 </script>
 
 <template>
-  <div :class="themeClass" :style="`font-size:${settings.fontSize*16}px`" class="pb-32 px-4 pt-4 min-h-screen">
+  <div :class="themeClass" class="pb-32 px-4 pt-4 min-h-screen">
 
     <!-- ── TOP BAR ── -->
     <header class="max-w-4xl mx-auto flex justify-between items-center mb-8 px-2 relative z-[200]">

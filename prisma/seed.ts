@@ -40,7 +40,6 @@ async function main() {
           exp: 5000,
           settings: {
             dyslexiaFont: true,
-            fontSize: 1,
             language: 'en',
           },
         },

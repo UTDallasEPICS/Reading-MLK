@@ -3,7 +3,6 @@ import type { Student } from '~~/prisma/generated/client'
 export type StudentSettings = {
   dyslexiaFont: boolean
   language: 'en' | 'es'
-  fontSize: number
 }
 
 const normalizeLanguage = (value: unknown): 'en' | 'es' => {
@@ -21,7 +20,6 @@ export const useCurrentStudent = () => {
     return {
       dyslexiaFont: Boolean(raw.dyslexiaFont),
       language: normalizeLanguage(raw.language),
-      fontSize: Number(raw.fontSize) || 1,
     }
   })
   
