@@ -2,7 +2,11 @@
 
 import { authClient } from '~/utils/auth-client'
 
-const { student, settings: globalSettings, saveSettings: pushSettings, clearStudent } = useCurrentStudent()
+const { student, settings: globalSettings, saveSettings: pushSettings, clearStudent, restoreStudent } = useCurrentStudent()
+
+if (!student.value) {
+  await restoreStudent()
+}
 
 if (!student.value) {
   await navigateTo('/reader/profile')
