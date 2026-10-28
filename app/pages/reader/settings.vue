@@ -192,7 +192,7 @@ watch(settings, (newSettings) => {
         @click="logout"
         class="w-full bg-red-500 hover:bg-red-600 text-white font-bold text-base py-3 rounded-xl shadow-lg transition active:scale-95 mt-2"
       >
-        Logout 👋
+        Logout
       </button>
 
     </div>

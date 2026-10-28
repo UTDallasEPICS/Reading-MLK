@@ -201,9 +201,11 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
         <div class="h-2 w-full bg-gradient-to-r from-[#6b6ee8] via-[#f0a446] to-[#ffb400]" />
 
         <div class="px-8 sm:px-12 py-8 text-center">
-          <div class="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-[#eef0fb] text-5xl shadow-inner">
-            🪄
-          </div>
+          <img
+            src="/logo.jpg"
+            alt="Reading Huddle — For story time wins"
+            class="mx-auto mb-6 h-24 w-24 rounded-2xl bg-white object-contain shadow-inner"
+          />
 
           <h1 class="text-4xl sm:text-5xl font-black text-[#0f1730] mb-3 tracking-tight">
             Magic Login

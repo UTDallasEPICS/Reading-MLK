@@ -76,9 +76,12 @@ function applyItem(item: any) {
     <!-- ── TOP BAR ── -->
     <header class="max-w-4xl mx-auto flex justify-between items-center mb-8 px-2 relative z-[200]">
       <div class="flex items-center gap-3">
-        <div class="w-12 h-12 rounded-xl flex items-center justify-center text-white font-heading font-bold text-2xl shadow-lg" style="background:var(--brand-indigo)">L</div>
+        <img
+          src="/logo.jpg"
+          alt="Reading Huddle"
+          class="h-16 w-16 rounded-xl bg-white object-contain shadow-lg"
+        />
         <div class="flex flex-col">
-          <span class="font-heading font-bold text-2xl tracking-tight leading-none" style="color:var(--brand-dark)">Reading<span style="color:var(--brand-indigo)">Huddle</span></span>
           <span class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--brand-mint)">Reading Buddy</span>
         </div>
       </div>
@@ -88,10 +91,10 @@ function applyItem(item: any) {
              style="border-color:rgba(245,158,11,0.3)"
              :class="(xpClicked) ? 'scale-90 transition-transform duration-100' : 'transition-transform duration-100'"
              @click="triggerXpClick">
-          <span class="text-lg" :class="xpClicked ? 'animate-star-spin' : ''">🪙</span>
+          <span class="text-lg" :class="xpClicked ? 'animate-star-spin' : ''">⭐️</span>
           <span class="font-heading font-bold text-amber-600">{{ stats.xp }}</span>
           <span v-for="c in burstCoins" :key="c.id" class="absolute text-sm animate-coin-burst"
-                :style="`--tx:${c.tx}px;--ty:${c.ty}px;left:50%;top:50%;`">🪙</span>
+                :style="`--tx:${c.tx}px;--ty:${c.ty}px;left:50%;top:50%;`">⭐️</span>
         </div>
         <NuxtLink to="/reader"
           class="w-14 h-14 bg-white/90 backdrop-blur-md rounded-xl flex items-center justify-center text-2xl border-2 border-white shadow-xl hover:scale-110 active:scale-95 transition-all"
