@@ -47,7 +47,6 @@ const loginRole = computed(() => {
 
 const isNewUser = ref(false)
 const checkingEmail = ref(false)
-const tosCheck = ref(false)
 const showTos = ref(false)
 
 const schema = computed(() => {
@@ -56,7 +55,7 @@ const schema = computed(() => {
       email: z.string().email('Invalid email'),
       name: z.string().min(1, 'Name is required'),
       tosCheck: z.literal(true, {
-        message: 'You must accept the Terms of Service and Privacy Policy',
+        message: 'You must accept the Terms of Service to create an account.',
       }),
     })
   }
@@ -101,6 +100,7 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
         email: state.email,
         name: state.name,
         role: loginRole.value,
+        tosCheck: state.tosCheck,
       },
     }).catch((error) => {
       toast.add({
@@ -174,17 +174,7 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
     color: 'primary',
   })
 
-  //Ensure that user accepts tos before allowing submission
-  async function onSubmit(){
-    if (isNewUser.value && !state.tosCheck) {
-      toast.add({
-        title: 'Error',
-        description: 'You must accept the Terms of Service and Privacy Policy to create an account.',
-        color: 'error',
-      })
-      return
-    }
-  }
+
 }
 </script>
 
@@ -251,9 +241,7 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
               />
             </UFormField>
 
-            <template 
-            v-if="isNewUser"
-            >
+            <UFormField v-if="isNewUser" name="tosCheck">
               <div class="flex items-center gap-2">
                 <input
                   type="checkbox"
@@ -265,10 +253,10 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
                 <label for="tos" class="text-sm text-[#5c6475]">
                   I agree to the
                   <a href="/terms" class="text-[#0d1735] font-bold hover:underline"
-                  @click.prevent="showTos = true">Terms of Service</a>
+                  @click.prevent="showTos = true">Release and Waiver of Liability</a>
                 </label>
               </div>
-            </template>
+            </UFormField>
             
             <Transition name="fade">
                 <div v-if="showTos"
@@ -282,7 +270,7 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
                       style="border-radius:2.5rem; box-shadow:0 20px 60px rgba(0,0,0,0.3); border-bottom:8px solid var(--brand-gold);">
 
                     <h2 class="font-heading text-2xl text-black text-center font-bold text-lg">
-                      Terms of Service
+                      Release and Waiver of Liability
                     </h2>
 
                     <div class="flex-1 min-h-0 overflow-y-auto pr-2 text-left text-sm text-gray-500 space-y-3">

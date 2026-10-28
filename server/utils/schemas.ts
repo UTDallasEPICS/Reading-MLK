@@ -6,6 +6,7 @@ export const userCreateSchema = z.object({
   name: z.string().min(1).max(100),
   email: emailSchema,
   role: z.enum(['coach', 'reader']).default('reader'),
+  tosCheck: z.literal(true, { message: 'You must accept the Terms of Service to create an account.' }),
 })
 
 export const classCreateSchema = z.object({
