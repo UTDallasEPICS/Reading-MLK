@@ -32,6 +32,7 @@ export const studentUpdateSchema = z.object({
       {
         dyslexiaFont: z.boolean().optional(),
         language: z.enum(['en', 'es']).optional(),
+        theme: z.enum(['light', 'blue', 'sepia', 'sunset', 'ocean', 'forest', 'candy', 'fire', 'ice']).optional(),
       },
       'Invalid Settings'
     )

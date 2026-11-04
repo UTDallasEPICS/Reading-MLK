@@ -336,7 +336,7 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
               size="xl"
               class="w-full justify-center rounded-2xl h-14 text-xl font-black bg-[#0d1735] hover:bg-[#132149] text-white shadow-xl"
             >
-              {{ isNewUser ? 'Create Account ✨' : 'Send Magic Link 🪄' }}
+              {{ isNewUser ? 'Create Account ✨' : 'Send Magic Link' }}
             </UButton>
           </UForm>
 

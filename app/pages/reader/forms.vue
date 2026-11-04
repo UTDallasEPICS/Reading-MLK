@@ -25,8 +25,9 @@ const stats = computed(() => ({
 }))
 
 const themeClass = computed(() => {
+  const t = settings.value.theme !== 'light' ? `theme-${settings.value.theme}` : ''
   const d = settings.value.dyslexiaFont ? 'dyslexia-font' : ''
-  return `reader-app ${d}`.trim()
+  return `reader-app ${t} ${d}`.trim()
 })
 
 const currentFormComponentsWithVideo = computed(() => {
@@ -200,14 +201,13 @@ function getBadgeClass(type: string) {
     <!-- ── TOP BAR ── -->
     <header class="max-w-4xl mx-auto flex justify-between items-center mb-8 px-2 relative z-[200]">
       <div class="flex items-center gap-3">
-        <img
-          src="/logo.jpg"
-          alt="Reading Huddle"
-          class="h-16 w-16 rounded-xl bg-white object-contain shadow-lg"
-        />
-        <div class="flex flex-col">
-          <span class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--brand-mint)">Reading Buddy</span>
-        </div>
+        <NuxtLink to="/reader" aria-label="Go to Reading Buddy home">
+          <img
+            src="/logo.jpg"
+            alt="Reading Huddle"
+            class="h-16 w-16 rounded-xl bg-white object-contain shadow-lg"
+          />
+        </NuxtLink>
       </div>
       <div class="flex items-center gap-3">
         <!-- XP -->
@@ -238,7 +238,7 @@ function getBadgeClass(type: string) {
       <section v-else class="space-y-6">
 
         <div class="mb-2">
-          <h2 class="font-heading text-4xl font-bold mb-4" style="color:var(--brand-dark)">Daily Forms 📝</h2>
+          <h2 class="font-heading text-4xl font-bold mb-4" style="color:var(--brand-dark)">Daily Forms</h2>
         </div>
 
         <!-- ── FORMS LIST ── -->
@@ -529,7 +529,7 @@ function getBadgeClass(type: string) {
           <p class="text-gray-500 mt-3">Great work! Keep your reading streak going.</p>
           <button @click="showXpReward = false; navigateTo('/reader')"
                   class="btn-fun text-white py-3 px-8 rounded-2xl font-bold mt-6 shadow-lg hover:scale-105 transition-transform"
-                  style="background:var(--brand-indigo)">Back to Home 🏠</button>
+                  style="background:var(--brand-indigo)">Back to Home</button>
         </div>
       </div>
     </Transition>

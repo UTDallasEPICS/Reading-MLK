@@ -40,7 +40,8 @@
 }
 
 /* ---------- Themes ---------- */
-.reader-app.theme-dark {
+.reader-app.theme-dark,
+.reader-app.theme-blue {
   --brand-dark: #f8fafc;
   --bg-gradient:
     radial-gradient(at 0% 0%,   hsla(250, 20%, 20%, 0.5) 0px, transparent 50%),

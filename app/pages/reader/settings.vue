@@ -15,6 +15,7 @@ if (!student.value) {
 const settings = reactive({ 
   dyslexiaFont: globalSettings.value.dyslexiaFont,
   language: globalSettings.value.language,
+  theme: globalSettings.value.theme,
 })
 
 async function logout() {
@@ -55,7 +56,7 @@ async function changeEmail() {
 
 // ── Theme class ── 
 const themeClass = computed(() => {
-  const t = 'light'
+  const t = settings.theme !== 'light' ? `theme-${settings.theme}` : ''
   const d = settings.dyslexiaFont ? 'dyslexia-font' : ''
   return `reader-app ${t} ${d}`.trim()
 })
@@ -79,9 +80,12 @@ watch(settings, (newSettings) => {
     >
       <NuxtLink
         to="/reader"
-        class="w-14 h-14 bg-white rounded-xl flex items-center justify-center text-2xl transition-all border border-gray-200 shadow-lg hover:scale-110 active:scale-95"
+        aria-label="Home"
+        class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#4933d6] to-[#625cf3] shadow-lg transition-all hover:scale-110 active:scale-95"
       >
-        🏠
+        <svg aria-hidden="true" viewBox="0 0 24 24" class="h-7 w-7" fill="white">
+          <path d="M12 3.2a1.5 1.5 0 0 1 1.06.44l8.3 8.3a1.5 1.5 0 0 1-2.12 2.12L18 12.82V19a2 2 0 0 1-2 2h-3v-6h-2v6H8a2 2 0 0 1-2-2v-6.18l-1.24 1.24a1.5 1.5 0 1 1-2.12-2.12l8.3-8.3A1.5 1.5 0 0 1 12 3.2Z" />
+        </svg>
       </NuxtLink>
     </header>
 
