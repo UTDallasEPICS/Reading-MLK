@@ -76,16 +76,17 @@ watch(settings, (newSettings) => {
 
     <!-- TOP BAR -->
     <header
-      class="absolute top-4 left-0 right-0 w-full max-w-4xl mx-auto flex justify-end items-center px-6 z-[200]"
+      class="absolute top-4 left-0 right-0 w-full max-w-4xl mx-auto flex justify-start items-center px-6 z-[200]"
     >
       <NuxtLink
         to="/reader"
-        aria-label="Home"
-        class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#4933d6] to-[#625cf3] shadow-lg transition-all hover:scale-110 active:scale-95"
+        aria-label="Go to Reading Buddy home"
       >
-        <svg aria-hidden="true" viewBox="0 0 24 24" class="h-7 w-7" fill="white">
-          <path d="M12 3.2a1.5 1.5 0 0 1 1.06.44l8.3 8.3a1.5 1.5 0 0 1-2.12 2.12L18 12.82V19a2 2 0 0 1-2 2h-3v-6h-2v6H8a2 2 0 0 1-2-2v-6.18l-1.24 1.24a1.5 1.5 0 1 1-2.12-2.12l8.3-8.3A1.5 1.5 0 0 1 12 3.2Z" />
-        </svg>
+        <img
+          src="/reader-logo.png"
+          alt="Reading Huddle"
+          class="h-16 w-16 object-contain"
+        />
       </NuxtLink>
     </header>
 

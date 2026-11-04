@@ -92,7 +92,7 @@ const completionMessage = computed(() => {
       <div class="flex items-center gap-3">
         <NuxtLink to="/reader" aria-label="Go to Reading Buddy home">
           <img
-            src="/logo.png"
+            src="/reader-logo.png"
             alt="Reading Huddle"
             class="h-16 w-16 object-contain"
           />
