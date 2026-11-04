@@ -42,8 +42,13 @@ export const useCurrentStudent = () => {
       if (process.client) {
         localStorage.setItem('currentStudentId', String(id))
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error('Failed to load student', e)
+
+      if (e.status == 404) {
+        clearStudent()
+        return
+      }
     }
   }
 
