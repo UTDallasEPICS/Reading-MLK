@@ -1,12 +1,18 @@
 <script setup lang="ts">
 definePageMeta({ ssr: false })
 
-const settings = reactive({ theme: 'light', dyslexiaFont: false, language: 'en' })
+const { student, settings, saveSettings, restoreStudent } = useCurrentStudent()
 const stats = reactive({ xp: 1250, booksRead: 14, streak: 5 })
 
+onMounted(async () => {
+  if (!student.value) {
+    await restoreStudent()
+  }
+})
+
 const themeClass = computed(() => {
-  const t = settings.theme !== 'light' ? `theme-${settings.theme}` : ''
-  const d = settings.dyslexiaFont ? 'dyslexia-font' : ''
+  const t = settings.value.theme !== 'light' ? `theme-${settings.value.theme}` : ''
+  const d = settings.value.dyslexiaFont ? 'dyslexia-font' : ''
   return `reader-app ${t} ${d}`.trim()
 })
 
@@ -56,9 +62,9 @@ function buyItem(item: any) {
   }
 }
 
-function applyItem(item: any) {
+async function applyItem(item: any) {
   if (item.type === 'theme') {
-    settings.theme = item.class
+    await saveSettings({ theme: item.class })
   } else if (item.type === 'animation') {
     if (activeAnimations.value.includes(item.name)) {
       activeAnimations.value = activeAnimations.value.filter(a => a !== item.name)
@@ -76,11 +82,13 @@ function applyItem(item: any) {
     <!-- ── TOP BAR ── -->
     <header class="max-w-4xl mx-auto flex justify-between items-center mb-8 px-2 relative z-[200]">
       <div class="flex items-center gap-3">
-        <div class="w-12 h-12 rounded-xl flex items-center justify-center text-white font-heading font-bold text-2xl shadow-lg" style="background:var(--brand-indigo)">L</div>
-        <div class="flex flex-col">
-          <span class="font-heading font-bold text-2xl tracking-tight leading-none" style="color:var(--brand-dark)">Reading<span style="color:var(--brand-indigo)">Huddle</span></span>
-          <span class="text-[10px] font-bold uppercase tracking-widest" style="color:var(--brand-mint)">Reading Buddy</span>
-        </div>
+        <NuxtLink to="/reader" aria-label="Go to Reading Buddy home">
+          <img
+            src="/logo.jpg"
+            alt="Reading Huddle"
+            class="h-16 w-16 rounded-xl bg-white object-contain shadow-lg"
+          />
+        </NuxtLink>
       </div>
       <div class="flex items-center gap-3">
         <!-- XP -->
@@ -88,14 +96,20 @@ function applyItem(item: any) {
              style="border-color:rgba(245,158,11,0.3)"
              :class="(xpClicked) ? 'scale-90 transition-transform duration-100' : 'transition-transform duration-100'"
              @click="triggerXpClick">
-          <span class="text-lg" :class="xpClicked ? 'animate-star-spin' : ''">🪙</span>
+          <span class="text-lg" :class="xpClicked ? 'animate-star-spin' : ''">⭐️</span>
           <span class="font-heading font-bold text-amber-600">{{ stats.xp }}</span>
           <span v-for="c in burstCoins" :key="c.id" class="absolute text-sm animate-coin-burst"
-                :style="`--tx:${c.tx}px;--ty:${c.ty}px;left:50%;top:50%;`">🪙</span>
+                :style="`--tx:${c.tx}px;--ty:${c.ty}px;left:50%;top:50%;`">⭐️</span>
         </div>
-        <NuxtLink to="/reader"
-          class="w-14 h-14 bg-white/90 backdrop-blur-md rounded-xl flex items-center justify-center text-2xl border-2 border-white shadow-xl hover:scale-110 active:scale-95 transition-all"
-          style="text-decoration:none">🏠</NuxtLink>
+        <NuxtLink
+          to="/reader"
+          aria-label="Home"
+          class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#4933d6] to-[#625cf3] shadow-xl transition-all hover:scale-110 active:scale-95"
+        >
+          <svg aria-hidden="true" viewBox="0 0 24 24" class="h-7 w-7" fill="white">
+            <path d="M12 3.2a1.5 1.5 0 0 1 1.06.44l8.3 8.3a1.5 1.5 0 0 1-2.12 2.12L18 12.82V19a2 2 0 0 1-2 2h-3v-6h-2v6H8a2 2 0 0 1-2-2v-6.18l-1.24 1.24a1.5 1.5 0 1 1-2.12-2.12l8.3-8.3A1.5 1.5 0 0 1 12 3.2Z" />
+          </svg>
+        </NuxtLink>
       </div>
     </header>
 
@@ -107,8 +121,8 @@ function applyItem(item: any) {
 
         <!-- Themes -->
         <div>
-          <h3 class="text-xl font-black mb-4 pb-2 flex items-center gap-2" style="color:var(--brand-dark); border-bottom:4px solid rgba(224,96,77,0.2)">
-            <span>🎨</span> THEMES
+          <h3 class="text-xl font-black mb-4 pb-2" style="color:var(--brand-dark); border-bottom:4px solid rgba(224,96,77,0.2)">
+            THEMES
           </h3>
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
             <div

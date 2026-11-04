@@ -100,8 +100,6 @@ onMounted(() => {
 
     <div class="relative z-10 min-h-screen px-6 py-8">
       <main class="max-w-5xl mx-auto flex flex-col items-center text-center pt-8">
-        <div class="text-5xl mb-4">👋</div>
-
         <h1 class="text-3xl sm:text-4xl font-black text-[#111827] mb-2">
           Who's Reading?
         </h1>

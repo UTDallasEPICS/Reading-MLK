@@ -23,9 +23,7 @@ const navigation = [
     <aside class="portal-sidebar">
       <div class="portal-sidebar-content">
         <NuxtLink to="/admin" class="portal-logo">
-          <div class="portal-logo-icon">
-            L
-          </div>
+          <img src="/logo.jpg" alt="Reading Huddle" class="portal-logo-icon" />
 
           <div>
             <div class="portal-logo-title">

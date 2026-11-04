@@ -3,6 +3,7 @@ import type { Student } from '~~/prisma/generated/client'
 export type StudentSettings = {
   dyslexiaFont: boolean
   language: 'en' | 'es'
+  theme: string
 }
 
 const normalizeLanguage = (value: unknown): 'en' | 'es' => {
@@ -10,6 +11,8 @@ const normalizeLanguage = (value: unknown): 'en' | 'es' => {
 
   return ['es', 'spanish'].includes(language) ? 'es' : 'en'
 }
+
+const readerThemes = ['light', 'blue', 'sepia', 'sunset', 'ocean', 'forest', 'candy', 'fire', 'ice']
 
 export const useCurrentStudent = () => {
   const student = useState<Student | null>('currentStudent', () => null)
@@ -20,6 +23,7 @@ export const useCurrentStudent = () => {
     return {
       dyslexiaFont: Boolean(raw.dyslexiaFont),
       language: normalizeLanguage(raw.language),
+      theme: readerThemes.includes(String(raw.theme)) ? String(raw.theme) : 'light',
     }
   })
   
