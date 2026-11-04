@@ -36,9 +36,9 @@
 
         <div class="order-first flex justify-center py-3 sm:col-span-2 sm:row-start-1 lg:order-none lg:col-span-1 lg:row-start-auto lg:py-0">
           <img
-            src="/logo.jpg"
+            src="/logo.png"
             alt="Reading Huddle — For story time wins"
-            class="h-52 w-52 object-contain mix-blend-multiply sm:h-60 sm:w-60 lg:h-[min(30vw,360px)] lg:w-[min(30vw,360px)]"
+            class="h-52 w-52 object-contain sm:h-60 sm:w-60 lg:h-[min(30vw,360px)] lg:w-[min(30vw,360px)]"
           />
         </div>
 

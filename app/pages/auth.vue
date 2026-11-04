@@ -202,9 +202,9 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
 
         <div class="px-8 sm:px-12 py-8 text-center">
           <img
-            src="/logo.jpg"
+            src="/logo.png"
             alt="Reading Huddle — For story time wins"
-            class="mx-auto mb-6 h-24 w-24 object-contain mix-blend-multiply"
+            class="mx-auto mb-6 h-24 w-24 object-contain"
           />
 
           <h1 class="text-4xl sm:text-5xl font-black text-[#0f1730] mb-3 tracking-tight">
