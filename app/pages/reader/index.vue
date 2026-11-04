@@ -94,7 +94,7 @@ const completionMessage = computed(() => {
           <img
             src="/logo.jpg"
             alt="Reading Huddle"
-            class="h-16 w-16 rounded-xl bg-white object-contain shadow-lg"
+            class="h-16 w-16 object-contain mix-blend-multiply"
           />
         </NuxtLink>
       </div>

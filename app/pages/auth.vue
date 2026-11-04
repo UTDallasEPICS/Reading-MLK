@@ -204,7 +204,7 @@ async function handleSubmit(_event: FormSubmitEvent<any>) {
           <img
             src="/logo.jpg"
             alt="Reading Huddle — For story time wins"
-            class="mx-auto mb-6 h-24 w-24 rounded-2xl bg-white object-contain shadow-inner"
+            class="mx-auto mb-6 h-24 w-24 object-contain mix-blend-multiply"
           />
 
           <h1 class="text-4xl sm:text-5xl font-black text-[#0f1730] mb-3 tracking-tight">

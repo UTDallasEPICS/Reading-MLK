@@ -51,9 +51,8 @@ body,
   width: 3.5rem;
   height: 3.5rem;
   flex-shrink: 0;
-  border-radius: 0.5rem;
-  background: #ffffff;
   object-fit: contain;
+  mix-blend-mode: multiply;
 }
 
 .portal-logo-title {
