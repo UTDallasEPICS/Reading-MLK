@@ -7,6 +7,8 @@ const {
 } = useCoach()
 const { classId } = useSelectedClass()
 
+const hasFiveCharacterCode = computed(() => /^[A-Z0-9]{5}$/.test(classId.value || ''))
+
 const activeForms = computed(
   () => publishedForms.value.filter((f: any) => f.status === 'Active').length
 )
@@ -39,12 +41,21 @@ watch(classId, refreshAnnouncements, { immediate: true })
     <header class="welcome-card">
       <p class="eyebrow">Welcome</p>
       <h1>Reading Coach</h1>
-      <p class="subtext">Use the left sidebar to manage forms, track progress, run raffles, and post announcements.</p>
+      <p class="subtext">Use the left sidebar to manage forms, track progress, and post announcements.</p>
       <div class="actions">
         <NuxtLink to="/coach/builder" class="primary-btn">Open Form Builder</NuxtLink>
         <NuxtLink to="/coach/progress" class="ghost-btn">View Class Progress</NuxtLink>
       </div>
     </header>
+
+    <article v-if="classId" class="stat-card">
+      <p class="stat-label">Student join code</p>
+      <div class="mt-2 flex flex-wrap items-center justify-between gap-4">
+        <p class="break-all font-mono text-2xl font-bold text-slate-900">
+          {{ hasFiveCharacterCode ? classId : 'Code update required' }}
+        </p>
+      </div>
+    </article>
 
     <div class="stats-grid">
       <article class="stat-card">

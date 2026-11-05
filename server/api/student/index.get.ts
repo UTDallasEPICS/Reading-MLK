@@ -1,5 +1,6 @@
 import { prisma } from '../../utils/prisma'
 import { requireClassAccess, requireSession } from '../../utils/require-session'
+import { ensureMlkClassMembership } from '../../utils/ensure-mlk-class-membership'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
@@ -25,6 +26,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const session = await requireSession(event)
+  await ensureMlkClassMembership(session.user.id)
 
   return await prisma.student.findMany({
     where: {

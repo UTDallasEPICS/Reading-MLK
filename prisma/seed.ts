@@ -40,7 +40,6 @@ async function main() {
           exp: 5000,
           settings: {
             dyslexiaFont: true,
-            fontSize: 1,
             language: 'en',
           },
         },
@@ -71,12 +70,13 @@ async function main() {
     },
   })
 
-  await prisma.user.create({
+  const admin = await prisma.user.create({
     data: {
       name: seededAdminName,
       email: seededEmails[2],
       emailVerified: true,
       role: 'admin',
+      coach: { create: {} },
       accounts: {
         create: {
           id: 'seed_account_6',
@@ -105,10 +105,12 @@ async function main() {
     throw new Error('Seed students not found')
   }
 
-  // Create a class for testing
+  // Create the master class with the placeholder admin as its coach.
  const testClass = await prisma.class.create({
     data: {
-      name: 'Reading Class (TEST)',
+      name: 'MLK',
+      joinToken: 'FOMLK',
+      Coach: { connect: { userId: admin.id } },
       Students: {
         connect: [
           { id: crota.id },

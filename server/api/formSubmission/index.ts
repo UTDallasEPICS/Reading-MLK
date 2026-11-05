@@ -3,7 +3,7 @@ import { prisma } from '../../utils/prisma'
 import { getQuery } from 'h3'
 import { z } from 'zod'
 import { formSubmissionCreateSchema } from '../../utils/schemas'
-import { requireClassAccess } from '../../utils/require-session'
+import { requireClassAccess, requireSession } from '../../utils/require-session'
 
 export default defineEventHandler(async (event) => {
   const method = event.node.req.method
@@ -17,6 +17,21 @@ export default defineEventHandler(async (event) => {
       const { classId } = await requireClassAccess(event, classToken)
       where.Form = { FormGroup: { class: classId } }
       where.Student = { Classes: { some: { id: classId } } }
+    } else if (query.student) {
+      const session = await requireSession(event)
+      const studentId = Number(query.student)
+      const student = await prisma.student.findFirst({
+        where: { id: studentId, parentUserId: session.user.id },
+        select: { id: true, Classes: { select: { id: true } } },
+      })
+
+      if (!student) {
+        throw createError({ statusCode: 404, statusMessage: 'Student not found' })
+      }
+
+      where.student = student.id
+    } else {
+      throw createError({ statusCode: 400, statusMessage: 'classId or student is required' })
     }
     
     if (query.form) {
@@ -38,6 +53,7 @@ export default defineEventHandler(async (event) => {
   }
 
   if (method === 'POST') {
+    const session = await requireSession(event)
     const body = formSubmissionCreateSchema.safeParse(await readBody(event))
 
     if (!body.success) {
@@ -47,10 +63,44 @@ export default defineEventHandler(async (event) => {
       })
     }
 
+    const student = await prisma.student.findFirst({
+      where: { id: body.data.student, parentUserId: session.user.id },
+      select: { id: true, Classes: { select: { id: true } } },
+    })
+
+    if (!student) {
+      throw createError({ statusCode: 404, statusMessage: 'Student not found' })
+    }
+
+    if (
+      body.data.classId &&
+      body.data.classId !== 'all' &&
+      !student.Classes.some((classroom) => classroom.id === body.data.classId)
+    ) {
+      throw createError({ statusCode: 403, statusMessage: 'Student is not in this class' })
+    }
+
+    const form = await prisma.form.findFirst({
+      where: {
+        id: body.data.form,
+        published: true,
+        FormGroup: {
+          class: body.data.classId && body.data.classId !== 'all'
+            ? body.data.classId
+            : { in: student.Classes.map((classroom) => classroom.id) },
+        },
+      },
+      select: { id: true },
+    })
+
+    if (!form) {
+      throw createError({ statusCode: 403, statusMessage: 'This form is not available to the student' })
+    }
+
     return await prisma.formSubmission.create({
       data: {
-        form: body.data.form,
-        student: body.data.student
+        form: form.id,
+        student: student.id
       }
     })
   }

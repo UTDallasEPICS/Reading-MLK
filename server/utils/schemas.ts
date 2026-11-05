@@ -6,8 +6,7 @@ export const userCreateSchema = z.object({
   name: z.string().min(1).max(100),
   email: emailSchema,
   role: z.enum(['coach', 'reader']).default('reader'),
-  raffleOptIn: z.boolean().optional().default(false),
-  publicityConsent: z.boolean().optional().default(false),
+  tosCheck: z.literal(true, { message: 'You must accept the Terms of Service to create an account.' }),
 })
 
 export const classCreateSchema = z.object({
@@ -32,10 +31,8 @@ export const studentUpdateSchema = z.object({
     .object(
       {
         dyslexiaFont: z.boolean().optional(),
-        fontSize: z.number().min(1).max(1.5).optional(),
         language: z.enum(['en', 'es']).optional(),
-        raffleOptIn: z.boolean().optional(),
-        publicityConsent: z.boolean().optional(),
+        theme: z.enum(['light', 'blue', 'sepia', 'sunset', 'ocean', 'forest', 'candy', 'fire', 'ice']).optional(),
       },
       'Invalid Settings'
     )
@@ -93,6 +90,7 @@ export const formComponentCreateSchema = z.object({
 export const formSubmissionCreateSchema = z.object({
   student: z.int(),
   form: z.int(),
+  classId: z.string().min(1).optional(),
   submissionDate: z.coerce.date().optional(),
 })
 

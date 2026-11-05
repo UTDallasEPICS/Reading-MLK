@@ -13,8 +13,6 @@ model User {
   email               String               @unique
   emailVerified       Boolean              @default(false)
   role                String               @default("reader")
-  raffleOptIn         Boolean              @default(true)
-  publicityConsent    Boolean              @default(false)
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
 
@@ -102,7 +100,6 @@ model Student {
   Parent                User       @relation(fields: [parentUserId], references: [id], onDelete: Cascade)
   Classes               Class[]
   Submissions           FormSubmission[]
-  WinnerOf              FormGroup[]   @relation("RaffleWinner")
   unlockedShopItems     ShopItem[]
   @@index([parentUserId])
 }
@@ -139,10 +136,8 @@ model FormGroup {
   startDate    DateTime
   endDate      DateTime?
   class        String
-  raffleWinner Int? // References the id of the Student who won the raffle for this form group
 
   Class        Class    @relation(fields: [class], references: [id], onDelete: Cascade)
-  RaffleWinner Student? @relation(name: "RaffleWinner", fields: [raffleWinner], references: [id], onDelete: SetNull)
   Forms        Form[]
   @@index([class])
   @@index([startDate])

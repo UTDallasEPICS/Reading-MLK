@@ -1,6 +1,7 @@
 import { prisma } from '../../utils/prisma'
 import { requireCoach } from '../../utils/require-session'
 import { classCreateSchema } from '../../utils/schemas'
+import { MLK_CLASS_CODE } from '../../utils/class-codes'
 
 const coachTagByClassType = {
   Teacher: 'teacher',
@@ -8,6 +9,20 @@ const coachTagByClassType = {
   'Community Group': 'other',
   Other: 'other',
 } as const
+
+const classCodeCharacters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+
+async function createClassCode() {
+  let code = ''
+
+  do {
+    code = Array.from({ length: 5 }, () =>
+      classCodeCharacters[Math.floor(Math.random() * classCodeCharacters.length)]
+    ).join('')
+  } while (code === MLK_CLASS_CODE || await prisma.class.findUnique({ where: { joinToken: code } }))
+
+  return code
+}
 
 export default defineEventHandler(async (event) => {
   const session = await requireCoach(event)
@@ -22,6 +37,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const data = parsed.data
+  const joinToken = await createClassCode()
   const coachData = {
     tag: coachTagByClassType[data.type],
     school: data.school || null,
@@ -47,6 +63,7 @@ export default defineEventHandler(async (event) => {
     return await transaction.class.create({
       data: {
         name: data.name,
+        joinToken,
         Coach: {
           connect: {
             id: coach.id,

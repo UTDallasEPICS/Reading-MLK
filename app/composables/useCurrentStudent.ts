@@ -3,7 +3,7 @@ import type { Student } from '~~/prisma/generated/client'
 export type StudentSettings = {
   dyslexiaFont: boolean
   language: 'en' | 'es'
-  fontSize: number
+  theme: string
 }
 
 const normalizeLanguage = (value: unknown): 'en' | 'es' => {
@@ -11,6 +11,8 @@ const normalizeLanguage = (value: unknown): 'en' | 'es' => {
 
   return ['es', 'spanish'].includes(language) ? 'es' : 'en'
 }
+
+const readerThemes = ['light', 'blue', 'sepia', 'sunset', 'ocean', 'forest', 'candy', 'fire', 'ice']
 
 export const useCurrentStudent = () => {
   const student = useState<Student | null>('currentStudent', () => null)
@@ -21,7 +23,7 @@ export const useCurrentStudent = () => {
     return {
       dyslexiaFont: Boolean(raw.dyslexiaFont),
       language: normalizeLanguage(raw.language),
-      fontSize: Number(raw.fontSize) || 1,
+      theme: readerThemes.includes(String(raw.theme)) ? String(raw.theme) : 'light',
     }
   })
   
@@ -44,8 +46,13 @@ export const useCurrentStudent = () => {
       if (process.client) {
         localStorage.setItem('currentStudentId', String(id))
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error('Failed to load student', e)
+
+      if (e.status == 404) {
+        clearStudent()
+        return
+      }
     }
   }
 

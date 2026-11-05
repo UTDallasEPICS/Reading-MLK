@@ -8,9 +8,7 @@ definePageMeta({ ssr: false })
 // Retrieve the active student.
 const { student, settings: settings, restoreStudent } = useCurrentStudent()
 const { totalFormsInGroup: totalForms, loadActiveFormGroup} = useCurrentFormGroup()
-const { tickets: tickets, loadProgress} = useCurrentStudentProgress()
-await loadActiveFormGroup()
-await loadProgress()
+const { completedFormIds, loadProgress } = useCurrentStudentProgress()
 const checkingStudent = ref(true)
 
 onMounted(async () => {
@@ -23,22 +21,22 @@ onMounted(async () => {
     return
   }
 
+  await loadActiveFormGroup()
+  await loadProgress()
   checkingStudent.value = false
 })
 
 
 // ── Theme class ──
 const themeClass = computed(() => {
-  const t = 'light'
+  const t = settings.value.theme !== 'light' ? `theme-${settings.value.theme}` : ''
   const d = settings.value.dyslexiaFont ? 'dyslexia-font' : ''
   return `reader-app ${t} ${d}`.trim()
 })
 
 // ── Click-triggered badge animations ──
 const xpClicked     = ref(false)
-const ticketClicked = ref(false)
 const burstCoins    = ref<{id:number; tx:number; ty:number}[]>([])
-const flyTickets    = ref<number[]>([])
 
 function triggerXpClick() {
   xpClicked.value = true
@@ -48,12 +46,6 @@ function triggerXpClick() {
     { id: Date.now() + 2, tx:  32, ty: -40 },
   ]
   setTimeout(() => { xpClicked.value = false; burstCoins.value = [] }, 800)
-}
-
-function triggerTicketClick() {
-  ticketClicked.value = true
-  flyTickets.value = [Date.now()]
-  setTimeout(() => { ticketClicked.value = false; flyTickets.value = [] }, 1000)
 }
 
 //TODO 3
@@ -88,53 +80,38 @@ const mostRecent = computed(() => {
 const showAllAnnouncements = ref(false)
 
 const completionMessage = computed(() => {
-  return ['', 'Nice!', 'Good Job!', 'Great Job!', 'Wow!', 'Awesome!', 'Amazing!'][tickets.value] ?? 'Spectacular!'
+  return ['', 'Nice!', 'Good Job!', 'Great Job!', 'Wow!', 'Awesome!', 'Amazing!'][completedFormIds.value.length] ?? 'Spectacular!'
 })
 </script>
 
 <template>
-  <div :class="themeClass" :style="`font-size: ${settings.fontSize * 16}px`" class="pb-32 px-4 pt-4 min-h-screen">
+  <div :class="themeClass" class="pb-32 px-4 pt-4 min-h-screen">
 
     <!-- ── TOP BAR ── -->
     <header class="max-w-4xl mx-auto flex justify-between items-center mb-8 px-2 relative z-[200]">
       <div class="flex items-center gap-3">
-        <div class="w-12 h-12 rounded-xl flex items-center justify-center text-white font-heading font-bold text-2xl shadow-lg"
-             style="background: var(--brand-indigo)">L</div>
-        <div class="flex flex-col">
-          <span class="font-heading font-bold text-2xl tracking-tight leading-none" style="color: var(--brand-dark)">
-            Reading<span style="color: var(--brand-indigo)">Huddle</span>
-          </span>
-          <span class="text-[10px] font-bold uppercase tracking-widest" style="color: var(--brand-mint)">Reading Buddy</span>
-        </div>
+        <NuxtLink to="/reader" aria-label="Go to Reading Buddy home">
+          <img
+            src="/reader-logo.png"
+            alt="Reading Huddle"
+            class="h-16 w-16 object-contain"
+          />
+        </NuxtLink>
       </div>
 
-      <!-- XP + Tickets badge + settings -->
+      <!-- XP + settings -->
       <div class="flex items-center gap-3">
         <!-- XP badge — click triggers star spin + coin burst -->
         <div
           class="relative bg-white/90 backdrop-blur-md px-4 py-2 rounded-xl shadow-xl border-2 flex items-center gap-3 cursor-pointer select-none transition-all"
           style="border-color: rgba(245,158,11,0.3)"
-          :class="(xpClicked || ticketClicked) ? 'scale-90 transition-transform duration-100' : 'transition-transform duration-100'"
+          :class="(xpClicked) ? 'scale-90 transition-transform duration-100' : 'transition-transform duration-100'"
           @click="triggerXpClick"
         >
-        <span class="text-lg" :class="xpClicked ? 'animate-star-spin' : ''">🪙</span>
+        <span class="text-lg" :class="xpClicked ? 'animate-star-spin' : ''">⭐️</span>
           <span class="font-heading font-bold text-amber-600">{{ Number(student?.exp) }}</span>
-          <span class="text-gray-300">|</span>
-          <span class="text-lg" :class="ticketClicked ? 'animate-ticket-wobble' : ''" @click.stop="triggerTicketClick">🎟️</span>
-          <span class="font-heading font-bold" style="color:var(--brand-mint)">{{ tickets }}</span>
           <span v-for="c in burstCoins" :key="c.id" class="absolute text-sm animate-coin-burst"
-                :style="`--tx:${c.tx}px;--ty:${c.ty}px;left:50%;top:50%;`">🪙</span>
-          <Transition name="box-pop">
-            <span
-              v-if="ticketClicked"
-              class="absolute -bottom-15 left-1/2 text-2xl animate-box-shake pointer-events-none">
-              📦
-            </span>
-          </Transition>
-          <span v-for="id in flyTickets" :key="id" class="absolute text-lg animate-ticket-fly pointer-events-none"
-                style="left:50%;top:50%;transform:translateX(-50%) translateY(-50%)">🎟️</span>
-
-
+                :style="`--tx:${c.tx}px;--ty:${c.ty}px;left:50%;top:50%;`">⭐️</span>
         </div>
 
         <!-- Settings button TODO 7-->
@@ -152,7 +129,7 @@ const completionMessage = computed(() => {
 
         <!-- Welcome heading -->
         <div class="text-center py-4">
-          <h1 class="font-heading text-5xl font-bold mb-1" style="color: var(--brand-dark)">Welcome Back! 👋</h1>
+          <h1 class="font-heading text-5xl font-bold mb-1" style="color: var(--brand-dark)">Welcome Back!</h1>
           <p class="text-lg text-gray-500 font-medium">Ready for today's reading adventure?</p>
         </div>
 
@@ -188,7 +165,6 @@ const completionMessage = computed(() => {
           class="premium-card px-5 py-4 flex items-center gap-3"
           style="background: rgba(245,158,11,0.04); border-color: rgba(245,158,11,0.15);"
         >
-          <span class="text-xl">📤</span>
           <p class="text-sm font-medium text-gray-400">No announcements right now. Check back later!</p>
         </div>
 
@@ -201,9 +177,9 @@ const completionMessage = computed(() => {
           <div class="flex items-center justify-between">
             <div>
               <p class="text-sm font-bold uppercase tracking-widest opacity-80 mb-1">Today's Challenge</p>
-              <h3 class="font-heading text-3xl font-black">Start Your Daily Form 📝</h3>
+              <h3 class="font-heading text-3xl font-black">Start Your Daily Form</h3>
               <p class="text-base opacity-80 mt-1 font-medium">
-                {{ tickets }} out of {{ totalForms }} completed this week.
+                {{ completedFormIds.length }} out of {{ totalForms }} completed this week.
                 {{ completionMessage }}
               </p>
             </div>

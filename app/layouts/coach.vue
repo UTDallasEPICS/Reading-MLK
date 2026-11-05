@@ -31,7 +31,7 @@ function navigateWithinClass(path: string) {
     <aside class="rh-sidebar">
       <div class="rh-sidebar-inner">
         <div class="rh-logo">
-          <div class="rh-logo-icon">L</div>
+          <img src="/logo.png" alt="Reading Huddle" class="rh-logo-image" />
           <div>
             <div class="rh-logo-name">Reading<span class="rh-logo-accent">Huddle</span></div>
             <div class="rh-logo-sub">Reading Coach Portal</div>
@@ -43,7 +43,6 @@ function navigateWithinClass(path: string) {
           <button @click="navigateWithinClass('/coach')"               class="rh-nav-btn" :class="{ 'rh-nav-active': route.path === '/coach' }">Dashboard</button>
           <button @click="navigateWithinClass('/coach/builder')"       class="rh-nav-btn" :class="{ 'rh-nav-active': route.path === '/coach/builder' }">Form Builder</button>
           <button @click="navigateWithinClass('/coach/progress')"      class="rh-nav-btn" :class="{ 'rh-nav-active': route.path === '/coach/progress' }">Class Progress</button>
-          <button @click="navigateWithinClass('/coach/raffle')"        class="rh-nav-btn" :class="{ 'rh-nav-active': route.path === '/coach/raffle' }">Raffle System</button>
           <button @click="navigateWithinClass('/coach/announcements')" class="rh-nav-btn" :class="{ 'rh-nav-active': route.path === '/coach/announcements' }">Announcements</button>
         </nav>
       </div>

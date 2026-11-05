@@ -16,6 +16,8 @@ const editorRef = ref<HTMLDivElement | null>(null)
 const colorWrapRef = ref<HTMLElement | null>(null)
 const showColorPicker = ref(false)
 const fontSizeInput = ref('16')
+let editingFontSize = false
+let fontSizeDirty = false
 const isComposing = ref(false)
 
 // ── Active formatting state ──
@@ -52,20 +54,38 @@ let savedRange: Range | null = null
 
 function saveSelection() {
   const sel = window.getSelection()
-  if (sel && sel.rangeCount > 0 && editorRef.value?.contains(sel.anchorNode)) {
+  if (
+    sel &&
+    sel.rangeCount > 0 &&
+    editorRef.value?.contains(sel.anchorNode) &&
+    editorRef.value.contains(sel.focusNode)
+  ) {
     savedRange = sel.getRangeAt(0).cloneRange()
   }
 }
 
 function restoreSelection() {
-  if (savedRange && editorRef.value) {
-    editorRef.value.focus()
-    const sel = window.getSelection()
-    if (sel) {
-      sel.removeAllRanges()
-      sel.addRange(savedRange)
-    }
+  const editor = editorRef.value
+  if (!editor) return false
+
+  const range = savedRange &&
+    editor.contains(savedRange.startContainer) &&
+    editor.contains(savedRange.endContainer)
+    ? savedRange
+    : document.createRange()
+
+  if (range !== savedRange) {
+    savedRange = null
+    range.selectNodeContents(editor)
   }
+
+  editor.focus()
+  const sel = window.getSelection()
+  if (!sel) return false
+
+  sel.removeAllRanges()
+  sel.addRange(range)
+  return editor.contains(sel.anchorNode) && editor.contains(sel.focusNode)
 }
 
 // ── Sync content ──
@@ -86,6 +106,7 @@ function onInput() {
   if (editorRef.value) {
     emit('update:modelValue', editorRef.value.innerHTML)
   }
+  saveSelection()
   updateActiveStates()
 }
 
@@ -100,10 +121,50 @@ function updateActiveStates() {
   isBold.value = document.queryCommandState('bold')
   isItalic.value = document.queryCommandState('italic')
   isUnderlined.value = document.queryCommandState('underline')
+  updateFontSizeInput()
+}
+
+function updateFontSizeInput() {
+  const editor = editorRef.value
+  const selection = window.getSelection()
+  if (editingFontSize || !editor || !selection?.rangeCount) return
+  const range = selection.getRangeAt(0)
+  if (!editor.contains(range.startContainer) || !editor.contains(range.endContainer)) return
+
+  const sizes = new Set<string>()
+  const addSize = (node: Node) => {
+    const element = node.nodeType === Node.ELEMENT_NODE ? node as Element : node.parentElement
+    if (element) sizes.add(String(parseFloat(getComputedStyle(element).fontSize)))
+  }
+
+  if (range.collapsed) {
+    let node = range.startContainer
+    if (node.nodeType === Node.ELEMENT_NODE && node.childNodes.length) {
+      node = node.childNodes[Math.max(0, range.startOffset - 1)] || node
+      while (node.lastChild) node = node.lastChild
+    }
+    addSize(node)
+  } else {
+    const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT)
+    let node: Node | null
+    while ((node = walker.nextNode())) {
+      if (!node.textContent || !range.intersectsNode(node)) continue
+      if (node === range.startContainer && range.startOffset === node.textContent.length) continue
+      if (node === range.endContainer && range.endOffset === 0) continue
+      addSize(node)
+    }
+  }
+  fontSizeInput.value = sizes.size === 1 ? [...sizes][0]! : ''
 }
 
 function onSelectionChange() {
-  if (editorRef.value?.contains(document.activeElement)) {
+  const selection = window.getSelection()
+  if (
+    selection &&
+    selection.rangeCount > 0 &&
+    editorRef.value?.contains(selection.anchorNode) &&
+    editorRef.value.contains(selection.focusNode)
+  ) {
     updateActiveStates()
     saveSelection()
   }
@@ -118,7 +179,26 @@ onUnmounted(() => {
 
 // ── Formatting commands ──
 function execCmd(command: string, value?: string) {
-  restoreSelection()
+  saveSelection()
+  if (!restoreSelection()) return
+
+  const editor = editorRef.value
+  const selection = window.getSelection()
+  if (
+    !editor ||
+    !selection ||
+    selection.rangeCount === 0 ||
+    !editor.contains(selection.anchorNode) ||
+    !editor.contains(selection.focusNode)
+  ) return
+
+  const range = selection.getRangeAt(0)
+  if (range.collapsed && editor.textContent) {
+    range.selectNodeContents(editor)
+    selection.removeAllRanges()
+    selection.addRange(range)
+  }
+
   document.execCommand('styleWithCSS', false, 'true')
   document.execCommand(command, false, value)
   saveSelection()
@@ -138,13 +218,28 @@ function applyFontSize(size: string) {
   if (!num || num < 1 || num > 200) return
   fontSizeInput.value = String(num)
 
-  restoreSelection()
+  saveSelection()
+  if (!restoreSelection()) return
   document.execCommand('styleWithCSS', false, 'true')
 
   const selection = window.getSelection()
-  if (!selection || selection.rangeCount === 0) return
+  const editor = editorRef.value
+  if (
+    !selection ||
+    selection.rangeCount === 0 ||
+    !editor ||
+    !editor.contains(selection.anchorNode) ||
+    !editor.contains(selection.focusNode)
+  ) return
 
-  const range = selection.getRangeAt(0)
+  let range = selection.getRangeAt(0)
+
+  if (range.collapsed && editor.textContent) {
+    range = document.createRange()
+    range.selectNodeContents(editor)
+    selection.removeAllRanges()
+    selection.addRange(range)
+  }
 
   if (range.collapsed) {
     // If no text is selected, create a span with a zero-width space
@@ -164,24 +259,32 @@ function applyFontSize(size: string) {
     return
   }
 
-  // Use execCommand fontSize with a marker value, then replace the
-  // generated tags with <span style="font-size:Npx">
-  document.execCommand('fontSize', false, '7')
-
-  if (editorRef.value) {
-    // Depending on the browser and styleWithCSS, it might generate <font size="7"> or <span style="font-size: xxx">
-    // We look for elements that have font-size or size=7
-    const fontElements = Array.from(editorRef.value.querySelectorAll('font[size="7"], span[style*="font-size"]'))
-    fontElements.forEach((el) => {
-      // Only replace if it matches the marker we just injected
-      if (el.getAttribute('size') === '7' || (el as HTMLElement).style.fontSize === '-webkit-xxx-large' || (el as HTMLElement).style.fontSize === '48px') {
-        const replacement = document.createElement('span')
-        replacement.style.fontSize = `${num}px`
-        replacement.innerHTML = el.innerHTML
-        el.parentNode?.replaceChild(replacement, el)
-      }
-    })
+  // Replace existing font sizes within the selected content, then wrap it in a
+  // span so the chosen size overrides previous formatting.
+  let container = range.commonAncestorContainer
+  let wrapper = container.nodeType === Node.ELEMENT_NODE ? container as Element : container.parentElement
+  while (wrapper && wrapper !== editor && ['SPAN', 'FONT'].includes(wrapper.tagName)
+    && range.toString() === wrapper.textContent) {
+    range.selectNode(wrapper)
+    wrapper = wrapper.parentElement
   }
+  const fragment = range.extractContents()
+  fragment.querySelectorAll<HTMLElement>('[style]').forEach((element) => {
+    element.style.removeProperty('font-size')
+  })
+  fragment.querySelectorAll<HTMLElement>('font[size]').forEach((element) => {
+    element.removeAttribute('size')
+  })
+
+  const replacement = document.createElement('span')
+  replacement.style.fontSize = `${num}px`
+  replacement.appendChild(fragment)
+  range.insertNode(replacement)
+
+  const updatedRange = document.createRange()
+  updatedRange.selectNodeContents(replacement)
+  selection.removeAllRanges()
+  selection.addRange(updatedRange)
 
   saveSelection()
   onInput()
@@ -200,15 +303,29 @@ function onCustomColor(e: Event) {
 function onFontSizeKeydown(e: KeyboardEvent) {
   if (e.key === 'Enter') {
     e.preventDefault()
-    applyFontSize(fontSizeInput.value)
+    commitFontSize()
   }
 }
 
-function onFontSizeBlur() {
+function commitFontSize() {
+  if (!fontSizeDirty) return
+  fontSizeDirty = false
   applyFontSize(fontSizeInput.value)
 }
 
+function onFontSizeFocus() {
+  saveSelection()
+  editingFontSize = true
+}
+
+function onFontSizeBlur() {
+  editingFontSize = false
+  commitFontSize()
+  updateFontSizeInput()
+}
+
 function selectPresetSize(size: string) {
+  fontSizeDirty = false
   fontSizeInput.value = size
   applyFontSize(size)
 }
@@ -246,6 +363,7 @@ const editorMinHeight = computed(() => {
       <!-- Font Family -->
       <select
         class="rte-select rte-font-select"
+        @mousedown="saveSelection"
         @change="applyFont(($event.target as HTMLSelectElement).value)"
         title="Font Family"
       >
@@ -262,7 +380,9 @@ const editorMinHeight = computed(() => {
           title="Font Size"
           @keydown="onFontSizeKeydown"
           @blur="onFontSizeBlur"
-          @focus="saveSelection"
+          @mousedown="saveSelection"
+          @focus="onFontSizeFocus"
+          @input="fontSizeDirty = true"
         />
         <div class="rte-size-dropdown">
           <button
@@ -346,10 +466,11 @@ const editorMinHeight = computed(() => {
       :data-placeholder="placeholder || 'Start typing...'"
       :style="{ minHeight: editorMinHeight }"
       @input="onInput"
+      @focus="saveSelection"
       @compositionstart="onCompositionStart"
       @compositionend="onCompositionEnd"
-      @mouseup="updateActiveStates"
-      @keyup="updateActiveStates"
+      @mouseup="saveSelection(); updateActiveStates()"
+      @keyup="saveSelection(); updateActiveStates()"
     />
   </div>
 </template>

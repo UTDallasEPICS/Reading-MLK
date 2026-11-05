@@ -1,9 +1,12 @@
 <script setup lang="ts">
 
 import { authClient } from '~/utils/auth-client'
-import { onMounted } from 'vue'
 
-const { student, settings: globalSettings, saveSettings: pushSettings, clearStudent } = useCurrentStudent()
+const { student, settings: globalSettings, saveSettings: pushSettings, clearStudent, restoreStudent } = useCurrentStudent()
+
+if (!student.value) {
+  await restoreStudent()
+}
 
 if (!student.value) {
   await navigateTo('/reader/profile')
@@ -12,12 +15,7 @@ if (!student.value) {
 const settings = reactive({ 
   dyslexiaFont: globalSettings.value.dyslexiaFont,
   language: globalSettings.value.language,
-  fontSize: globalSettings.value.fontSize,
-})
-
-const accountSettings = reactive({
-  raffleOptIn: true,
-  publicityConsent: false,
+  theme: globalSettings.value.theme,
 })
 
 async function logout() {
@@ -56,49 +54,9 @@ async function changeEmail() {
   }
 }
 
-//Loading accont settings
-async function loadAccountSettings() {
-  try {
-    const data = await $fetch('/api/users/account-settings', {
-      method: 'GET',
-    })
-
-    accountSettings.raffleOptIn = data.raffleOptIn
-    accountSettings.publicityConsent = data.publicityConsent
-  } catch (error) {
-    console.error('Failed to load account settings:', error)
-  }
-}
-
-onMounted(async () => {
-  await loadAccountSettings()
-})
-
-
-//Saving aacount settings
-async function saveAccountSettings() {
-  try {
-    await $fetch<{
-      success: boolean
-      settings: {
-        raffleOptIn: boolean
-        publicityConsent: boolean
-      }
-    }>('/api/users/account-settings', {
-      method: 'PUT',
-      body: {
-        raffleOptIn: accountSettings.raffleOptIn,
-        publicityConsent: accountSettings.publicityConsent,
-      },
-    })
-  } catch (error) {
-    console.error('Failed to save account settings:', error)
-  }
-}
-
 // ── Theme class ── 
 const themeClass = computed(() => {
-  const t = 'light'
+  const t = settings.theme !== 'light' ? `theme-${settings.theme}` : ''
   const d = settings.dyslexiaFont ? 'dyslexia-font' : ''
   return `reader-app ${t} ${d}`.trim()
 })
@@ -113,19 +71,22 @@ watch(settings, (newSettings) => {
 <template>
   <div
     :class="themeClass"
-    :style="`font-size: ${settings.fontSize * 16}px`"
     class="pb-32 px-4 pt-4 min-h-screen relative text-gray-800"
   >
 
     <!-- TOP BAR -->
     <header
-      class="absolute top-4 left-0 right-0 w-full max-w-4xl mx-auto flex justify-end items-center px-6 z-[200]"
+      class="absolute top-4 left-0 right-0 w-full max-w-4xl mx-auto flex justify-start items-center px-6 z-[200]"
     >
       <NuxtLink
         to="/reader"
-        class="w-14 h-14 bg-white rounded-xl flex items-center justify-center text-2xl transition-all border border-gray-200 shadow-lg hover:scale-110 active:scale-95"
+        aria-label="Go to Reading Buddy home"
       >
-        🏠
+        <img
+          src="/reader-logo.png"
+          alt="Reading Huddle"
+          class="h-16 w-16 object-contain"
+        />
       </NuxtLink>
     </header>
 
@@ -156,36 +117,6 @@ watch(settings, (newSettings) => {
         >
           Switch Profile
         </NuxtLink>
-      </div>
-
-      <!-- FONT SIZE -->
-      <div>
-        <label
-          class="block text-[10px] font-black text-gray-600 uppercase tracking-widest mb-1.5"
-        >
-          Text Size
-        </label>
-
-        <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-          <span class="text-sm font-bold text-gray-500">A</span>
-
-          <input
-            type="range"
-            min="1"
-            max="1.5"
-            step="0.1"
-            v-model.number="settings.fontSize"
-            class="flex-grow h-2 bg-gray-200 rounded-full appearance-none cursor-pointer accent-indigo-500"
-          />
-
-          <span class="text-lg font-bold text-gray-500">A</span>
-
-          <span
-            class="text-xs font-bold text-indigo-600 bg-indigo-100 px-2 py-1 rounded-lg"
-          >
-            {{ Math.round(settings.fontSize * 100) }}%
-          </span>
-        </div>
       </div>
 
       <!-- DYSLEXIA -->
@@ -235,62 +166,6 @@ watch(settings, (newSettings) => {
         </button>
       </div>
 
-      <!-- RAFFLE -->
-      <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-        <div>
-          <h4 class="font-bold text-sm text-gray-800">
-            Raffle Participation
-          </h4>
-
-          <p class="text-xs text-gray-600">
-            Opt in or out of Friends of MLK raffles
-          </p>
-        </div>
-
-        <button
-          @click="accountSettings.raffleOptIn = !accountSettings.raffleOptIn; saveAccountSettings()"
-          :class="[
-            'w-12 h-6 rounded-full transition-all relative',
-            accountSettings.raffleOptIn ? 'bg-green-400' : 'bg-gray-300'
-          ]"
-        >
-          <div
-            :class="[
-              'w-5 h-5 bg-white rounded-full shadow absolute top-0.5 transition-all',
-              accountSettings.raffleOptIn ? 'right-0.5' : 'left-0.5'
-            ]"
-          />
-        </button>
-      </div>
-
-      <!-- PUBLICITY -->
-      <div class="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-        <div>
-          <h4 class="font-bold text-sm text-gray-800">
-            Publicity Consent
-          </h4>
-
-          <p class="text-xs text-gray-600">
-            Allow Friends of MLK to use responses for publicity
-          </p>
-        </div>
-
-        <button
-          @click="accountSettings.publicityConsent = !accountSettings.publicityConsent; saveAccountSettings()"
-          :class="[
-            'w-12 h-6 rounded-full transition-all relative',
-            accountSettings.publicityConsent ? 'bg-green-400' : 'bg-gray-300'
-          ]"
-        >
-          <div
-            :class="[
-              'w-5 h-5 bg-white rounded-full shadow absolute top-0.5 transition-all',
-              accountSettings.publicityConsent ? 'right-0.5' : 'left-0.5'
-            ]"
-          />
-        </button>
-      </div>
-
       <!-- CHANGE EMAIL -->
       <div>
         <label
@@ -322,7 +197,7 @@ watch(settings, (newSettings) => {
         @click="logout"
         class="w-full bg-red-500 hover:bg-red-600 text-white font-bold text-base py-3 rounded-xl shadow-lg transition active:scale-95 mt-2"
       >
-        Logout 👋
+        Logout
       </button>
 
     </div>

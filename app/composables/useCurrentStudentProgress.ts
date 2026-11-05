@@ -22,9 +22,8 @@ export const useCurrentStudentProgress = () => {
   })
 
   // Computed progress metrics
-  const tickets = computed(() => completedFormIds.value.length)
   const isFormGroupCompleted = computed(() => {
-    return totalFormsInGroup.value > 0 && tickets.value >= totalFormsInGroup.value
+    return totalFormsInGroup.value > 0 && completedFormIds.value.length >= totalFormsInGroup.value
   })
 
   // Fetch student's progress (form submissions)
@@ -46,7 +45,7 @@ export const useCurrentStudentProgress = () => {
   }
 
   // Log a new form submission to track progress
-  const logFormSubmission = async (formId: number) => {
+  const logFormSubmission = async (formId: number, classId: string | null) => {
     if (!student.value?.id) {
       console.error('Cannot log form submission: No student is currently active.')
       return null
@@ -57,7 +56,8 @@ export const useCurrentStudentProgress = () => {
         method: 'POST',
         body: {
           student: student.value.id,
-          form: formId
+          form: formId,
+          ...(classId ? { classId } : {}),
         }
       })
 
@@ -80,7 +80,6 @@ export const useCurrentStudentProgress = () => {
   return {
     submissions,
     completedFormIds,
-    tickets,
     isFormGroupCompleted,
     loadProgress,
     logFormSubmission,

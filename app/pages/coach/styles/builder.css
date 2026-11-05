@@ -182,6 +182,8 @@
 .btn-dark:hover { background: black; }
 .btn-ghost   { padding: 0.75rem 1.5rem; border-radius: 0.75rem; font-weight: 500; background: white; border: 2px solid #e5e7eb; color: #6b7280; cursor: pointer; transition: background 0.15s; }
 .btn-ghost:hover { background: #f9fafb; }
+.btn-danger  { padding: 0.75rem 1.5rem; border-radius: 0.75rem; font-weight: 500; background: #fef2f2; border: 2px solid #fecaca; color: #dc2626; cursor: pointer; transition: background 0.15s; }
+.btn-danger:hover { background: #fee2e2; }
 .btn-indigo  { padding: 0.75rem 1.5rem; border-radius: 0.75rem; font-weight: 500; background: #4f46e5; color: white; border: none; cursor: pointer; box-shadow: 0 4px 14px rgba(99,102,241,0.3); transition: background 0.15s; }
 .btn-indigo:hover { background: #4338ca; }
 .btn-indigo:active { transform: scale(0.97); }
