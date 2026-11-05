@@ -84,9 +84,9 @@ async function applyItem(item: any) {
       <div class="flex items-center gap-3">
         <NuxtLink to="/reader" aria-label="Go to Reading Buddy home">
           <img
-            src="/logo.jpg"
+            src="/reader-logo.png"
             alt="Reading Huddle"
-            class="h-16 w-16 rounded-xl bg-white object-contain shadow-lg"
+            class="h-16 w-16 object-contain"
           />
         </NuxtLink>
       </div>
