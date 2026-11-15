@@ -1,4 +1,5 @@
 import { prisma } from '../server/utils/prisma'
+import { seededAdminName } from '../server/utils/master-admin'
 
 function makeLocalDate(dateString: string) {
   const [year, month, day] = dateString.split('-').map(Number)
@@ -9,9 +10,8 @@ async function main() {
   const seededEmails = [
     'parent1@example.com',
     'parent2@gmail.com',
-    '[Admin email here]'
+    seededAdminName
   ]
-  const seededAdminName = '[Admin name here]'
 
   await prisma.user.deleteMany({
     where: {
