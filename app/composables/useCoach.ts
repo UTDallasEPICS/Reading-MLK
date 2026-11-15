@@ -6,7 +6,11 @@ import utc from 'dayjs/plugin/utc'
 dayjs.extend(utc)
 export const useCoach = () => {
   const { classId } = useSelectedClass()
-  const callFormApi = async <T>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', params: Record<string, unknown> = {}, body?: Record<string, unknown>): Promise<T> => {
+  const callFormApi = async <T>(
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE',
+    params: Record<string, unknown> = {},
+    body?: Record<string, unknown>
+  ): Promise<T> => {
     if (!classId.value) {
       throw new Error('Select a class before managing forms')
     }
@@ -17,15 +21,21 @@ export const useCoach = () => {
       classId: classId.value,
     }
     const scopedBody = { ...body, classId: classId.value }
-    const queryString = method === 'GET' || method === 'DELETE'
-      ? `?${new URLSearchParams(Object.entries(scopedParams).reduce((acc, [key, value]) => {
-          if (value !== undefined && value !== null) {
-            acc[key] = String(value)
-          }
+    const queryString =
+      method === 'GET' || method === 'DELETE'
+        ? `?${new URLSearchParams(
+            Object.entries(scopedParams).reduce(
+              (acc, [key, value]) => {
+                if (value !== undefined && value !== null) {
+                  acc[key] = String(value)
+                }
 
-          return acc
-        }, {} as Record<string, string>)).toString()}`
-      : ''
+                return acc
+              },
+              {} as Record<string, string>
+            )
+          ).toString()}`
+        : ''
 
     return await $fetch<T>(`/api/form${queryString}`, {
       method,
@@ -105,16 +115,18 @@ export const useCoach = () => {
         reference: question.questionOptions?.reference || '',
         referenceEs: question.questionOptions?.referenceEs || '',
         url: question.questionOptions?.url || '',
-        choices: Array.isArray(question.questionOptions?.choices) ? question.questionOptions.choices : question.choices,
+        choices: Array.isArray(question.questionOptions?.choices)
+          ? question.questionOptions.choices
+          : question.choices,
       })),
     }
   }
 
   // ── Builder state ──
-  const builderSubTab  = useState<'history' | 'creation'>('builderSubTab', () => 'history')
-  const formTitle      = useState('formTitle', () => '')
-  const editingFormId  = useState<number | null>('editingFormId', () => null)
-  const questions      = useState<any[]>('questions', () => [])
+  const builderSubTab = useState<'history' | 'creation'>('builderSubTab', () => 'history')
+  const formTitle = useState('formTitle', () => '')
+  const editingFormId = useState<number | null>('editingFormId', () => null)
+  const questions = useState<any[]>('questions', () => [])
 
   // Week/day pickers — default to current Monday
   const todayDate = new Date()
@@ -123,17 +135,22 @@ export const useCoach = () => {
   mon.setDate(todayDate.getDate() - dayOff)
   const monStr = formatYmdLocal(mon)
 
-  const formWeekStart    = useState('formWeekStart', () => monStr)
-  const formDays         = useState<string[]>('formDays', () => ['Monday'])
+  const formWeekStart = useState('formWeekStart', () => monStr)
+  const formDays = useState<string[]>('formDays', () => ['Monday'])
   const historyWeekStart = useState('historyWeekStart', () => '')
-  const historyStatusSelection = useState<Array<'published' | 'unpublished'>>('historyStatusSelection', () => ['published', 'unpublished'])
+  const historyStatusSelection = useState<Array<'published' | 'unpublished'>>(
+    'historyStatusSelection',
+    () => ['published', 'unpublished']
+  )
   const historyGroupStartDate = useState('historyGroupStartDate', () => '')
   const historyGroupEndDate = useState('historyGroupEndDate', () => '')
   const selectedFormDetails = useState<any | null>('selectedFormDetails', () => null)
 
   const toggleHistoryStatus = (value: 'published' | 'unpublished') => {
     if (historyStatusSelection.value.includes(value)) {
-      historyStatusSelection.value = historyStatusSelection.value.filter((selected) => selected !== value)
+      historyStatusSelection.value = historyStatusSelection.value.filter(
+        (selected) => selected !== value
+      )
       return
     }
 
@@ -189,11 +206,34 @@ export const useCoach = () => {
   }
 
   const defaultQuestions = (): any[] => [
-    { id: Date.now(),     type: 'video',   text: '', textEs: '', reference: '', referenceEs: '', url: '' },
-    { id: Date.now() + 1, type: 'text',    text: '', textEs: '', reference: '', referenceEs: '', url: '' },
-    { id: Date.now() + 2, type: 'mcq',     text: '', textEs: '', reference: '', referenceEs: '', url: '',
+    {
+      id: Date.now(),
+      type: 'video',
+      text: '',
+      textEs: '',
+      reference: '',
+      referenceEs: '',
+      url: '',
+    },
+    {
+      id: Date.now() + 1,
+      type: 'text',
+      text: '',
+      textEs: '',
+      reference: '',
+      referenceEs: '',
+      url: '',
+    },
+    {
+      id: Date.now() + 2,
+      type: 'mcq',
+      text: '',
+      textEs: '',
+      reference: '',
+      referenceEs: '',
+      url: '',
       choices: [
-        { text: '', correct: true  },
+        { text: '', correct: true },
         { text: '', correct: false },
         { text: '', correct: false },
         { text: '', correct: false },
@@ -217,9 +257,7 @@ export const useCoach = () => {
         form.weekStart >= historyGroupStartDate.value
 
       const matchesGroupEnd =
-        !historyGroupEndDate.value ||
-        !form.weekStart ||
-        form.weekStart <= historyGroupEndDate.value
+        !historyGroupEndDate.value || !form.weekStart || form.weekStart <= historyGroupEndDate.value
 
       return matchesStatus && matchesGroupStart && matchesGroupEnd
     })
@@ -313,10 +351,18 @@ export const useCoach = () => {
 
   // ── CRUD ──
   const addQuestion = (type: string) => {
-    const q: any = { id: Date.now(), type, text: '', textEs: '', reference: '', referenceEs: '', url: '' }
+    const q: any = {
+      id: Date.now(),
+      type,
+      text: '',
+      textEs: '',
+      reference: '',
+      referenceEs: '',
+      url: '',
+    }
     if (type === 'mcq') {
       q.choices = [
-        { text: '', correct: true  },
+        { text: '', correct: true },
         { text: '', correct: false },
         { text: '', correct: false },
         { text: '', correct: false },
@@ -326,12 +372,18 @@ export const useCoach = () => {
   }
 
   const publishForm = async () => {
-    if (!formTitle.value)       { alert('Please enter a title!');           return }
-    if (!formDays.value.length) { alert('Please select at least one day!'); return }
+    if (!formTitle.value) {
+      alert('Please enter a title!')
+      return
+    }
+    if (!formDays.value.length) {
+      alert('Please select at least one day!')
+      return
+    }
 
     try {
       const weekStart = getLastMonday(formWeekStart.value || '')
-      const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
+      const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
       if (editingFormId.value) {
         const targetDay = formDays.value[0] || 'Monday'
@@ -345,15 +397,21 @@ export const useCoach = () => {
         if (!startDate) throw new Error('Invalid week start date')
         startDate.setDate(startDate.getDate() + dayIndex)
 
-        await callFormApi('PUT', {}, {
-          action: 'updateForm',
-          id: editingFormId.value,
-          startDate: formatYmdLocal(startDate),
-          published: true,
-          title: formTitle.value,
-        })
+        await callFormApi(
+          'PUT',
+          {},
+          {
+            action: 'updateForm',
+            id: editingFormId.value,
+            startDate: formatYmdLocal(startDate),
+            published: true,
+            title: formTitle.value,
+          }
+        )
 
-        const existingForm = publishedForms.value.find((form) => Number(form.id) === Number(editingFormId.value))
+        const existingForm = publishedForms.value.find(
+          (form) => Number(form.id) === Number(editingFormId.value)
+        )
         const existingComponentIds = new Set<number>(
           (existingForm?.questions ?? [])
             .map((question: any) => Number(question.id))
@@ -363,36 +421,49 @@ export const useCoach = () => {
         for (let index = 0; index < questions.value.length; index++) {
           const question = questions.value[index]
           const numericQuestionId = Number(question.id)
-          const isExistingComponent = Number.isInteger(numericQuestionId) && existingComponentIds.has(numericQuestionId)
+          const isExistingComponent =
+            Number.isInteger(numericQuestionId) && existingComponentIds.has(numericQuestionId)
 
           if (isExistingComponent) {
-            await callFormApi('PUT', {}, {
-              action: 'updateComponent',
-              id: numericQuestionId,
-              order: index,
-              questionType: question.type,
-              questionText: toApiQuestionText(question, formTitle.value),
-              questionOptions: buildQuestionOptions(question),
-            })
+            await callFormApi(
+              'PUT',
+              {},
+              {
+                action: 'updateComponent',
+                id: numericQuestionId,
+                order: index,
+                questionType: question.type,
+                questionText: toApiQuestionText(question, formTitle.value),
+                questionOptions: buildQuestionOptions(question),
+              }
+            )
 
             existingComponentIds.delete(numericQuestionId)
           } else {
-            await callFormApi('POST', {}, {
-              action: 'createComponent',
-              form: editingFormId.value,
-              order: index,
-              questionType: question.type,
-              questionText: toApiQuestionText(question, formTitle.value),
-              questionOptions: buildQuestionOptions(question),
-            })
+            await callFormApi(
+              'POST',
+              {},
+              {
+                action: 'createComponent',
+                form: editingFormId.value,
+                order: index,
+                questionType: question.type,
+                questionText: toApiQuestionText(question, formTitle.value),
+                questionOptions: buildQuestionOptions(question),
+              }
+            )
           }
         }
 
         for (const removedId of existingComponentIds) {
-          await callFormApi('DELETE', {}, {
-            action: 'deleteComponent',
-            id: removedId,
-          })
+          await callFormApi(
+            'DELETE',
+            {},
+            {
+              action: 'deleteComponent',
+              id: removedId,
+            }
+          )
         }
 
         await loadPublishedForms()
@@ -416,12 +487,16 @@ export const useCoach = () => {
 
         startDate.setDate(startDate.getDate() + dayIndex)
 
-          const createdFormResponse = await callFormApi<any>('POST', {}, {
+        const createdFormResponse = await callFormApi<any>(
+          'POST',
+          {},
+          {
             action: 'createForm',
             startDate: formatYmdLocal(startDate),
             published: true,
             title: formTitle.value,
-          })
+          }
+        )
 
         const createdForm = createdFormResponse?.data
 
@@ -432,14 +507,18 @@ export const useCoach = () => {
         for (let index = 0; index < questions.value.length; index++) {
           const question = questions.value[index]
 
-          await callFormApi('POST', {}, {
-            action: 'createComponent',
-            form: createdForm.id,
-            order: index,
-            questionType: question.type,
-            questionText: toApiQuestionText(question, formTitle.value),
-            questionOptions: buildQuestionOptions(question),
-          })
+          await callFormApi(
+            'POST',
+            {},
+            {
+              action: 'createComponent',
+              form: createdForm.id,
+              order: index,
+              questionType: question.type,
+              questionText: toApiQuestionText(question, formTitle.value),
+              questionOptions: buildQuestionOptions(question),
+            }
+          )
         }
       }
 
@@ -452,10 +531,10 @@ export const useCoach = () => {
   }
 
   const editPublishedForm = (form: any) => {
-    formTitle.value     = form.title
+    formTitle.value = form.title
     formWeekStart.value = form.weekStart || formWeekStart.value
-    formDays.value      = [form.day || 'Monday']
-    questions.value     = JSON.parse(JSON.stringify(form.questions))
+    formDays.value = [form.day || 'Monday']
+    questions.value = JSON.parse(JSON.stringify(form.questions))
     editingFormId.value = form.id
     builderSubTab.value = 'creation'
     navigateTo({ path: '/coach/builder', query: { class: classId.value } })
@@ -467,10 +546,14 @@ export const useCoach = () => {
     if (!window.confirm('Are you sure you want to delete this form?')) return
 
     try {
-      await callFormApi('DELETE', {}, {
-        action: 'deleteForm',
-        id: formId,
-      })
+      await callFormApi(
+        'DELETE',
+        {},
+        {
+          action: 'deleteForm',
+          id: formId,
+        }
+      )
 
       publishedForms.value = publishedForms.value.filter((form) => Number(form.id) !== formId)
       editingFormId.value = null
@@ -485,16 +568,20 @@ export const useCoach = () => {
   }
 
   const toggleFormPublish = async (form: any) => {
-// "unpublished" = "nonactive"  b
-// a form being "published" is measured with True and False - boolean value
+    // "unpublished" = "nonactive"  b
+    // a form being "published" is measured with True and False - boolean value
     form.status = form.status === 'Active' ? 'Unpublished' : 'Active'
     const newStatus = form.status === 'Active' ? true : false
 
-    await callFormApi('PUT', {}, {
-      action: 'updateForm',
-      id: form.id,
-      published: newStatus,
-    })
+    await callFormApi(
+      'PUT',
+      {},
+      {
+        action: 'updateForm',
+        id: form.id,
+        published: newStatus,
+      }
+    )
   }
 
   const viewFormDetails = (form: any) => {
@@ -503,38 +590,54 @@ export const useCoach = () => {
 
   // ── Students / Progress ──
   const students = useState<any[]>('coachStudents', () => [])
+  const studentsLoading = useState<boolean>('coachStudentsLoading', () => false)
+  const studentsError = useState<string>('coachStudentsError', () => '')
 
   const loadStudents = async () => {
     if (!classId.value) {
       students.value = []
+      studentsError.value = ''
+      studentsLoading.value = false
       return
     }
 
-    const classStudents = await $fetch<Array<{ id: number; name: string; exp: number }>>(
-      '/api/student',
-      {
-        method: 'GET',
-        query: { classId: classId.value },
-      }
-    )
+    studentsLoading.value = true
+    studentsError.value = ''
 
-    students.value = classStudents.map((student) => ({
-      ...student,
-      initials: student.name
-        .split(/\s+/)
-        .filter(Boolean)
-        .slice(0, 2)
-        .map((part) => part[0]?.toUpperCase())
-        .join(''),
-      streak: 0,
-      lastActive: '',
-    }))
+    try {
+      const classStudents = await $fetch<Array<{ id: number; name: string; exp: number }>>(
+        '/api/student',
+        {
+          method: 'GET',
+          query: { classId: classId.value },
+        }
+      )
+
+      students.value = classStudents.map((student) => ({
+        ...student,
+        initials: student.name
+          .split(/\s+/)
+          .filter(Boolean)
+          .slice(0, 2)
+          .map((part) => part[0]?.toUpperCase())
+          .join(''),
+        streak: 0,
+        lastActive: '',
+      }))
+    } catch (error) {
+      studentsError.value =
+        error instanceof Error ? error.message : 'Could not load students for this class.'
+      throw error
+    } finally {
+      studentsLoading.value = false
+    }
   }
 
   watch(
     classId,
     async () => {
       students.value = []
+      studentsError.value = ''
 
       try {
         await loadStudents()
@@ -546,50 +649,102 @@ export const useCoach = () => {
   )
 
   const searchStudent = useState('searchStudent', () => '')
-  const sortStudent   = useState('sortStudent',   () => 'xp')
+  const sortStudent = useState('sortStudent', () => 'xp')
 
   const filteredAndSortedStudents = computed(() => {
     let res = students.value
     if (searchStudent.value) {
       const q = searchStudent.value.toLowerCase()
-      res = res.filter(s => s.name.toLowerCase().includes(q))
+      res = res.filter((s) => s.name.toLowerCase().includes(q))
     }
     return [...res].sort((a, b) => {
       if (sortStudent.value === 'xp') return b.exp - a.exp
-      if (sortStudent.value === 'streak')  return b.streak  - a.streak
-      if (sortStudent.value === 'name')    return a.name.localeCompare(b.name)
+      if (sortStudent.value === 'streak') return b.streak - a.streak
+      if (sortStudent.value === 'name') return a.name.localeCompare(b.name)
       return 0
     })
   })
 
   // ── Announcements ──
-  const announcementSubTab = useState<'creation' | 'history'>('announcementSubTab', () => 'creation')
+  const announcementSubTab = useState<'creation' | 'history'>(
+    'announcementSubTab',
+    () => 'creation'
+  )
 
   const announcements = useState<any[]>('announcements', () => [
-    { id: 1, title: 'Summer Reading Challenge!', content: 'Log 20 books this month to win a Super Sage badge!', icon: '🌟', startDate: '2026-03-01', endDate: '2026-03-31', weekStart: '2026-03-02', day: 'Monday'    },
-    { id: 2, title: 'New Badges Available',       content: 'Check the shop for new limited edition themes.',     icon: '🎉', startDate: '2026-03-05', endDate: '',           weekStart: '2026-03-02', day: 'Thursday'  },
-    { id: 3, title: 'Friday Game Night',          content: 'Join us in the library for board games and snacks!', icon: '🎲', startDate: '2026-03-06', endDate: '',           weekStart: '2026-03-02', day: 'Friday'    },
-    { id: 4, title: 'Week 10 Progress',           content: 'You are doing amazing! Keep up the streak.',         icon: '📈', startDate: '2026-03-09', endDate: '',           weekStart: '2026-03-09', day: 'Monday'    },
-    { id: 5, title: 'Author Visit',               content: 'Virtual session this Wednesday at 10 AM.',           icon: '✍️', startDate: '2026-03-11', endDate: '',           weekStart: '2026-03-09', day: 'Wednesday' },
+    {
+      id: 1,
+      title: 'Summer Reading Challenge!',
+      content: 'Log 20 books this month to win a Super Sage badge!',
+      icon: '🌟',
+      startDate: '2026-03-01',
+      endDate: '2026-03-31',
+      weekStart: '2026-03-02',
+      day: 'Monday',
+    },
+    {
+      id: 2,
+      title: 'New Badges Available',
+      content: 'Check the shop for new limited edition themes.',
+      icon: '🎉',
+      startDate: '2026-03-05',
+      endDate: '',
+      weekStart: '2026-03-02',
+      day: 'Thursday',
+    },
+    {
+      id: 3,
+      title: 'Friday Game Night',
+      content: 'Join us in the library for board games and snacks!',
+      icon: '🎲',
+      startDate: '2026-03-06',
+      endDate: '',
+      weekStart: '2026-03-02',
+      day: 'Friday',
+    },
+    {
+      id: 4,
+      title: 'Week 10 Progress',
+      content: 'You are doing amazing! Keep up the streak.',
+      icon: '📈',
+      startDate: '2026-03-09',
+      endDate: '',
+      weekStart: '2026-03-09',
+      day: 'Monday',
+    },
+    {
+      id: 5,
+      title: 'Author Visit',
+      content: 'Virtual session this Wednesday at 10 AM.',
+      icon: '✍️',
+      startDate: '2026-03-11',
+      endDate: '',
+      weekStart: '2026-03-09',
+      day: 'Wednesday',
+    },
   ])
 
   const newAnnouncement = useState<any>('newAnnouncement', () => ({
-    title: '', content: '', icon: '🌟',
+    title: '',
+    content: '',
+    icon: '🌟',
     startDate: new Date().toISOString().split('T')[0],
-    endDate: '', weekStart: monStr, day: 'Monday',
+    endDate: '',
+    weekStart: monStr,
+    day: 'Monday',
   }))
 
   const announcementFilterWeek = useState('announcementFilterWeek', () => monStr)
 
   const filteredAnnouncements = computed(() =>
-    announcements.value.filter(a =>
-      !announcementFilterWeek.value || a.weekStart === announcementFilterWeek.value
+    announcements.value.filter(
+      (a) => !announcementFilterWeek.value || a.weekStart === announcementFilterWeek.value
     )
   )
 
   const isAnnouncementActive = (ann: any): boolean => {
     const now = new Date().toISOString().split('T')[0]
-    if(!now) return false // in case of invalid date
+    if (!now) return false // in case of invalid date
     if (ann.startDate > now) return false
     if (ann.endDate && ann.endDate < now) return false
     return true
@@ -597,12 +752,19 @@ export const useCoach = () => {
 
   const addAnnouncement = () => {
     const na = newAnnouncement.value
-    if (!na.title || !na.content) { alert('Please fill in title and message!'); return }
+    if (!na.title || !na.content) {
+      alert('Please fill in title and message!')
+      return
+    }
     announcements.value.push({ id: Date.now(), ...JSON.parse(JSON.stringify(na)) })
     newAnnouncement.value = {
-      title: '', content: '', icon: '🌟',
+      title: '',
+      content: '',
+      icon: '🌟',
       startDate: new Date().toISOString().split('T')[0],
-      endDate: '', weekStart: monStr, day: 'Monday',
+      endDate: '',
+      weekStart: monStr,
+      day: 'Monday',
     }
   }
 
@@ -612,19 +774,49 @@ export const useCoach = () => {
 
   return {
     // builder
-    builderSubTab, formTitle, editingFormId, questions,
-    formWeekStart, formDays, historyWeekStart, historyStatusSelection, historyGroupStartDate, historyGroupEndDate, toggleHistoryStatus, getLastMonday,
-    getCalculatedDate, formatDate, defaultQuestions,
-    publishedForms, filteredPublishedForms,
-    selectedFormDetails, viewFormDetails,
-    draggedIdx, dragStart, onDrop,
-    addQuestion, publishForm, editPublishedForm, deletePublishedForm, toggleFormPublish,
+    builderSubTab,
+    formTitle,
+    editingFormId,
+    questions,
+    formWeekStart,
+    formDays,
+    historyWeekStart,
+    historyStatusSelection,
+    historyGroupStartDate,
+    historyGroupEndDate,
+    toggleHistoryStatus,
+    getLastMonday,
+    getCalculatedDate,
+    formatDate,
+    defaultQuestions,
+    publishedForms,
+    filteredPublishedForms,
+    selectedFormDetails,
+    viewFormDetails,
+    draggedIdx,
+    dragStart,
+    onDrop,
+    addQuestion,
+    publishForm,
+    editPublishedForm,
+    deletePublishedForm,
+    toggleFormPublish,
     loadPublishedForms,
     // progress
-    students, searchStudent, sortStudent, filteredAndSortedStudents,
+    students,
+    studentsLoading,
+    studentsError,
+    searchStudent,
+    sortStudent,
+    filteredAndSortedStudents,
     // announcements
-    announcementSubTab, announcements, newAnnouncement,
-    announcementFilterWeek, filteredAnnouncements,
-    isAnnouncementActive, addAnnouncement, deleteAnnouncement,
+    announcementSubTab,
+    announcements,
+    newAnnouncement,
+    announcementFilterWeek,
+    filteredAnnouncements,
+    isAnnouncementActive,
+    addAnnouncement,
+    deleteAnnouncement,
   }
 }
