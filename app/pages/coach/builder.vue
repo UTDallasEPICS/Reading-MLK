@@ -5,13 +5,13 @@ const builderSectionRef = ref<HTMLElement | null>(null)
 
 const {
   builderSubTab, formTitle, editingFormId, questions,
-  formWeekStart, formDays, historyWeekStart, historyStatusSelection, historyGroupStartDate, historyGroupEndDate, toggleHistoryStatus, getLastMonday,
+  formWeekStart, formEndDate, formDays, historyWeekStart, historyStatusSelection, historyGroupStartDate, historyGroupEndDate, toggleHistoryStatus, getLastMonday,
   getCalculatedDate, formatDate, defaultQuestions,
   filteredPublishedForms, selectedFormDetails, viewFormDetails,
   draggedIdx, dragStart, onDrop,
   addQuestion, publishForm, editPublishedForm, deletePublishedForm, toggleFormPublish, loadPublishedForms,
 } = useCoach()
-
+ 
 const previewDates = computed(() => {
   if (!formDays.value.length) return []
   const weekStart = getLastMonday(formWeekStart.value || '')
@@ -194,30 +194,16 @@ onBeforeUnmount(() => {
         <div class="week-row">
           <div>
             <p class="field-hint">Selected Week</p>
-            <h4 class="week-label">{{ formWeekStart ? 'Week of ' + getLastMonday(formWeekStart) : 'Select a week' }}</h4>
+            <h4 class="week-label">{{ formWeekStart && formEndDate ? 'From ' + formatDate(getLastMonday(formWeekStart)) + ' to ' + formatDate(formEndDate) : 'Select a week' }}</h4>
           </div>
           <div>
-            <label class="field-label">Change Week Starting (Mon)</label>
+            <label class="field-label">Start Date</label>
             <input v-model="formWeekStart" type="date" class="input-base" data-builder-field="true"  @keydown.enter.prevent="handleBuilderEnter" />
           </div>
-        </div>
-
-        <!-- Day multi-select -->
-        <div>
-          <label class="field-label">Day(s) of Week (Multi-select)</label>
-          <div class="day-pills">
-            <button
-              v-for="day in ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']"
-              :key="day"
-              class="day-pill"
-              :class="formDays.includes(day) ? 'active' : ''"
-              @pointerdown.prevent="startDayDrag(day)"
-              @pointerenter="continueDayDrag(day)"
-              @keydown.enter.prevent="toggleDaySingle(day)"
-              @keydown.space.prevent="toggleDaySingle(day)"
-            >{{ day }}</button>
+          <div>
+            <label class="field-label">End Date</label>
+            <input v-model="formEndDate" type="date" class="input-base" data-builder-field="true" @keydown.enter.prevent="handleBuilderEnter" />
           </div>
-          <p class="field-note">* Selecting multiple days will publish a copy of this form for each selected day.</p>
         </div>
 
         <!-- Title + preview date -->
@@ -225,13 +211,6 @@ onBeforeUnmount(() => {
           <div class="flex-grow">
             <label class="field-label">Form Title</label>
             <input v-model="formTitle" type="text" placeholder="e.g. Kindness & Math Challenge" class="input-title" data-builder-field="true" @keydown.enter.prevent="handleBuilderEnter" />
-          </div>
-          <div class="preview-date-box">
-            <span class="field-hint">Preview Date</span>
-            <span v-if="previewDates.length === 0" class="preview-date-val">Select a day</span>
-            <div v-else class="preview-date-list">
-              <span v-for="item in previewDates" :key="item" class="preview-date-val">{{ item }}</span>
-            </div>
           </div>
         </div>
       </div>

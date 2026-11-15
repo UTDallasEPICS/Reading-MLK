@@ -93,6 +93,8 @@ export const useCoach = () => {
     return {
       id: Number(form.id),
       weekStart: parseDateToYmd(form.weekStart || form.startDate || ''),
+      startDate: parseDateToYmd(form.startDate || ''),
+      endDate: parseDateToYmd(form.endDate || ''),
       day: form.day || 'Monday',
       title: form.title || `Form ${form.id}`,
       date: form.date || formatDate(form.startDate || ''),
@@ -122,8 +124,11 @@ export const useCoach = () => {
   const mon = new Date(todayDate)
   mon.setDate(todayDate.getDate() - dayOff)
   const monStr = formatYmdLocal(mon)
+  const sun = new Date(mon)
+  sun.setDate(mon.getDate() + 6)
 
   const formWeekStart    = useState('formWeekStart', () => monStr)
+  const formEndDate      = useState('formEndDate', () => formatYmdLocal(sun))
   const formDays         = useState<string[]>('formDays', () => ['Monday'])
   const historyWeekStart = useState('historyWeekStart', () => '')
   const historyStatusSelection = useState<Array<'published' | 'unpublished'>>('historyStatusSelection', () => ['published', 'unpublished'])
@@ -332,6 +337,20 @@ export const useCoach = () => {
     try {
       const weekStart = getLastMonday(formWeekStart.value || '')
       const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
+      if (!formEndDate.value) { alert('Please select an end date!'); return }
+
+      const selectedStartDates = formDays.value.map((day) => {
+        const startDate = parseLocalDate(weekStart)
+        const dayIndex = days.indexOf(day)
+        if (!startDate || dayIndex === -1) return ''
+        startDate.setDate(startDate.getDate() + dayIndex)
+        return formatYmdLocal(startDate)
+      })
+
+      if (selectedStartDates.some((startDate) => !startDate || startDate > formEndDate.value)) {
+        alert('The end date must be on or after every selected start date!')
+        return
+      }
 
       if (editingFormId.value) {
         const targetDay = formDays.value[0] || 'Monday'
@@ -349,6 +368,7 @@ export const useCoach = () => {
           action: 'updateForm',
           id: editingFormId.value,
           startDate: formatYmdLocal(startDate),
+          endDate: formEndDate.value,
           published: true,
           title: formTitle.value,
         })
@@ -419,6 +439,7 @@ export const useCoach = () => {
           const createdFormResponse = await callFormApi<any>('POST', {}, {
             action: 'createForm',
             startDate: formatYmdLocal(startDate),
+            endDate: formEndDate.value,
             published: true,
             title: formTitle.value,
           })
@@ -454,6 +475,7 @@ export const useCoach = () => {
   const editPublishedForm = (form: any) => {
     formTitle.value     = form.title
     formWeekStart.value = form.weekStart || formWeekStart.value
+    formEndDate.value   = form.endDate || form.startDate || form.weekStart || formWeekStart.value
     formDays.value      = [form.day || 'Monday']
     questions.value     = JSON.parse(JSON.stringify(form.questions))
     editingFormId.value = form.id
@@ -613,7 +635,7 @@ export const useCoach = () => {
   return {
     // builder
     builderSubTab, formTitle, editingFormId, questions,
-    formWeekStart, formDays, historyWeekStart, historyStatusSelection, historyGroupStartDate, historyGroupEndDate, toggleHistoryStatus, getLastMonday,
+    formWeekStart, formEndDate, formDays, historyWeekStart, historyStatusSelection, historyGroupStartDate, historyGroupEndDate, toggleHistoryStatus, getLastMonday,
     getCalculatedDate, formatDate, defaultQuestions,
     publishedForms, filteredPublishedForms,
     selectedFormDetails, viewFormDetails,
