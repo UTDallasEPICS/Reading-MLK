@@ -5,7 +5,9 @@ export default defineEventHandler(async (event) => {
   await requireAdmin(event)
 
   const applications = await prisma.coach.findMany({
-    where: { tag: { in: ['teacher', 'teacher_denied'] } },
+    orderBy: {
+      User: { createdAt: 'desc' },
+    },
     include: {
       User: {
         select: { name: true, email: true, createdAt: true },
@@ -17,13 +19,21 @@ export default defineEventHandler(async (event) => {
     id: application.id,
     name: application.User.name,
     email: application.User.email,
-    role: 'Teacher',
+    role: application.tag === 'teacher' || application.tag === 'teacher_denied'
+      ? 'Teacher'
+      : application.tag === 'studygroup'
+        ? 'Study Group'
+        : application.tag === 'personal'
+          ? 'Personal'
+          : 'Other',
     school: application.school ?? '',
     district: application.district ?? '',
     zipcode: application.zipcode ?? '',
     requestedAt: application.User.createdAt,
     status: application.tag === 'teacher_denied'
       ? 'Denied'
-      : application.verified ? 'Approved' : 'Pending',
+      : application.tag === 'teacher'
+        ? application.verified ? 'Approved' : 'Pending'
+        : 'Not Required',
   }))
 })

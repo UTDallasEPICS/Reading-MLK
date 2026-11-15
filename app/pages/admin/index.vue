@@ -10,55 +10,109 @@ useHead({
 
 type DashboardStatistic = {
   label: string
-  value: string
+  value: number | string
   detail: string
   icon: 'teacher' | 'group' | 'class' | 'student'
   positive: boolean
 }
 
 type Activity = {
+  id: string
   title: string
   detail: string
-  time: string
+  createdAt: string
 }
 
 type PendingApplication = {
+  id: string
   name: string
   organization: string
+  district: string
 }
 
-const statistics: DashboardStatistic[] = [
+type RecentCoach = {
+  id: string
+  name: string
+  email: string
+  role: string
+  createdAt: string
+}
+
+type DashboardData = {
+  totalTeachers: number
+  verifiedTeachers: number
+  unverifiedTeachers: number
+  totalStudyGroups: number
+  totalStudents: number
+  activeClasses: number
+  pendingApplications: PendingApplication[]
+  recentCoaches: RecentCoach[]
+}
+
+const dashboardData = ref<DashboardData | null>(null)
+const loading = ref(true)
+const loadError = ref('')
+
+const recentActivity = computed<Activity[]>(() =>
+  (dashboardData.value?.recentCoaches ?? []).map(coach => ({
+    id: coach.id,
+    title: `New coach: ${coach.name}`,
+    detail: `${coach.role} profile | ${coach.email}`,
+    createdAt: coach.createdAt,
+  })),
+)
+
+const statistics = computed<DashboardStatistic[]>(() => [
   {
     label: 'Total Teachers',
-    value: '0',
-    detail: 'No data available',
+    value: dashboardData.value?.totalTeachers ?? '--',
+    detail: dashboardData.value
+      ? `${dashboardData.value.verifiedTeachers} verified, ${dashboardData.value.unverifiedTeachers} pending`
+      : loading.value ? 'Loading...' : 'Unavailable',
     icon: 'teacher',
     positive: false,
   },
   {
     label: 'Total Study Groups',
-    value: '0',
-    detail: 'No data available',
+    value: dashboardData.value?.totalStudyGroups ?? '--',
+    detail: 'Registered study groups',
     icon: 'group',
     positive: false,
   },
   {
     label: 'Active Classes',
-    value: '0',
-    detail: 'No data available',
+    value: dashboardData.value?.activeClasses ?? '--',
+    detail: 'Classes with students',
     icon: 'class',
     positive: false,
   },
   {
     label: 'Total Students',
-    value: '0',
-    detail: 'No data available',
+    value: dashboardData.value?.totalStudents ?? '--',
+    detail: 'Reader profiles',
     icon: 'student',
     positive: false,
   },
-]
-const recentActivity: Activity[] = []
-const pendingApplications: PendingApplication[] = []
+])
+
+const pendingApplications = computed(() =>
+  dashboardData.value?.pendingApplications ?? [],
+)
+
+async function loadDashboard() {
+  loading.value = true
+  loadError.value = ''
+
+  try {
+    dashboardData.value = await $fetch<DashboardData>('/api/admin/dashboard')
+  } catch {
+    loadError.value = 'Dashboard data could not be loaded. Please try again.'
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(loadDashboard)
 </script>
 
 <template>
@@ -66,6 +120,17 @@ const pendingApplications: PendingApplication[] = []
     <section class="dashboard-heading">
       <h2>Platform Overview</h2>
     </section>
+
+    <p
+      v-if="loadError"
+      class="dashboard-error"
+      role="alert"
+    >
+      {{ loadError }}
+      <button type="button" @click="loadDashboard">
+        Retry
+      </button>
+    </p>
 
     <section class="statistics-grid">
       <article
@@ -129,7 +194,7 @@ const pendingApplications: PendingApplication[] = []
         <div class="card-heading">
           <div>
             <h3>Recent Activity</h3>
-            <p>Latest activity across the platform.</p>
+            <p>Recently joined coach profiles.</p>
           </div>
 
           <NuxtLink
@@ -143,7 +208,7 @@ const pendingApplications: PendingApplication[] = []
         <div class="activity-list">
           <div
             v-for="activity in recentActivity"
-            :key="activity.title"
+            :key="activity.id"
             class="activity-row"
           >
             <span class="activity-dot" />
@@ -153,14 +218,23 @@ const pendingApplications: PendingApplication[] = []
               <span>{{ activity.detail }}</span>
             </div>
 
-            <time>{{ activity.time }}</time>
+            <time :datetime="activity.createdAt">
+              {{ new Date(activity.createdAt).toLocaleDateString() }}
+            </time>
           </div>
 
           <div
-            v-if="recentActivity.length === 0"
+            v-if="loading && recentActivity.length === 0"
             class="dashboard-empty-state"
           >
-            No recent activity is available.
+            Loading recent coaches...
+          </div>
+
+          <div
+            v-else-if="!loadError && recentActivity.length === 0"
+            class="dashboard-empty-state"
+          >
+            No coach profiles are available yet.
           </div>
         </div>
       </article>
@@ -169,7 +243,10 @@ const pendingApplications: PendingApplication[] = []
         <div class="card-heading">
           <div>
             <h3>Pending Verification</h3>
-            <p>Teacher accounts awaiting review.</p>
+            <p>
+              {{ pendingApplications.length }}
+              teacher {{ pendingApplications.length === 1 ? 'application' : 'applications' }} awaiting review.
+            </p>
           </div>
 
           <span class="pending-count">
@@ -180,7 +257,7 @@ const pendingApplications: PendingApplication[] = []
         <div class="application-list">
           <div
             v-for="application in pendingApplications"
-            :key="application.name"
+            :key="application.id"
             class="application-row"
           >
             <div class="application-initial">
@@ -189,12 +266,22 @@ const pendingApplications: PendingApplication[] = []
 
             <div class="application-information">
               <strong>{{ application.name }}</strong>
-              <span>{{ application.organization }}</span>
+              <span>
+                {{ application.organization || 'Organization not provided' }}
+                <template v-if="application.district">, {{ application.district }}</template>
+              </span>
             </div>
           </div>
 
           <div
-            v-if="pendingApplications.length === 0"
+            v-if="loading"
+            class="dashboard-empty-state"
+          >
+            Loading pending applications...
+          </div>
+
+          <div
+            v-else-if="!loadError && pendingApplications.length === 0"
             class="dashboard-empty-state"
           >
             No pending applications are available.
@@ -250,6 +337,27 @@ const pendingApplications: PendingApplication[] = []
   font-size: 0.78rem;
   font-weight: 500;
   text-align: center;
+}
+
+.dashboard-error {
+  padding: 0.65rem 0.85rem;
+  margin: 0 0 0.85rem;
+  background: #fee2e2;
+  border-radius: 0.5rem;
+  color: #b91c1c;
+  font-size: 0.78rem;
+}
+
+.dashboard-error button {
+  padding: 0;
+  margin-left: 0.4rem;
+  background: none;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
 }
 
 .statistic-card {
