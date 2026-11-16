@@ -1,6 +1,6 @@
-html,
-body,
-#__nuxt {
+html:has(.portal-layout),
+body:has(.portal-layout),
+#__nuxt:has(.portal-layout) {
   width: 100%;
   height: 100%;
   margin: 0;

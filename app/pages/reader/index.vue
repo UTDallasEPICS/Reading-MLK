@@ -86,6 +86,9 @@ const completionMessage = computed(() => {
 
 <template>
   <div :class="themeClass" class="pb-32 px-4 pt-4 min-h-screen">
+    <ReaderEquippedBanner />
+    <ReaderDecorations />
+    <ReaderEffects />
 
     <!-- ── TOP BAR ── -->
     <header class="max-w-4xl mx-auto flex justify-between items-center mb-8 px-2 relative z-[200]">
@@ -94,7 +97,7 @@ const completionMessage = computed(() => {
           <img
             src="/reader-logo.png"
             alt="Reading Huddle"
-            class="h-16 w-16 object-contain"
+            class="h-20 w-20 object-contain"
           />
         </NuxtLink>
       </div>
