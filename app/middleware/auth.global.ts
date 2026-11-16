@@ -25,6 +25,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
       return navigateTo('/reader')
     }
 
+    if (requestedRole === 'coach') {
+      return navigateTo(userRole === 'reader' ? '/coach/onboarding' : '/coach')
+    }
+
     if (userRole === 'admin') {
       return navigateTo('/admin')
     }
@@ -40,24 +44,31 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return navigateTo(userRole === 'coach' ? '/coach' : '/reader/profile')
   }
 
-  if (isCoachRoute && userRole !== 'admin' && userRole !== 'coach') {
+  if (isCoachRoute && userRole !== 'admin' && userRole !== 'coach' && userRole !== 'reader') {
     return navigateTo('/reader/profile')
   }
 
-  if (isCoachRoute && userRole === 'coach') {
-    const requestFetch = useRequestFetch()
-    const coach = await requestFetch<{ id: string } | null>('/api/coach/profile')
+  let coachProfile: { id: string } | null = null
 
-    if (!coach && to.path !== '/coach/onboarding') {
+  if (isCoachRoute && (userRole === 'coach' || userRole === 'reader')) {
+    const requestFetch = useRequestFetch()
+    coachProfile = await requestFetch<{ id: string } | null>('/api/coach/profile')
+
+    if (!coachProfile && to.path !== '/coach/onboarding') {
       return navigateTo('/coach/onboarding')
     }
 
-    if (coach && to.path === '/coach/onboarding') {
+    if (coachProfile && to.path === '/coach/onboarding') {
       return navigateTo('/coach')
     }
   }
 
-  if (isCoachRoute && to.path !== '/coach/create-class' && to.path !== '/coach/onboarding' && userRole === 'coach') {
+  if (
+    isCoachRoute
+    && coachProfile
+    && to.path !== '/coach/create-class'
+    && to.path !== '/coach/onboarding'
+  ) {
     const requestFetch = useRequestFetch()
     const classes = await requestFetch<Array<{ joinToken: string }>>('/api/admin/classes')
 

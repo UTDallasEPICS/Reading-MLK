@@ -1,8 +1,8 @@
 import { prisma } from '../../utils/prisma'
-import { requireCoach } from '../../utils/require-session'
+import { requireSession } from '../../utils/require-session'
 
 export default defineEventHandler(async (event) => {
-  const session = await requireCoach(event)
+  const session = await requireSession(event)
 
   return await prisma.coach.findUnique({
     where: { userId: session.user.id },
