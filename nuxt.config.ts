@@ -6,7 +6,7 @@ export default defineNuxtConfig({
   css: ['./assets/css/main.css'],
   vite: {
     optimizeDeps: {
-      include: ['emoji-mart', '@emoji-mart/data'],
+      include: ['emoji-mart'],
     },
   },
   ssr: false,
