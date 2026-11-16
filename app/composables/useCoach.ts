@@ -103,6 +103,8 @@ export const useCoach = () => {
     return {
       id: Number(form.id),
       weekStart: parseDateToYmd(form.weekStart || form.startDate || ''),
+      startDate: parseDateToYmd(form.startDate || ''),
+      endDate: parseDateToYmd(form.endDate || ''),
       day: form.day || 'Monday',
       title: form.title || `Form ${form.id}`,
       date: form.date || formatDate(form.startDate || ''),
@@ -128,15 +130,17 @@ export const useCoach = () => {
   const editingFormId = useState<number | null>('editingFormId', () => null)
   const questions = useState<any[]>('questions', () => [])
 
-  // Week/day pickers — default to current Monday
+  // Date range — default to the current week
   const todayDate = new Date()
   const dayOff = (todayDate.getDay() + 6) % 7
   const mon = new Date(todayDate)
   mon.setDate(todayDate.getDate() - dayOff)
   const monStr = formatYmdLocal(mon)
+  const sun = new Date(mon)
+  sun.setDate(mon.getDate() + 6)
 
-  const formWeekStart = useState('formWeekStart', () => monStr)
-  const formDays = useState<string[]>('formDays', () => ['Monday'])
+  const formStartDate    = useState('formStartDate', () => monStr)
+  const formEndDate      = useState('formEndDate', () => formatYmdLocal(sun))
   const historyWeekStart = useState('historyWeekStart', () => '')
   const historyStatusSelection = useState<Array<'published' | 'unpublished'>>(
     'historyStatusSelection',
@@ -158,27 +162,6 @@ export const useCoach = () => {
   }
 
   // ── Helpers ──
-  const getCalculatedDate = (weekStartStr: string, dayName: string): string => {
-    if (!weekStartStr) return ''
-
-    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-    const idx = days.indexOf(dayName)
-    if (idx === -1) return ''
-
-    const base = parseLocalDate(weekStartStr)
-    if (!base) return ''
-
-    const d = new Date(base)
-    d.setDate(base.getDate() + idx)
-
-    return d.toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    })
-  }
-
   const getLastMonday = (dateStr: string) => {
     const d = parseLocalDate(dateStr)
     if (!d) return ''
@@ -372,42 +355,24 @@ export const useCoach = () => {
   }
 
   const publishForm = async () => {
-    if (!formTitle.value) {
-      alert('Please enter a title!')
-      return
-    }
-    if (!formDays.value.length) {
-      alert('Please select at least one day!')
+    if (!formTitle.value)       { alert('Please enter a title!');           return }
+    if (!parseLocalDate(formStartDate.value)) { alert('Please select a start date!'); return }
+    if (!parseLocalDate(formEndDate.value)) { alert('Please select an end date!'); return }
+    if (formEndDate.value < formStartDate.value) {
+      alert('The end date must be on or after the start date!')
       return
     }
 
     try {
-      const weekStart = getLastMonday(formWeekStart.value || '')
-      const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-
       if (editingFormId.value) {
-        const targetDay = formDays.value[0] || 'Monday'
-        const dayIndex = days.indexOf(targetDay)
-
-        if (dayIndex === -1) {
-          throw new Error('Invalid day selected for update')
-        }
-
-        const startDate = parseLocalDate(weekStart)
-        if (!startDate) throw new Error('Invalid week start date')
-        startDate.setDate(startDate.getDate() + dayIndex)
-
-        await callFormApi(
-          'PUT',
-          {},
-          {
-            action: 'updateForm',
-            id: editingFormId.value,
-            startDate: formatYmdLocal(startDate),
-            published: true,
-            title: formTitle.value,
-          }
-        )
+        await callFormApi('PUT', {}, {
+          action: 'updateForm',
+          id: editingFormId.value,
+          startDate: formStartDate.value,
+          endDate: formEndDate.value,
+          published: true,
+          title: formTitle.value,
+        })
 
         const existingForm = publishedForms.value.find(
           (form) => Number(form.id) === Number(editingFormId.value)
@@ -473,57 +438,34 @@ export const useCoach = () => {
         return
       }
 
-      for (const day of formDays.value) {
-        const dayIndex = days.indexOf(day)
+      const createdFormResponse = await callFormApi<any>('POST', {}, {
+        action: 'createForm',
+        startDate: formStartDate.value,
+        endDate: formEndDate.value,
+        published: true,
+        title: formTitle.value,
+      })
 
-        if (dayIndex === -1) {
-          continue
-        }
+      const createdForm = createdFormResponse?.data
 
-        const startDate = parseLocalDate(weekStart)
-        if (!startDate) {
-          continue
-        }
-
-        startDate.setDate(startDate.getDate() + dayIndex)
-
-        const createdFormResponse = await callFormApi<any>(
-          'POST',
-          {},
-          {
-            action: 'createForm',
-            startDate: formatYmdLocal(startDate),
-            published: true,
-            title: formTitle.value,
-          }
-        )
-
-        const createdForm = createdFormResponse?.data
-
-        if (!createdForm?.id) {
-          continue
-        }
-
-        for (let index = 0; index < questions.value.length; index++) {
-          const question = questions.value[index]
-
-          await callFormApi(
-            'POST',
-            {},
-            {
-              action: 'createComponent',
-              form: createdForm.id,
-              order: index,
-              questionType: question.type,
-              questionText: toApiQuestionText(question, formTitle.value),
-              questionOptions: buildQuestionOptions(question),
-            }
-          )
-        }
+      if (!createdForm?.id) {
+        throw new Error('Form creation did not return an ID')
       }
 
+      for (let index = 0; index < questions.value.length; index++) {
+        const question = questions.value[index]
+
+        await callFormApi('POST', {}, {
+          action: 'createComponent',
+          form: createdForm.id,
+          order: index,
+          questionType: question.type,
+          questionText: toApiQuestionText(question, formTitle.value),
+          questionOptions: buildQuestionOptions(question),
+        })
+      }
       await loadPublishedForms()
-      alert(`Published for: ${formDays.value.join(', ')}`)
+      alert('Form published successfully')
     } catch (error) {
       console.error('Failed to publish form', error)
       alert('Failed to publish form. Please try again.')
@@ -531,10 +473,10 @@ export const useCoach = () => {
   }
 
   const editPublishedForm = (form: any) => {
-    formTitle.value = form.title
-    formWeekStart.value = form.weekStart || formWeekStart.value
-    formDays.value = [form.day || 'Monday']
-    questions.value = JSON.parse(JSON.stringify(form.questions))
+    formTitle.value     = form.title
+    formStartDate.value = form.startDate || form.weekStart || formStartDate.value
+    formEndDate.value   = form.endDate || form.startDate || form.weekStart || formStartDate.value
+    questions.value     = JSON.parse(JSON.stringify(form.questions))
     editingFormId.value = form.id
     builderSubTab.value = 'creation'
     navigateTo({ path: '/coach/builder', query: { class: classId.value } })
@@ -558,7 +500,6 @@ export const useCoach = () => {
       publishedForms.value = publishedForms.value.filter((form) => Number(form.id) !== formId)
       editingFormId.value = null
       formTitle.value = ''
-      formDays.value = ['Monday']
       questions.value = defaultQuestions()
       builderSubTab.value = 'history'
     } catch (error) {
@@ -774,33 +715,13 @@ export const useCoach = () => {
 
   return {
     // builder
-    builderSubTab,
-    formTitle,
-    editingFormId,
-    questions,
-    formWeekStart,
-    formDays,
-    historyWeekStart,
-    historyStatusSelection,
-    historyGroupStartDate,
-    historyGroupEndDate,
-    toggleHistoryStatus,
-    getLastMonday,
-    getCalculatedDate,
-    formatDate,
-    defaultQuestions,
-    publishedForms,
-    filteredPublishedForms,
-    selectedFormDetails,
-    viewFormDetails,
-    draggedIdx,
-    dragStart,
-    onDrop,
-    addQuestion,
-    publishForm,
-    editPublishedForm,
-    deletePublishedForm,
-    toggleFormPublish,
+    builderSubTab, formTitle, editingFormId, questions,
+    formStartDate, formEndDate, historyWeekStart, historyStatusSelection, historyGroupStartDate, historyGroupEndDate, toggleHistoryStatus, getLastMonday,
+    formatDate, defaultQuestions,
+    publishedForms, filteredPublishedForms,
+    selectedFormDetails, viewFormDetails,
+    draggedIdx, dragStart, onDrop,
+    addQuestion, publishForm, editPublishedForm, deletePublishedForm, toggleFormPublish,
     loadPublishedForms,
     // progress
     students,
