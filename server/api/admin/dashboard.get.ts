@@ -25,7 +25,6 @@ export default defineEventHandler(async (event) => {
     prisma.coach.count({
       where: {
         tag: { notIn: ['teacher', 'teacher_denied'] },
-        User: { isNot: { role: 'admin' } },
       },
     }),
     prisma.student.count(),
