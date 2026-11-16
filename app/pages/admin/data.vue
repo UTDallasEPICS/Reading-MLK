@@ -48,7 +48,7 @@ type StudentRecord = {
   classes: Array<{ id: string; name: string }>
   teachers: Array<{ id: string; name: string; tag: string; school: string }>
   schools: string[]
-  submissions: Array<{ id: number; date: string; form: string }>
+  submissions: Array<{ id: number; date: string; form: string; classId: string }>
 }
 
 type AdminDataResponse = {
@@ -60,26 +60,19 @@ type AdminDataResponse = {
   totalStudents: number
 }
 
-type DetailTarget =
-  | { type: 'coach'; id: string }
-  | { type: 'class'; id: string }
-  | { type: 'student'; id: number }
-
-type CoachDetailTab = 'Profile' | 'Classes' | 'Students'
-type ClassDetailTab = 'Overview' | 'Students' | 'Forms'
-
 const {
   data: explorerData,
   pending,
   error,
-} = await useFetch<AdminDataResponse>('/api/admin/data')
+} = useFetch<AdminDataResponse>('/api/admin/data')
 
 const activeTab = ref<DataTab>('Teachers')
 const searchQuery = ref('')
 const schoolFilter = ref('')
-const detailStack = ref<DetailTarget[]>([])
-const coachDetailTab = ref<CoachDetailTab>('Profile')
-const classDetailTab = ref<ClassDetailTab>('Overview')
+const selectedCoachId = ref<string | null>(null)
+const selectedClassId = ref<string | null>(null)
+const selectedStudentId = ref<number | null>(null)
+const studentDetailsPanel = ref<HTMLElement | null>(null)
 
 const coaches = computed(() => explorerData.value?.coaches ?? [])
 const teachers = computed(() => explorerData.value?.teachers ?? [])
@@ -88,44 +81,14 @@ const students = computed(() => explorerData.value?.students ?? [])
 const schools = computed(() => explorerData.value?.schools ?? [])
 
 const normalizedSearch = computed(() => searchQuery.value.trim().toLowerCase())
-const currentDetail = computed(() => detailStack.value.at(-1) ?? null)
-const detailCoach = computed(() =>
-  currentDetail.value?.type === 'coach'
-    ? (coaches.value.find((coach) => coach.id === currentDetail.value?.id) ?? null)
-    : null
-)
-const detailClass = computed(() =>
-  currentDetail.value?.type === 'class'
-    ? (classes.value.find((classroom) => classroom.id === currentDetail.value?.id) ?? null)
-    : null
-)
-const detailStudent = computed(() =>
-  currentDetail.value?.type === 'student'
-    ? (students.value.find((student) => student.id === currentDetail.value?.id) ?? null)
-    : null
-)
+const selectedCoach = computed(() => coaches.value.find(coach => coach.id === selectedCoachId.value))
+const selectedClass = computed(() => classes.value.find(classroom => classroom.id === selectedClassId.value))
+const selectedStudent = computed(() => students.value.find(student => student.id === selectedStudentId.value))
 
-const coachStudents = computed(() => {
-  if (!detailCoach.value) {
-    return []
-  }
-
-  return students.value.filter((student) =>
-    student.teachers.some((teacher) => teacher.id === detailCoach.value?.id)
-  )
-})
-
-const schoolFilteredStudents = computed(() =>
-  schoolFilter.value
-    ? students.value.filter((student) => student.schools.includes(schoolFilter.value))
-    : students.value
-)
-
-const totalStudentCount = computed(() =>
-  schoolFilter.value
-    ? schoolFilteredStudents.value.length
-    : (explorerData.value?.totalStudents ?? 0)
-)
+const scopedStudents = computed(() => students.value.filter(student =>
+  (!selectedCoachId.value || student.teachers.some(coach => coach.id === selectedCoachId.value)) &&
+  (!selectedClassId.value || student.classes.some(classroom => classroom.id === selectedClassId.value))
+))
 
 function matchesSearch(values: Array<string | number>) {
   return values.join(' ').toLowerCase().includes(normalizedSearch.value)
@@ -162,13 +125,14 @@ const filteredTeachers = computed(() =>
 const filteredClasses = computed(() =>
   classes.value.filter(
     (classroom) =>
+      (!selectedCoachId.value || classroom.teachers.some(coach => coach.id === selectedCoachId.value)) &&
       matchesSchool(classroom.schools) &&
       matchesSearch([classroom.name, ...classTeacherNames(classroom), ...classroom.schools])
   )
 )
 
 const filteredStudents = computed(() =>
-  students.value.filter(
+  scopedStudents.value.filter(
     (student) =>
       matchesSchool(student.schools) &&
       matchesSearch([
@@ -217,28 +181,37 @@ function roleLabel(tag: string) {
 function changeTab(tab: DataTab) {
   activeTab.value = tab
   searchQuery.value = ''
+  selectedCoachId.value = null
+  selectedClassId.value = null
+  selectedStudentId.value = null
 }
 
 function openCoachDetails(id: string) {
-  coachDetailTab.value = 'Profile'
-  detailStack.value.push({ type: 'coach', id })
+  changeTab('Classes')
+  schoolFilter.value = ''
+  selectedCoachId.value = id
 }
 
 function openClassDetails(id: string) {
-  classDetailTab.value = 'Overview'
-  detailStack.value.push({ type: 'class', id })
+  const coachId = selectedCoachId.value
+  changeTab('Students')
+  schoolFilter.value = ''
+  selectedClassId.value = id
+  if (classes.value.find(classroom => classroom.id === id)?.teachers.some(coach => coach.id === coachId)) {
+    selectedCoachId.value = coachId
+  }
 }
 
-function openStudentDetails(id: number) {
-  detailStack.value.push({ type: 'student', id })
+async function openStudentDetails(id: number) {
+  selectedStudentId.value = selectedStudentId.value === id ? null : id
+  await nextTick()
+  studentDetailsPanel.value?.scrollIntoView({ block: 'nearest' })
 }
 
-function goBackInDetails() {
-  detailStack.value.pop()
-}
-
-function closeDetails() {
-  detailStack.value = []
+function studentSubmissions(student: StudentRecord) {
+  return selectedClassId.value
+    ? student.submissions.filter(submission => submission.classId === selectedClassId.value)
+    : student.submissions
 }
 
 function formatDate(date: string | null) {
@@ -254,8 +227,6 @@ function formatSubmissionDate(date: string) {
 }
 
 const tabs: DataTab[] = ['Coach', 'Teachers', 'Classes', 'Students']
-const coachDetailTabs: CoachDetailTab[] = ['Profile', 'Classes', 'Students']
-const classDetailTabs: ClassDetailTab[] = ['Overview', 'Students', 'Forms']
 
 function getTabLabel(tab: DataTab) {
   return tab === 'Coach' ? 'Reading Coach' : tab
@@ -270,10 +241,6 @@ function getTabLabel(tab: DataTab) {
         <span class="record-summary">{{ currentRecordsLabel }}</span>
       </div>
 
-      <div class="student-total" aria-live="polite">
-        <strong>{{ totalStudentCount }}</strong>
-        <span>{{ schoolFilter || 'All schools' }} · total students</span>
-      </div>
     </section>
 
     <section class="data-card">
@@ -288,6 +255,16 @@ function getTabLabel(tab: DataTab) {
         >
           {{ getTabLabel(tab) }}
         </button>
+      </div>
+
+      <div v-if="selectedCoach || selectedClass" class="drilldown-context">
+        <span>Showing {{ activeTab.toLowerCase() }} for</span>
+        <button v-if="selectedCoach" type="button" class="name-link" @click="openCoachDetails(selectedCoach.id)">
+          {{ selectedCoach.name }}
+        </button>
+        <span v-if="selectedCoach && selectedClass">→</span>
+        <strong v-if="selectedClass">{{ selectedClass.name }}</strong>
+        <button type="button" class="name-link" @click="changeTab(activeTab)">Show all {{ activeTab.toLowerCase() }}</button>
       </div>
 
       <div class="toolbar">
@@ -475,10 +452,44 @@ function getTabLabel(tab: DataTab) {
                 <span v-if="student.teachers.length === 0">—</span>
               </td>
               <td>{{ student.exp }}</td>
-              <td>{{ student.submissions.length }}</td>
+              <td>{{ studentSubmissions(student).length }}</td>
             </tr>
           </tbody>
         </table>
+
+        <section v-if="activeTab === 'Classes' && selectedCoach" class="inline-details">
+          <h3>{{ selectedCoach.name }}</h3>
+          <p>{{ roleLabel(selectedCoach.tag) }} · {{ selectedCoach.email }}</p>
+          <p>{{ selectedCoach.school || 'No school provided' }} · {{ selectedCoach.district || 'No district provided' }} · {{ selectedCoach.zipcode || 'No ZIP code provided' }}</p>
+          <p>{{ selectedCoach.classCount }} classes · {{ selectedCoach.studentCount }} students · {{ selectedCoach.formCount }} forms</p>
+          <p v-if="selectedCoach.tag === 'teacher' || selectedCoach.tag === 'teacher_denied'">
+            Verification: {{ selectedCoach.tag === 'teacher_denied' ? 'Denied' : selectedCoach.verified ? 'Verified' : 'Pending' }}
+          </p>
+        </section>
+
+        <section v-if="activeTab === 'Students' && selectedClass" class="inline-details">
+          <h3>{{ selectedClass.name }} forms</h3>
+          <div class="detail-list">
+            <article v-for="form in selectedClass.forms" :key="form.id" class="detail-row">
+              <strong>{{ form.title }}</strong>
+              <span>{{ form.published ? 'Published' : 'Draft' }} · {{ form.submissionCount }} submissions</span>
+              <span>{{ formatDate(form.startDate) }} – {{ formatDate(form.endDate) }}</span>
+            </article>
+            <p v-if="selectedClass.forms.length === 0">No forms are linked to this class.</p>
+          </div>
+        </section>
+
+        <section v-if="activeTab === 'Students' && selectedStudent" ref="studentDetailsPanel" class="inline-details">
+          <h3>{{ selectedStudent.name }} — submissions</h3>
+          <button type="button" class="name-link" @click="selectedStudentId = null">Close student details</button>
+          <div class="detail-list">
+            <article v-for="submission in studentSubmissions(selectedStudent)" :key="submission.id" class="detail-row">
+              <strong>{{ submission.form }}</strong>
+              <span>{{ formatSubmissionDate(submission.date) }}</span>
+            </article>
+            <p v-if="studentSubmissions(selectedStudent).length === 0">No form submissions are available.</p>
+          </div>
+        </section>
 
         <div v-if="currentRecordCount === 0" class="empty-state">
           No records match your search and school filters.
@@ -486,240 +497,7 @@ function getTabLabel(tab: DataTab) {
       </div>
     </section>
 
-    <Teleport to="body">
-      <div v-if="currentDetail" class="modal-backdrop" @click.self="closeDetails">
-        <section
-          class="detail-modal"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="detail-modal-title"
-        >
-          <div class="modal-header">
-            <div>
-              <button
-                v-if="detailStack.length > 1"
-                class="back-button"
-                type="button"
-                @click="goBackInDetails"
-              >
-                ← Back
-              </button>
-              <h2 id="detail-modal-title">
-                {{ detailCoach?.name || detailClass?.name || detailStudent?.name }}
-              </h2>
-              <p v-if="detailCoach">{{ roleLabel(detailCoach.tag) }} · {{ detailCoach.email }}</p>
-              <p v-else-if="detailClass">Class details</p>
-              <p v-else-if="detailStudent">Student details</p>
-            </div>
 
-            <button
-              type="button"
-              class="close-button"
-              aria-label="Close details"
-              @click="closeDetails"
-            >
-              ×
-            </button>
-          </div>
-
-          <template v-if="detailCoach">
-            <nav class="detail-tabs" aria-label="Teacher or coach details">
-              <button
-                v-for="tab in coachDetailTabs"
-                :key="tab"
-                type="button"
-                :class="{ active: coachDetailTab === tab }"
-                @click="coachDetailTab = tab"
-              >
-                {{ tab }}
-              </button>
-            </nav>
-
-            <div v-if="coachDetailTab === 'Profile'" class="detail-content detail-grid">
-              <div>
-                <span>School</span><strong>{{ detailCoach.school || '—' }}</strong>
-              </div>
-              <div>
-                <span>District</span><strong>{{ detailCoach.district || '—' }}</strong>
-              </div>
-              <div>
-                <span>Zip code</span><strong>{{ detailCoach.zipcode || '—' }}</strong>
-              </div>
-              <div>
-                <span>Verification</span
-                ><strong>{{ detailCoach.verified ? 'Verified' : 'Pending' }}</strong>
-              </div>
-              <div>
-                <span>Classes</span><strong>{{ detailCoach.classCount }}</strong>
-              </div>
-              <div>
-                <span>Students</span><strong>{{ detailCoach.studentCount }}</strong>
-              </div>
-              <div>
-                <span>Forms</span><strong>{{ detailCoach.formCount }}</strong>
-              </div>
-            </div>
-
-            <div v-else-if="coachDetailTab === 'Classes'" class="detail-content detail-list">
-              <button
-                v-for="classroom in detailCoach.classes"
-                :key="classroom.id"
-                class="detail-row detail-row-button"
-                type="button"
-                @click="openClassDetails(classroom.id)"
-              >
-                <strong>{{ classroom.name }}</strong>
-                <span
-                  >{{
-                    classes.find((item) => item.id === classroom.id)?.students.length ?? 0
-                  }}
-                  students</span
-                >
-                <span>View details →</span>
-              </button>
-              <p v-if="detailCoach.classes.length === 0" class="empty-state">
-                No classes are linked to this account.
-              </p>
-            </div>
-
-            <div v-else class="detail-content detail-list">
-              <button
-                v-for="student in coachStudents"
-                :key="student.id"
-                class="detail-row detail-row-button"
-                type="button"
-                @click="openStudentDetails(student.id)"
-              >
-                <strong>{{ student.name }}</strong>
-                <span>{{
-                  student.classes.map((classroom) => classroom.name).join(', ') || 'No class'
-                }}</span>
-                <span>View details →</span>
-              </button>
-              <p v-if="coachStudents.length === 0" class="empty-state">
-                No students are linked to this account.
-              </p>
-            </div>
-          </template>
-
-          <template v-else-if="detailClass">
-            <nav class="detail-tabs" aria-label="Class details">
-              <button
-                v-for="tab in classDetailTabs"
-                :key="tab"
-                type="button"
-                :class="{ active: classDetailTab === tab }"
-                @click="classDetailTab = tab"
-              >
-                {{ tab }}
-              </button>
-            </nav>
-
-            <div v-if="classDetailTab === 'Overview'" class="detail-content detail-grid">
-              <div>
-                <span>School</span><strong>{{ detailClass.schools.join(', ') || '—' }}</strong>
-              </div>
-              <div>
-                <span>Students</span><strong>{{ detailClass.students.length }}</strong>
-              </div>
-              <div>
-                <span>Forms</span><strong>{{ detailClass.forms.length }}</strong>
-              </div>
-              <div class="detail-wide">
-                <span>Teachers and reading coaches</span>
-                <button
-                  v-for="teacher in detailClass.teachers"
-                  :key="teacher.id"
-                  class="inline-name-link"
-                  type="button"
-                  @click="openCoachDetails(teacher.id)"
-                >
-                  {{ teacher.name }}
-                </button>
-                <strong v-if="detailClass.teachers.length === 0">None assigned</strong>
-              </div>
-            </div>
-
-            <div v-else-if="classDetailTab === 'Students'" class="detail-content detail-list">
-              <button
-                v-for="student in detailClass.students"
-                :key="student.id"
-                class="detail-row detail-row-button"
-                type="button"
-                @click="openStudentDetails(student.id)"
-              >
-                <strong>{{ student.name }}</strong>
-                <span>{{ student.exp }} experience</span>
-                <span>View details →</span>
-              </button>
-              <p v-if="detailClass.students.length === 0" class="empty-state">
-                No students are enrolled in this class.
-              </p>
-            </div>
-
-            <div v-else class="detail-content detail-list">
-              <article v-for="form in detailClass.forms" :key="form.id" class="detail-row">
-                <strong>{{ form.title }}</strong>
-                <span
-                  >{{ form.published ? 'Published' : 'Draft' }} ·
-                  {{ form.submissionCount }} submissions</span
-                >
-                <span>{{ formatDate(form.startDate) }} – {{ formatDate(form.endDate) }}</span>
-              </article>
-              <p v-if="detailClass.forms.length === 0" class="empty-state">
-                No forms are linked to this class.
-              </p>
-            </div>
-          </template>
-
-          <div v-else-if="detailStudent" class="detail-content student-detail">
-            <div class="detail-grid">
-              <div>
-                <span>Experience</span><strong>{{ detailStudent.exp }}</strong>
-              </div>
-              <div>
-                <span>School</span><strong>{{ detailStudent.schools.join(', ') || '—' }}</strong>
-              </div>
-              <div>
-                <span>Form submissions</span><strong>{{ detailStudent.submissions.length }}</strong>
-              </div>
-            </div>
-
-            <h3>Classes</h3>
-            <div class="detail-list">
-              <button
-                v-for="classroom in detailStudent.classes"
-                :key="classroom.id"
-                class="detail-row detail-row-button"
-                type="button"
-                @click="openClassDetails(classroom.id)"
-              >
-                <strong>{{ classroom.name }}</strong>
-                <span>View class details →</span>
-              </button>
-              <p v-if="detailStudent.classes.length === 0" class="empty-state">
-                This student is not assigned to a class.
-              </p>
-            </div>
-
-            <h3>Recent form submissions</h3>
-            <div class="detail-list">
-              <article
-                v-for="submission in detailStudent.submissions"
-                :key="submission.id"
-                class="detail-row"
-              >
-                <strong>{{ submission.form }}</strong>
-                <span>{{ formatSubmissionDate(submission.date) }}</span>
-              </article>
-              <p v-if="detailStudent.submissions.length === 0" class="empty-state">
-                No form submissions are available.
-              </p>
-            </div>
-          </div>
-        </section>
-      </div>
-    </Teleport>
   </div>
 </template>
 
@@ -745,26 +523,6 @@ function getTabLabel(tab: DataTab) {
   margin: 0;
   color: #1e293b;
   font-size: 1.25rem;
-}
-
-.student-total {
-  display: flex;
-  align-items: baseline;
-  gap: 0.55rem;
-  padding: 0.65rem 0.85rem;
-  background: #eef2ff;
-  border: 1px solid #e0e7ff;
-  border-radius: 0.65rem;
-  color: #4338ca;
-}
-
-.student-total strong {
-  font-size: 1.25rem;
-}
-
-.student-total span {
-  font-size: 0.72rem;
-  font-weight: 700;
 }
 
 .record-summary {
@@ -1006,175 +764,29 @@ tbody tr:hover {
   color: #b91c1c;
 }
 
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
+.drilldown-context {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 1.5rem;
-  background: rgb(15 23 42 / 45%);
-}
-
-.detail-modal {
-  width: 100%;
-  max-width: 46rem;
-  max-height: calc(100vh - 3rem);
-  overflow-y: auto;
-  padding: 1.25rem;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.85rem;
-  box-shadow: 0 20px 50px rgb(15 23 42 / 18%);
-}
-
-.modal-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.back-button {
-  padding: 0 0 0.35rem;
-  background: none;
-  border: 0;
-  color: #4f46e5;
-  cursor: pointer;
-  font: inherit;
-  font-size: 0.72rem;
-  font-weight: 700;
-}
-
-.modal-header h2 {
-  margin: 0;
-  color: #1e293b;
-  font-size: 1.05rem;
-}
-
-.modal-header p {
-  margin: 0.25rem 0 0;
-  color: #94a3b8;
-  font-size: 0.75rem;
-}
-
-.detail-tabs {
-  display: flex;
-  gap: 0.35rem;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.detail-tabs button {
-  padding: 0.5rem 0.75rem;
-  background: transparent;
-  border: 0;
-  border-radius: 0.45rem;
-  color: #64748b;
-  cursor: pointer;
-  font: inherit;
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-.detail-tabs button.active {
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  padding: 0.8rem 1rem;
   background: #eef2ff;
-  color: #4338ca;
-}
-
-.detail-content {
-  max-height: min(60vh, 34rem);
-  overflow: auto;
-  padding: 1rem 0 0;
-}
-
-.detail-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem;
-}
-
-.detail-grid > div {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  padding: 0.75rem;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.55rem;
-}
-
-.detail-grid span,
-.detail-row span {
-  color: #64748b;
-  font-size: 0.7rem;
-}
-
-.detail-grid strong,
-.detail-row strong {
-  color: #1e293b;
+  color: #475569;
   font-size: 0.8rem;
 }
 
-.detail-grid .detail-wide {
-  grid-column: 1 / -1;
-}
-
-.detail-list {
-  display: grid;
-  gap: 0.5rem;
-}
-
-.detail-row {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.25rem;
-  padding: 0.75rem;
-  background: #ffffff;
+.inline-details {
+  margin-top: 1rem;
+  padding: 1rem;
   border: 1px solid #e2e8f0;
-  border-radius: 0.55rem;
+  border-radius: 0.5rem;
+  color: #475569;
+  font-size: 0.8rem;
 }
 
-.detail-row-button {
-  width: 100%;
-  cursor: pointer;
-  text-align: left;
-}
-
-.detail-row-button:hover {
-  background: #f8fafc;
-  border-color: #c7d2fe;
-}
-
-.student-detail h3 {
-  margin: 1.2rem 0 0;
-  color: #1e293b;
-  font-size: 0.85rem;
-}
-
-.student-detail .detail-list {
-  padding-top: 0.5rem;
-}
-
-.close-button {
-  width: 2rem;
-  height: 2rem;
-  flex-shrink: 0;
-  background: transparent;
-  border: 0;
-  border-radius: 0.4rem;
-  color: #64748b;
-  cursor: pointer;
-  font-size: 1.3rem;
-}
-
-.close-button:hover {
-  background: #f1f5f9;
-}
+.inline-details h3 { margin: 0 0 0.5rem; }
+.detail-list { display: grid; gap: 0.5rem; margin-top: 0.75rem; }
+.detail-row { display: grid; gap: 0.25rem; padding: 0.75rem; background: #f8fafc; }
 
 @media (max-width: 900px) {
   .data-page {
@@ -1215,12 +827,5 @@ tbody tr:hover {
     flex-direction: column;
   }
 
-  .detail-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .detail-grid .detail-wide {
-    grid-column: auto;
-  }
 }
 </style>

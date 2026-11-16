@@ -106,7 +106,7 @@ export default defineEventHandler(async (event) => {
           select: {
             id: true,
             submissionDate: true,
-            Form: { select: { title: true } },
+            Form: { select: { title: true, FormGroup: { select: { class: true } } } },
           },
           orderBy: { submissionDate: 'desc' },
         },
@@ -207,6 +207,7 @@ export default defineEventHandler(async (event) => {
       id: submission.id,
       date: submission.submissionDate,
       form: submission.Form.title,
+      classId: submission.Form.FormGroup.class,
     })),
   }))
 
