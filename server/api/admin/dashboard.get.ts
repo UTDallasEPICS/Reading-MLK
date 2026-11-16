@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
   const [
     totalTeachers,
     verifiedTeachers,
-    totalStudyGroups,
+    totalNonTeacherCoaches,
     totalStudents,
     activeClasses,
     pendingApplications,
@@ -22,7 +22,12 @@ export default defineEventHandler(async (event) => {
   ] = await Promise.all([
     prisma.coach.count({ where: { tag: 'teacher' } }),
     prisma.coach.count({ where: { tag: 'teacher', verified: true } }),
-    prisma.coach.count({ where: { tag: 'studygroup' } }),
+    prisma.coach.count({
+      where: {
+        tag: { notIn: ['teacher', 'teacher_denied'] },
+        User: { isNot: { role: 'admin' } },
+      },
+    }),
     prisma.student.count(),
     prisma.class.count({ where: { Students: { some: {} } } }),
     prisma.coach.findMany({
@@ -49,7 +54,7 @@ export default defineEventHandler(async (event) => {
     totalTeachers,
     verifiedTeachers,
     unverifiedTeachers: totalTeachers - verifiedTeachers,
-    totalStudyGroups,
+    totalNonTeacherCoaches,
     totalStudents,
     activeClasses,
     pendingApplications: pendingApplications.map(application => ({

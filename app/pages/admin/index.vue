@@ -42,7 +42,7 @@ type DashboardData = {
   totalTeachers: number
   verifiedTeachers: number
   unverifiedTeachers: number
-  totalStudyGroups: number
+  totalNonTeacherCoaches: number
   totalStudents: number
   activeClasses: number
   pendingApplications: PendingApplication[]
@@ -73,9 +73,9 @@ const statistics = computed<DashboardStatistic[]>(() => [
     positive: false,
   },
   {
-    label: 'Total Study Groups',
-    value: dashboardData.value?.totalStudyGroups ?? '--',
-    detail: 'Registered study groups',
+    label: 'Non-Teacher Coaches',
+    value: dashboardData.value?.totalNonTeacherCoaches ?? '--',
+    detail: 'Study groups, community groups, and others',
     icon: 'group',
     positive: false,
   },
