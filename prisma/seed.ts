@@ -1,5 +1,4 @@
 import { prisma } from '../server/utils/prisma'
-import { pathToFileURL } from 'node:url'
 
 // Add local development admins here, then run: pnpm exec prisma db seed
 // These entries grant master access only outside production.
@@ -385,8 +384,9 @@ async function main() {
   console.log('Seeding finished.')
 }
 
-// Importing the admin list must not execute database seeding.
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+// Check the original CLI entry point: bundlers can rewrite import.meta.url.
+// Importing the admin list from the application must never run the seed.
+if (process.argv[1] && /(?:^|[\\/])prisma[\\/]seed\.ts$/.test(process.argv[1])) {
   main()
     .then(async () => {
       await prisma.$disconnect()
