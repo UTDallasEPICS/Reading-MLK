@@ -8,14 +8,13 @@ useHead({
   title: 'Teacher Verification',
 })
 
-type CoachCategory = 'Teacher' | 'Study Group' | 'Personal' | 'Other'
-type VerificationStatus = 'Pending' | 'Approved' | 'Denied' | 'Not Required'
+type VerificationStatus = 'Pending' | 'Approved' | 'Denied'
 
 type TeacherApplication = {
   id: string
   name: string
   email: string
-  role: CoachCategory
+  role: string
   school: string
   district: string
   zipcode: string
@@ -26,18 +25,15 @@ type TeacherApplication = {
 const applications = ref<TeacherApplication[]>([])
 
 const searchQuery = ref('')
-const roleFilter = ref<CoachCategory | 'All'>('All')
-const statusFilter = ref<VerificationStatus | 'All'>('All')
+const roleFilter = ref('All')
+const statusFilter = ref<VerificationStatus | 'All'>('Pending')
 
 const selectedApplication = ref<TeacherApplication | null>(null)
 const modalOpen = ref(false)
 const loading = ref(true)
-const errorMessage = ref('')
-const coachCategories: CoachCategory[] = ['Teacher', 'Study Group', 'Personal', 'Other']
 
 async function loadApplications() {
   loading.value = true
-  errorMessage.value = ''
 
   try {
     const result = await $fetch<TeacherApplication[]>('/api/admin/teacher-verification')
@@ -45,10 +41,6 @@ async function loadApplications() {
       ...application,
       requestedAt: new Date(application.requestedAt).toLocaleDateString(),
     }))
-  } catch (error) {
-    errorMessage.value = error instanceof Error
-      ? error.message
-      : 'Unable to load coach profiles.'
   } finally {
     loading.value = false
   }
@@ -66,7 +58,6 @@ const filteredApplications = computed(() => {
       application.school,
       application.district,
       application.zipcode,
-      application.requestedAt,
       application.role,
     ]
       .join(' ')
@@ -84,19 +75,6 @@ const filteredApplications = computed(() => {
     return matchesSearch && matchesRole && matchesStatus
   })
 })
-
-const categoryFilters = computed(() => [
-  {
-    role: 'All' as const,
-    label: 'All Profiles',
-    count: applications.value.length,
-  },
-  ...coachCategories.map(role => ({
-    role,
-    label: role,
-    count: applications.value.filter(application => application.role === role).length,
-  })),
-])
 
 const pendingCount = computed(() =>
   applications.value.filter(
@@ -176,6 +154,16 @@ async function saveApplicationChanges() {
         </div>
 
         <select
+          v-model="roleFilter"
+          class="filter-select"
+        >
+          <option value="All">All Roles</option>
+          <option value="Teacher">Teacher</option>
+          <option value="Study Group">Study Group</option>
+          <option value="Other">Other</option>
+        </select>
+
+        <select
           v-model="statusFilter"
           class="filter-select"
         >
@@ -183,23 +171,8 @@ async function saveApplicationChanges() {
           <option value="Pending">Pending</option>
           <option value="Approved">Approved</option>
           <option value="Denied">Denied</option>
-          <option value="Not Required">Not Required</option>
         </select>
       </div>
-
-      <nav class="category-tabs" aria-label="Coach profile categories">
-        <button
-          v-for="category in categoryFilters"
-          :key="category.role"
-          type="button"
-          :class="{ active: roleFilter === category.role }"
-          :aria-pressed="roleFilter === category.role"
-          @click="roleFilter = category.role"
-        >
-          {{ category.label }}
-          <span>{{ category.count }}</span>
-        </button>
-      </nav>
 
       <div class="application-list">
         <div
@@ -207,17 +180,6 @@ async function saveApplicationChanges() {
           class="empty-state"
         >
           Loading teacher applications...
-        </div>
-
-        <div
-          v-if="!loading && errorMessage"
-          class="empty-state error-state"
-          role="alert"
-        >
-          {{ errorMessage }}
-          <button type="button" @click="loadApplications">
-            Retry
-          </button>
         </div>
 
         <article
@@ -242,7 +204,6 @@ async function saveApplicationChanges() {
               :class="{
                 teacher: application.role === 'Teacher',
                 group: application.role === 'Study Group',
-                personal: application.role === 'Personal',
                 other: application.role === 'Other',
               }"
             >
@@ -261,12 +222,7 @@ async function saveApplicationChanges() {
           </div>
 
           <div class="application-detail">
-            <span class="detail-label">ZIP code</span>
-            <span>{{ application.zipcode }}</span>
-          </div>
-
-          <div class="application-detail">
-            <span class="detail-label">Joined</span>
+            <span class="detail-label">Requested</span>
             <span>{{ application.requestedAt }}</span>
           </div>
 
@@ -276,7 +232,6 @@ async function saveApplicationChanges() {
               :class="{
                 approved: application.status === 'Approved',
                 denied: application.status === 'Denied',
-                'not-required': application.status === 'Not Required',
               }"
             >
               {{ application.status }}
@@ -288,12 +243,12 @@ async function saveApplicationChanges() {
             class="review-button"
             @click="openApplication(application)"
           >
-            {{ application.role === 'Teacher' ? 'Review' : 'View' }}
+            Review
           </button>
         </article>
 
         <div
-          v-if="!loading && !errorMessage && filteredApplications.length === 0"
+          v-if="!loading && filteredApplications.length === 0"
           class="empty-state"
         >
           No matching teacher applications found.
@@ -315,13 +270,11 @@ async function saveApplicationChanges() {
           <div class="modal-header">
             <div>
               <h2 id="review-modal-title">
-                {{ selectedApplication.role === 'Teacher' ? 'Review Teacher Application' : 'Coach Profile' }}
+                Review Application
               </h2>
 
               <p>
-                {{ selectedApplication.role === 'Teacher'
-                  ? 'Confirm the applicant information before approving access.'
-                  : 'Profile details for this coach category.' }}
+                Confirm the applicant's information before approving access.
               </p>
             </div>
 
@@ -350,7 +303,6 @@ async function saveApplicationChanges() {
               :class="{
                 approved: selectedApplication.status === 'Approved',
                 denied: selectedApplication.status === 'Denied',
-                'not-required': selectedApplication.status === 'Not Required',
               }"
             >
               {{ selectedApplication.status }}
@@ -374,45 +326,27 @@ async function saveApplicationChanges() {
               <select v-model="selectedApplication.role" disabled>
                 <option value="Teacher">Teacher</option>
                 <option value="Study Group">Study Group</option>
-                <option value="Personal">Personal</option>
                 <option value="Other">Other</option>
               </select>
             </label>
 
             <label>
               <span>School or organization</span>
-              <input
-                v-model="selectedApplication.school"
-                type="text"
-                :disabled="selectedApplication.role !== 'Teacher'"
-              >
+              <input v-model="selectedApplication.school" type="text">
             </label>
 
             <label>
               <span>District</span>
-              <input
-                v-model="selectedApplication.district"
-                type="text"
-                :disabled="selectedApplication.role !== 'Teacher'"
-              >
+              <input v-model="selectedApplication.district" type="text">
             </label>
 
             <label>
               <span>ZIP code</span>
-              <input
-                v-model="selectedApplication.zipcode"
-                type="text"
-                :disabled="selectedApplication.role !== 'Teacher'"
-              >
-            </label>
-
-            <label>
-              <span>Joined</span>
-              <input v-model="selectedApplication.requestedAt" type="text" disabled>
+              <input v-model="selectedApplication.zipcode" type="text">
             </label>
           </div>
 
-          <div v-if="selectedApplication.role === 'Teacher'" class="modal-actions">
+          <div class="modal-actions">
             <button
               type="button"
               class="deny-button"
@@ -435,16 +369,6 @@ async function saveApplicationChanges() {
               @click="updateStatus('Approved')"
             >
               Approve
-            </button>
-          </div>
-
-          <div v-else class="modal-actions">
-            <button
-              type="button"
-              class="secondary-button"
-              @click="closeModal"
-            >
-              Close
             </button>
           </div>
         </section>
@@ -507,45 +431,6 @@ async function saveApplicationChanges() {
   padding: 0.9rem 1rem;
   background: #f8fafc;
   border-bottom: 1px solid #dbe3ec;
-}
-
-.category-tabs {
-  display: flex;
-  gap: 0.45rem;
-  overflow-x: auto;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid #dbe3ec;
-}
-
-.category-tabs button {
-  display: inline-flex;
-  flex-shrink: 0;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.5rem 0.7rem;
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
-  border-radius: 999px;
-  color: #475569;
-  cursor: pointer;
-  font: inherit;
-  font-size: 0.74rem;
-  font-weight: 700;
-}
-
-.category-tabs button.active {
-  background: #eef2ff;
-  border-color: #a5b4fc;
-  color: #4338ca;
-}
-
-.category-tabs button span {
-  min-width: 1.25rem;
-  padding: 0.1rem 0.3rem;
-  background: rgb(148 163 184 / 16%);
-  border-radius: 999px;
-  font-size: 0.68rem;
-  text-align: center;
 }
 
 .search-field {
@@ -626,7 +511,6 @@ async function saveApplicationChanges() {
     minmax(6rem, 0.7fr)
     minmax(9rem, 1fr)
     minmax(7rem, 0.8fr)
-    minmax(5rem, 0.5fr)
     minmax(6rem, 0.6fr)
     auto
     auto;
@@ -721,11 +605,6 @@ async function saveApplicationChanges() {
   color: #15803d;
 }
 
-.role-badge.personal {
-  background: #fef3c7;
-  color: #b45309;
-}
-
 .role-badge.other {
   background: #f1f5f9;
   color: #475569;
@@ -744,11 +623,6 @@ async function saveApplicationChanges() {
 .status-badge.denied {
   background: #fee2e2;
   color: #b91c1c;
-}
-
-.status-badge.not-required {
-  background: #f1f5f9;
-  color: #475569;
 }
 
 .review-button {
@@ -774,23 +648,6 @@ async function saveApplicationChanges() {
   font-size: 0.82rem;
   font-weight: 500;
   text-align: center;
-}
-
-.error-state {
-  color: #b91c1c;
-}
-
-.error-state button {
-  display: block;
-  padding: 0.45rem 0.7rem;
-  margin: 0.7rem auto 0;
-  background: #ffffff;
-  border: 1px solid #fecaca;
-  border-radius: 0.45rem;
-  color: #b91c1c;
-  cursor: pointer;
-  font: inherit;
-  font-weight: 700;
 }
 
 .modal-backdrop {
@@ -958,13 +815,12 @@ async function saveApplicationChanges() {
       minmax(10rem, 1fr)
       minmax(6rem, 0.6fr)
       minmax(9rem, 0.8fr)
+      minmax(7rem, 0.7fr)
       auto
       auto;
   }
 
-  .application-row > :nth-child(5),
-  .application-row > :nth-child(6),
-  .application-row > :nth-child(7) {
+  .application-row > :nth-child(6) {
     display: none;
   }
 }
