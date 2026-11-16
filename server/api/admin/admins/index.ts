@@ -11,7 +11,7 @@ const createAdminSchema = z.object({
 
 export default defineEventHandler(async (event) => {
   const session = await requireAdmin(event)
-  const canCreateAdmins = isMasterAdmin(session.user.email)
+  const canCreateAdmins = process.env.NODE_ENV !== 'production' || isMasterAdmin(session.user.email)
 
   if (event.node.req.method === 'GET') {
     if (!canCreateAdmins) {

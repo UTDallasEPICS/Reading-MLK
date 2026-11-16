@@ -1,7 +1,8 @@
 import { prisma } from '../server/utils/prisma'
 
 // Add local development admins here, then run: pnpm exec prisma db seed
-// These entries grant master access only outside production.
+// Admin access is saved in the local database; entries can be removed after seeding.
+// All admins can manage admins locally. Production restricts management to Rae.
 export const masterAdmins: Array<{ name: string; email: string }> = [
   // { name: 'Your Name', email: 'your-email@example.com' },
 ]
@@ -79,7 +80,7 @@ async function main() {
   })
 
   const seededAdmins = []
-  for (const [index, admin] of masterAdmins.entries()) {
+  for (const admin of masterAdmins) {
     const email = admin.email.trim().toLowerCase()
     seededAdmins.push(await prisma.user.create({
       data: {
@@ -90,7 +91,7 @@ async function main() {
         coach: { create: {} },
         accounts: {
           create: {
-            id: `seed_admin_account_${index}`,
+            id: `seed_admin_account_${email}`,
             accountId: email,
             providerId: 'magic-link',
           },
