@@ -239,6 +239,16 @@
     }
   }
 
+  function continueWithOwnBook() {
+    hasOwnBook.value = true
+    preFormStep.value = null
+  }
+
+  function closeActiveForm() {
+    activeForm.value = null
+    preFormStep.value = null
+  }
+
   const showXpReward = ref(false)
   const xpRewardAmount = ref(0)
   const submitting = ref(false)
@@ -570,10 +580,7 @@
               :class="{ 'sm:grid-cols-1': !firstVideoUrl }"
             >
               <button
-                @click="
-                  hasOwnBook = true
-                  preFormStep = null
-                "
+                @click="continueWithOwnBook"
                 class="btn-fun rounded-2xl py-5 text-xl font-bold text-white shadow-lg hover:scale-105"
                 style="background: var(--brand-indigo)"
               >
@@ -588,10 +595,7 @@
               </button>
             </div>
             <button
-              @click="
-                activeForm = null
-                preFormStep = null
-              "
+              @click="closeActiveForm"
               class="text-sm font-bold text-gray-400 transition hover:text-gray-700"
             >
               ← Back to Forms
@@ -683,10 +687,7 @@
                 </p>
               </div>
               <button
-                @click="
-                  activeForm = null
-                  preFormStep = null
-                "
+                @click="closeActiveForm"
                 class="text-lg font-bold text-gray-400 hover:text-red-500"
               >
                 Cancel
