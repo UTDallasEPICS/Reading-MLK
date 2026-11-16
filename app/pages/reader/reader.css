@@ -24,7 +24,18 @@
 }
 
 /* ---------- Body / Base ---------- */
+.reader-app:has(.equipped-banner) > header {
+  margin-bottom: 3.5rem;
+}
+
+html:has(.reader-app),
+body:has(.reader-app) {
+  overscroll-behavior-y: none;
+}
+
 .reader-app {
+  position: relative;
+  isolation: isolate;
   font-family: Arial, sans-serif;
   background-color: #f5ede3;
   background-image: var(--bg-gradient);

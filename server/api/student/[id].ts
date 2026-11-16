@@ -71,8 +71,7 @@ export default defineEventHandler(async (event) => {
 
     const data : Prisma.StudentUpdateInput = {}
 
-    if (body.data.exp !== undefined) { data.exp = body.data.exp}
-    if (body.data.settings !== undefined) { data.settings = body.data.settings}
+    if (body.data.settings !== undefined) { data.settings = { ...(student.settings as Prisma.JsonObject || {}), ...body.data.settings }}
 
     const updatedStudent = await prisma.student.update({
       where: {

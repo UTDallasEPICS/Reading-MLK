@@ -1,7 +1,7 @@
 <script setup lang="ts">
 definePageMeta({ ssr: false })
 
-const { student, settings, updateExp, restoreStudent } = useCurrentStudent()
+const { student, settings, restoreStudent } = useCurrentStudent()
 const { FormGroup, loadActiveFormGroup } = useCurrentFormGroup()
 const { completedFormIds, logFormSubmission, logSubmissionResponse, loadProgress } = useCurrentStudentProgress()
 
@@ -215,20 +215,21 @@ function nextStep() {
 
 const showXpReward = ref(false)
 const submitting = ref(false)
+const submissionError = ref('')
 
 async function submitChallenge() {
   if (submitting.value || !activeForm.value) return
   submitting.value = true
+  submissionError.value = ''
   try {
     const classId = FormGroup.value.selectedClassId
     const submission = await logFormSubmission(activeForm.value.id, classId === 'all' ? null : classId)
-    if (!submission) return
-    await updateExp(500)
+    if (!submission) { submissionError.value = 'Could not submit your challenge. Please try again.'; return }
     activeForm.value = null
     currentComponentID.value = 0
     feedbackVisible.value = {}
     answers.value = {}
-    showXpReward.value = true
+    showXpReward.value = submission.xpAwarded > 0
   } finally {
     submitting.value = false
   }
@@ -244,6 +245,10 @@ function getBadgeClass(type: string) {
 
 <template>
   <div :class="themeClass" class="pb-32 px-4 pt-4 min-h-screen">
+    <ReaderEquippedBanner />
+    <ReaderDecorations />
+    <ReaderEffects />
+    <p v-if="submissionError" role="alert" class="relative z-50 rounded-xl bg-red-50 p-4 text-red-700">{{ submissionError }}</p>
 
     <!-- ── TOP BAR ── -->
     <header class="max-w-4xl mx-auto flex justify-between items-center mb-8 px-2 relative z-[200]">
@@ -252,7 +257,7 @@ function getBadgeClass(type: string) {
           <img
             src="/reader-logo.png"
             alt="Reading Huddle"
-            class="h-16 w-16 object-contain"
+            class="h-20 w-20 object-contain"
           />
         </NuxtLink>
       </div>
@@ -437,7 +442,7 @@ function getBadgeClass(type: string) {
               <button @click="preFormStep = 'ask'" class="text-gray-400 font-bold hover:text-gray-700 transition text-sm">← Back</button>
               <button @click="preFormSkipToForm"
                 class="btn-fun text-white py-3 px-10 rounded-2xl font-bold text-lg shadow-lg hover:scale-105"
-                style="background:var(--brand-indigo)">Continue to Form ➡️</button>
+                style="background:var(--brand-indigo)">Continue to Form</button>
             </div>
           </div>
         </div>
@@ -543,7 +548,7 @@ function getBadgeClass(type: string) {
                         @click="checkAnswer"
                         :disabled="!answers[currentComponent.id]"
                         class="mt-6 btn-fun w-full text-white py-4 rounded-2xl font-bold text-xl disabled:opacity-50 shadow-lg"
-                        style="background:var(--brand-indigo)">Check Answer ✨</button>
+                        style="background:var(--brand-indigo)">Check Answer</button>
                     </div>
 
                     <!-- Feedback -->
@@ -586,14 +591,14 @@ function getBadgeClass(type: string) {
                       @click="nextStep"
                       class="btn-fun text-white px-10 py-3 rounded-2xl font-bold text-lg shadow-lg"
                       style="background:var(--brand-dark)"
-                    >{{ currentComponentID < currentFormComponents.length - 1 ? 'Continue ➡️' : 'Finish Challenge! 🎉' }}</button>
+                    >{{ currentComponentID < currentFormComponents.length - 1 ? 'Continue ➡️' : 'Finish Challenge!' }}</button>
                     <!-- Text/MCQ after answered -->
                     <button
                       v-else-if="feedbackVisible[currentComponent.id]"
                       @click="nextStep"
                       class="btn-fun text-white px-10 py-3 rounded-2xl font-bold text-lg"
                       style="background:var(--brand-dark)"
-                    >{{ currentComponentID < currentFormComponents.length - 1 ? 'Next Step' : 'Finish Challenge! 🎉' }}</button>
+                    >{{ currentComponentID < currentFormComponents.length - 1 ? 'Next Step' : 'Finish Challenge!' }}</button>
                   </div>
                 </div>
               </div>
