@@ -5,7 +5,7 @@ import { requireAdmin } from '../../../utils/require-session'
 import { isMasterAdmin } from '../../../utils/master-admin'
 
 const createAdminSchema = z.object({
-  name: z.string().trim().min(1).max(100),
+  name: z.string().trim().max(100).optional(),
   email: emailSchema,
 })
 
@@ -86,11 +86,28 @@ export default defineEventHandler(async (event) => {
 
   const existingUser = await prisma.user.findUnique({
     where: { email: parsed.data.email },
-    select: { id: true },
+    select: { id: true, role: true },
   })
 
   if (existingUser) {
-    throw createError({ statusCode: 409, statusMessage: 'A user with this email already exists' })
+    if (existingUser.role === 'admin') {
+      throw createError({ statusCode: 409, statusMessage: 'This user is already an admin' })
+    }
+
+    const [user] = await prisma.$transaction([
+      prisma.user.update({
+        where: { id: existingUser.id },
+        data: { role: 'admin' },
+        select: { name: true, email: true, role: true },
+      }),
+      prisma.session.deleteMany({ where: { userId: existingUser.id } }),
+    ])
+
+    return { success: true, promoted: true, user }
+  }
+
+  if (!parsed.data.name) {
+    throw createError({ statusCode: 400, statusMessage: 'A name is required for a new account' })
   }
 
   const user = await prisma.user.create({
@@ -107,5 +124,5 @@ export default defineEventHandler(async (event) => {
     },
   })
 
-  return { success: true, user }
+  return { success: true, promoted: false, user }
 })

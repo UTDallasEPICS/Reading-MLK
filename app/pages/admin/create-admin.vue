@@ -44,7 +44,7 @@ async function submit() {
   email.value = email.value.trim().toLowerCase()
 
   try {
-    await $fetch('/api/admin/admins', {
+    const result = await $fetch<{ promoted: boolean }>('/api/admin/admins', {
       method: 'POST',
       body: { name: name.value, email: email.value },
     })
@@ -58,9 +58,10 @@ async function submit() {
     name.value = ''
     email.value = ''
     statusType.value = error ? 'error' : 'success'
+    const action = result.promoted ? 'User promoted to admin' : 'Admin created'
     statusMessage.value = error
-      ? 'Admin created, but a sign-in link could not be sent. They can request one at /auth.'
-      : 'Admin created. A sign-in link was sent to their email.'
+      ? `${action}, but a sign-in link could not be sent. They can request one at /auth.`
+      : `${action}. A sign-in link was sent to their email.`
   } catch (error) {
     console.error('Failed to create admin', error)
     const fetchError = error as { data?: { statusMessage?: string } }
@@ -101,13 +102,13 @@ async function removeAdminPrivilege(admin: { id: string; name: string }) {
     <section class="create-admin-panel">
       <header>
         <h2>Create Admin</h2>
-        <p>Create an administrator account and send its sign-in link.</p>
+        <p>Enter an existing user’s email to promote them, or a new email and name to create an admin. A sign-in link will be sent.</p>
       </header>
 
       <form v-if="canCreateAdmins && !isCheckingAccess" class="create-admin-form" @submit.prevent="submit">
         <label>
-          <span>Name</span>
-          <input v-model="name" required maxlength="100" autocomplete="name">
+          <span>Name (new accounts only)</span>
+          <input v-model="name" maxlength="100" autocomplete="name">
         </label>
 
         <label>
@@ -116,7 +117,7 @@ async function removeAdminPrivilege(admin: { id: string; name: string }) {
         </label>
 
         <button type="submit" :disabled="isSubmitting">
-          {{ isSubmitting ? 'Creating…' : 'Create Admin' }}
+          {{ isSubmitting ? 'Saving…' : 'Add Admin' }}
         </button>
       </form>
 
