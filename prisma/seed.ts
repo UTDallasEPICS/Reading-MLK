@@ -1,5 +1,11 @@
 import { prisma } from '../server/utils/prisma'
-import { seededAdminName } from '../server/utils/master-admin'
+import { pathToFileURL } from 'node:url'
+
+// Add local development admins here, then run: pnpm exec prisma db seed
+// These entries grant master access only outside production.
+export const masterAdmins: Array<{ name: string; email: string }> = [
+  // { name: 'Your Name', email: 'your-email@example.com' },
+]
 
 function makeLocalDate(dateString: string) {
   const [year, month, day] = dateString.split('-').map(Number)
@@ -10,7 +16,7 @@ async function main() {
   const seededEmails = [
     'parent1@example.com',
     'parent2@gmail.com',
-    seededAdminName
+    ...masterAdmins.map((admin) => admin.email.trim().toLowerCase()),
   ]
 
   await prisma.user.deleteMany({
@@ -70,22 +76,26 @@ async function main() {
     },
   })
 
-  const admin = await prisma.user.create({
-    data: {
-      name: seededAdminName,
-      email: seededEmails[2],
-      emailVerified: true,
-      role: 'admin',
-      coach: { create: {} },
-      accounts: {
-        create: {
-          id: 'seed_account_6',
-          accountId: seededEmails[2],
-          providerId: 'magic-link',
-        }
-      }
-    }
-  })
+  const seededAdmins = []
+  for (const [index, admin] of masterAdmins.entries()) {
+    const email = admin.email.trim().toLowerCase()
+    seededAdmins.push(await prisma.user.create({
+      data: {
+        name: admin.name.trim(),
+        email,
+        emailVerified: true,
+        role: 'admin',
+        coach: { create: {} },
+        accounts: {
+          create: {
+            id: `seed_admin_account_${index}`,
+            accountId: email,
+            providerId: 'magic-link',
+          },
+        },
+      },
+    }))
+  }
 
   // Clean old progress-testing data
   await prisma.submissionResponse.deleteMany()
@@ -105,12 +115,12 @@ async function main() {
     throw new Error('Seed students not found')
   }
 
-  // Create the master class with the placeholder admin as its coach.
+  // Give every seeded master admin access to the sample class.
  const testClass = await prisma.class.create({
     data: {
       name: 'MLK',
       joinToken: 'FOMLK',
-      Coach: { connect: { userId: admin.id } },
+      Coach: { connect: seededAdmins.map((admin) => ({ userId: admin.id })) },
       Students: {
         connect: [
           { id: crota.id },
@@ -375,12 +385,15 @@ async function main() {
   console.log('Seeding finished.')
 }
 
-main()
-  .then(async () => {
-    await prisma.$disconnect()
-  })
-  .catch(async (e) => {
-    console.error(e)
-    await prisma.$disconnect()
-    process.exit(1)
-  })
+// Importing the admin list must not execute database seeding.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main()
+    .then(async () => {
+      await prisma.$disconnect()
+    })
+    .catch(async (e) => {
+      console.error(e)
+      await prisma.$disconnect()
+      process.exit(1)
+    })
+}

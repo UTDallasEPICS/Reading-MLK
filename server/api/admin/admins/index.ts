@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { emailSchema } from '../../../utils/schemas'
 import { prisma } from '../../../utils/prisma'
 import { requireAdmin } from '../../../utils/require-session'
-import { seededAdminName } from '../../../utils/master-admin'
+import { isMasterAdmin } from '../../../utils/master-admin'
 
 const createAdminSchema = z.object({
   name: z.string().trim().min(1).max(100),
@@ -11,7 +11,7 @@ const createAdminSchema = z.object({
 
 export default defineEventHandler(async (event) => {
   const session = await requireAdmin(event)
-  const canCreateAdmins = session.user.email.toLowerCase() === seededAdminName.toLowerCase()
+  const canCreateAdmins = isMasterAdmin(session.user.email)
 
   if (event.node.req.method === 'GET') {
     if (!canCreateAdmins) {
@@ -26,7 +26,7 @@ export default defineEventHandler(async (event) => {
 
     const admins = adminUsers.map((admin) => ({
       ...admin,
-      isMaster: admin.email.toLowerCase() === seededAdminName.toLowerCase(),
+      isMaster: isMasterAdmin(admin.email),
     }))
 
     return { canCreateAdmins, admins }
@@ -59,7 +59,7 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 404, statusMessage: 'Admin account not found' })
     }
 
-    if (target.email.toLowerCase() === seededAdminName.toLowerCase()) {
+    if (isMasterAdmin(target.email)) {
       throw createError({ statusCode: 400, statusMessage: 'The master admin privilege cannot be removed' })
     }
 
