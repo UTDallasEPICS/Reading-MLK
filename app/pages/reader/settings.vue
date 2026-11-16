@@ -15,6 +15,7 @@ if (!student.value) {
 const settings = reactive({ 
   dyslexiaFont: globalSettings.value.dyslexiaFont,
   language: globalSettings.value.language,
+  theme: globalSettings.value.theme,
 })
 
 async function logout() {
@@ -55,7 +56,7 @@ async function changeEmail() {
 
 // ── Theme class ── 
 const themeClass = computed(() => {
-  const t = 'light'
+  const t = settings.theme !== 'light' ? `theme-${settings.theme}` : ''
   const d = settings.dyslexiaFont ? 'dyslexia-font' : ''
   return `reader-app ${t} ${d}`.trim()
 })
@@ -75,13 +76,17 @@ watch(settings, (newSettings) => {
 
     <!-- TOP BAR -->
     <header
-      class="absolute top-4 left-0 right-0 w-full max-w-4xl mx-auto flex justify-end items-center px-6 z-[200]"
+      class="absolute top-4 left-0 right-0 w-full max-w-4xl mx-auto flex justify-start items-center px-6 z-[200]"
     >
       <NuxtLink
         to="/reader"
-        class="w-14 h-14 bg-white rounded-xl flex items-center justify-center text-2xl transition-all border border-gray-200 shadow-lg hover:scale-110 active:scale-95"
+        aria-label="Go to Reading Buddy home"
       >
-        🏠
+        <img
+          src="/reader-logo.png"
+          alt="Reading Huddle"
+          class="h-16 w-16 object-contain"
+        />
       </NuxtLink>
     </header>
 
@@ -192,7 +197,7 @@ watch(settings, (newSettings) => {
         @click="logout"
         class="w-full bg-red-500 hover:bg-red-600 text-white font-bold text-base py-3 rounded-xl shadow-lg transition active:scale-95 mt-2"
       >
-        Logout 👋
+        Logout
       </button>
 
     </div>
