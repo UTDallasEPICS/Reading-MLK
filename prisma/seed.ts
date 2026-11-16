@@ -8,11 +8,14 @@ export const masterAdmins: Array<{ name: string; email: string }> = [
 
 function makeLocalDate(dateString: string) {
   const [year, month, day] = dateString.split('-').map(Number)
+  if (year === undefined || month === undefined || day === undefined) {
+    throw new Error(`Invalid seed date: ${dateString}`)
+  }
   return new Date(year, month - 1, day)
 }
 
 async function main() {
-  const seededEmails = [
+  const seededEmails: [string, string, ...string[]] = [
     'parent1@example.com',
     'parent2@gmail.com',
     ...masterAdmins.map((admin) => admin.email.trim().toLowerCase()),
