@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { prisma } from '../../utils/prisma'
-import { requireSession } from '../../utils/require-session'
+import { requireCoach } from '../../utils/require-session'
 
 const coachBaseSchema = z.object({
   purpose: z.enum(['teacher', 'studygroup', 'other']),
@@ -18,15 +18,7 @@ const coachExtendSchema = coachBaseSchema.extend({
 })
 
 export default defineEventHandler(async (event) => {
-  const session = await requireSession(event)
-
-  if (!['reader', 'coach', 'admin'].includes(session.user.role)) {
-    throw createError({
-      statusCode: 403,
-      statusMessage: 'Forbidden',
-    })
-  }
-
+  const session = await requireCoach(event)
   const parsed = coachExtendSchema.safeParse(await readBody(event))
 
   if (!parsed.success) {
@@ -38,25 +30,14 @@ export default defineEventHandler(async (event) => {
 
   const teacher = parsed.data.purpose === 'teacher'
 
-  return await prisma.$transaction(async (transaction) => {
-    const coach = await transaction.coach.create({
-      data: {
-        userId: session.user.id,
-        tag: parsed.data.purpose,
-        verified: false,
-        school: teacher ? parsed.data.school : null,
-        district: teacher ? parsed.data.district : null,
-        zipcode: teacher ? parsed.data.zipcode : null,
-      },
-    })
-
-    if (session.user.role === 'reader') {
-      await transaction.user.update({
-        where: { id: session.user.id },
-        data: { role: 'coach' },
-      })
-    }
-
-    return coach
+  return await prisma.coach.create({
+    data: {
+      userId: session.user.id,
+      tag: parsed.data.purpose,
+      verified: false,
+      school: teacher ? parsed.data.school : null,
+      district: teacher ? parsed.data.district : null,
+      zipcode: teacher ? parsed.data.zipcode : null,
+    },
   })
 })

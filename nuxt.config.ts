@@ -6,14 +6,7 @@ export default defineNuxtConfig({
   css: ['./assets/css/main.css'],
   vite: {
     optimizeDeps: {
-      include: [
-        'better-auth/client/plugins',
-        'better-auth/vue',
-        'dayjs',
-        'dayjs/plugin/utc',
-        'emoji-mart',
-        'zod',
-      ],
+      include: ['emoji-mart', '@emoji-mart/data'],
     },
   },
   ssr: false,
