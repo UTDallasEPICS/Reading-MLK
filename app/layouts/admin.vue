@@ -1,20 +1,39 @@
 <script setup lang="ts">
 import './admin.css'
 
-const navigation = [
-  {
-    label: 'Dashboard',
-    route: '/admin',
-  },
-  {
-    label: 'Data',
-    route: '/admin/data',
-  },
-  {
-    label: 'Teacher Verification',
-    route: '/admin/teacher-verification',
-  },
-]
+const canCreateAdmins = ref(false)
+
+const navigation = computed(() => {
+  const items = [
+    {
+      label: 'Dashboard',
+      route: '/admin',
+    },
+    {
+      label: 'Data',
+      route: '/admin/data',
+    },
+    {
+      label: 'Teacher Verification',
+      route: '/admin/teacher-verification',
+    },
+  ]
+
+  if (canCreateAdmins.value) {
+    items.push({ label: 'Create Admin', route: '/admin/create-admin' })
+  }
+
+  return items
+})
+
+onMounted(async () => {
+  try {
+    const access = await $fetch<{ canCreateAdmins: boolean }>('/api/admin/admins')
+    canCreateAdmins.value = access.canCreateAdmins
+  } catch (error) {
+    console.error('Failed to check admin creation access', error)
+  }
+})
 
 </script>
 

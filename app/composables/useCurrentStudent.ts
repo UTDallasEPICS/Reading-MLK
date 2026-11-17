@@ -1,18 +1,36 @@
 import type { Student } from '~~/prisma/generated/client'
+import { isPetType, type PetType } from '~~/shared/pet'
 
 export type StudentSettings = {
+  theme: string
+  activeAnimations: string[]
+  activeBanner: string | null
+  activeStickers: string[]
   dyslexiaFont: boolean
   language: 'en' | 'es'
-  theme: string
+  pet: { type: PetType; fedAt?: string; wateredAt?: string }
 }
 
 const normalizeLanguage = (value: unknown): 'en' | 'es' => {
-  const language = String(value || '').trim().toLowerCase()
+  const language = String(value || '')
+    .trim()
+    .toLowerCase()
 
   return ['es', 'spanish'].includes(language) ? 'es' : 'en'
 }
 
-const readerThemes = ['light', 'blue', 'sepia', 'sunset', 'ocean', 'forest', 'candy', 'fire', 'ice']
+const readerThemes = [
+  'light',
+  'dark',
+  'blue',
+  'sepia',
+  'sunset',
+  'ocean',
+  'forest',
+  'candy',
+  'fire',
+  'ice',
+]
 
 export const useCurrentStudent = () => {
   const student = useState<Student | null>('currentStudent', () => null)
@@ -21,12 +39,20 @@ export const useCurrentStudent = () => {
     const raw = (student.value?.settings as Partial<StudentSettings>) || {}
 
     return {
+      activeAnimations: Array.isArray(raw.activeAnimations) ? raw.activeAnimations : [],
+      activeBanner: typeof raw.activeBanner === 'string' ? raw.activeBanner : null,
+      activeStickers: Array.isArray(raw.activeStickers) ? raw.activeStickers : [],
       dyslexiaFont: Boolean(raw.dyslexiaFont),
       language: normalizeLanguage(raw.language),
+      pet: {
+        type: isPetType(raw.pet?.type) ? raw.pet.type : 'cat',
+        ...(typeof raw.pet?.fedAt === 'string' ? { fedAt: raw.pet.fedAt } : {}),
+        ...(typeof raw.pet?.wateredAt === 'string' ? { wateredAt: raw.pet.wateredAt } : {}),
+      },
       theme: readerThemes.includes(String(raw.theme)) ? String(raw.theme) : 'light',
     }
   })
-  
+
   const setStudent = (newStudent: Student | null) => {
     student.value = newStudent
 
@@ -87,8 +113,8 @@ export const useCurrentStudent = () => {
       const updatedStudent = await $fetch<Student>(`/api/student/${student.value.id}`, {
         method: 'PUT',
         body: {
-          settings: updatedSettings
-        }
+          settings: updatedSettings,
+        },
       })
 
       // Update the global state with the response, automatically passing it to pages like Home.vue
@@ -98,33 +124,13 @@ export const useCurrentStudent = () => {
     }
   }
 
-  // Update student XP and persist to DB
-  const updateExp = async (amount: number) => {
-    if (!student.value?.id) return
-
-    const newExp = (student.value.exp || 0) + amount
-
-    try {
-      const updatedStudent = await $fetch<Student>(`/api/student/${student.value.id}`, {
-        method: 'PUT',
-        body: {
-          exp: newExp
-        }
-      })
-      student.value = updatedStudent
-    } catch (error) {
-      console.error('Failed to update student XP:', error)
-    }
-  }
-
   return {
     student,
     settings,
     saveSettings,
-    updateExp,
     setStudent,
     loadStudent,
     restoreStudent,
-    clearStudent
+    clearStudent,
   }
 }

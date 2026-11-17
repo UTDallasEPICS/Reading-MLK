@@ -5,19 +5,12 @@ const builderSectionRef = ref<HTMLElement | null>(null)
 
 const {
   builderSubTab, formTitle, editingFormId, questions,
-  formWeekStart, formDays, historyWeekStart, historyStatusSelection, historyGroupStartDate, historyGroupEndDate, toggleHistoryStatus, getLastMonday,
-  getCalculatedDate, formatDate, defaultQuestions,
+  formStartDate, formEndDate, historyWeekStart, historyStatusSelection, historyGroupStartDate, historyGroupEndDate, toggleHistoryStatus,
+  formatDate, defaultQuestions,
   filteredPublishedForms, selectedFormDetails, viewFormDetails,
   draggedIdx, dragStart, onDrop,
   addQuestion, publishForm, editPublishedForm, deletePublishedForm, toggleFormPublish, loadPublishedForms,
 } = useCoach()
-
-const previewDates = computed(() => {
-  if (!formDays.value.length) return []
-  const weekStart = getLastMonday(formWeekStart.value || '')
-  if (!weekStart) return []
-  return formDays.value.map(day => `${day}: ${getCalculatedDate(weekStart, day)}`)
-})
 
 const questionTypeLabel = (type: string) => {
   if (type === 'text') return 'Discussion'
@@ -25,51 +18,6 @@ const questionTypeLabel = (type: string) => {
   if (type === 'video') return 'Video'
   if (type === 'context') return 'Context'
   return type
-}
-
-const isPointerDown = ref(false)
-const dragMode = ref<'add' | 'remove' | null>(null)
-const visitedInThisDrag = ref<Set<string>>(new Set())
-
-const addDay = (day: string) => {
-  if (!formDays.value.includes(day)) formDays.value.push(day)
-}
-
-const removeDay = (day: string) => {
-  if (formDays.value.includes(day)) {
-    formDays.value = formDays.value.filter((d: string) => d !== day)
-  }
-}
-
-const toggleDaySingle = (day: string) => {
-  if (formDays.value.includes(day)) removeDay(day)
-  else addDay(day)
-}
-
-const applyDayByMode = (day: string) => {
-  if (dragMode.value === 'add') addDay(day)
-  if (dragMode.value === 'remove') removeDay(day)
-}
-
-const startDayDrag = (day: string) => {
-  isPointerDown.value = true
-  dragMode.value = formDays.value.includes(day) ? 'remove' : 'add'
-  visitedInThisDrag.value.clear()
-  applyDayByMode(day)
-  visitedInThisDrag.value.add(day)
-}
-
-const continueDayDrag = (day: string) => {
-  if (!isPointerDown.value || !dragMode.value) return
-  if (visitedInThisDrag.value.has(day)) return
-  applyDayByMode(day)
-  visitedInThisDrag.value.add(day)
-}
-
-const endDayDrag = () => {
-  isPointerDown.value = false
-  dragMode.value = null
-  visitedInThisDrag.value.clear()
 }
 
 const removeQuestion = (index: number) => {
@@ -107,17 +55,7 @@ const handleBuilderEnter = (event: KeyboardEvent) => {
 
 onMounted(() => {
   loadPublishedForms()
-  window.addEventListener('pointerup', endDayDrag)
-  window.addEventListener('pointercancel', endDayDrag)
-  window.addEventListener('blur', endDayDrag)
 })
-
-onBeforeUnmount(() => {
-  window.removeEventListener('pointerup', endDayDrag)
-  window.removeEventListener('pointercancel', endDayDrag)
-  window.removeEventListener('blur', endDayDrag)
-})
-
 
 </script>
 
@@ -193,31 +131,17 @@ onBeforeUnmount(() => {
         <!-- Week row -->
         <div class="week-row">
           <div>
-            <p class="field-hint">Selected Week</p>
-            <h4 class="week-label">{{ formWeekStart ? 'Week of ' + getLastMonday(formWeekStart) : 'Select a week' }}</h4>
+            <p class="field-hint">Selected Dates</p>
+            <h4 class="week-label">{{ formStartDate && formEndDate ? 'From ' + formatDate(formStartDate) + ' to ' + formatDate(formEndDate) : 'Select dates' }}</h4>
           </div>
           <div>
-            <label class="field-label">Change Week Starting (Mon)</label>
-            <input v-model="formWeekStart" type="date" class="input-base" data-builder-field="true"  @keydown.enter.prevent="handleBuilderEnter" />
+            <label class="field-label">Start Date</label>
+            <input v-model="formStartDate" type="date" class="input-base" data-builder-field="true"  @keydown.enter.prevent="handleBuilderEnter" />
           </div>
-        </div>
-
-        <!-- Day multi-select -->
-        <div>
-          <label class="field-label">Day(s) of Week (Multi-select)</label>
-          <div class="day-pills">
-            <button
-              v-for="day in ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']"
-              :key="day"
-              class="day-pill"
-              :class="formDays.includes(day) ? 'active' : ''"
-              @pointerdown.prevent="startDayDrag(day)"
-              @pointerenter="continueDayDrag(day)"
-              @keydown.enter.prevent="toggleDaySingle(day)"
-              @keydown.space.prevent="toggleDaySingle(day)"
-            >{{ day }}</button>
+          <div>
+            <label class="field-label">End Date</label>
+            <input v-model="formEndDate" :min="formStartDate" type="date" class="input-base" data-builder-field="true" @keydown.enter.prevent="handleBuilderEnter" />
           </div>
-          <p class="field-note">* Selecting multiple days will publish a copy of this form for each selected day.</p>
         </div>
 
         <!-- Title + preview date -->
@@ -225,13 +149,6 @@ onBeforeUnmount(() => {
           <div class="flex-grow">
             <label class="field-label">Form Title</label>
             <input v-model="formTitle" type="text" placeholder="e.g. Kindness & Math Challenge" class="input-title" data-builder-field="true" @keydown.enter.prevent="handleBuilderEnter" />
-          </div>
-          <div class="preview-date-box">
-            <span class="field-hint">Preview Date</span>
-            <span v-if="previewDates.length === 0" class="preview-date-val">Select a day</span>
-            <div v-else class="preview-date-list">
-              <span v-for="item in previewDates" :key="item" class="preview-date-val">{{ item }}</span>
-            </div>
           </div>
         </div>
       </div>
@@ -352,13 +269,13 @@ onBeforeUnmount(() => {
             <button class="btn-danger preview-cancel-btn" @click="deletePublishedForm">Delete Form</button>
             <button
               class="btn-ghost preview-cancel-btn"
-              @click="editingFormId = null; formTitle = ''; formDays = ['Monday']; questions = defaultQuestions(); builderSubTab = 'history'"
+              @click="editingFormId = null; formTitle = ''; questions = defaultQuestions(); builderSubTab = 'history'"
             >Cancel</button>
           </template>
           <template v-else>
             <button
               class="btn-ghost preview-cancel-btn"
-              @click="formTitle = ''; formDays = ['Monday']; questions = defaultQuestions(); builderSubTab = 'history'"
+              @click="formTitle = ''; questions = defaultQuestions(); builderSubTab = 'history'"
             >Discard</button>
             <button class="btn-indigo preview-cancel-btn" @click="publishForm">Publish Form</button>
           </template>

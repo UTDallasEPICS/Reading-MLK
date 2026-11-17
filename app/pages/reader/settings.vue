@@ -56,7 +56,7 @@ async function changeEmail() {
 
 // ── Theme class ── 
 const themeClass = computed(() => {
-  const t = settings.theme !== 'light' ? `theme-${settings.theme}` : ''
+  const t = globalSettings.value.theme === 'light' ? '' : `theme-${globalSettings.value.theme}`
   const d = settings.dyslexiaFont ? 'dyslexia-font' : ''
   return `reader-app ${t} ${d}`.trim()
 })
@@ -74,9 +74,11 @@ watch(settings, (newSettings) => {
     class="pb-32 px-4 pt-4 min-h-screen relative text-gray-800"
   >
 
+    <ReaderEquippedBanner />
+    <ReaderDecorations />
     <!-- TOP BAR -->
     <header
-      class="absolute top-4 left-0 right-0 w-full max-w-4xl mx-auto flex justify-start items-center px-6 z-[200]"
+      class="relative w-full max-w-4xl mx-auto mb-8 flex justify-start items-center px-6 z-[200]"
     >
       <NuxtLink
         to="/reader"
@@ -85,7 +87,7 @@ watch(settings, (newSettings) => {
         <img
           src="/reader-logo.png"
           alt="Reading Huddle"
-          class="h-16 w-16 object-contain"
+          class="h-20 w-20 object-contain"
         />
       </NuxtLink>
     </header>
@@ -203,3 +205,7 @@ watch(settings, (newSettings) => {
     </div>
   </div>
 </template>
+
+<style>
+@import './reader.css';
+</style>
