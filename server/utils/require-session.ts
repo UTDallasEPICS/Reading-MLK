@@ -32,6 +32,17 @@ export async function requireAdmin(event: H3Event) {
 export async function requireCoach(event: H3Event) {
   const session = await requireSession(event)
 
+  if (session.user.role === 'reader') {
+    const coach = await prisma.coach.findUnique({
+      where: { userId: session.user.id },
+      select: { id: true },
+    })
+
+    if (coach) {
+      return session
+    }
+  }
+
   if (session.user.role !== 'coach' && session.user.role !== 'admin') {
     throw createError({
       statusCode: 403,

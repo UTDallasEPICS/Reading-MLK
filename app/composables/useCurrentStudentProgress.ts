@@ -52,7 +52,7 @@ export const useCurrentStudentProgress = () => {
     }
 
     try {
-      const newSubmission = await $fetch<FormSubmission>('/api/formSubmission', {
+      const newSubmission = await $fetch<FormSubmission & { xpAwarded: number; studentExp: number }>('/api/formSubmission', {
         method: 'POST',
         body: {
           student: student.value.id,
@@ -62,7 +62,10 @@ export const useCurrentStudentProgress = () => {
       })
 
       // Update local state without needing a new fetch
-      submissions.value = [...submissions.value, newSubmission]
+      if (student.value?.id === newSubmission.student) {
+        student.value = { ...student.value, exp: newSubmission.studentExp }
+        submissions.value = [...submissions.value.filter(s => s.id !== newSubmission.id), newSubmission]
+      }
       return newSubmission
     } catch (error) {
       console.error('Failed to log form submission:', error)
