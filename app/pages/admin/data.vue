@@ -10,126 +10,137 @@ useHead({
 
 type DataTab = 'Coach' | 'Teachers' | 'Classes' | 'Students'
 
-type EditableRecord = {
-  type: DataTab
-  data: Record<string, string | number | boolean>
-}
-
 type CoachRecord = {
+  id: string
   name: string
-  role: string
-  school: string
-  district: string
-  forms: number
-}
-
-type TeacherRecord = {
-  name: string
-  school: string
-  district: string
-  classes: number
+  email: string
+  tag: string
   verified: boolean
+  school: string
+  district: string
+  zipcode: string
+  classes: Array<{ id: string; name: string }>
+  classCount: number
+  studentCount: number
+  formCount: number
 }
 
 type ClassRecord = {
+  id: string
   name: string
-  teacher: string
-  school: string
-  students: number
+  teachers: Array<{ id: string; name: string; tag: string; school: string }>
+  schools: string[]
+  students: Array<{ id: number; name: string; exp: number }>
+  forms: Array<{
+    id: number
+    title: string
+    published: boolean
+    startDate: string
+    endDate: string | null
+    submissionCount: number
+  }>
 }
 
 type StudentRecord = {
+  id: number
   name: string
-  className: string
-  teacher: string
-  readingLevel: string
+  exp: number
+  classes: Array<{ id: string; name: string }>
+  teachers: Array<{ id: string; name: string; tag: string; school: string }>
+  schools: string[]
+  submissions: Array<{ id: number; date: string; form: string; classId: string }>
 }
+
+type AdminDataResponse = {
+  schools: string[]
+  coaches: CoachRecord[]
+  teachers: CoachRecord[]
+  classes: ClassRecord[]
+  students: StudentRecord[]
+  totalStudents: number
+}
+
+const {
+  data: explorerData,
+  pending,
+  error,
+} = useFetch<AdminDataResponse>('/api/admin/data')
 
 const activeTab = ref<DataTab>('Teachers')
 const searchQuery = ref('')
-const editModalOpen = ref(false)
-const selectedRecord = ref<EditableRecord | null>(null)
+const schoolFilter = ref('')
+const selectedCoachId = ref<string | null>(null)
+const selectedClassId = ref<string | null>(null)
+const selectedStudentId = ref<number | null>(null)
+const studentDetailsPanel = ref<HTMLElement | null>(null)
 
-const tabs: DataTab[] = [
-  'Coach',
-  'Teachers',
-  'Classes',
-  'Students',
-]
+const coaches = computed(() => explorerData.value?.coaches ?? [])
+const teachers = computed(() => explorerData.value?.teachers ?? [])
+const classes = computed(() => explorerData.value?.classes ?? [])
+const students = computed(() => explorerData.value?.students ?? [])
+const schools = computed(() => explorerData.value?.schools ?? [])
 
-function getTabLabel(tab: DataTab) {
-  return tab === 'Coach' ? 'Reading Coach' : tab
+const normalizedSearch = computed(() => searchQuery.value.trim().toLowerCase())
+const selectedCoach = computed(() => coaches.value.find(coach => coach.id === selectedCoachId.value))
+const selectedClass = computed(() => classes.value.find(classroom => classroom.id === selectedClassId.value))
+const selectedStudent = computed(() => students.value.find(student => student.id === selectedStudentId.value))
+
+const scopedStudents = computed(() => students.value.filter(student =>
+  (!selectedCoachId.value || student.teachers.some(coach => coach.id === selectedCoachId.value)) &&
+  (!selectedClassId.value || student.classes.some(classroom => classroom.id === selectedClassId.value))
+))
+
+function matchesSearch(values: Array<string | number>) {
+  return values.join(' ').toLowerCase().includes(normalizedSearch.value)
 }
 
-function getRecordLabel(tab: DataTab) {
-  return tab === 'Coach' ? 'Reading Coach' : tab.slice(0, -1)
+function matchesSchool(values: string[]) {
+  return !schoolFilter.value || values.includes(schoolFilter.value)
 }
 
-const coach = ref<CoachRecord[]>([])
-const teachers = ref<TeacherRecord[]>([])
-const classes = ref<ClassRecord[]>([])
-const students = ref<StudentRecord[]>([])
+function coachSchoolNames(coach: CoachRecord) {
+  return coach.school ? [coach.school] : []
+}
 
-const normalizedSearch = computed(() =>
-  searchQuery.value.trim().toLowerCase(),
-)
+function classTeacherNames(classroom: ClassRecord) {
+  return classroom.teachers.map((teacher) => teacher.name)
+}
 
 const filteredCoach = computed(() =>
-  coach.value.filter((coach) => {
-    const searchable = [
-      coach.name,
-      coach.role,
-      coach.school,
-      coach.district,
-    ]
-      .join(' ')
-      .toLowerCase()
-
-    return searchable.includes(normalizedSearch.value)
-  }),
+  coaches.value.filter(
+    (coach) =>
+      matchesSchool(coachSchoolNames(coach)) &&
+      matchesSearch([coach.name, coach.tag, coach.school, coach.district, coach.email])
+  )
 )
 
 const filteredTeachers = computed(() =>
-  teachers.value.filter((teacher) => {
-    const searchable = [
-      teacher.name,
-      teacher.school,
-      teacher.district,
-    ]
-      .join(' ')
-      .toLowerCase()
-
-    return searchable.includes(normalizedSearch.value)
-  }),
+  teachers.value.filter(
+    (teacher) =>
+      matchesSchool(coachSchoolNames(teacher)) &&
+      matchesSearch([teacher.name, teacher.school, teacher.district, teacher.email])
+  )
 )
 
 const filteredClasses = computed(() =>
-  classes.value.filter((classroom) => {
-    const searchable = [
-      classroom.name,
-      classroom.teacher,
-      classroom.school,
-    ]
-      .join(' ')
-      .toLowerCase()
-
-    return searchable.includes(normalizedSearch.value)
-  }),
+  classes.value.filter(
+    (classroom) =>
+      (!selectedCoachId.value || classroom.teachers.some(coach => coach.id === selectedCoachId.value)) &&
+      matchesSchool(classroom.schools) &&
+      matchesSearch([classroom.name, ...classTeacherNames(classroom), ...classroom.schools])
+  )
 )
 
 const filteredStudents = computed(() =>
-  students.value.filter((student) => {
-    const searchable = [
-      student.name,
-      student.className,
-      student.teacher,
-      student.readingLevel,
-    ]
-      .join(' ')
-      .toLowerCase()
-
-    return searchable.includes(normalizedSearch.value)
-  }),
+  scopedStudents.value.filter(
+    (student) =>
+      matchesSchool(student.schools) &&
+      matchesSearch([
+        student.name,
+        ...student.classes.map((classroom) => classroom.name),
+        ...student.teachers.map((teacher) => teacher.name),
+      ])
+  )
 )
 
 const currentRecordCount = computed(() => {
@@ -148,110 +159,88 @@ const currentRecordCount = computed(() => {
   return filteredStudents.value.length
 })
 
+const currentRecordsLabel = computed(() => {
+  const label = getTabLabel(activeTab.value).toLowerCase()
+  return `${currentRecordCount.value} ${label}`
+})
+
+const requestError = computed(() => error.value?.message ?? '')
+
+function roleLabel(tag: string) {
+  const labels: Record<string, string> = {
+    teacher: 'Teacher',
+    teacher_denied: 'Teacher (Denied)',
+    personal: 'Personal',
+    studygroup: 'Study Group',
+    other: 'Other',
+  }
+
+  return labels[tag] ?? tag
+}
+
 function changeTab(tab: DataTab) {
   activeTab.value = tab
   searchQuery.value = ''
+  selectedCoachId.value = null
+  selectedClassId.value = null
+  selectedStudentId.value = null
 }
 
-function openEditModal(
-  type: DataTab,
-  data: Record<string, string | number | boolean>,
-) {
-  selectedRecord.value = {
-    type,
-    data: { ...data },
-  }
-
-  editModalOpen.value = true
+function openCoachDetails(id: string) {
+  changeTab('Classes')
+  schoolFilter.value = ''
+  selectedCoachId.value = id
 }
 
-function closeEditModal() {
-  editModalOpen.value = false
-  selectedRecord.value = null
+function openClassDetails(id: string) {
+  const coachId = selectedCoachId.value
+  changeTab('Students')
+  schoolFilter.value = ''
+  selectedClassId.value = id
+  if (classes.value.find(classroom => classroom.id === id)?.teachers.some(coach => coach.id === coachId)) {
+    selectedCoachId.value = coachId
+  }
 }
 
-function saveEdit() {
-  if (!selectedRecord.value) {
-    return
+async function openStudentDetails(id: number) {
+  selectedStudentId.value = selectedStudentId.value === id ? null : id
+  await nextTick()
+  studentDetailsPanel.value?.scrollIntoView({ block: 'nearest' })
+}
+
+function studentSubmissions(student: StudentRecord) {
+  return selectedClassId.value
+    ? student.submissions.filter(submission => submission.classId === selectedClassId.value)
+    : student.submissions
+}
+
+function formatDate(date: string | null) {
+  if (!date) {
+    return 'No end date'
   }
 
-  const { type, data } = selectedRecord.value
+  return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date(date))
+}
 
-  if (type === 'Coach') {
-    const index = coach.value.findIndex(
-      coach => coach.name === data.name,
-    )
+function formatSubmissionDate(date: string) {
+  return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date(date))
+}
 
-    if (index !== -1) {
-      coach.value[index] = {
-        name: String(data.name),
-        role: String(data.role),
-        school: String(data.school),
-        district: String(data.district),
-        forms: Number(data.forms),
-      }
-    }
-  }
+const tabs: DataTab[] = ['Coach', 'Teachers', 'Classes', 'Students']
 
-  if (type === 'Teachers') {
-    const index = teachers.value.findIndex(
-      teacher => teacher.name === data.name,
-    )
-
-    if (index !== -1) {
-      teachers.value[index] = {
-        name: String(data.name),
-        school: String(data.school),
-        district: String(data.district),
-        classes: Number(data.classes),
-        verified: Boolean(data.verified),
-      }
-    }
-  }
-
-  if (type === 'Classes') {
-    const index = classes.value.findIndex(
-      classroom => classroom.name === data.name,
-    )
-
-    if (index !== -1) {
-      classes.value[index] = {
-        name: String(data.name),
-        teacher: String(data.teacher),
-        school: String(data.school),
-        students: Number(data.students),
-      }
-    }
-  }
-
-  if (type === 'Students') {
-    const index = students.value.findIndex(
-      student => student.name === data.name,
-    )
-
-    if (index !== -1) {
-      students.value[index] = {
-        name: String(data.name),
-        className: String(data.className),
-        teacher: String(data.teacher),
-        readingLevel: String(data.readingLevel),
-      }
-    }
-  }
-
-  closeEditModal()
+function getTabLabel(tab: DataTab) {
+  return tab === 'Coach' ? 'Reading Coach' : tab
 }
 </script>
 
 <template>
   <div class="data-page">
     <section class="page-heading">
+      <div>
         <h2>Universal Data Explorer</h2>
+        <span class="record-summary">{{ currentRecordsLabel }}</span>
+      </div>
 
-        <span class="record-summary">
-            {{ currentRecordCount }}
-            {{ getTabLabel(activeTab).toLowerCase() }}
-        </span>
     </section>
 
     <section class="data-card">
@@ -268,12 +257,19 @@ function saveEdit() {
         </button>
       </div>
 
+      <div v-if="selectedCoach || selectedClass" class="drilldown-context">
+        <span>Showing {{ activeTab.toLowerCase() }} for</span>
+        <button v-if="selectedCoach" type="button" class="name-link" @click="openCoachDetails(selectedCoach.id)">
+          {{ selectedCoach.name }}
+        </button>
+        <span v-if="selectedCoach && selectedClass">→</span>
+        <strong v-if="selectedClass">{{ selectedClass.name }}</strong>
+        <button type="button" class="name-link" @click="changeTab(activeTab)">Show all {{ activeTab.toLowerCase() }}</button>
+      </div>
+
       <div class="toolbar">
         <div class="search-field">
-          <svg
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
             <circle cx="11" cy="11" r="7" />
             <path d="m16.5 16.5 4 4" />
           </svg>
@@ -282,25 +278,27 @@ function saveEdit() {
             v-model="searchQuery"
             type="search"
             :placeholder="`Search ${getTabLabel(activeTab).toLowerCase()}...`"
-          >
+          />
         </div>
 
-        <select class="filter-select">
-          <option>All Schools</option>
-        </select>
-
-        <select
-          v-if="activeTab === 'Coach' || activeTab === 'Teachers'"
-          class="filter-select"
-        >
-          <option>All Roles</option>
-          <option>Teacher</option>
-          <option>Study Group</option>
-          <option>Other</option>
-        </select>
+        <label class="school-filter">
+          <span>School</span>
+          <select v-model="schoolFilter" class="filter-select">
+            <option value="">All Schools</option>
+            <option v-for="school in schools" :key="school" :value="school">
+              {{ school }}
+            </option>
+          </select>
+        </label>
       </div>
 
-      <div class="table-wrapper">
+      <div v-if="pending" class="empty-state" role="status">Loading admin data...</div>
+
+      <div v-else-if="requestError" class="empty-state error-state" role="alert">
+        Could not load admin data: {{ requestError }}
+      </div>
+
+      <div v-else class="table-wrapper">
         <table v-if="activeTab === 'Coach'">
           <thead>
             <tr>
@@ -308,46 +306,36 @@ function saveEdit() {
               <th>Role</th>
               <th>School</th>
               <th>District</th>
-              <th>Forms Created</th>
-              <th>Actions</th>
+              <th>Classes</th>
+              <th>Students</th>
+              <th>Forms</th>
             </tr>
           </thead>
 
           <tbody>
-            <tr
-              v-for="coach in filteredCoach"
-              :key="coach.name"
-            >
+            <tr v-for="coach in filteredCoach" :key="coach.id">
               <td>
-                <strong>{{ coach.name }}</strong>
+                <button class="name-link" type="button" @click="openCoachDetails(coach.id)">
+                  {{ coach.name }}
+                </button>
               </td>
-
               <td>
                 <span
                   class="status-badge"
                   :class="{
-                    teacher: coach.role === 'Teacher',
-                    group: coach.role === 'Study Group',
-                    other: coach.role === 'Other',
+                    teacher: coach.tag === 'teacher',
+                    group: coach.tag === 'studygroup',
+                    other: coach.tag !== 'teacher' && coach.tag !== 'studygroup',
                   }"
                 >
-                  {{ coach.role }}
+                  {{ roleLabel(coach.tag) }}
                 </span>
               </td>
-
-              <td>{{ coach.school }}</td>
-              <td>{{ coach.district }}</td>
-              <td>{{ coach.forms }}</td>
-
-              <td>
-                <button
-                  type="button"
-                  class="edit-button"
-                  @click="openEditModal('Coach', coach)"
-                >
-                  Edit
-                </button>
-              </td>
+              <td>{{ coach.school || '—' }}</td>
+              <td>{{ coach.district || '—' }}</td>
+              <td>{{ coach.classCount }}</td>
+              <td>{{ coach.studentCount }}</td>
+              <td>{{ coach.formCount }}</td>
             </tr>
           </tbody>
         </table>
@@ -359,41 +347,26 @@ function saveEdit() {
               <th>School</th>
               <th>District</th>
               <th>Classes</th>
+              <th>Students</th>
               <th>Status</th>
-              <th>Actions</th>
             </tr>
           </thead>
 
           <tbody>
-            <tr
-              v-for="teacher in filteredTeachers"
-              :key="teacher.name"
-            >
+            <tr v-for="teacher in filteredTeachers" :key="teacher.id">
               <td>
-                <strong>{{ teacher.name }}</strong>
+                <button class="name-link" type="button" @click="openCoachDetails(teacher.id)">
+                  {{ teacher.name }}
+                </button>
               </td>
-
-              <td>{{ teacher.school }}</td>
-              <td>{{ teacher.district }}</td>
-              <td>{{ teacher.classes }}</td>
-
+              <td>{{ teacher.school || '—' }}</td>
+              <td>{{ teacher.district || '—' }}</td>
+              <td>{{ teacher.classCount }}</td>
+              <td>{{ teacher.studentCount }}</td>
               <td>
-                <span
-                  class="verification-badge"
-                  :class="{ pending: !teacher.verified }"
-                >
+                <span class="verification-badge" :class="{ pending: !teacher.verified }">
                   {{ teacher.verified ? 'Verified' : 'Pending' }}
                 </span>
-              </td>
-
-              <td>
-                <button
-                  type="button"
-                  class="edit-button"
-                  @click="openEditModal('Teachers', teacher)"
-                >
-                  Edit
-                </button>
               </td>
             </tr>
           </tbody>
@@ -403,35 +376,35 @@ function saveEdit() {
           <thead>
             <tr>
               <th>Class Name</th>
-              <th>Teacher</th>
+              <th>Teacher / Coach</th>
               <th>School</th>
               <th>Students</th>
-              <th>Actions</th>
+              <th>Forms</th>
             </tr>
           </thead>
 
           <tbody>
-            <tr
-              v-for="classroom in filteredClasses"
-              :key="classroom.name"
-            >
+            <tr v-for="classroom in filteredClasses" :key="classroom.id">
               <td>
-                <strong>{{ classroom.name }}</strong>
-              </td>
-
-              <td>{{ classroom.teacher }}</td>
-              <td>{{ classroom.school }}</td>
-              <td>{{ classroom.students }}</td>
-
-              <td>
-                <button
-                  type="button"
-                  class="edit-button"
-                  @click="openEditModal('Classes', classroom)"
-                >
-                  Edit
+                <button class="name-link" type="button" @click="openClassDetails(classroom.id)">
+                  {{ classroom.name }}
                 </button>
               </td>
+              <td>
+                <button
+                  v-for="teacher in classroom.teachers"
+                  :key="teacher.id"
+                  class="inline-name-link"
+                  type="button"
+                  @click="openCoachDetails(teacher.id)"
+                >
+                  {{ teacher.name }}
+                </button>
+                <span v-if="classroom.teachers.length === 0">—</span>
+              </td>
+              <td>{{ classroom.schools.join(', ') || '—' }}</td>
+              <td>{{ classroom.students.length }}</td>
+              <td>{{ classroom.forms.length }}</td>
             </tr>
           </tbody>
         </table>
@@ -441,155 +414,90 @@ function saveEdit() {
             <tr>
               <th>Student Name</th>
               <th>Class</th>
-              <th>Teacher</th>
-              <th>Reading Level</th>
-              <th>Actions</th>
+              <th>Teacher / Coach</th>
+              <th>Experience</th>
+              <th>Submissions</th>
             </tr>
           </thead>
 
           <tbody>
-            <tr
-              v-for="student in filteredStudents"
-              :key="student.name"
-            >
+            <tr v-for="student in filteredStudents" :key="student.id">
               <td>
-                <strong>{{ student.name }}</strong>
-              </td>
-
-              <td>{{ student.className }}</td>
-              <td>{{ student.teacher }}</td>
-              <td>{{ student.readingLevel }}</td>
-
-              <td>
-                <button
-                  type="button"
-                  class="edit-button"
-                  @click="openEditModal('Students', student)"
-                >
-                  Edit
+                <button class="name-link" type="button" @click="openStudentDetails(student.id)">
+                  {{ student.name }}
                 </button>
               </td>
+              <td>
+                <button
+                  v-for="classroom in student.classes"
+                  :key="classroom.id"
+                  class="inline-name-link"
+                  type="button"
+                  @click="openClassDetails(classroom.id)"
+                >
+                  {{ classroom.name }}
+                </button>
+                <span v-if="student.classes.length === 0">—</span>
+              </td>
+              <td>
+                <button
+                  v-for="teacher in student.teachers"
+                  :key="teacher.id"
+                  class="inline-name-link"
+                  type="button"
+                  @click="openCoachDetails(teacher.id)"
+                >
+                  {{ teacher.name }}
+                </button>
+                <span v-if="student.teachers.length === 0">—</span>
+              </td>
+              <td>{{ student.exp }}</td>
+              <td>{{ studentSubmissions(student).length }}</td>
             </tr>
           </tbody>
         </table>
 
-        <div
-          v-if="currentRecordCount === 0"
-          class="empty-state"
-        >
-          No records are available.
+        <section v-if="activeTab === 'Classes' && selectedCoach" class="inline-details">
+          <h3>{{ selectedCoach.name }}</h3>
+          <p>{{ roleLabel(selectedCoach.tag) }} · {{ selectedCoach.email }}</p>
+          <p>{{ selectedCoach.school || 'No school provided' }} · {{ selectedCoach.district || 'No district provided' }} · {{ selectedCoach.zipcode || 'No ZIP code provided' }}</p>
+          <p>{{ selectedCoach.classCount }} classes · {{ selectedCoach.studentCount }} students · {{ selectedCoach.formCount }} forms</p>
+          <p v-if="selectedCoach.tag === 'teacher' || selectedCoach.tag === 'teacher_denied'">
+            Verification: {{ selectedCoach.tag === 'teacher_denied' ? 'Denied' : selectedCoach.verified ? 'Verified' : 'Pending' }}
+          </p>
+        </section>
+
+        <section v-if="activeTab === 'Students' && selectedClass" class="inline-details">
+          <h3>{{ selectedClass.name }} forms</h3>
+          <div class="detail-list">
+            <article v-for="form in selectedClass.forms" :key="form.id" class="detail-row">
+              <strong>{{ form.title }}</strong>
+              <span>{{ form.published ? 'Published' : 'Draft' }} · {{ form.submissionCount }} submissions</span>
+              <span>{{ formatDate(form.startDate) }} – {{ formatDate(form.endDate) }}</span>
+            </article>
+            <p v-if="selectedClass.forms.length === 0">No forms are linked to this class.</p>
+          </div>
+        </section>
+
+        <section v-if="activeTab === 'Students' && selectedStudent" ref="studentDetailsPanel" class="inline-details">
+          <h3>{{ selectedStudent.name }} — submissions</h3>
+          <button type="button" class="name-link" @click="selectedStudentId = null">Close student details</button>
+          <div class="detail-list">
+            <article v-for="submission in studentSubmissions(selectedStudent)" :key="submission.id" class="detail-row">
+              <strong>{{ submission.form }}</strong>
+              <span>{{ formatSubmissionDate(submission.date) }}</span>
+            </article>
+            <p v-if="studentSubmissions(selectedStudent).length === 0">No form submissions are available.</p>
+          </div>
+        </section>
+
+        <div v-if="currentRecordCount === 0" class="empty-state">
+          No records match your search and school filters.
         </div>
       </div>
     </section>
 
-    <Teleport to="body">
-      <div
-        v-if="editModalOpen && selectedRecord"
-        class="modal-backdrop"
-      >
-        <section
-          class="edit-modal"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="edit-modal-title"
-        >
-          <div class="modal-header">
-            <div>
-              <h2 id="edit-modal-title">
-                Edit {{ getRecordLabel(selectedRecord.type) }}
-              </h2>
 
-              <p>
-                Update the selected record. These changes are currently
-                stored only in the page UI.
-              </p>
-            </div>
-
-            <button
-              type="button"
-              class="close-button"
-              aria-label="Close edit modal"
-              @click="closeEditModal"
-            >
-              ×
-            </button>
-          </div>
-
-          <div class="modal-fields">
-            <label
-              v-for="(_, key) in selectedRecord.data"
-              :key="String(key)"
-            >
-              <span>
-                {{
-                  String(key)
-                    .replace(/([A-Z])/g, ' $1')
-                    .replace(/^./, character => character.toUpperCase())
-                }}
-              </span>
-
-              <select
-                v-if="typeof selectedRecord.data[key] === 'boolean'"
-                v-model="selectedRecord.data[key]"
-              >
-                <option :value="true">
-                  Verified
-                </option>
-
-                <option :value="false">
-                  Pending
-                </option>
-              </select>
-
-              <select
-                v-else-if="key === 'role'"
-                v-model="selectedRecord.data[key]"
-              >
-                <option value="Teacher">
-                  Teacher
-                </option>
-
-                <option value="Study Group">
-                  Study Group
-                </option>
-
-                <option value="Other">
-                  Other
-                </option>
-              </select>
-
-              <input
-                v-else
-                v-model="selectedRecord.data[key]"
-                :type="
-                  typeof selectedRecord.data[key] === 'number'
-                    ? 'number'
-                    : 'text'
-                "
-              >
-            </label>
-          </div>
-
-          <div class="modal-actions">
-            <button
-              type="button"
-              class="secondary-button"
-              @click="closeEditModal"
-            >
-              Cancel
-            </button>
-
-            <button
-              type="button"
-              class="primary-button"
-              @click="saveEdit"
-            >
-              Save Changes
-            </button>
-          </div>
-        </section>
-      </div>
-    </Teleport>
   </div>
 </template>
 
@@ -618,6 +526,8 @@ function saveEdit() {
 }
 
 .record-summary {
+  display: block;
+  margin-top: 0.25rem;
   color: #64748b;
   font-size: 0.72rem;
   font-weight: 700;
@@ -672,6 +582,15 @@ function saveEdit() {
   padding: 0.9rem 1rem;
   background: #f8fafc;
   border-bottom: 1px solid #e2e8f0;
+}
+
+.school-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 700;
 }
 
 .search-field {
@@ -800,6 +719,30 @@ tbody tr:hover {
   color: #475569;
 }
 
+.name-link,
+.inline-name-link {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  color: #4338ca;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  text-align: left;
+}
+
+.name-link:hover,
+.inline-name-link:hover {
+  color: #312e81;
+  text-decoration: underline;
+}
+
+.inline-name-link {
+  display: block;
+  margin: 0.15rem 0;
+  font-size: 0.74rem;
+}
+
 .verification-badge {
   background: #dcfce7;
   color: #15803d;
@@ -810,23 +753,6 @@ tbody tr:hover {
   color: #b45309;
 }
 
-.edit-button {
-  padding: 0.4rem 0.7rem;
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
-  border-radius: 0.45rem;
-  color: #4f46e5;
-  cursor: pointer;
-  font: inherit;
-  font-size: 0.7rem;
-  font-weight: 700;
-}
-
-.edit-button:hover {
-  background: #eef2ff;
-  border-color: #a5b4fc;
-}
-
 .empty-state {
   padding: 3rem 1rem;
   color: #94a3b8;
@@ -834,141 +760,33 @@ tbody tr:hover {
   text-align: center;
 }
 
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
+.error-state {
+  color: #b91c1c;
+}
+
+.drilldown-context {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 1.5rem;
-  background: rgb(15 23 42 / 45%);
-}
-
-.edit-modal {
-  width: 100%;
-  max-width: 34rem;
-  max-height: calc(100vh - 3rem);
-  overflow-y: auto;
-  padding: 1.25rem;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.85rem;
-  box-shadow: 0 20px 50px rgb(15 23 42 / 18%);
-}
-
-.modal-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.modal-header h2 {
-  margin: 0;
-  color: #1e293b;
-  font-size: 1.05rem;
-}
-
-.modal-header p {
-  margin: 0.25rem 0 0;
-  color: #94a3b8;
-  font-size: 0.75rem;
-}
-
-.close-button {
-  width: 2rem;
-  height: 2rem;
-  flex-shrink: 0;
-  background: transparent;
-  border: 0;
-  border-radius: 0.4rem;
-  color: #64748b;
-  cursor: pointer;
-  font-size: 1.3rem;
-}
-
-.close-button:hover {
-  background: #f1f5f9;
-}
-
-.modal-fields {
-  display: grid;
-  gap: 1rem;
-  padding: 1rem 0;
-}
-
-.modal-fields label {
-  display: grid;
-  gap: 0.4rem;
-}
-
-.modal-fields label span {
-  color: #475569;
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: capitalize;
-}
-
-.modal-fields input,
-.modal-fields select {
-  width: 100%;
-  padding: 0.65rem 0.75rem;
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
-  border-radius: 0.5rem;
-  color: #1e293b;
-  font: inherit;
-  font-size: 0.78rem;
-}
-
-.modal-fields input:focus,
-.modal-fields select:focus {
-  border-color: #4f46e5;
-  outline: none;
-  box-shadow: 0 0 0 3px rgb(79 70 229 / 10%);
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
+  flex-wrap: wrap;
   gap: 0.65rem;
-  padding-top: 1rem;
-  border-top: 1px solid #e2e8f0;
-}
-
-.secondary-button,
-.primary-button {
-  padding: 0.6rem 0.9rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  font: inherit;
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-.secondary-button {
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
+  padding: 0.8rem 1rem;
+  background: #eef2ff;
   color: #475569;
+  font-size: 0.8rem;
 }
 
-.primary-button {
-  background: #4f46e5;
-  border: 1px solid #4f46e5;
-  color: #ffffff;
+.inline-details {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  color: #475569;
+  font-size: 0.8rem;
 }
 
-.secondary-button:hover {
-  background: #f8fafc;
-}
-
-.primary-button:hover {
-  background: #4338ca;
-  border-color: #4338ca;
-}
+.inline-details h3 { margin: 0 0 0.5rem; }
+.detail-list { display: grid; gap: 0.5rem; margin-top: 0.75rem; }
+.detail-row { display: grid; gap: 0.25rem; padding: 0.75rem; background: #f8fafc; }
 
 @media (max-width: 900px) {
   .data-page {
@@ -987,6 +805,11 @@ tbody tr:hover {
     min-width: 0;
   }
 
+  .school-filter {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
   .data-card {
     height: auto;
     overflow: visible;
@@ -996,5 +819,13 @@ tbody tr:hover {
     height: auto;
     overflow-x: auto;
   }
+}
+
+@media (max-width: 550px) {
+  .page-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
 }
 </style>
