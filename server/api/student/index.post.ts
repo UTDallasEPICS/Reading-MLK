@@ -20,15 +20,7 @@ export default defineEventHandler(async (event) => {
     data: {
       name: body.data.name,
       parentUserId: session.user.id,
-      settings: {
-        dyslexiaFont: false,
-        language: 'en',
-        pet: {
-          type: body.data.petType,
-          fedAt: new Date().toISOString(),
-          wateredAt: new Date().toISOString(),
-        },
-      },
+      settings: { dyslexiaFont: false, language: 'en' },
       Classes: { connect: { id: defaultClass.id } },
     },
   })

@@ -1,7 +1,7 @@
 import { Prisma } from '~~/prisma/generated/client'
 import { prisma } from '../../utils/prisma'
 import { getQuery } from 'h3'
-import { completeForm } from '../../utils/reader-rewards'
+import { z } from 'zod'
 import { formSubmissionCreateSchema } from '../../utils/schemas'
 import { requireClassAccess, requireSession } from '../../utils/require-session'
 
@@ -97,6 +97,11 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 403, statusMessage: 'This form is not available to the student' })
     }
 
-    return await completeForm(prisma, student.id, form.id)
+    return await prisma.formSubmission.create({
+      data: {
+        form: form.id,
+        student: student.id
+      }
+    })
   }
 })
