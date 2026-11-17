@@ -6,7 +6,9 @@ export const userCreateSchema = z.object({
   name: z.string().min(1).max(100),
   email: emailSchema,
   role: z.enum(['coach', 'reader']).default('reader'),
-  tosCheck: z.literal(true, { message: 'You must accept the Terms of Service to create an account.' }),
+  tosCheck: z.literal(true, {
+    message: 'You must accept the Terms of Service to create an account.',
+  }),
 })
 
 export const classCreateSchema = z.object({
@@ -23,6 +25,7 @@ export const coachCreateSchema = z.object({
 
 export const studentCreateSchema = z.object({
   name: z.string('Invalid Name').min(1).max(35),
+  petType: z.enum(['kangaroo', 'dragon', 'cat', 'panda', 'horse']),
 })
 
 export const studentUpdateSchema = z.object({
@@ -32,6 +35,13 @@ export const studentUpdateSchema = z.object({
       {
         dyslexiaFont: z.boolean().optional(),
         language: z.enum(['en', 'es']).optional(),
+        pet: z
+          .object({
+            type: z.enum(['kangaroo', 'dragon', 'cat', 'panda', 'horse']),
+            fedAt: z.string().optional(),
+            wateredAt: z.string().optional(),
+          })
+          .optional(),
       },
       'Invalid Settings'
     )
