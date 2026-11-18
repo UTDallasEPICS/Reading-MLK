@@ -1,4 +1,5 @@
 import type { Student } from '~~/prisma/generated/client'
+import { isPetType, type PetType } from '~~/shared/pet'
 
 export type StudentSettings = {
   theme: string
@@ -7,15 +8,29 @@ export type StudentSettings = {
   activeStickers: string[]
   dyslexiaFont: boolean
   language: 'en' | 'es'
+  pet: { type: PetType; fedAt?: string; wateredAt?: string }
 }
 
 const normalizeLanguage = (value: unknown): 'en' | 'es' => {
-  const language = String(value || '').trim().toLowerCase()
+  const language = String(value || '')
+    .trim()
+    .toLowerCase()
 
   return ['es', 'spanish'].includes(language) ? 'es' : 'en'
 }
 
-const readerThemes = ['light', 'dark', 'blue', 'sepia', 'sunset', 'ocean', 'forest', 'candy', 'fire', 'ice']
+const readerThemes = [
+  'light',
+  'dark',
+  'blue',
+  'sepia',
+  'sunset',
+  'ocean',
+  'forest',
+  'candy',
+  'fire',
+  'ice',
+]
 
 export const useCurrentStudent = () => {
   const student = useState<Student | null>('currentStudent', () => null)
@@ -29,10 +44,15 @@ export const useCurrentStudent = () => {
       activeStickers: Array.isArray(raw.activeStickers) ? raw.activeStickers : [],
       dyslexiaFont: Boolean(raw.dyslexiaFont),
       language: normalizeLanguage(raw.language),
+      pet: {
+        type: isPetType(raw.pet?.type) ? raw.pet.type : 'cat',
+        ...(typeof raw.pet?.fedAt === 'string' ? { fedAt: raw.pet.fedAt } : {}),
+        ...(typeof raw.pet?.wateredAt === 'string' ? { wateredAt: raw.pet.wateredAt } : {}),
+      },
       theme: readerThemes.includes(String(raw.theme)) ? String(raw.theme) : 'light',
     }
   })
-  
+
   const setStudent = (newStudent: Student | null) => {
     student.value = newStudent
 
@@ -93,8 +113,8 @@ export const useCurrentStudent = () => {
       const updatedStudent = await $fetch<Student>(`/api/student/${student.value.id}`, {
         method: 'PUT',
         body: {
-          settings: updatedSettings
-        }
+          settings: updatedSettings,
+        },
       })
 
       // Update the global state with the response, automatically passing it to pages like Home.vue
@@ -111,6 +131,6 @@ export const useCurrentStudent = () => {
     setStudent,
     loadStudent,
     restoreStudent,
-    clearStudent
+    clearStudent,
   }
 }
