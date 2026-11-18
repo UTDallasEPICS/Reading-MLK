@@ -94,8 +94,15 @@ watch(settings, (newSettings) => {
 
     <!-- MAIN CARD -->
     <div
-      class="p-6 max-w-lg mx-auto space-y-4 bg-white mt-8 rounded-[2.5rem] border border-gray-200 shadow-xl"
+      class="relative p-6 max-w-lg mx-auto space-y-4 bg-white mt-8 rounded-[2.5rem] border border-gray-200 shadow-xl"
     >
+      <NuxtLink
+        to="/reader"
+        aria-label="Return to reader"
+        class="absolute top-3 right-5 text-2xl leading-none text-gray-500 transition-colors hover:text-red-600"
+      >
+        ×
+      </NuxtLink>
 
       <!-- TITLE -->
       <div class="text-center mb-2">
